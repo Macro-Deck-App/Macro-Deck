@@ -8826,6 +8826,9 @@
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>وضع الاستهداف هذا لوحة المفاتيح غير مدعوم على هذه المنصة.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>إدخال لوحة المفاتيح محدود على Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>منح الإذن</value>
   </data>
@@ -8840,6 +8843,9 @@
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>محاكاة لوحة المفاتيح غير متاحة</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>هذه جلسة Wayland، لذا يمر إدخال لوحة المفاتيح عبر XWayland. تستقبل التطبيقات العاملة عبر XWayland المفاتيح والنص. قد لا تستقبلها تطبيقات Wayland الأصلية، ولا تستطيع إجراءات لوحة المفاتيح الموجهة إلى تطبيق العثور عليها.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>لوحة المفاتيح</value>
@@ -11723,6 +11729,12 @@
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>مستوى صوت الإخراج في النظام غير متاح.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>هذه جلسة Wayland، لذا يرى Macro Deck فقط التطبيقات العاملة عبر XWayland. أثناء تركيز تطبيق Wayland أصلي، تحتفظ متغيرات التطبيق المركّز عليه بآخر قيمة لها.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>اكتشاف التطبيق المركّز عليه محدود على Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>لم يُكتشف أي معالج رسومات مدعوم. في Linux تحتاج مقاييس GPU إلى برنامج التشغيل amdgpu أو nvidia-smi.</value>
@@ -21601,6 +21613,9 @@
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>تعذّر تحديث القاعدة</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>هذه جلسة Wayland، لذا يرى Macro Deck فقط التطبيقات العاملة عبر XWayland. لا يعمل التفعيل التلقائي مع تطبيقات Wayland الأصلية.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>تم تصدير المجلد</value>

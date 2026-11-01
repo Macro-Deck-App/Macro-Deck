@@ -249,11 +249,7 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 
 	private static LocalizedText DetectDegradation()
 	{
-		var sessionType = Environment.GetEnvironmentVariable("XDG_SESSION_TYPE");
-		var isWayland = string.Equals(sessionType, "wayland", StringComparison.OrdinalIgnoreCase)
-			|| !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY"));
-
-		return isWayland
+		return LinuxDisplaySession.IsWayland
 			? AppStrings.Integrations.Mouse.Issues.WaylandDegradedReason()
 			: default;
 	}

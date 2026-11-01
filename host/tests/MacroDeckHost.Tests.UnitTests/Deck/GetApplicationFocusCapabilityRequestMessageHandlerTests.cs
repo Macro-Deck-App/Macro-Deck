@@ -44,11 +44,28 @@ public class GetApplicationFocusCapabilityRequestMessageHandlerTests
 		});
 	}
 
+	[Test]
+	public async Task Handle_Degraded_StaysSupportedAndSaysSo()
+	{
+		var watcher = new FakeApplicationFocusWatcher { IsSupported = true, IsDegraded = true };
+		var handler = new GetApplicationFocusCapabilityRequestMessageHandler(watcher);
+
+		var response = await handler.Handle(new GetApplicationFocusCapabilityRequest(), CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Supported, Is.True);
+			Assert.That(response.Degraded, Is.True);
+		});
+	}
+
 	private sealed class FakeApplicationFocusWatcher : IApplicationFocusWatcher
 	{
 		public bool IsSupported { get; init; }
 
 		public string? UnsupportedReason { get; init; }
+
+		public bool IsDegraded { get; init; }
 
 		public bool WatchAsyncCalled { get; private set; }
 

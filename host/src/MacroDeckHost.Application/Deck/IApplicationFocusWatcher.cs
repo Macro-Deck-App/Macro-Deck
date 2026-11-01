@@ -17,5 +17,7 @@ public interface IApplicationFocusWatcher
 
 	string? UnsupportedReason { get; }
 
+	bool IsDegraded => false;
+
 	IAsyncEnumerable<FocusedApplication> WatchAsync(CancellationToken cancellationToken);
 }

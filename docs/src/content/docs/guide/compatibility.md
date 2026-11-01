@@ -86,6 +86,10 @@ dates and times are shown as digits.
 
 ### Computer requirements
 
+On Linux, Macro Deck controls the keyboard and mouse and detects the focused app through X11. Under Wayland that
+runs through XWayland and reaches only some apps, see
+[Keyboard actions or Automatic activation do not reach an app on Wayland](/guide/troubleshooting/#keyboard-actions-or-automatic-activation-do-not-reach-an-app-on-wayland).
+
 Macro Deck is built for x64 Windows and Linux and for Apple silicon Macs. There are no builds for
 Intel Macs or for ARM versions of Windows and Linux. Actions do not run while the computer is locked, see
 [Troubleshooting](/guide/troubleshooting/#buttons-do-nothing-and-devices-show-a-lock-screen). On Linux,

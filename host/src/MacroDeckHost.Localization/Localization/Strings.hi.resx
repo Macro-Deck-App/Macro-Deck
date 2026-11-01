@@ -8826,6 +8826,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>यह कीबोर्ड लक्ष्यीकरण मोड इस प्लेटफ़ॉर्म पर समर्थित नहीं है।</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Wayland पर कीबोर्ड इनपुट सीमित है</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>अनुमति दें</value>
   </data>
@@ -8840,6 +8843,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>कीबोर्ड सिमुलेशन उपलब्ध नहीं</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>यह Wayland सत्र है, इसलिए कीबोर्ड इनपुट XWayland से होकर चलता है। XWayland से चलने वाले ऐप कुंजियाँ और टेक्स्ट पाते हैं। नेटिव Wayland ऐप शायद न पाएँ, और किसी ऐप को लक्ष्य करने वाली कीबोर्ड कार्रवाइयाँ उन्हें नहीं ढूँढ पातीं।</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>कीबोर्ड</value>
@@ -11723,6 +11729,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>सिस्टम का आउटपुट वॉल्यूम उपलब्ध नहीं है।</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>यह Wayland सत्र है, इसलिए Macro Deck केवल XWayland से चलने वाले ऐप देखता है। जब तक नेटिव Wayland ऐप पर फ़ोकस है, फ़ोकस किए गए ऐप्लिकेशन के वेरिएबल अपना पिछला मान रखते हैं।</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Wayland पर फ़ोकस किए गए ऐप की पहचान सीमित है</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>कोई समर्थित GPU नहीं मिला। Linux पर GPU मेट्रिक्स के लिए amdgpu ड्राइवर या nvidia-smi चाहिए।</value>
@@ -21601,6 +21613,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>नियम अपडेट नहीं हो सका</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>यह Wayland सत्र है, इसलिए Macro Deck केवल XWayland से चलने वाले ऐप देखता है। स्वचालित सक्रियण नेटिव Wayland ऐप के लिए कुछ नहीं करता।</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>फ़ोल्डर निर्यात किया गया</value>

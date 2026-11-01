@@ -17,6 +17,7 @@ public sealed class KeyboardInputIntegration : IIntegration, IIntegrationIssuePr
 
 	private const string PermissionIssueId = "accessibility-permission";
 	private const string UnsupportedIssueId = "platform-unsupported";
+	private const string DegradedIssueId = "wayland-input-limited";
 	private static readonly byte[] _icon = LoadIcon();
 
 	private readonly KeyboardInputService _input;
@@ -29,8 +30,12 @@ public sealed class KeyboardInputIntegration : IIntegration, IIntegrationIssuePr
 	}
 
 	public KeyboardInputIntegration()
+		: this(KeyboardInputProviderFactory.Create())
 	{
-		var provider = KeyboardInputProviderFactory.Create();
+	}
+
+	internal KeyboardInputIntegration(IKeyboardInputProvider provider)
+	{
 		var layout = new KeyboardLayoutService();
 		_input = new KeyboardInputService(provider, layout);
 		var sequenceExecutor =
@@ -93,6 +98,16 @@ public sealed class KeyboardInputIntegration : IIntegration, IIntegrationIssuePr
 				Description = AppStrings.Integrations.Keyboard.Issues.PermissionRequiredDescription(),
 				Severity = IntegrationIssueSeverity.Error,
 				ActionLabel = AppStrings.Integrations.Keyboard.Issues.GrantPermissionAction()
+			});
+		}
+		else if (_input.IsDegraded)
+		{
+			issues.Add(new IntegrationIssue
+			{
+				Id = DegradedIssueId,
+				Title = AppStrings.Integrations.Keyboard.Issues.DegradedTitle(),
+				Description = _input.DegradedReason,
+				Severity = IntegrationIssueSeverity.Warning
 			});
 		}
 

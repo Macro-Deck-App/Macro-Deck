@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using MacroDeck.Localization;
 using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Platform.Processes;
 using Input = MacroDeckHost.Platform.Native.Win32Input.Input;
@@ -23,6 +24,10 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	public string PlatformName => "Windows (SendInput)";
 
 	public bool IsSupported => OperatingSystem.IsWindows();
+
+	public bool IsDegraded => false;
+
+	public LocalizedText DegradedReason => default;
 
 	public bool RequiresPermission => false;
 

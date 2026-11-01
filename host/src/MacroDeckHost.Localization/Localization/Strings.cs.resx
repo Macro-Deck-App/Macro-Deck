@@ -8825,6 +8825,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Tento režim zaměřování klávesnice není na této platformě podporován.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Vstup z klávesnice je ve Waylandu omezený</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Udělit oprávnění</value>
   </data>
@@ -8839,6 +8842,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Simulace klávesnice není dostupná</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Toto je relace Wayland, takže vstup z klávesnice prochází přes XWayland. Aplikace běžící přes XWayland přijímají klávesy a text. Nativní aplikace Wayland je přijímat nemusí a akce klávesnice cílené na aplikaci je nenajdou.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Klávesnice</value>
@@ -11722,6 +11728,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Hlasitost systémového výstupu není dostupná.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Toto je relace Wayland, takže Macro Deck vidí jen aplikace běžící přes XWayland. Dokud má fokus nativní aplikace Wayland, proměnné aktivní aplikace si ponechají poslední hodnotu.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Rozpoznání aktivní aplikace je ve Waylandu omezené</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Nebyla nalezena žádná podporovaná GPU. V systému Linux vyžadují metriky GPU ovladač amdgpu nebo nvidia-smi.</value>
@@ -21581,6 +21593,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Pravidlo se nepodařilo aktualizovat</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Toto je relace Wayland, takže Macro Deck vidí jen aplikace běžící přes XWayland. Automatická aktivace nemá u nativních aplikací Wayland žádný účinek.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Složka exportována</value>

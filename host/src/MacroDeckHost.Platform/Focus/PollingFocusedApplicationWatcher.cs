@@ -27,6 +27,8 @@ public sealed class PollingFocusedApplicationWatcher : IFocusedApplicationWatche
 
 	public string? UnsupportedReason => _reader.UnsupportedReason;
 
+	public bool IsDegraded => _reader.IsDegraded;
+
 	public async IAsyncEnumerable<FocusedAppInfo> WatchAsync(
 		[EnumeratorCancellation] CancellationToken cancellationToken)
 	{

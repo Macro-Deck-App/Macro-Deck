@@ -8826,6 +8826,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>此平台不支援此鍵盤目標模式。</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>鍵盤輸入在 Wayland 上受限</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>授予權限</value>
   </data>
@@ -8840,6 +8843,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>無法使用鍵盤模擬</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>這是 Wayland 工作階段，因此鍵盤輸入透過 XWayland 執行。透過 XWayland 執行的應用程式可以接收按鍵和文字。原生 Wayland 應用程式可能無法接收，且針對應用程式的鍵盤動作也找不到它們。</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>鍵盤</value>
@@ -11723,6 +11729,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>系統輸出音量無法使用。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>這是 Wayland 工作階段，因此 Macro Deck 只能看到透過 XWayland 執行的應用程式。當原生 Wayland 應用程式取得焦點時，焦點應用程式變數會保留上一個值。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>焦點應用程式偵測在 Wayland 上受限</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>未偵測到支援的 GPU。在 Linux 上，GPU 指標需要 amdgpu 驅動程式或 nvidia-smi。</value>
@@ -21601,6 +21613,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>無法更新規則</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>這是 Wayland 工作階段，因此 Macro Deck 只能看到透過 XWayland 執行的應用程式。自動啟用對原生 Wayland 應用程式沒有作用。</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>資料夾已匯出</value>

@@ -8826,6 +8826,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Mode penargetan keyboard ini tidak didukung di platform ini.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Input keyboard terbatas di Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Berikan izin</value>
   </data>
@@ -8840,6 +8843,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Simulasi keyboard tidak tersedia</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Ini adalah sesi Wayland, sehingga input keyboard berjalan melalui XWayland. Aplikasi yang berjalan melalui XWayland menerima tombol dan teks. Aplikasi Wayland native mungkin tidak menerimanya, dan aksi keyboard yang menargetkan aplikasi tidak dapat menemukannya.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Keyboard</value>
@@ -11723,6 +11729,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Volume output sistem tidak tersedia.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Ini adalah sesi Wayland, sehingga Macro Deck hanya melihat aplikasi yang berjalan melalui XWayland. Selama aplikasi Wayland native memiliki fokus, variabel aplikasi yang difokuskan mempertahankan nilai terakhirnya.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Deteksi aplikasi yang difokuskan terbatas di Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Tidak ada GPU yang didukung terdeteksi. Di Linux, metrik GPU memerlukan driver amdgpu atau nvidia-smi.</value>
@@ -21601,6 +21613,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Aturan tidak dapat diperbarui</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Ini adalah sesi Wayland, sehingga Macro Deck hanya melihat aplikasi yang berjalan melalui XWayland. Aktivasi otomatis tidak berfungsi untuk aplikasi Wayland native.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Folder diekspor</value>

@@ -1,3 +1,5 @@
+using MacroDeck.Localization;
+
 namespace MacroDeckHost.Integrations.Keyboard.Native;
 
 public sealed class NullKeyboardInputProvider : IKeyboardInputProvider
@@ -12,6 +14,10 @@ public sealed class NullKeyboardInputProvider : IKeyboardInputProvider
 	public string PlatformName => $"unsupported ({_reason})";
 
 	public bool IsSupported => false;
+
+	public bool IsDegraded => false;
+
+	public LocalizedText DegradedReason => default;
 
 	public bool RequiresPermission => false;
 

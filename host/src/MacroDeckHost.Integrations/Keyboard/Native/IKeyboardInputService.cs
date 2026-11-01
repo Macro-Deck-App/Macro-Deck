@@ -1,3 +1,4 @@
+using MacroDeck.Localization;
 using MacroDeckHost.Integrations.Keyboard.Models;
 
 namespace MacroDeckHost.Integrations.Keyboard.Native;
@@ -41,6 +42,10 @@ public readonly struct KeyboardSessionResult
 public interface IKeyboardInputService
 {
 	bool IsSupported { get; }
+
+	bool IsDegraded { get; }
+
+	LocalizedText DegradedReason { get; }
 
 	bool RequiresPermission { get; }
 

@@ -8,5 +8,7 @@ public interface IFocusedWindowReader
 
 	string? UnsupportedReason { get; }
 
+	bool IsDegraded => false;
+
 	FocusedAppInfo? Read();
 }

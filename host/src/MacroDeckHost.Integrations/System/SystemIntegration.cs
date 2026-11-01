@@ -39,6 +39,7 @@ public sealed class SystemIntegration
 
 	private const string UnsupportedIssueId = "platform-unsupported";
 	private const string VolumeIssueId = "volume-unavailable";
+	private const string FocusDegradedIssueId = "focus-limited-on-wayland";
 	private const string NotificationsIssueId = "notifications-unavailable";
 	private const string GpuMetricsIssueId = "gpu-metrics-unavailable";
 	private const string PowerIssueId = "power-control-unavailable";
@@ -986,6 +987,17 @@ public sealed class SystemIntegration
 			});
 
 			return Task.FromResult<IReadOnlyList<IntegrationIssue>>(issues);
+		}
+
+		if (_focusWatcher is { IsDegraded: true })
+		{
+			issues.Add(new IntegrationIssue
+			{
+				Id = FocusDegradedIssueId,
+				Title = AppStrings.Integrations.System.Issues.FocusDegradedTitle(),
+				Description = AppStrings.Integrations.System.Issues.FocusDegradedDescription(),
+				Severity = IntegrationIssueSeverity.Warning
+			});
 		}
 
 		if (!_volume.IsSupported)

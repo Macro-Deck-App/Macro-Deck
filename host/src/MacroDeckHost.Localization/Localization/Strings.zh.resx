@@ -8826,6 +8826,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>此平台不支持这种键盘目标模式。</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>键盘输入在 Wayland 上受限</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>授予权限</value>
   </data>
@@ -8840,6 +8843,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>键盘模拟不可用</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>这是 Wayland 会话，因此键盘输入通过 XWayland 运行。通过 XWayland 运行的应用可以接收按键和文本。原生 Wayland 应用可能无法接收，并且针对应用的键盘动作也找不到它们。</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>键盘</value>
@@ -11723,6 +11729,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>系统输出音量不可用。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>这是 Wayland 会话，因此 Macro Deck 只能看到通过 XWayland 运行的应用。当原生 Wayland 应用获得焦点时，焦点应用变量会保留上一个值。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>焦点应用检测在 Wayland 上受限</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>未检测到受支持的 GPU。在 Linux 上，GPU 指标需要 amdgpu 驱动程序或 nvidia-smi。</value>
@@ -21583,6 +21595,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>无法更新规则</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>这是 Wayland 会话，因此 Macro Deck 只能看到通过 XWayland 运行的应用。自动激活对原生 Wayland 应用不起作用。</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>文件夹已导出</value>

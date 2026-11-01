@@ -8823,6 +8823,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Dieser Tastatur-Zielmodus wird auf dieser Plattform nicht unterstützt.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Tastatureingaben sind unter Wayland eingeschränkt</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Berechtigung erteilen</value>
   </data>
@@ -8837,6 +8840,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Tastatursimulation nicht verfügbar</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Dies ist eine Wayland-Sitzung, daher laufen Tastatureingaben über XWayland. Apps, die über XWayland laufen, empfangen Tasten und Text. Native Wayland-Apps möglicherweise nicht, und Tastaturaktionen mit einer Ziel-App finden sie nicht.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Tastatur</value>
@@ -11720,6 +11726,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Die Systemausgabelautstärke ist nicht verfügbar.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Dies ist eine Wayland-Sitzung, daher sieht Macro Deck nur Apps, die über XWayland laufen. Solange eine native Wayland-App den Fokus hat, behalten die Variablen zur fokussierten Anwendung ihren letzten Wert.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Erkennung der fokussierten App ist unter Wayland eingeschränkt</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Es wurde keine unterstützte GPU erkannt. Unter Linux brauchen GPU-Messwerte den amdgpu-Treiber oder nvidia-smi.</value>
@@ -21579,6 +21591,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Die Regel konnte nicht aktualisiert werden</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Dies ist eine Wayland-Sitzung, daher sieht Macro Deck nur Apps, die über XWayland laufen. Die automatische Aktivierung bewirkt bei nativen Wayland-Apps nichts.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Ordner exportiert</value>

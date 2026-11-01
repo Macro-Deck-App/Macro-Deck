@@ -297,6 +297,20 @@ updates from the plugin's own publisher. If the plugin really changed hands, or 
 other publisher's package, uninstall the plugin first and tick **Also delete the plugin's stored data**,
 then install it again.
 
+## Keyboard actions or Automatic activation do not reach an app on Wayland
+
+Most Linux desktops use Wayland by default. Macro Deck works through X11 there, using XWayland, so it only sees
+apps that run through XWayland:
+
+- **Keyboard:** apps running natively on Wayland may not receive keys or text, and keyboard actions that target
+  an app cannot find them.
+- **Automatic activation:** a folder does not open when a native Wayland app gets focus.
+- **Focused app variables:** they keep their last value while a native Wayland app has focus.
+- **Mouse:** moving to a fixed position may land somewhere else or do nothing.
+
+The **Keyboard** and **System** integrations show a warning for this, and so does the Automatic activation dialog.
+To avoid these limits, log in to an X11 session if your desktop offers one, or run the app through XWayland.
+
 ## A reverse proxy or firewall blocks a connection to a service
 
 Some reverse proxies and anti-bot protections reject requests they take for automated traffic, so an

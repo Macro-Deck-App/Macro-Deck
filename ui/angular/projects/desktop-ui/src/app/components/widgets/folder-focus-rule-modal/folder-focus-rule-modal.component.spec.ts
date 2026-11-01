@@ -99,6 +99,20 @@ describe('FolderFocusRuleModalComponent', () => {
     expect(Array.from(rows).map(el => el.textContent?.trim())).toEqual(['com.example.app', 'com.other.app']);
   });
 
+  it('shows the Wayland limit and keeps editing enabled when focus detection is degraded', async () => {
+    configure([]);
+    apiSpy.getApplicationFocusSupport.and.resolveTo({
+      supported: true,
+      degraded: true,
+      preferredIdentityKind: 'ExecutablePath',
+    });
+    fixture = await create();
+
+    expect(fixture.nativeElement.querySelector('p.ffr-warning')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('shared-error-banner')).toBeNull();
+    expect(fixture.componentInstance['editingDisabled']()).toBeFalse();
+  });
+
   it('shows the unsupported-platform banner and disables editing', async () => {
     configure([rule('r1')]);
     apiSpy.getApplicationFocusSupport.and.resolveTo({

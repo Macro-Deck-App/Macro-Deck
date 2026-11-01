@@ -28,6 +28,8 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 		? null
 		: "No X11 display available (Wayland without XWayland is not supported).";
 
+	public bool IsDegraded => IsSupported && LinuxDisplaySession.IsWayland;
+
 	public FocusedAppInfo? Read()
 	{
 		if (_display == IntPtr.Zero)
