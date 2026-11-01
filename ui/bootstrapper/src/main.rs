@@ -18,6 +18,7 @@ mod host;
 mod host_error_window;
 #[cfg(windows)]
 mod host_job;
+mod host_process;
 mod host_supervisor;
 mod install_integrity;
 mod install_state;

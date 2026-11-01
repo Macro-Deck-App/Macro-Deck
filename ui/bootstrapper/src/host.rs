@@ -17,6 +17,7 @@ use tauri::Manager;
 
 use crate::deep_links;
 use crate::host_error_window::{self, ExitStatus, HostErrorKind, HostErrorReport};
+use crate::host_process;
 use crate::host_supervisor::{Decision, ExitAction, Supervisor, MAX_RESTART_ATTEMPTS};
 use crate::localization::{self, keys};
 use crate::logging::{self, LogTail};
@@ -68,6 +69,15 @@ const QUIT_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 const UPDATE_STOP_TIMEOUT: Duration = Duration::from_secs(35);
 
 const FORCED_STOP_TIMEOUT: Duration = Duration::from_secs(10);
+
+#[cfg(unix)]
+const TERM_STOP_TIMEOUT: Duration = Duration::from_secs(5);
+
+// The heartbeat comes from a timer, so it goes on through a hung restore too.
+const QUIT_RESTORE_LIMIT: Duration = Duration::from_secs(15 * 60);
+
+// Three of the host's StartupHeartbeat intervals.
+const HEARTBEAT_FRESH: Duration = Duration::from_secs(15);
 
 const REPLACED_HOST_STOP_TIMEOUT: Duration = QUIT_STOP_TIMEOUT;
 
@@ -378,6 +388,71 @@ async fn host_version(port: u16) -> Option<String> {
     response.json::<HostStatus>().await.ok()?.version
 }
 
+fn replaced_host_running(pid: u32) -> bool {
+    host_process::is_host_process(pid, host_binary_name())
+}
+
+async fn wait_until(mut gone: impl FnMut() -> bool, timeout: Duration) -> bool {
+    let deadline = Instant::now() + timeout;
+    loop {
+        if gone() {
+            return true;
+        }
+        if Instant::now() >= deadline {
+            return false;
+        }
+        tokio::time::sleep(STOP_POLL_INTERVAL).await;
+    }
+}
+
+// It stopped listening at the start of its shutdown, while plugins and data writes go on. It
+// answered before, so it is past any restore, and forcing it cannot cut one short.
+async fn wait_for_replaced_host(pid: u32) {
+    let gone = wait_out_replaced_host(
+        || replaced_host_running(pid),
+        || async move {
+            logging::warn(&format!(
+                "[host] the replaced host {pid} did not exit in time; ending it"
+            ));
+            let target = replaced_host_running(pid).then_some(pid);
+            term_then_wait(target, || async { !replaced_host_running(pid) }).await
+        },
+        || {
+            #[cfg(unix)]
+            if replaced_host_running(pid) {
+                signal_process_group(pid, libc::SIGKILL);
+            }
+        },
+        REPLACED_HOST_STOP_TIMEOUT,
+        FORCED_STOP_TIMEOUT,
+    )
+    .await;
+    if !gone {
+        logging::error(&format!(
+            "[host] the replaced host {pid} is still running after the kill"
+        ));
+    }
+}
+
+async fn wait_out_replaced_host<Running, Term, Termed>(
+    mut running: Running,
+    term: Term,
+    kill: impl FnOnce(),
+    timeout: Duration,
+    forced_timeout: Duration,
+) -> bool
+where
+    Running: FnMut() -> bool,
+    Term: FnOnce() -> Termed,
+    Termed: Future<Output = bool>,
+{
+    if wait_until(|| !running(), timeout).await || term().await {
+        return true;
+    }
+    kill();
+    wait_until(|| !running(), forced_timeout).await
+}
+
 async fn wait_until_unreachable(port: u16, timeout: Duration) -> bool {
     let deadline = Instant::now() + timeout;
     while Instant::now() < deadline {
@@ -663,6 +738,7 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                     "[host] replacing the running host {} on port {port} with {own_version}",
                     running_version.as_deref().unwrap_or("of unknown version")
                 ));
+                let previous = host_process::load(port_file_dir);
                 let _ = post_shutdown(port, "replaced").await;
                 if !wait_until_unreachable(port, REPLACED_HOST_STOP_TIMEOUT).await {
                     logging::error(&format!(
@@ -681,6 +757,9 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                         give_up(app, Some(reason), ExitStatus::NotRecorded, String::new()).await;
                     }
                     return false;
+                }
+                if let Some(pid) = previous {
+                    wait_for_replaced_host(pid).await;
                 }
             }
             Adoption::Ignore => {
@@ -807,6 +886,8 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
         .spawn()
         .map_err(|error| LaunchError::SpawnFailed(error.to_string()))?;
 
+    let spawned_pid = child.id();
+
     if let Some(stdout) = child.stdout.take() {
         pipe_to_tail(stdout, state.log_tail.clone(), state.heartbeat.clone());
     }
@@ -834,9 +915,16 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
         crate::install_integrity::host_gone();
     }
     state.ui_port.store(port, Ordering::SeqCst);
+    if let Some(dir) = &config_dir {
+        if let Err(error) = host_process::persist(dir, spawned_pid) {
+            logging::warn(&format!(
+                "[host] could not persist the host process id: {error}"
+            ));
+        }
+    }
     drop(supervisor);
 
-    spawn_exit_monitor(app.clone(), generation);
+    spawn_exit_monitor(app.clone(), generation, spawned_pid);
     Ok(Some((generation, port)))
 }
 
@@ -955,7 +1043,7 @@ fn report_failed_restart(app: &AppHandle, code: Option<i32>) {
     );
 }
 
-fn spawn_exit_monitor(app: AppHandle, generation: u64) {
+fn spawn_exit_monitor(app: AppHandle, generation: u64, pid: u32) {
     std::thread::spawn(move || {
         let state = app.state::<Arc<HostState>>();
         let code = loop {
@@ -985,6 +1073,10 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64) {
             }
             std::thread::sleep(Duration::from_millis(250));
         };
+
+        if let Ok(dir) = app.path().app_config_dir() {
+            host_process::clear(&dir, pid);
+        }
 
         let shutdown_expected = state.shutdown_expected.load(Ordering::SeqCst);
         let action = state
@@ -1322,7 +1414,14 @@ async fn terminate_attempt(state: &HostState, generation: u64, port: u16) -> boo
     if wait_for_exit(state, generation, UNRESPONSIVE_STOP_TIMEOUT).await {
         return true;
     }
-    logging::warn("[host] did not stop in time; killing the host process");
+    logging::warn("[host] did not stop in time; ending the host process");
+    if term_then_wait(child_pid(state), || async {
+        exit_of(state, generation).is_some()
+    })
+    .await
+    {
+        return true;
+    }
     kill_child(state);
     wait_for_exit(state, generation, FORCED_STOP_TIMEOUT).await
 }
@@ -1414,23 +1513,42 @@ pub async fn resume_after_failed_update(app: &AppHandle) {
     state.ready.store(false, Ordering::SeqCst);
     crate::install_integrity::host_gone();
 
-    let answering = is_reachable(managed_port(&state), Duration::from_millis(300)).await;
-    if previous_host_alive(
+    let port = managed_port(&state);
+    let answering = is_reachable(port, Duration::from_millis(300)).await;
+    match after_failed_stop(
         state.spawned(),
         state.exited.load(Ordering::SeqCst),
+        state.adopted.load(Ordering::SeqCst),
         answering,
     ) {
-        logging::error(
-            "[host] the host could not be stopped for the update; not starting another one",
-        );
-        give_up(
-            app,
-            Some(localization::t(keys::UPDATE_HOST_STOP_FAILED)),
-            ExitStatus::NotRecorded,
-            state.log_tail.joined(),
-        )
-        .await;
-        return;
+        AfterFailedStop::Rewatch => {
+            let generation = state
+                .supervisor
+                .lock()
+                .ok()
+                .and_then(|mut supervisor| supervisor.rewatch(Instant::now()));
+            if let (Some(generation), Some(port)) = (generation, port) {
+                logging::info("[host] the taken-over host survived the stop; watching it again");
+                state.ready.store(true, Ordering::SeqCst);
+                crate::install_integrity::host_ready(app);
+                spawn_adoption_monitor(app.clone(), generation, port);
+            }
+            return;
+        }
+        AfterFailedStop::GiveUp => {
+            logging::error(
+                "[host] the host could not be stopped for the update; not starting another one",
+            );
+            give_up(
+                app,
+                Some(localization::t(keys::UPDATE_HOST_STOP_FAILED)),
+                ExitStatus::NotRecorded,
+                state.log_tail.joined(),
+            )
+            .await;
+            return;
+        }
+        AfterFailedStop::Restart => {}
     }
     logging::info("[host] restarting the host after the failed update");
     if supervise(app, None).await {
@@ -1438,11 +1556,24 @@ pub async fn resume_after_failed_update(app: &AppHandle) {
     }
 }
 
-fn previous_host_alive(spawned: bool, child_exited: bool, answering: bool) -> bool {
-    if spawned {
-        !child_exited
-    } else {
-        answering
+#[derive(Debug, PartialEq, Eq)]
+pub enum AfterFailedStop {
+    Rewatch,
+    GiveUp,
+    Restart,
+}
+
+pub fn after_failed_stop(
+    spawned: bool,
+    child_exited: bool,
+    adopted: bool,
+    answering: bool,
+) -> AfterFailedStop {
+    match (spawned, child_exited, adopted, answering) {
+        (true, false, _, _) => AfterFailedStop::GiveUp,
+        (true, true, _, _) | (false, _, _, false) => AfterFailedStop::Restart,
+        (false, _, true, true) => AfterFailedStop::Rewatch,
+        (false, _, false, true) => AfterFailedStop::GiveUp,
     }
 }
 
@@ -1464,6 +1595,25 @@ fn begin_shutdown(app: &AppHandle) -> Option<u16> {
     port
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum WhileBusy {
+    KeepWaiting,
+    Stop,
+}
+
+// Only a quit may wait for a restore: the exit path blocks the main thread through a logout.
+fn while_busy(reason: &str) -> WhileBusy {
+    if reason == "quit" {
+        WhileBusy::KeepWaiting
+    } else {
+        WhileBusy::Stop
+    }
+}
+
+pub fn heartbeat_is_fresh(last: Option<Instant>, now: Instant) -> bool {
+    last.is_some_and(|beat| now.saturating_duration_since(beat) < HEARTBEAT_FRESH)
+}
+
 // The budget restarts once the host accepts, so a host that started late still gets its full shutdown.
 async fn stop_gracefully(
     app: &AppHandle,
@@ -1471,6 +1621,7 @@ async fn stop_gracefully(
     reason: &str,
     graceful_timeout: Duration,
 ) -> bool {
+    let keep_waiting = while_busy(reason) == WhileBusy::KeepWaiting;
     let mut attempts = 0u32;
     let request = || {
         attempts += 1;
@@ -1499,25 +1650,41 @@ async fn stop_gracefully(
             }
         }
     };
-    request_until_stopped(request, || host_stopped(app, port), graceful_timeout).await
+    let state = app.state::<Arc<HostState>>();
+    let busy = || keep_waiting && heartbeat_is_fresh(state.heartbeat.last(), Instant::now());
+    request_until_stopped(
+        request,
+        || host_stopped(app, port),
+        busy,
+        graceful_timeout,
+        QUIT_RESTORE_LIMIT,
+    )
+    .await
 }
 
-async fn request_until_stopped<Request, Requested, Stopped, Checked>(
+async fn request_until_stopped<Request, Requested, Stopped, Checked, Busy>(
     mut request: Request,
     mut stopped: Stopped,
+    mut busy: Busy,
     timeout: Duration,
+    busy_limit: Duration,
 ) -> bool
 where
     Request: FnMut() -> Requested,
     Requested: Future<Output = bool>,
     Stopped: FnMut() -> Checked,
     Checked: Future<Output = bool>,
+    Busy: FnMut() -> bool,
 {
-    let mut deadline = Instant::now() + timeout;
+    let started = Instant::now();
+    let mut deadline = started + timeout;
     let mut accepted = false;
-    let mut next_request = Instant::now();
+    let mut next_request = started;
     loop {
         let now = Instant::now();
+        if now.saturating_duration_since(started) < busy_limit && busy() {
+            deadline = deadline.max(now + timeout);
+        }
         if !accepted && now >= next_request {
             let remaining = deadline.saturating_duration_since(now);
             accepted = matches!(tokio::time::timeout(remaining, request()).await, Ok(true));
@@ -1543,8 +1710,12 @@ async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) ->
         return true;
     }
 
-    logging::warn("[host] did not stop in time; killing the host process");
-    kill_child(&app.state::<Arc<HostState>>());
+    logging::warn("[host] did not stop in time; ending the host process");
+    let state = app.state::<Arc<HostState>>();
+    if term_then_wait(child_pid(&state), || host_stopped(app, port)).await {
+        return true;
+    }
+    kill_child(&state);
     if wait_until_stopped(app, port, FORCED_STOP_TIMEOUT).await {
         return true;
     }
@@ -1580,6 +1751,47 @@ pub fn process_group_signal_target(pid: u32) -> Option<i32> {
     i32::try_from(pid).ok().map(|pid| -pid)
 }
 
+fn child_pid(state: &HostState) -> Option<u32> {
+    state
+        .child
+        .lock()
+        .ok()
+        .and_then(|slot| slot.as_ref().map(|(_, child)| child.id()))
+}
+
+#[cfg(unix)]
+fn signal_process_group(pid: u32, signal: libc::c_int) -> bool {
+    process_group_signal_target(pid)
+        .is_some_and(|target| unsafe { libc::kill(target, signal) } == 0)
+}
+
+async fn term_then_wait<Gone, Checked>(pid: Option<u32>, mut gone: Gone) -> bool
+where
+    Gone: FnMut() -> Checked,
+    Checked: Future<Output = bool>,
+{
+    #[cfg(unix)]
+    if let Some(pid) = pid {
+        if signal_process_group(pid, libc::SIGTERM) {
+            let deadline = Instant::now() + TERM_STOP_TIMEOUT;
+            loop {
+                if gone().await {
+                    // A plugin that ignored the SIGTERM would otherwise outlive its host.
+                    signal_process_group(pid, libc::SIGKILL);
+                    return true;
+                }
+                if Instant::now() >= deadline {
+                    return false;
+                }
+                tokio::time::sleep(STOP_POLL_INTERVAL).await;
+            }
+        }
+    }
+    #[cfg(not(unix))]
+    let _ = pid;
+    gone().await
+}
+
 fn kill_child(state: &HostState) {
     #[cfg(windows)]
     {
@@ -1595,11 +1807,8 @@ fn kill_child(state: &HostState) {
         if let Some((_, child)) = slot.as_mut() {
             #[cfg(unix)]
             {
-                if let Some(target) = process_group_signal_target(child.id()) {
-                    let killed = unsafe { libc::kill(target, libc::SIGKILL) } == 0;
-                    if killed {
-                        return;
-                    }
+                if signal_process_group(child.id(), libc::SIGKILL) {
+                    return;
                 }
             }
             let _ = child.kill();
@@ -2441,14 +2650,225 @@ mod tests {
 
     #[test]
     fn a_host_that_survived_the_update_stop_is_not_started_a_second_time() {
-        assert!(previous_host_alive(true, false, false));
-        assert!(previous_host_alive(false, false, true));
+        assert_eq!(
+            after_failed_stop(true, false, false, false),
+            AfterFailedStop::GiveUp
+        );
+        assert_eq!(
+            after_failed_stop(false, false, false, true),
+            AfterFailedStop::GiveUp
+        );
+    }
+
+    #[test]
+    fn a_taken_over_host_that_survived_the_update_stop_is_watched_again() {
+        assert_eq!(
+            after_failed_stop(false, false, true, true),
+            AfterFailedStop::Rewatch
+        );
     }
 
     #[test]
     fn a_host_that_is_gone_after_a_failed_update_stop_is_started_again() {
-        assert!(!previous_host_alive(true, true, false));
-        assert!(!previous_host_alive(false, false, false));
+        assert_eq!(
+            after_failed_stop(true, true, false, false),
+            AfterFailedStop::Restart
+        );
+        assert_eq!(
+            after_failed_stop(false, false, false, false),
+            AfterFailedStop::Restart
+        );
+        assert_eq!(
+            after_failed_stop(false, false, true, false),
+            AfterFailedStop::Restart
+        );
+    }
+
+    #[test]
+    fn a_fresh_heartbeat_means_the_host_is_still_busy() {
+        let now = Instant::now();
+        assert!(heartbeat_is_fresh(Some(now), now));
+        assert!(!heartbeat_is_fresh(Some(now), now + HEARTBEAT_FRESH));
+        assert!(!heartbeat_is_fresh(None, now));
+    }
+
+    #[test]
+    fn a_quit_outlasts_its_budget_while_the_host_beats() {
+        let started = Instant::now();
+        let timeout = Duration::from_millis(300);
+        let finishes_at = Duration::from_millis(1200);
+
+        let stopped = tauri::async_runtime::block_on(request_until_stopped(
+            || async { false },
+            || async move { started.elapsed() >= finishes_at },
+            || true,
+            timeout,
+            Duration::from_secs(60),
+        ));
+
+        assert!(stopped, "the running restore was given up on");
+    }
+
+    #[test]
+    fn a_host_that_beats_forever_is_given_up_on_at_the_limit() {
+        let timeout = Duration::from_millis(100);
+        let limit = Duration::from_millis(400);
+        let started = Instant::now();
+
+        let stopped = tauri::async_runtime::block_on(request_until_stopped(
+            || async { false },
+            || async { false },
+            || true,
+            timeout,
+            limit,
+        ));
+
+        assert!(!stopped);
+        assert!(started.elapsed() < limit + Duration::from_secs(2));
+    }
+
+    #[test]
+    fn only_a_quit_waits_for_a_busy_host() {
+        assert_eq!(while_busy("quit"), WhileBusy::KeepWaiting);
+        assert_eq!(while_busy("exit"), WhileBusy::Stop);
+        assert_eq!(while_busy("update"), WhileBusy::Stop);
+        assert_eq!(while_busy(SESSION_END_REASON), WhileBusy::Stop);
+    }
+
+    fn replace_steps(exits_after: Option<&'static str>) -> (bool, Vec<&'static str>) {
+        let steps = Arc::new(Mutex::new(Vec::new()));
+        let gone = Arc::new(AtomicBool::new(false));
+        let result = tauri::async_runtime::block_on(wait_out_replaced_host(
+            {
+                let gone = gone.clone();
+                move || !gone.load(Ordering::SeqCst)
+            },
+            {
+                let (steps, gone) = (steps.clone(), gone.clone());
+                move || async move {
+                    steps.lock().unwrap().push("term");
+                    let stopped = exits_after == Some("term");
+                    gone.store(stopped, Ordering::SeqCst);
+                    stopped
+                }
+            },
+            {
+                let (steps, gone) = (steps.clone(), gone.clone());
+                move || {
+                    steps.lock().unwrap().push("kill");
+                    gone.store(exits_after == Some("kill"), Ordering::SeqCst);
+                }
+            },
+            Duration::from_millis(50),
+            Duration::from_millis(50),
+        ));
+        let taken = steps.lock().unwrap().clone();
+        (result, taken)
+    }
+
+    #[test]
+    fn a_replaced_host_that_exits_by_itself_is_never_signalled() {
+        let steps = Arc::new(Mutex::new(Vec::<&str>::new()));
+        let started = Instant::now();
+        let finishes_at = Duration::from_millis(300);
+
+        let gone = tauri::async_runtime::block_on(wait_out_replaced_host(
+            || started.elapsed() < finishes_at,
+            {
+                let steps = steps.clone();
+                move || async move {
+                    steps.lock().unwrap().push("term");
+                    false
+                }
+            },
+            || steps.lock().unwrap().push("kill"),
+            Duration::from_secs(5),
+            Duration::from_secs(5),
+        ));
+
+        assert!(gone);
+        assert!(started.elapsed() >= finishes_at, "it was not waited for");
+        assert!(steps.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_replaced_host_is_termed_before_it_is_killed() {
+        assert_eq!(replace_steps(Some("term")), (true, vec!["term"]));
+        assert_eq!(replace_steps(Some("kill")), (true, vec!["term", "kill"]));
+        assert_eq!(replace_steps(None), (false, vec!["term", "kill"]));
+    }
+
+    #[test]
+    fn a_stop_that_may_not_wait_ignores_the_heartbeat_path() {
+        let timeout = Duration::from_millis(100);
+        let started = Instant::now();
+
+        let stopped = tauri::async_runtime::block_on(request_until_stopped(
+            || async { false },
+            || async { false },
+            || false,
+            timeout,
+            QUIT_RESTORE_LIMIT,
+        ));
+
+        assert!(!stopped);
+        assert!(started.elapsed() < Duration::from_secs(2));
+    }
+
+    #[cfg(unix)]
+    fn stand_in_host(script: &str) -> Child {
+        use std::os::unix::process::CommandExt;
+        Command::new("sh")
+            .args(["-c", script])
+            .process_group(0)
+            .spawn()
+            .unwrap()
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_host_that_handles_sigterm_stops_without_a_kill() {
+        let mut child = stand_in_host("trap 'exit 7' TERM; while :; do sleep 0.05; done");
+        let pid = child.id();
+        std::thread::sleep(Duration::from_millis(200));
+        let exited = Arc::new(Mutex::new(None));
+
+        let stopped = tauri::async_runtime::block_on(term_then_wait(Some(pid), || {
+            let status = child.try_wait().unwrap();
+            if let Some(status) = status {
+                *exited.lock().unwrap() = status.code();
+            }
+            let gone = status.is_some();
+            async move { gone }
+        }));
+
+        assert!(stopped);
+        assert_eq!(*exited.lock().unwrap(), Some(7));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_host_that_ignores_sigterm_is_left_for_the_kill() {
+        let mut child = stand_in_host("trap '' TERM; while :; do sleep 0.05; done");
+        let pid = child.id();
+        std::thread::sleep(Duration::from_millis(200));
+
+        let stopped = tauri::async_runtime::block_on(term_then_wait(Some(pid), || async { false }));
+
+        assert!(!stopped);
+        assert_eq!(child.try_wait().unwrap(), None);
+        assert!(signal_process_group(pid, libc::SIGKILL));
+        child.wait().unwrap();
+    }
+
+    #[test]
+    fn nothing_to_signal_waits_for_nothing() {
+        let started = Instant::now();
+
+        let stopped = tauri::async_runtime::block_on(term_then_wait(None, || async { false }));
+
+        assert!(!stopped);
+        assert!(started.elapsed() < Duration::from_secs(1));
     }
 
     #[test]
@@ -2917,7 +3337,9 @@ mod tests {
                 let exited = exited.clone();
                 async move { exited.load(Ordering::SeqCst) }
             },
+            || false,
             Duration::from_secs(5),
+            QUIT_RESTORE_LIMIT,
         ));
 
         assert!(
@@ -2957,7 +3379,9 @@ mod tests {
         let stopped = tauri::async_runtime::block_on(request_until_stopped(
             || async move { started.elapsed() >= accepted_from },
             || async move { started.elapsed() >= exits_at },
+            || false,
             timeout,
+            QUIT_RESTORE_LIMIT,
         ));
 
         assert!(
