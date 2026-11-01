@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -26,6 +27,7 @@ public class FolderService : IFolderService
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
 	private readonly IFolderViewRegistry _folderViews;
 	private readonly SecretWriteAuthority? _writeAuthority;
+	private readonly WidgetLayoutGate _layoutGate;
 
 	public FolderService(
 		IFolderCache folderCache,
@@ -36,7 +38,8 @@ public class FolderService : IFolderService
 		IWidgetSecretScrubber widgetSecretScrubber,
 		IWidgetVariableCloner widgetVariableCloner,
 		IFolderViewRegistry folderViews,
-		SecretWriteAuthority? writeAuthority = null)
+		SecretWriteAuthority? writeAuthority = null,
+		WidgetLayoutGate? layoutGate = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
@@ -47,6 +50,7 @@ public class FolderService : IFolderService
 		_widgetVariableCloner = widgetVariableCloner;
 		_folderViews = folderViews;
 		_writeAuthority = writeAuthority;
+		_layoutGate = layoutGate ?? new WidgetLayoutGate();
 	}
 
 	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
@@ -69,6 +73,7 @@ public class FolderService : IFolderService
 			return Result.Fail<FolderEntity, FolderError>(view.Error!.Value, view.ErrorMessage);
 		}
 
+		using var lease = await _layoutGate.Enter();
 		var profile = _profileCache.GetById(profileId);
 		if (profile is null)
 		{
@@ -110,6 +115,7 @@ public class FolderService : IFolderService
 		PinnedWidgetLayout.GrowToFitPinned(folder, profileFolders, effectiveColumns, effectiveRows);
 
 		await _folderCache.AddOrUpdate(folder, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new FolderCreatedNotification(folder));
 
@@ -131,6 +137,7 @@ public class FolderService : IFolderService
 		string? folderViewConfiguration = null,
 		string? emptyCellStyle = null)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(id);
 		if (folder is null)
 		{
@@ -373,6 +380,8 @@ public class FolderService : IFolderService
 			await _folderCache.AddOrUpdate(folder, Approval);
 		}
 
+		lease.Dispose();
+
 		foreach (var changed in changedStartFolders.Where(changed => changed.Id != folder.Id))
 		{
 			await _mediator.Publish(new FolderUpdatedNotification(changed));
@@ -390,6 +399,7 @@ public class FolderService : IFolderService
 
 	public async Task<Result<FolderError>> Delete(Guid id)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(id);
 		if (folder is null)
 		{
@@ -424,6 +434,8 @@ public class FolderService : IFolderService
 			};
 		}
 
+		lease.Dispose();
+
 		var removedWidgets = removal.RemovedFolders.SelectMany(removedFolder => removedFolder.Widgets).ToList();
 
 		foreach (var widget in removedWidgets)
@@ -451,6 +463,7 @@ public class FolderService : IFolderService
 
 	public async Task<Result<FolderEntity, FolderError>> Duplicate(Guid id)
 	{
+		using var lease = await _layoutGate.Enter();
 		var originalFolder = _folderCache.GetFolderById(id);
 		if (originalFolder is null)
 		{
@@ -514,6 +527,7 @@ public class FolderService : IFolderService
 		duplicateFolder.Widgets = duplicatedWidgets;
 
 		await _folderCache.AddOrUpdate(duplicateFolder, Approval);
+		lease.Dispose();
 
 		foreach (var (duplicateId, sourceId) in sourceWidgetIdsByDuplicateId)
 		{
@@ -534,6 +548,7 @@ public class FolderService : IFolderService
 		Guid targetId,
 		FolderMovePosition position)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(id);
 		if (folder is null)
 		{
@@ -616,6 +631,7 @@ public class FolderService : IFolderService
 		var batch = placementChanges.Concat(changedStartFolders).DistinctBy(changed => changed.Id).ToList();
 
 		await _folderCache.AddOrUpdateRange(batch, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new FoldersReorderedNotification(folder.ProfileId, batch));
 
@@ -624,6 +640,7 @@ public class FolderService : IFolderService
 
 	public async Task<Result<FolderFocusRule, FolderError>> SetFocusRule(Guid folderId, FolderFocusRule rule)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -661,6 +678,7 @@ public class FolderService : IFolderService
 		folder.FocusRules = folder.FocusRules.Where(existing => existing.Id != ruleId).Append(normalizedRule).ToList();
 
 		await _folderCache.AddOrUpdate(folder, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new FolderFocusRuleChangedNotification(folderId));
 
@@ -669,6 +687,7 @@ public class FolderService : IFolderService
 
 	public async Task<Result<FolderError>> DeleteFocusRule(Guid folderId, Guid ruleId)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -684,6 +703,7 @@ public class FolderService : IFolderService
 		folder.FocusRules = folder.FocusRules.Where(existing => existing.Id != ruleId).ToList();
 
 		await _folderCache.AddOrUpdate(folder, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new FolderFocusRuleRemovedNotification(folderId, ruleId));
 

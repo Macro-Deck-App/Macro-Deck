@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Enums;
@@ -19,6 +20,7 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 {
 	private readonly EventTriggerContextResolver _contexts;
 	private readonly IFlowExecutor _flowExecutor;
+	private readonly IEventCascadeNotifier _cascadeNotifier;
 	private readonly ILogger _logger;
 
 	public EventTriggerRunner(
@@ -28,10 +30,12 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 		IEventSubscriptionMatcher matcher,
 		IVariableTemplateRenderer variableRenderer,
 		IFlowExecutor flowExecutor,
+		IEventCascadeNotifier cascadeNotifier,
 		ILogger logger)
 	{
 		_contexts = new EventTriggerContextResolver(folderCache, automationCache, registry, matcher, variableRenderer);
 		_flowExecutor = flowExecutor;
+		_cascadeNotifier = cascadeNotifier;
 		_logger = logger.ForContext<EventTriggerRunner>();
 	}
 
@@ -50,6 +54,19 @@ public sealed class EventTriggerRunner : IEventTriggerRunner
 		{
 			return NotRun();
 		}
+
+		if (occurrence.CascadeDepth >= EventCascade.MaxDepth)
+		{
+			_logger.Warning("Stopped event trigger {TriggerId} on {Owner} for {EventId}: chain reached depth {Depth}",
+				subscription.TriggerId,
+				subscription.Owner,
+				occurrence.EventId,
+				occurrence.CascadeDepth);
+			await _cascadeNotifier.NotifyStopped(subscription.Owner, cancellationToken);
+			return NotRun();
+		}
+
+		EventCascade.Set(occurrence.CascadeDepth + 1);
 
 		_logger.Debug("Running event trigger {TriggerId} on {Owner} for {EventId}",
 			subscription.TriggerId,

@@ -49,6 +49,11 @@ public sealed class EventBus : IEventBus
 			return;
 		}
 
+		if (EventCascade.Current > occurrence.CascadeDepth)
+		{
+			occurrence = occurrence with { CascadeDepth = EventCascade.Current };
+		}
+
 		if (!_channel.Writer.TryWrite(occurrence))
 		{
 			RecordDrop(occurrence.EventId);

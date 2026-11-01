@@ -3031,6 +3031,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Non è stato possibile arrestare il plugin, quindi non è stato rimosso nulla. Riprova.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck si sta ancora avviando, quindi il plugin non è stato avviato. Riprova tra poco.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck si sta chiudendo, quindi il plugin non è stato avviato.</value>
   </data>
@@ -14901,6 +14904,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>La chiave di identità di questo computer è stata sostituita. Su ogni telefono o tablet associato, scansiona di nuovo il codice QR di questo computer per continuare a usarlo.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Ciclo di eventi interrotto</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Gli eventi continuavano ad attivarsi a vicenda, quindi Macro Deck ha interrotto questa catena. Controlla le automazioni e i widget che reagiscono l'uno all'altro.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Tentativo di accesso non riuscito</value>

@@ -22,7 +22,9 @@ public enum PluginSupervisorError
 
 	TakenOverByDevelopmentBuild,
 
-	HostShuttingDown
+	HostShuttingDown,
+
+	HostNotReady
 }
 
 public sealed record PluginSupervisorResult(bool Success, PluginSupervisorError? Error = null, string? Message = null)

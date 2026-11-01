@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -21,6 +22,7 @@ public class WidgetService : IWidgetService
 	private readonly IWidgetSecretCloner _widgetSecretCloner;
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
 	private readonly SecretWriteAuthority? _writeAuthority;
+	private readonly WidgetLayoutGate _layoutGate;
 
 	public WidgetService(
 		IFolderCache folderCache,
@@ -29,7 +31,8 @@ public class WidgetService : IWidgetService
 		IWidgetSecretScrubber widgetSecretScrubber,
 		IWidgetSecretCloner widgetSecretCloner,
 		IWidgetVariableCloner widgetVariableCloner,
-		SecretWriteAuthority? writeAuthority = null)
+		SecretWriteAuthority? writeAuthority = null,
+		WidgetLayoutGate? layoutGate = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
@@ -38,6 +41,7 @@ public class WidgetService : IWidgetService
 		_widgetSecretCloner = widgetSecretCloner;
 		_widgetVariableCloner = widgetVariableCloner;
 		_writeAuthority = writeAuthority;
+		_layoutGate = layoutGate ?? new WidgetLayoutGate();
 	}
 
 	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
@@ -47,6 +51,7 @@ public class WidgetService : IWidgetService
 		WidgetEntity widget,
 		Guid? sourceWidgetId = null)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -93,6 +98,7 @@ public class WidgetService : IWidgetService
 		widget.Data = await _widgetSecretCloner.CloneReferencedSecrets(widget.Data);
 
 		_folderCache.AddWidget(folderId, widget, Approval);
+		lease.Dispose();
 
 		if (sourceWidgetId is { } source)
 		{
@@ -106,6 +112,7 @@ public class WidgetService : IWidgetService
 
 	public async Task<Result<WidgetEntity, WidgetError>> Update(WidgetEntity widget)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(widget.FolderId);
 		if (folder is null)
 		{
@@ -163,6 +170,7 @@ public class WidgetService : IWidgetService
 			|| !string.Equals(existing.Data, widget.Data, StringComparison.Ordinal);
 
 		_folderCache.UpdateWidget(widget.FolderId, widget, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new WidgetUpdatedNotification(widget, dataChanged));
 
@@ -173,6 +181,7 @@ public class WidgetService : IWidgetService
 		Guid folderId,
 		IReadOnlyList<WidgetPlacement> placements)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -234,6 +243,7 @@ public class WidgetService : IWidgetService
 			.ToHashSet();
 
 		_folderCache.UpdateWidgetPositions(folderId, placements);
+		lease.Dispose();
 
 		var updatedWidgets = placements.Select(p => widgetsById[p.WidgetId]).ToList();
 
@@ -244,6 +254,7 @@ public class WidgetService : IWidgetService
 
 	public async Task<Result<WidgetError>> Delete(Guid widgetId, Guid folderId)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -253,6 +264,7 @@ public class WidgetService : IWidgetService
 		var widget = folder.Widgets.FirstOrDefault(w => w.Id == widgetId);
 
 		_folderCache.RemoveWidget(folderId, widgetId);
+		lease.Dispose();
 
 		await _widgetSecretScrubber.ScrubReferencedSecrets(widget?.Data);
 
@@ -267,6 +279,7 @@ public class WidgetService : IWidgetService
 		bool pinned,
 		PinScope? scope = null)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -308,6 +321,7 @@ public class WidgetService : IWidgetService
 		widget.IsPinned = pinned;
 		widget.PinScope = resultingScope;
 		_folderCache.UpdateWidget(folderId, widget, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new WidgetUpdatedNotification(widget, false));
 
@@ -320,6 +334,7 @@ public class WidgetService : IWidgetService
 		IReadOnlyList<Guid>? replaceIds = null,
 		IReadOnlyList<Guid?>? sourceWidgetIds = null)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -429,6 +444,7 @@ public class WidgetService : IWidgetService
 			// One persisted write for both halves of the swap - never observable as a delete followed
 			// by a separate create (issue #213).
 			_folderCache.ReplaceWidgets(folderId, replaceIds, created, Approval);
+			lease.Dispose();
 
 			foreach (var data in dataSnapshots)
 			{
@@ -446,6 +462,7 @@ public class WidgetService : IWidgetService
 		else
 		{
 			_folderCache.AddWidgets(folderId, created, Approval);
+			lease.Dispose();
 
 			foreach (var (targetId, sourceWidgetId) in sourceWidgetIdsByTargetId)
 			{
@@ -460,6 +477,7 @@ public class WidgetService : IWidgetService
 
 	public async Task<Result<WidgetError>> DeleteMany(Guid folderId, IReadOnlyList<Guid> widgetIds)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -491,6 +509,7 @@ public class WidgetService : IWidgetService
 		var dataSnapshots = targets.Select(w => w.Data).ToList();
 
 		_folderCache.RemoveWidgets(folderId, widgetIds.ToList());
+		lease.Dispose();
 
 		foreach (var data in dataSnapshots)
 		{
@@ -508,6 +527,7 @@ public class WidgetService : IWidgetService
 		bool pinned,
 		PinScope? scope = null)
 	{
+		using var lease = await _layoutGate.Enter();
 		var folder = _folderCache.GetFolderById(folderId);
 		if (folder is null)
 		{
@@ -587,6 +607,7 @@ public class WidgetService : IWidgetService
 		}
 
 		_folderCache.UpdateWidgets(folderId, changed, Approval);
+		lease.Dispose();
 
 		await _mediator.Publish(new WidgetsUpdatedNotification(folderId, changed));
 

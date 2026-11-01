@@ -3030,6 +3030,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>プラグインを停止できなかったため、何も削除されていません。もう一度お試しください。</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck がまだ起動中のため、プラグインは起動されませんでした。しばらくしてからもう一度お試しください。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
   </data>
@@ -14902,6 +14905,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>このコンピューターの ID キーが置き換えられました。ペアリング済みのスマートフォンやタブレットでは、このコンピューターの QR コードを再度読み取って、引き続き使用してください。</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>イベントのループを停止しました</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>イベントが互いをトリガーし続けたため、Macro Deck がこの連鎖を停止しました。互いに反応するオートメーションとウィジェットを確認してください。</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>ログインの失敗</value>

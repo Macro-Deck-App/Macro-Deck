@@ -3030,6 +3030,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>플러그인을 중지할 수 없어 아무것도 제거되지 않았습니다. 다시 시도하세요.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck이 아직 시작되는 중이므로 플러그인을 시작하지 않았습니다. 잠시 후 다시 시도하세요.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck이 종료되는 중이므로 플러그인을 시작하지 않았습니다.</value>
   </data>
@@ -14902,6 +14905,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>이 컴퓨터의 ID 키가 교체되었습니다. 페어링된 모든 휴대폰이나 태블릿에서 이 컴퓨터의 QR 코드를 다시 스캔해 계속 사용하세요.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>이벤트 루프 중지됨</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>이벤트가 서로를 계속 트리거하여 Macro Deck이 이 연쇄를 중지했습니다. 서로 반응하는 자동화와 위젯을 확인하세요.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>로그인 시도 실패</value>
