@@ -96,7 +96,12 @@ describe('Shell', () => {
     client = new Client(() => 'http://host', 'client-1');
   });
 
-  afterEach(() => root.remove());
+  // A press with no session arms a real 2 s timer, whose toast would land in a later spec's host.
+  afterEach(() => {
+    client.widgetSessions.reset();
+    dismissAllToasts();
+    root.remove();
+  });
 
   const services = (): ShellServices => ({
     target: DEFAULT_WEB_CLIENT_TARGET,
