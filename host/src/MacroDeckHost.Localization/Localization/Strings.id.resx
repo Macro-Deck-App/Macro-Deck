@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Folder data ini terakhir digunakan oleh versi Macro Deck yang lebih baru. Instal ulang versi tersebut; data tidak diubah.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Host Macro Deck lain sudah berjalan di akun ini. Tutup host tersebut atau mulai ulang komputer, lalu jalankan Macro Deck lagi.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>File biner host Macro Deck tidak ditemukan:
 {paths}</value>

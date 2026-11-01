@@ -5,13 +5,15 @@ namespace MacroDeckHost;
 
 public static class HostExitCodes
 {
-	// Keep in sync with HOST_RESTART_EXIT_CODE, HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE and
-	// HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE in ui/bootstrapper/src/host.rs.
+	// Keep in sync with HOST_RESTART_EXIT_CODE, HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE,
+	// HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE and HOST_ALREADY_RUNNING_EXIT_CODE in host.rs.
 	public const int RestartRequested = 86;
 
 	public const int CryptographyUnavailable = 87;
 
 	public const int DatabaseFromNewerVersion = 88;
+
+	public const int AnotherInstanceRunning = 89;
 
 	public const int Failed = 1;
 

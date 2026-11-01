@@ -216,6 +216,13 @@ never shown.
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again
 does not open a second copy. Look for the running Macro Deck in the system tray or menu bar.
 
+If Macro Deck says another host is already running under this account, a host is still running without
+its window. Close it or restart the computer, then start Macro Deck again.
+
+On Linux, two users on one computer can each run their own Macro Deck at the same time. The first one
+keeps the default public port, so the second one starts without it: its devices connect once you
+[choose another port](#macro-deck-is-not-listening-on-its-port).
+
 ## Macro Deck shows an older version after you started a new one
 
 **About** and the version at the bottom of the sidebar show the version that is actually running. If they

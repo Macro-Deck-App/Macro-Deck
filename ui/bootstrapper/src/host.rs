@@ -118,6 +118,8 @@ pub const HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE: i32 = 87;
 
 pub const HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE: i32 = 88;
 
+pub const HOST_ALREADY_RUNNING_EXIT_CODE: i32 = 89;
+
 pub const RELAUNCH_MARKER_ENVIRONMENT_VARIABLE: &str = "MACRODECK_RELAUNCH";
 
 pub const RELAUNCH_SETTLE_DELAY: Duration = Duration::from_millis(1500);
@@ -204,11 +206,70 @@ pub fn is_development_build() -> bool {
     BUILD_CHANNEL == "Development"
 }
 
-fn port_file_port() -> Option<u16> {
-    let path = std::env::temp_dir().join(port_file_name());
+// Keep in sync with HostEndpoints.ResolvePerUserDirectory in the host. A custom TMPDIR stays
+// authoritative: that is how parallel hosts isolate their single-instance check.
+pub fn per_user_port_dir(
+    is_linux: bool,
+    temp_dir: &Path,
+    environment: &dyn Fn(&str) -> Option<OsString>,
+) -> Option<PathBuf> {
+    if !is_linux || temp_dir != Path::new("/tmp") {
+        return None;
+    }
+    let absolute = |name: &str| {
+        environment(name)
+            .map(PathBuf::from)
+            .filter(|path| path.is_absolute())
+    };
+    absolute("XDG_CONFIG_HOME")
+        .or_else(|| absolute("HOME").map(|home| home.join(".config")))
+        .map(|base| base.join("macro-deck"))
+}
+
+#[cfg(any(target_os = "linux", test))]
+pub fn is_foreign_owner(file_uid: u32, own_uid: u32) -> bool {
+    file_uid != own_uid
+}
+
+#[cfg(target_os = "linux")]
+fn owned_by_another_user(path: &Path) -> bool {
+    use std::os::unix::fs::MetadataExt;
+    std::fs::metadata(path)
+        .is_ok_and(|metadata| is_foreign_owner(metadata.uid(), unsafe { libc::geteuid() }))
+}
+
+#[cfg(not(target_os = "linux"))]
+fn owned_by_another_user(_path: &Path) -> bool {
+    false
+}
+
+fn read_port_file(path: &Path) -> Option<u16> {
     std::fs::read_to_string(path)
         .ok()
         .and_then(|raw| parse_port(&raw))
+}
+
+pub fn port_from_files(
+    per_user: Option<&Path>,
+    legacy: &Path,
+    foreign: impl Fn(&Path) -> bool,
+) -> Option<u16> {
+    per_user
+        .and_then(read_port_file)
+        .or_else(|| (!foreign(legacy)).then(|| read_port_file(legacy)).flatten())
+}
+
+fn port_file_port() -> Option<u16> {
+    let temp_dir = std::env::temp_dir();
+    let per_user = per_user_port_dir(cfg!(target_os = "linux"), &temp_dir, &|name: &str| {
+        std::env::var_os(name)
+    })
+    .map(|dir| dir.join(port_file_name()));
+    port_from_files(
+        per_user.as_deref(),
+        &temp_dir.join(port_file_name()),
+        owned_by_another_user,
+    )
 }
 
 pub fn current_port() -> Option<u16> {
@@ -476,6 +537,8 @@ fn exit_failure_reason(code: Option<i32>, log: &str) -> String {
         localization::t(keys::ERRORS_CRYPTOGRAPHY_UNAVAILABLE)
     } else if code == Some(HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE) {
         localization::t(keys::ERRORS_DATABASE_FROM_NEWER_VERSION)
+    } else if code == Some(HOST_ALREADY_RUNNING_EXIT_CODE) {
+        localization::t(keys::ERRORS_HOST_ALREADY_RUNNING)
     } else {
         startup_failure_reason(log)
     }
@@ -1213,6 +1276,7 @@ async fn give_up(app: &AppHandle, reason: Option<String>, exit: ExitStatus, log:
                     ExitStatus::Code(
                         HOST_CRYPTOGRAPHY_UNAVAILABLE_EXIT_CODE
                             | HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE
+                            | HOST_ALREADY_RUNNING_EXIT_CODE
                     )
                 ) =>
         {
@@ -2459,6 +2523,91 @@ mod tests {
         let message = exit_failure_reason(Some(HOST_DATABASE_FROM_NEWER_VERSION_EXIT_CODE), "boom");
         assert!(message.contains("newer version of Macro Deck"));
         assert!(!message.contains("did not start"));
+    }
+
+    #[test]
+    fn another_running_host_is_explained_instead_of_a_failed_start() {
+        let message = exit_failure_reason(Some(HOST_ALREADY_RUNNING_EXIT_CODE), "boom");
+        assert!(message.contains("already running"));
+        assert!(!message.contains("did not start"));
+    }
+
+    #[test]
+    fn the_already_running_exit_code_matches_the_host_constant() {
+        // Keep in sync with HostExitCodes.AnotherInstanceRunning in the .NET host.
+        assert_eq!(HOST_ALREADY_RUNNING_EXIT_CODE, 89);
+    }
+
+    #[cfg(unix)]
+    fn env_of<'a>(values: &'a [(&'a str, &'a str)]) -> impl Fn(&str) -> Option<OsString> + 'a {
+        move |name| {
+            values
+                .iter()
+                .find(|(key, _)| *key == name)
+                .map(|(_, value)| OsString::from(value))
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn the_per_user_directory_applies_only_to_the_shared_linux_tmp() {
+        let tmp = Path::new("/tmp");
+        let home = env_of(&[("HOME", "/home/a")]);
+        let expected = Some(PathBuf::from("/home/a/.config/macro-deck"));
+        assert_eq!(per_user_port_dir(true, tmp, &home), expected);
+        assert_eq!(per_user_port_dir(true, Path::new("/tmp/"), &home), expected);
+        assert_eq!(per_user_port_dir(false, tmp, &home), None);
+        assert_eq!(per_user_port_dir(true, Path::new("/tmp/own"), &home), None);
+        assert_eq!(
+            per_user_port_dir(
+                true,
+                tmp,
+                &env_of(&[("XDG_CONFIG_HOME", "/cfg"), ("HOME", "/home/a")])
+            ),
+            Some(PathBuf::from("/cfg/macro-deck"))
+        );
+        assert_eq!(
+            per_user_port_dir(
+                true,
+                tmp,
+                &env_of(&[("XDG_CONFIG_HOME", "relative"), ("HOME", "/home/a")])
+            ),
+            expected
+        );
+        assert_eq!(
+            per_user_port_dir(true, tmp, &env_of(&[("HOME", "relative")])),
+            None
+        );
+        assert_eq!(per_user_port_dir(true, tmp, &env_of(&[])), None);
+    }
+
+    #[test]
+    fn the_per_user_file_wins_and_another_users_legacy_file_is_ignored() {
+        let dir = std::env::temp_dir().join(format!("md-port-files-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let per_user = dir.join("per-user");
+        let legacy = dir.join("legacy");
+        std::fs::write(&legacy, "5000").unwrap();
+
+        assert_eq!(port_from_files(None, &legacy, |_| false), Some(5000));
+        assert_eq!(
+            port_from_files(Some(&per_user), &legacy, |_| false),
+            Some(5000)
+        );
+        assert_eq!(port_from_files(Some(&per_user), &legacy, |_| true), None);
+        std::fs::write(&per_user, "6000").unwrap();
+        assert_eq!(
+            port_from_files(Some(&per_user), &legacy, |_| true),
+            Some(6000)
+        );
+
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn a_file_counts_as_foreign_only_with_another_owner() {
+        assert!(is_foreign_owner(1000, 1001));
+        assert!(!is_foreign_owner(1000, 1000));
     }
 
     #[test]

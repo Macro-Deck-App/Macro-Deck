@@ -937,6 +937,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Ce dossier de données a été utilisé en dernier par une version plus récente de Macro Deck. Réinstalle cette version ; tes données n'ont pas été modifiées.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Un autre hôte Macro Deck est déjà en cours d'exécution sur ce compte. Ferme-le ou redémarre l'ordinateur, puis relance Macro Deck.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Le binaire hôte de Macro Deck est introuvable:
 {paths}</value>
