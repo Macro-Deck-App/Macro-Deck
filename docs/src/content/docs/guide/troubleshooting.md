@@ -216,6 +216,9 @@ never shown.
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again
 does not open a second copy. Look for the running Macro Deck in the system tray or menu bar.
 
+If you quit from the menu bar or system tray while Macro Deck is still restoring a backup or preparing its
+data at startup, it finishes that first, for up to 15 minutes. Until then, starting it again shows nothing.
+
 ## Macro Deck shows an older version after you started a new one
 
 **About** and the version at the bottom of the sidebar show the version that is actually running. If they

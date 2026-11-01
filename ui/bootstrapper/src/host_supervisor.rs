@@ -200,6 +200,17 @@ impl Supervisor {
         true
     }
 
+    pub fn rewatch(&mut self, now: Instant) -> Option<u64> {
+        if self.phase != Phase::Starting {
+            return None;
+        }
+        self.generation += 1;
+        self.exited = None;
+        self.phase = Phase::Running;
+        self.healthy_since = Some(now);
+        Some(self.generation)
+    }
+
     pub fn give_up(&mut self) {
         if self.phase != Phase::Stopping {
             self.phase = Phase::GaveUp;
@@ -210,6 +221,33 @@ impl Supervisor {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_host_that_outlived_a_failed_update_counts_as_running_again() {
+        let now = Instant::now();
+        let mut supervisor = Supervisor::new();
+        let adopted = supervisor.adopt(now).unwrap();
+        supervisor.begin_stop();
+        assert!(supervisor.resume());
+
+        let generation = supervisor.rewatch(now).unwrap();
+
+        assert!(generation > adopted);
+        assert_eq!(supervisor.phase(), Phase::Running);
+        assert_eq!(
+            supervisor.on_adopted_exit(generation, false),
+            ExitAction::Relaunch
+        );
+    }
+
+    #[test]
+    fn only_a_resumed_supervisor_can_rewatch() {
+        let now = Instant::now();
+        let mut supervisor = Supervisor::new();
+        assert_eq!(supervisor.rewatch(now), None);
+        supervisor.adopt(now);
+        assert_eq!(supervisor.rewatch(now), None);
+    }
 
     fn running(now: Instant) -> (Supervisor, u64) {
         let mut supervisor = Supervisor::new();
