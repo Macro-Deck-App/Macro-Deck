@@ -2484,6 +2484,7 @@ mod tests {
         assert_eq!(HOST_ALREADY_RUNNING_EXIT_CODE, 89);
     }
 
+    #[cfg(unix)]
     fn env_of<'a>(values: &'a [(&'a str, &'a str)]) -> impl Fn(&str) -> Option<OsString> + 'a {
         move |name| {
             values
