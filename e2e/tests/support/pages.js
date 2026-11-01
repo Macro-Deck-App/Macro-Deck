@@ -100,10 +100,9 @@ export async function connectWebClient(browser, host, api) {
 // Every JSON message the page sends over its UI sockets, so a test can count what one gesture sent.
 export function recordSocketFrames(page) {
   const frames = { sent: [], received: [] };
-  let sequence = 0;
   const parse = frame => {
     try {
-      return { ...JSON.parse(String(frame.payload)), sequence: ++sequence };
+      return JSON.parse(String(frame.payload));
     } catch {
       return null;
     }

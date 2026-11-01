@@ -19,14 +19,12 @@ function sessionsOpenedSince(frames, from) {
   return opened;
 }
 
-// Sessions the host ended on its own: a close the page asked for first proves nothing here. The
-// page may still ask afterwards, when the editor goes away because its widget is gone.
+// Sessions the host ended because their widget was deleted. The page also closes the session when
+// the editor goes away, in either order, but that close carries its own reason.
 function closedByHost(frames) {
-  const closedByPage = frames.requests('CloseUiSession');
   return frames.received
-    .filter(message => message.type === 'UiSessionClosedEvent')
-    .filter(message => !closedByPage.some(request => request.payload?.[0] === message.payload?.sessionId
-      && request.sequence < message.sequence))
+    .filter(message => message.type === 'UiSessionClosedEvent'
+      && message.payload?.reason === 'The widget was deleted.')
     .map(message => message.payload?.sessionId);
 }
 
