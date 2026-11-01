@@ -19,8 +19,8 @@
     "astro-mermaid": "^2.1.0",
     "mermaid": "^12.2.0",
     "sharp": "^0.35.5",
-    "starlight-links-validator": "^0.26.0",
-    "starlight-openapi": "^0.26.2",
+    "starlight-links-validator": "^0.27.0",
+    "starlight-openapi": "^0.27.0",
     "starlight-sidebar-topics": "^0.9.0"
   },
   "overrides": {
