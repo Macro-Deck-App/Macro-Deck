@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>此資料資料夾上次由較新版本的 Macro Deck 使用。請重新安裝該版本；資料未被變更。</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>此帳戶下已有另一個 Macro Deck 主機正在執行。請將其關閉或重新啟動電腦，然後再次啟動 Macro Deck。</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>缺少 Macro Deck 主機執行檔：
 {paths}</value>

@@ -1,4 +1,3 @@
-using System.Globalization;
 using MacroDeckHost.Application.Configuration;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -13,6 +12,8 @@ public class LoopbackPortFileService : IHostedService
 	private readonly IServer _server;
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IHostListenerState _listenerState;
+	private IReadOnlyList<PublishedPortFile> _published = [];
+	private int _publishedPort;
 
 	public LoopbackPortFileService(
 		IServer server,
@@ -32,13 +33,7 @@ public class LoopbackPortFileService : IHostedService
 
 	public Task StopAsync(CancellationToken cancellationToken)
 	{
-		try
-		{
-			File.Delete(HostEndpoints.LoopbackPortFilePath);
-		}
-		catch (IOException)
-		{
-		}
+		LoopbackPortFiles.DeleteOwn(_publishedPort, _published);
 
 		return Task.CompletedTask;
 	}
@@ -69,19 +64,13 @@ public class LoopbackPortFileService : IHostedService
 		_listenerState.SetLoopbackPort(loopbackPort);
 		ResolvedLoopbackPort.Set(loopbackPort);
 
-		try
+		_published = LoopbackPortFiles.Publish(loopbackPort, HostEndpoints.LoopbackPortFilePaths);
+		_publishedPort = loopbackPort;
+		if (_published.Count > 0)
 		{
-			File.WriteAllText(HostEndpoints.LoopbackPortFilePath,
-				loopbackPort.ToString(CultureInfo.InvariantCulture));
-			_logger.Information("Listening for UI connections on 127.0.0.1:{Port} (published to {File})",
+			_logger.Information("Listening for UI connections on 127.0.0.1:{Port} (published to {Files})",
 				loopbackPort,
-				HostEndpoints.LoopbackPortFilePath);
-		}
-		catch (Exception e)
-		{
-			_logger.Error(e,
-				"Failed to write port file {File}. The desktop UI cannot discover the host",
-				HostEndpoints.LoopbackPortFilePath);
+				_published.Select(file => file.Path));
 		}
 	}
 }
