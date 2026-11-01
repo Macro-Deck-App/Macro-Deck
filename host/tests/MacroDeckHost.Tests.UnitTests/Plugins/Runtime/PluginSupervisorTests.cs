@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.Plugins.Installation;
@@ -140,12 +141,16 @@ internal sealed class PluginSupervisorTests
 			});
 	}
 
-	private PluginSupervisor CreateSupervisor(UserSessionEnd? sessionEnd = null)
+	private PluginSupervisor CreateSupervisor(
+		UserSessionEnd? sessionEnd = null,
+		IDotnetMuxerLocator? muxerLocator = null)
 	{
 		var services = new ServiceCollection()
 			.AddSingleton<Mediator.IMediator>(_mediator)
 			.AddSingleton<IPluginTrustRecordRepository, InMemoryPluginTrustRecordRepository>()
 			.AddSingleton<IPluginTrustBaseline, FakePluginTrustBaseline>()
+			.AddSingleton(TestLocalization.Resolver)
+			.AddScoped<IAppPreferenceService>(_ => new FakeDeveloperModePreferences())
 			.BuildServiceProvider();
 
 		return new PluginSupervisor(_manifestReader,
@@ -153,7 +158,7 @@ internal sealed class PluginSupervisorTests
 			_stateStore,
 			_journal,
 			_launcher,
-			_muxerLocator,
+			muxerLocator ?? _muxerLocator,
 			_healthProbe,
 			_sessionRegistry,
 			_launchTokenService,
@@ -336,6 +341,126 @@ internal sealed class PluginSupervisorTests
 					Path.GetFullPath(Path.Combine(versionDirectory, "runtimes/x/Plugin.dll")), "--verbose"
 				}));
 		});
+	}
+
+	private static readonly PluginManifestReadResult _brokenManifest
+		= PluginManifestReadResult.Fail(PluginManifestError.Malformed, "broken");
+
+	private static DotnetMuxerLocator LocatorWithRuntimes(Func<IReadOnlyList<Version>> installed)
+	{
+		var muxer = Path.GetTempFileName();
+		return new DotnetMuxerLocator(Serilog.Core.Logger.None,
+			Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")),
+			() => [muxer],
+			_ => new Dictionary<string, IReadOnlyList<Version>>
+			{
+				[DotnetFrameworkRequirement.NetCoreAppFramework] = installed()
+			});
+	}
+
+	[Test]
+	public async Task A_missing_runtime_is_not_retried_by_reconcile_and_a_manual_start_finds_it_once_installed()
+	{
+		UseFrameworkDependentEntrypoint("Plugin.dll");
+		var runtimes = new List<Version>();
+		var supervisor = CreateSupervisor(muxerLocator: LocatorWithRuntimes(() => runtimes));
+		await _stateStore.Save(PluginId, true);
+
+		await supervisor.Reconcile();
+		runtimes.Add(new Version(10, 0, 1));
+		await supervisor.Reconcile();
+		await supervisor.Reconcile();
+		var launchedByReconcile = _launcher.Requests.Count;
+		var started = await supervisor.Start(PluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(launchedByReconcile, Is.Zero);
+			Assert.That(started.Success, Is.True, started.Message);
+		});
+	}
+
+	[Test]
+	public async Task A_launch_after_a_missing_runtime_was_installed_finds_it_without_a_manual_start()
+	{
+		UseFrameworkDependentEntrypoint("Plugin.dll");
+		var runtimes = new List<Version>();
+		var supervisor = CreateSupervisor(muxerLocator: LocatorWithRuntimes(() => runtimes));
+		await using (var hold = await supervisor.HoldLaunches(PluginId))
+		{
+			await hold.Start();
+		}
+
+		runtimes.Add(new Version(10, 0, 1));
+		await using var retry = await supervisor.HoldLaunches(PluginId);
+		var started = await retry.Start();
+
+		Assert.That(started.Success, Is.True, started.Message);
+	}
+
+	[Test]
+	public async Task An_unreadable_manifest_is_tried_once_and_a_manual_start_tries_again()
+	{
+		_manifestReader.Default = _brokenManifest;
+		var supervisor = CreateSupervisor();
+		await _stateStore.Save(PluginId, true);
+
+		await supervisor.Reconcile();
+		_manifestReader.Default = OkManifestResult();
+		await supervisor.Reconcile();
+		var launchedByReconcile = _launcher.Requests.Count;
+		var started = await supervisor.Start(PluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(launchedByReconcile, Is.Zero);
+			Assert.That(started.Success, Is.True, started.Message);
+		});
+	}
+
+	[Test]
+	public async Task An_update_gives_a_plugin_with_a_terminal_failure_one_more_automatic_attempt()
+	{
+		_manifestReader.Default = _brokenManifest;
+		var supervisor = CreateSupervisor();
+		await _stateStore.Save(PluginId, true);
+		await supervisor.Reconcile();
+
+		_manifestReader.Default = OkManifestResult();
+		await supervisor.Stop(PluginId, PluginStopReason.Update);
+		await supervisor.Reconcile();
+
+		Assert.That(_launcher.Requests, Has.Count.EqualTo(1));
+	}
+
+	[Test]
+	public async Task Stop_clears_auto_start_of_a_plugin_that_cannot_launch()
+	{
+		_manifestReader.Default = _brokenManifest;
+		var supervisor = CreateSupervisor();
+		await _stateStore.Save(PluginId, true);
+		await supervisor.Reconcile();
+		var snapshot = supervisor.Snapshot().Single(entry => entry.PluginId == PluginId);
+
+		var stopped = await supervisor.Stop(PluginId, PluginStopReason.UserRequested);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(snapshot.DesiredStarted, Is.True);
+			Assert.That(stopped.Success, Is.True, stopped.Message);
+			Assert.That(_stateStore.Load()[PluginId], Is.False);
+			Assert.That(supervisor.Snapshot().Single(entry => entry.PluginId == PluginId).DesiredStarted, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task Stop_answers_not_running_when_nothing_would_start_it()
+	{
+		var supervisor = CreateSupervisor();
+
+		var stopped = await supervisor.Stop(PluginId, PluginStopReason.UserRequested);
+
+		Assert.That(stopped.Error, Is.EqualTo(PluginSupervisorError.NotRunning));
 	}
 
 	[Test]

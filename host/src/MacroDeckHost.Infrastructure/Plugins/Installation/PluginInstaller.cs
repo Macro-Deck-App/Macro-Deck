@@ -1094,7 +1094,8 @@ public sealed class PluginInstaller : IPluginInstaller
 			replacesInPlace ? wasRunning : null,
 			cancellationToken);
 
-		await FinishArtifact(acquisition, request, result.Success, cancellationToken);
+		// The outcome is decided: a cancel from here on must not report a live version as cancelled.
+		await FinishArtifact(acquisition, request, result.Success, CancellationToken.None);
 
 		if (result.Success)
 		{
@@ -1105,8 +1106,10 @@ public sealed class PluginInstaller : IPluginInstaller
 				ForgetTestInstallation(manifest.Id);
 			}
 
-			await AskForAdbConsentAsync(manifest, previouslyDeclaredAdb, cancellationToken);
-			await AskForCompanionDeviceConsentAsync(manifest, previouslyDeclaredCompanionDevices, cancellationToken);
+			await AskForAdbConsentAsync(manifest, previouslyDeclaredAdb, CancellationToken.None);
+			await AskForCompanionDeviceConsentAsync(manifest,
+				previouslyDeclaredCompanionDevices,
+				CancellationToken.None);
 
 			// A plugin that was activated but deliberately not started never welcomes a session, and the
 			// registrar only registers such plugins at startup. Without this an install held back by a
@@ -1114,7 +1117,7 @@ public sealed class PluginInstaller : IPluginInstaller
 			// all until the host restarts - invisible to the UI that installed it, and so unremovable.
 			if (!canStart || result.HasBlockingWarning)
 			{
-				await _integrationRegistrar.RegisterInstalledDetachedAsync(manifest.Id, cancellationToken);
+				await _integrationRegistrar.RegisterInstalledDetachedAsync(manifest.Id, CancellationToken.None);
 			}
 		}
 
@@ -1146,12 +1149,14 @@ public sealed class PluginInstaller : IPluginInstaller
 	{
 		string? previousVersion;
 		bool wasRunning;
+		bool wantedStarted;
 		PluginSupervisorResult start;
 
 		await using (hold)
 		{
 			previousVersion = ActiveVersionOf(pluginId);
 			wasRunning = runningBeforeInstall ?? IsRunning(pluginId);
+			wantedStarted = WantedStarted(pluginId);
 
 			await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
 
@@ -1167,8 +1172,8 @@ public sealed class PluginInstaller : IPluginInstaller
 					version,
 					previousVersion,
 					wasRunning,
-					rollback,
-					cancellationToken);
+					wantedStarted,
+					rollback);
 
 				return PluginInstallResult.Fail(PluginInstallError.ActivationFailed,
 					ex.Message,
@@ -1222,8 +1227,24 @@ public sealed class PluginInstaller : IPluginInstaller
 				version,
 				previousVersion,
 				wasRunning,
-				rollback,
-				cancellationToken);
+				wantedStarted,
+				rollback);
+		}
+
+		if (cancellationToken.IsCancellationRequested)
+		{
+			var cancelled = await ActiveLocalization.Resolve(_scopeFactory,
+				rolledBack
+					? AppStrings.Errors.Plugins.InstallCancelledRolledBack()
+					: AppStrings.Errors.Plugins.InstallCancelledNotRolledBack());
+
+			return PluginInstallResult.Fail(PluginInstallError.Cancelled,
+				cancelled,
+				pluginId,
+				version,
+				previousVersion,
+				rolledBack,
+				warnings);
 		}
 
 		return PluginInstallResult.Fail(PluginInstallError.HealthValidationFailed,
@@ -1235,18 +1256,28 @@ public sealed class PluginInstaller : IPluginInstaller
 			warnings);
 	}
 
+	private bool WantedStarted(string pluginId)
+	{
+		return _supervisor.Snapshot()
+				.FirstOrDefault(entry => string.Equals(entry.PluginId, pluginId, StringComparison.Ordinal))
+				?.DesiredStarted
+			== true;
+	}
+
 	private async Task<bool> RollBack(
 		IPluginLaunchHold hold,
 		string pluginId,
 		string failedVersion,
 		string? previousVersion,
 		bool restartPrevious,
-		PluginRollbackPlan rollback,
-		CancellationToken cancellationToken)
+		bool wantedStarted,
+		PluginRollbackPlan rollback)
 	{
 		try
 		{
-			await _supervisor.Stop(pluginId, PluginStopReason.Update, cancellationToken);
+			// Never the caller's token: a cancelled Stop or Start reports failure instead of throwing, which
+			// would leave the failed version running or the previous one down.
+			await _supervisor.Stop(pluginId, PluginStopReason.Update, CancellationToken.None);
 
 			if (rollback.TrustUndo is { } trustUndo)
 			{
@@ -1281,7 +1312,20 @@ public sealed class PluginInstaller : IPluginInstaller
 
 			if (restartPrevious && previousVersion is not null && Directory.Exists(previousDirectory))
 			{
-				await hold.Start(cancellationToken);
+				await hold.Start(CancellationToken.None);
+			}
+
+			// The failed version's start persisted auto-start, which reconcile would act on after this.
+			if (!restartPrevious && !wantedStarted)
+			{
+				if (previousVersion is null)
+				{
+					await _supervisor.Forget(pluginId, CancellationToken.None);
+				}
+				else
+				{
+					await _supervisor.Stop(pluginId, PluginStopReason.UserRequested, CancellationToken.None);
+				}
 			}
 
 			PluginInstallerLog.RolledBack(_logger, pluginId, previousVersion ?? "no active version");
@@ -1381,7 +1425,14 @@ public sealed class PluginInstaller : IPluginInstaller
 				}
 			}
 
-			await Task.Delay(_healthPollInterval, _timeProvider, cancellationToken);
+			try
+			{
+				await Task.Delay(_healthPollInterval, _timeProvider, cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				return false;
+			}
 		}
 
 		return false;

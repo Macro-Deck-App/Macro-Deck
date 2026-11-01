@@ -3027,6 +3027,24 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck अभी शुरू हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया। कृपया कुछ देर बाद फिर से कोशिश करें।</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>प्लगइन का मैनिफ़ेस्ट नहीं पढ़ा जा सका।</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>इस प्लगइन का इस सिस्टम के लिए कोई संस्करण नहीं है।</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>इस प्लगइन को शुरू करने के लिए कोई .NET रनटाइम नहीं मिला। कृपया एक इंस्टॉल करें, फिर प्लगइन को दोबारा शुरू करें।</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>कोई भी इंस्टॉल किया गया .NET रनटाइम आवश्यक संस्करण {required} को पूरा नहीं करता। कृपया इसे इंस्टॉल करें, फिर प्लगइन को दोबारा शुरू करें।</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>इंस्टॉलेशन रद्द कर दिया गया और पिछली स्थिति बहाल कर दी गई।</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>इंस्टॉलेशन रद्द कर दिया गया, लेकिन पिछली स्थिति बहाल नहीं की जा सकी। नया संस्करण अभी भी सक्रिय हो सकता है।</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
   </data>

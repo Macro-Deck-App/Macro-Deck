@@ -241,7 +241,7 @@ In [`manifest.json`](/reference/manifest/#timing-settings); out-of-range values 
 | `health.timeoutSeconds` | 2 | 1-10 |
 | `health.unhealthyThreshold` | 3 | 2-10 |
 
-The floor of 2 means a single missed probe never restarts a plugin.
+The floor of 2 means a single missed probe never marks a plugin unhealthy.
 
 ### Never override your own listener URL
 
@@ -255,9 +255,10 @@ look the same. [MDP4002](/reference/analyzers/#mdp4002) catches the statically v
 - **Activation.** Unless the caller opted out of starting it, activating a version starts the plugin and
   waits for it to be healthy. If it is not, activation is undone: the previous version is restored, the
   failed one deleted, and the previous one restarted.
-- **Steady state.** Consecutive failures past `unhealthyThreshold` mark the plugin unhealthy and the
-  supervisor restarts it, within a restart budget. A plugin that keeps failing ends in a terminal failed
-  state rather than restarting forever.
+- **Steady state.** While a plugin's session is connected, failed probes only lower it to degraded and
+  it is not restarted, even with a hung HTTP pipeline. Without a session, consecutive failures past
+  `unhealthyThreshold` mark the plugin unhealthy and the supervisor restarts it, within a restart budget.
+  A plugin that keeps failing ends in a terminal failed state rather than restarting forever.
 
 ## Shutdown
 

@@ -55,7 +55,12 @@ export class ManagedPluginsSectionComponent {
   }
 
   canStop(plugin: PluginRuntimeInfo): boolean {
-    return plugin.managed && STOPPABLE_STATES.has(plugin.state) && !this.isBusy(plugin.pluginId);
+    const clearsAutoStart = plugin.desiredStarted === true
+      && !plugin.takenOverByDevelopmentBuild
+      && STARTABLE_STATES.has(plugin.state);
+    return plugin.managed
+      && (STOPPABLE_STATES.has(plugin.state) || clearsAutoStart)
+      && !this.isBusy(plugin.pluginId);
   }
 
   canRestart(plugin: PluginRuntimeInfo): boolean {

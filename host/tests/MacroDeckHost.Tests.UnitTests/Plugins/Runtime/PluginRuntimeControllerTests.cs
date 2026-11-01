@@ -138,6 +138,26 @@ internal sealed class PluginRuntimeControllerTests
 	}
 
 	[Test]
+	public void A_plugin_that_would_start_on_its_own_reports_it_on_the_wire()
+	{
+		var supervisor = new FakePluginSupervisor();
+		supervisor.SnapshotToReturn.Add(new PluginRuntimeSnapshot
+		{
+			PluginId = "com.example.plugin",
+			DisplayName = "Example",
+			Version = "1.0.0",
+			State = PluginRuntimeState.Stopped,
+			Health = PluginHealthState.Unknown,
+			Managed = true,
+			DesiredStarted = true
+		});
+
+		var response = new PluginRuntimeController(supervisor).GetAll();
+
+		Assert.That(response.Plugins[0].DesiredStarted, Is.True);
+	}
+
+	[Test]
 	public async Task Stop_always_requests_UserRequested_never_an_internal_reason()
 	{
 		var supervisor = new FakePluginSupervisor();

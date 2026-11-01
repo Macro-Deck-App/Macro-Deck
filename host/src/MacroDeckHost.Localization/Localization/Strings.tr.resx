@@ -3027,6 +3027,24 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck hâlâ başlatılıyor, bu nedenle eklenti başlatılmadı. Birazdan yeniden deneyin.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Eklentinin bildirimi okunamadı.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Bu eklentinin bu sistem için bir sürümü yok.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Bu eklentiyi başlatacak bir .NET çalışma zamanı bulunamadı. Bir tane yükleyin, ardından eklentiyi yeniden başlatın.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Yüklü hiçbir .NET çalışma zamanı gereken {required} sürümünü karşılamıyor. Bu sürümü yükleyin, ardından eklentiyi yeniden başlatın.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Yükleme iptal edildi ve önceki durum geri yüklendi.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Yükleme iptal edildi ancak önceki durum geri yüklenemedi. Yeni sürüm hâlâ etkin olabilir.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck kapanıyor, bu nedenle eklenti başlatılmadı.</value>
   </data>

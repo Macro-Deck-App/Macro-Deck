@@ -3027,6 +3027,24 @@
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>لا يزال Macro Deck قيد التشغيل، لذلك لم يتم تشغيل المكوّن الإضافي. حاول مرة أخرى بعد قليل.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>تعذرت قراءة بيان المكوّن الإضافي.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>لا يتوفر لهذا المكوّن الإضافي إصدار لهذا النظام.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>لم يتم العثور على وقت تشغيل .NET لتشغيل هذا المكوّن الإضافي. ثبّت واحدًا ثم شغّل المكوّن الإضافي مرة أخرى.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>لا يلبي أي وقت تشغيل .NET مثبت الإصدار المطلوب {required}. ثبّته ثم شغّل المكوّن الإضافي مرة أخرى.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>تم إلغاء التثبيت واستعادة الحالة السابقة.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>تم إلغاء التثبيت، لكن تعذرت استعادة الحالة السابقة. قد يظل الإصدار الجديد نشطًا.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>يتم إيقاف تشغيل Macro Deck، لذلك لم يتم تشغيل المكوّن الإضافي.</value>
   </data>

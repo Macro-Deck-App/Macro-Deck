@@ -3027,6 +3027,24 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
     <value>Macro Deck masih dimulai, jadi plugin tidak dijalankan. Coba lagi sebentar lagi.</value>
   </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Manifes plugin tidak dapat dibaca.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Plugin ini tidak memiliki versi untuk sistem ini.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Runtime .NET untuk menjalankan plugin ini tidak ditemukan. Instal runtime, lalu jalankan plugin lagi.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Tidak ada runtime .NET terinstal yang memenuhi versi {required} yang diperlukan. Instal versi tersebut, lalu jalankan plugin lagi.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Instalasi dibatalkan dan keadaan sebelumnya dipulihkan.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Instalasi dibatalkan, tetapi keadaan sebelumnya tidak dapat dipulihkan. Versi baru mungkin masih aktif.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck sedang dimatikan, jadi plugin tidak dijalankan.</value>
   </data>
