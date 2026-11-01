@@ -2493,6 +2493,7 @@ mod tests {
         }
     }
 
+    #[cfg(unix)]
     #[test]
     fn the_per_user_directory_applies_only_to_the_shared_linux_tmp() {
         let tmp = Path::new("/tmp");
