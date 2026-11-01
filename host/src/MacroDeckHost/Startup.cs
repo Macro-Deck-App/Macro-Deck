@@ -539,6 +539,7 @@ public class Startup
 		services.AddSingleton<EventPreviewSamples>();
 		services.AddScoped<IEventSubscriptionMatcher, EventSubscriptionMatcher>();
 		services.AddScoped<IEventTriggerRunner, EventTriggerRunner>();
+		services.AddScoped<IEventCascadeNotifier, EventCascadeNotifier>();
 		services.AddScoped<IEventTriggerContextResolver, EventTriggerContextResolver>();
 
 		services.AddSingleton<VariableRegistry>();
@@ -565,6 +566,7 @@ public class Startup
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IScriptService, ScriptService>();
 		services.AddScoped<IAutomationService, AutomationService>();
+		services.AddSingleton<WidgetLayoutGate>();
 		services.AddScoped<IWidgetService, WidgetService>();
 		services.AddScoped<IWidgetAppearanceService, WidgetAppearanceService>();
 		services.AddScoped<IFlowExecutor, FlowExecutor>();

@@ -34,6 +34,8 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 		services.AddSingleton<IUserVariableStore, NullUserVariableStore>();
 		services.AddTestVariableService();
 		services.AddScoped<IFlowExecutor>(_ => FlowExecutor);
+		services.AddSingleton<IActionExecutionCoordinator>(serviceProvider =>
+			new InlineActionExecutionCoordinator(serviceProvider.GetRequiredService<IServiceScopeFactory>()));
 		_services = services.BuildServiceProvider(new ServiceProviderOptions { ValidateScopes = true });
 
 		var scopeFactory = _services.GetRequiredService<IServiceScopeFactory>();
@@ -62,6 +64,9 @@ internal sealed class TimerWidgetHarness : IAsyncDisposable
 	public ScriptedDurationPrompt Prompt { get; }
 
 	public RecordingFlowExecutor FlowExecutor { get; }
+
+	public int CoordinatedRuns
+		=> ((InlineActionExecutionCoordinator)_services.GetRequiredService<IActionExecutionCoordinator>()).Runs;
 
 	public TimerWidgetStore Store { get; }
 

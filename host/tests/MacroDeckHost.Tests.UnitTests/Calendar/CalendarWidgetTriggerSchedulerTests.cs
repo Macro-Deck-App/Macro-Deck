@@ -28,6 +28,13 @@ public class CalendarWidgetTriggerSchedulerTests
 	}
 
 	[Test]
+	public async Task The_scheduler_wakes_at_least_every_minute()
+	{
+		Assert.That(await _harness.Triggers.RunAsync(CancellationToken.None),
+			Is.LessThanOrEqualTo(TimeSpan.FromMinutes(1)));
+	}
+
+	[Test]
 	public async Task Starts_soon_runs_the_widgets_flow_at_its_own_lead_time_once_with_the_event_as_payload()
 	{
 		_harness.With(Event("review", Noon.AddMinutes(30), TimeSpan.FromMinutes(30), title: "Review"));
@@ -51,6 +58,7 @@ public class CalendarWidgetTriggerSchedulerTests
 			Assert.That(request.EventParameters!["title"], Is.EqualTo("Review"));
 			Assert.That(request.EventParameters!["eventId"], Is.EqualTo("review"));
 			Assert.That(request.EventParameters!["provider"], Is.EqualTo("Google Calendar"));
+			Assert.That(_harness.CoordinatedRuns, Is.EqualTo(1));
 		});
 	}
 
@@ -124,7 +132,7 @@ public class CalendarWidgetTriggerSchedulerTests
 		await _harness.Cache.SyncAsync(CancellationToken.None);
 		using var service = _harness.BackgroundService();
 		await service.StartAsync(CancellationToken.None);
-		await SleepingUntilAsync(Noon.AddHours(1));
+		await SleepingUntilAsync(Noon.AddMinutes(1));
 
 		var widget = _harness.Folders.AddCalendar(CalendarWidgetTypes.LayoutNextEvent,
 			Data(new { leadTime = 5 }, StartsSoon));

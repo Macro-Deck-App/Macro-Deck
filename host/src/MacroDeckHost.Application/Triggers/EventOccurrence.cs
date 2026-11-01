@@ -4,7 +4,8 @@ public sealed record EventOccurrence(
 	string EventId,
 	IReadOnlyDictionary<string, object?> Parameters,
 	EventTarget? Target = null,
-	Guid? McpTokenId = null)
+	Guid? McpTokenId = null,
+	int CascadeDepth = 0)
 {
 	public static readonly IReadOnlyDictionary<string, object?> NoParameters
 		= new Dictionary<string, object?>(StringComparer.Ordinal);

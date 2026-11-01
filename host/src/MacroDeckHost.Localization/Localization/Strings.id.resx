@@ -3024,6 +3024,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Plugin tidak dapat dihentikan, jadi tidak ada yang dihapus. Coba lagi.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck masih dimulai, jadi plugin tidak dijalankan. Coba lagi sebentar lagi.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck sedang dimatikan, jadi plugin tidak dijalankan.</value>
   </data>
@@ -14908,6 +14911,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Kunci identitas komputer ini diganti. Pada setiap ponsel atau tablet yang sudah dipasangkan, pindai ulang kode QR komputer ini agar tetap dapat digunakan.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Perulangan peristiwa dihentikan</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Peristiwa terus saling memicu, sehingga Macro Deck menghentikan rantai ini. Periksa otomasi dan widget yang saling bereaksi.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Percobaan masuk gagal</value>

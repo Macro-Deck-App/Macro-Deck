@@ -27,6 +27,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 {
 	private static readonly TimeSpan _postKillWait = TimeSpan.FromSeconds(2);
 	private static readonly TimeSpan _iconPackSyncBound = TimeSpan.FromSeconds(30);
+	private static readonly TimeSpan _hostPortBound = TimeSpan.FromSeconds(30);
 
 	private readonly IPluginManifestReader _manifestReader;
 	private readonly IPluginInstallationCatalog _catalog;
@@ -702,12 +703,18 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		return _stateStore.Load().TryGetValue(pluginId, out var started) && started;
 	}
 
-	private static async Task<int> BeginLaunch(PluginRuntimeEntry entry)
+	private async Task<int> BeginLaunch(PluginRuntimeEntry entry)
 	{
 		await entry.Gate.WaitAsync(CancellationToken.None);
 		try
 		{
 			entry.LaunchInFlight = true;
+			entry.LaunchCancel = new CancellationTokenSource();
+			if (_hostShuttingDown)
+			{
+				entry.LaunchCancel.Cancel();
+			}
+
 			return entry.StopRequests;
 		}
 		finally
@@ -722,6 +729,8 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		try
 		{
 			entry.LaunchInFlight = false;
+			entry.LaunchCancel?.Dispose();
+			entry.LaunchCancel = null;
 		}
 		finally
 		{
@@ -774,6 +783,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 
 		entry.StopRequests++;
+		entry.LaunchCancel?.Cancel();
 		return true;
 	}
 
@@ -1346,6 +1356,45 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		}
 	}
 
+	// Kestrel answers requests before ApplicationStarted publishes the port, so a plugin launched in
+	// that gap would dial port 0 forever. A launch waits it out; Stop and shutdown cut the wait short.
+	private async Task<PluginSupervisorResult?> AwaitHostPort(
+		PluginRuntimeEntry entry,
+		int stamp,
+		CancellationToken launchCancelled,
+		CancellationToken ct)
+	{
+		if (_hostListenerState.LoopbackPort is not null)
+		{
+			return null;
+		}
+
+		using var waiting = CancellationTokenSource.CreateLinkedTokenSource(ct, launchCancelled);
+		try
+		{
+			await _hostListenerState.LoopbackPortKnown.WaitAsync(_hostPortBound, _timeProvider, waiting.Token);
+			return null;
+		}
+		catch (TimeoutException)
+		{
+		}
+		catch (OperationCanceledException) when (launchCancelled.IsCancellationRequested)
+		{
+		}
+
+		await entry.Gate.WaitAsync(CancellationToken.None);
+		try
+		{
+			return entry.StopRequests != stamp || _hostShuttingDown || _sessionEnd.IsEnding
+				? StopOvertookLaunch()
+				: PluginSupervisorResult.Fail(PluginSupervisorError.HostNotReady);
+		}
+		finally
+		{
+			entry.Gate.Release();
+		}
+	}
+
 	private async Task<PluginSupervisorResult> AttemptLaunch(
 		PluginRuntimeEntry entry,
 		InstalledPlugin installed,
@@ -1363,6 +1412,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			return TakenOver();
 		}
 
+		CancellationToken launchCancelled;
 		await entry.Gate.WaitAsync(ct);
 		try
 		{
@@ -1375,10 +1425,17 @@ public sealed class PluginSupervisor : IPluginSupervisor
 			{
 				return StopOvertookLaunch();
 			}
+
+			launchCancelled = entry.LaunchCancel?.Token ?? CancellationToken.None;
 		}
 		finally
 		{
 			entry.Gate.Release();
+		}
+
+		if (await AwaitHostPort(entry, stamp, launchCancelled, ct) is { } refused)
+		{
+			return refused;
 		}
 
 		var manifestResult
@@ -1617,7 +1674,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		// wrote those was released above, AttemptLaunch is reentrant, and reading entry.* here would
 		// race a concurrent relaunch that has since overwritten them.
 		var secret = _launchTokenService.Mint(entry.PluginId, launchId, manifest.Name, manifest.Version);
-		var hostPort = _hostListenerState.LoopbackPort ?? 0;
+		var hostPort = _hostListenerState.LoopbackPort!.Value;
 
 		// Plugin-owned state lives beside versions/, never inside a version directory, so it survives
 		// every update and rollback. The plugin is told where it is because it cannot derive the path -
@@ -2029,6 +2086,7 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		public bool StartupGraceRetried;
 		public bool IntegrityFailed;
 		public bool LaunchInFlight;
+		public CancellationTokenSource? LaunchCancel;
 		public int StopRequests;
 
 		public PluginStopReason PendingIntent = PluginStopReason.None;

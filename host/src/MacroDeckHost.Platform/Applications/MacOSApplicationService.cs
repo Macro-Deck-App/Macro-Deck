@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
+using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Platform.Processes;
 using Serilog;
 
 namespace MacroDeckHost.Platform.Applications;
@@ -9,26 +11,41 @@ internal sealed class MacOsApplicationService(ILogger logger) : ApplicationServi
 {
 	protected override void StartProcess(string path, string? arguments, string? workingDirectory, bool runAsAdmin)
 	{
-		if (IsAppBundle(path))
+		if (MacOsBundles.IsAppBundle(path))
 		{
-			var startInfo = new ProcessStartInfo("open") { UseShellExecute = false };
-			startInfo.ArgumentList.Add("-a");
-			startInfo.ArgumentList.Add(path);
-			if (!string.IsNullOrWhiteSpace(arguments))
-			{
-				startInfo.ArgumentList.Add("--args");
-				foreach (var argument in SplitArguments(arguments))
-				{
-					startInfo.ArgumentList.Add(argument);
-				}
-			}
-
-			ApplyWorkingDirectory(startInfo, workingDirectory);
-			Process.Start(startInfo);
+			Process.Start(CreateBundleLaunch(path, arguments, workingDirectory));
 			return;
 		}
 
 		base.StartProcess(path, arguments, workingDirectory, runAsAdmin);
+	}
+
+	internal static ProcessStartInfo CreateBundleLaunch(string path, string? arguments, string? workingDirectory)
+	{
+		var startInfo = new ProcessStartInfo("open") { UseShellExecute = false };
+		startInfo.ArgumentList.Add("-a");
+		startInfo.ArgumentList.Add(path);
+		if (!string.IsNullOrWhiteSpace(arguments))
+		{
+			startInfo.ArgumentList.Add("--args");
+			foreach (var argument in CommandLineArguments.Split(arguments))
+			{
+				startInfo.ArgumentList.Add(argument);
+			}
+		}
+
+		ApplyWorkingDirectory(startInfo, workingDirectory);
+		return startInfo;
+	}
+
+	// CloseMainWindow is always false on Unix, so without this every app would be stopped by SIGKILL and
+	// lose unsaved work. Terminate lets it quit normally; only a process outside AppKit is killed.
+	protected override void StopProcess(Process process)
+	{
+		if (!MacOsRunningApplication.TryTerminate(process.Id))
+		{
+			process.Kill();
+		}
 	}
 
 	public override void OpenFolder(string path)
@@ -58,15 +75,5 @@ internal sealed class MacOsApplicationService(ILogger logger) : ApplicationServi
 		}
 
 		return Task.CompletedTask;
-	}
-
-	private static bool IsAppBundle(string path)
-	{
-		return path.TrimEnd('/').EndsWith(".app", StringComparison.OrdinalIgnoreCase);
-	}
-
-	private static string[] SplitArguments(string arguments)
-	{
-		return arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 	}
 }

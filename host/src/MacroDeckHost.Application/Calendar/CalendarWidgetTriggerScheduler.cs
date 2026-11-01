@@ -11,7 +11,7 @@ namespace MacroDeckHost.Application.Calendar;
 
 public sealed class CalendarWidgetTriggerScheduler : IDisposable
 {
-	private static readonly TimeSpan _maximumSleep = TimeSpan.FromHours(1);
+	private static readonly TimeSpan _maximumSleep = TimeSpan.FromMinutes(1);
 
 	private static readonly (CalendarFiringKind Kind, string Trigger)[] _triggers =
 	[
@@ -123,8 +123,8 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 				.ConfigureAwait(false);
 
 			// Host-initiated like a countdown finishing: nobody pressed anything, so no host-lock gate applies.
-			var result = await scope.ServiceProvider.GetRequiredService<IFlowExecutor>()
-				.ExecuteAsync(new FlowExecutionRequest
+			var dispatch = await scope.ServiceProvider.GetRequiredService<IActionExecutionCoordinator>()
+				.RunBoundedAsync(new FlowExecutionRequest
 					{
 						FlowsSource = widget.Data,
 						Trigger = TriggerSelector.ByType(target.Trigger),
@@ -135,10 +135,11 @@ public sealed class CalendarWidgetTriggerScheduler : IDisposable
 						Origin = ExecutionOrigin.Host,
 						EventParameters = parameters
 					},
+					Timeout.InfiniteTimeSpan,
 					CancellationToken.None)
 				.ConfigureAwait(false);
 
-			if (result.Status != FlowExecutionStatus.Succeeded)
+			if (dispatch.Result is { Status: not FlowExecutionStatus.Succeeded } result)
 			{
 				_logger.Warning("{Trigger} flow of calendar widget {WidgetId} finished as {Status}: {ErrorCode}",
 					target.Trigger,

@@ -300,8 +300,8 @@ public sealed class TimerWidgetCoordinator
 			await using var scope = _scopeFactory.CreateAsyncScope();
 
 			// Host-initiated like onStateChange: no client pressed anything, so the host-lock gate does not apply.
-			var result = await scope.ServiceProvider.GetRequiredService<IFlowExecutor>()
-				.ExecuteAsync(new FlowExecutionRequest
+			var dispatch = await scope.ServiceProvider.GetRequiredService<IActionExecutionCoordinator>()
+				.RunBoundedAsync(new FlowExecutionRequest
 					{
 						FlowsSource = widget.Data,
 						Trigger = TriggerSelector.ByType(trigger),
@@ -311,10 +311,11 @@ public sealed class TimerWidgetCoordinator
 						Owner = FlowOwner.Widget(widgetId),
 						Origin = ExecutionOrigin.Host
 					},
+					Timeout.InfiniteTimeSpan,
 					CancellationToken.None)
 				.ConfigureAwait(false);
 
-			if (result.Status != FlowExecutionStatus.Succeeded)
+			if (dispatch.Result is { Status: not FlowExecutionStatus.Succeeded } result)
 			{
 				_logger.Warning("{Trigger} flow of widget {WidgetId} finished as {Status}: {ErrorCode}",
 					trigger,

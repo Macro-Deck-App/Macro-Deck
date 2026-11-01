@@ -28,6 +28,8 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 	private readonly ILogger _logger;
 	private readonly SemaphoreSlim _syncLock = new(1, 1);
 
+	private readonly TimeZoneInfo? _timeZone;
+
 	private volatile CalendarSnapshot _snapshot = CalendarSnapshot.Empty;
 
 	public CalendarEventCache(
@@ -39,12 +41,12 @@ public sealed class CalendarEventCache : ICalendarEventCache, IDisposable
 		_registry = registry;
 		_time = time;
 		_logger = logger.ForContext<CalendarEventCache>();
-		TimeZone = timeZone ?? TimeZoneInfo.Local;
+		_timeZone = timeZone;
 	}
 
 	public CalendarSnapshot Snapshot => _snapshot;
 
-	public TimeZoneInfo TimeZone { get; }
+	public TimeZoneInfo TimeZone => _timeZone ?? _time.LocalTimeZone;
 
 	public event Action? Changed;
 

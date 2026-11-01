@@ -102,6 +102,7 @@ public class CountdownWidgetTests
 			Assert.That(_harness.Phase(widget), Is.EqualTo(TimerWidgetPhase.Finished));
 			Assert.That(finished, Has.Count.EqualTo(1));
 			Assert.That(_harness.FlowExecutor.Requests.Single().Origin, Is.EqualTo(ExecutionOrigin.Host));
+			Assert.That(_harness.CoordinatedRuns, Is.EqualTo(1));
 			Assert.That(finished[0].VariablesSeen[TimerWidgetVariableWriter.CountdownFinished], Is.EqualTo("true"));
 			Assert.That(_harness.Variable(widget, TimerWidgetVariableWriter.CountdownRemainingSeconds),
 				Is.EqualTo("0"));

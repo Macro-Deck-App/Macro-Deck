@@ -16,6 +16,8 @@ public static class AutostartEntryContent
 
 	public const string MinimizedArgument = "--minimized";
 
+	private const string DesktopExecLauncher = "env ";
+
 	public static string BuildLaunchAgentPlist(AutostartRegistration registration)
 	{
 		var builder = new StringBuilder();
@@ -48,7 +50,7 @@ public static class AutostartEntryContent
 		builder.AppendLine("[Desktop Entry]");
 		builder.AppendLine("Type=Application");
 		builder.AppendLine("Name=Macro Deck");
-		builder.AppendLine(CultureInfo.InvariantCulture, $"Exec={BuildCommandLine(registration)}");
+		builder.AppendLine(CultureInfo.InvariantCulture, $"Exec={BuildDesktopExec(registration)}");
 		builder.AppendLine("X-GNOME-Autostart-enabled=true");
 		builder.AppendLine("Terminal=false");
 		return builder.ToString();
@@ -110,6 +112,100 @@ public static class AutostartEntryContent
 		return new AutostartRegistration(executable, rest.Contains(MinimizedArgument, StringComparison.Ordinal));
 	}
 
+	public static string BuildDesktopExec(AutostartRegistration registration)
+	{
+		var builder = new StringBuilder();
+
+		// GLib and systemd look the program up before decoding percent signs, so such a path would never
+		// start. As an argument of env it is decoded first.
+		if (registration.ExecutablePath.Contains('%', StringComparison.Ordinal))
+		{
+			builder.Append(DesktopExecLauncher);
+		}
+
+		builder.Append('"');
+		foreach (var character in registration.ExecutablePath)
+		{
+			switch (character)
+			{
+				case '"' or '`' or '$' or '\\':
+					builder.Append('\\').Append(character);
+					break;
+				case '%':
+					builder.Append("%%");
+					break;
+				default:
+					builder.Append(character);
+					break;
+			}
+		}
+
+		builder.Append('"');
+		builder.Append(' ').Append(AutostartArgument);
+		if (registration.OpenMinimized)
+		{
+			builder.Append(' ').Append(MinimizedArgument);
+		}
+
+		return EscapeDesktopString(builder.ToString());
+	}
+
+	// Reads an entry an older version wrote unescaped as a different path, as strict sessions do, so the
+	// refresh at startup rewrites it. An unescaped dollar or backtick is invalid in a quoted value.
+	public static AutostartRegistration? ParseDesktopExec(string? exec)
+	{
+		if (string.IsNullOrWhiteSpace(exec))
+		{
+			return null;
+		}
+
+		var value = UnescapeDesktopString(exec.Trim());
+		if (value.StartsWith(DesktopExecLauncher, StringComparison.Ordinal))
+		{
+			value = value[DesktopExecLauncher.Length..];
+		}
+
+		var executable = new StringBuilder();
+		string rest;
+		if (value.StartsWith('"'))
+		{
+			var index = 1;
+			var terminated = false;
+			for (; index < value.Length && !terminated; index++)
+			{
+				var character = value[index];
+				if (character == '"')
+				{
+					terminated = true;
+				}
+				else if (character == '\\' && index + 1 < value.Length)
+				{
+					executable.Append(value[++index]);
+				}
+				else if (character is not ('$' or '`'))
+				{
+					executable.Append(character);
+				}
+			}
+
+			rest = terminated ? value[index..] : value;
+		}
+		else
+		{
+			var space = value.IndexOf(' ');
+			executable.Append(space < 0 ? value : value[..space]);
+			rest = space < 0 ? string.Empty : value[space..];
+		}
+
+		var path = RemoveFieldCodes(executable.ToString());
+		if (path.Length == 0 || !rest.Contains(AutostartArgument, StringComparison.Ordinal))
+		{
+			return null;
+		}
+
+		return new AutostartRegistration(path, rest.Contains(MinimizedArgument, StringComparison.Ordinal));
+	}
+
 	public static AutostartRegistration? ParseLaunchAgentPlist(string? content)
 	{
 		if (string.IsNullOrWhiteSpace(content))
@@ -134,6 +230,57 @@ public static class AutostartEntryContent
 		}
 
 		return new AutostartRegistration(arguments[1], arguments.Contains(MinimizedArgument));
+	}
+
+	private static string EscapeDesktopString(string value)
+	{
+		return value
+			.Replace("\\", "\\\\", StringComparison.Ordinal)
+			.Replace("\n", "\\n", StringComparison.Ordinal)
+			.Replace("\t", "\\t", StringComparison.Ordinal)
+			.Replace("\r", "\\r", StringComparison.Ordinal);
+	}
+
+	private static string UnescapeDesktopString(string value)
+	{
+		var builder = new StringBuilder(value.Length);
+		for (var index = 0; index < value.Length; index++)
+		{
+			if (value[index] != '\\' || index + 1 == value.Length)
+			{
+				builder.Append(value[index]);
+				continue;
+			}
+
+			builder.Append(value[++index] switch
+			{
+				's' => ' ',
+				'n' => '\n',
+				't' => '\t',
+				'r' => '\r',
+				var other => other
+			});
+		}
+
+		return builder.ToString();
+	}
+
+	private static string RemoveFieldCodes(string value)
+	{
+		var builder = new StringBuilder(value.Length);
+		for (var index = 0; index < value.Length; index++)
+		{
+			if (value[index] != '%')
+			{
+				builder.Append(value[index]);
+			}
+			else if (++index < value.Length && value[index] == '%')
+			{
+				builder.Append('%');
+			}
+		}
+
+		return builder.ToString();
 	}
 
 	private static string SecurityElementUnescape(string value)

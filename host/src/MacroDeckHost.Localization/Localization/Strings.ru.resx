@@ -3024,6 +3024,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Не удалось остановить плагин, поэтому ничего не удалено. Повторите попытку.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck ещё запускается, поэтому плагин не был запущен. Повторите попытку через некоторое время.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck завершает работу, поэтому плагин не был запущен.</value>
   </data>
@@ -14908,6 +14911,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Ключ идентичности этого компьютера был заменён. На каждом сопряжённом телефоне или планшете отсканируйте QR-код этого компьютера заново, чтобы продолжить им пользоваться.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Цикл событий остановлен</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>События продолжали запускать друг друга, поэтому Macro Deck остановил эту цепочку. Проверьте автоматизации и виджеты, которые реагируют друг на друга.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Неудачная попытка входа</value>

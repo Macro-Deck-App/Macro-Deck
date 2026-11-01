@@ -3025,6 +3025,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Nie udało się zatrzymać wtyczki, więc nic nie zostało usunięte. Spróbuj ponownie.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck wciąż się uruchamia, więc wtyczka nie została uruchomiona. Spróbuj ponownie za chwilę.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck jest zamykany, więc wtyczka nie została uruchomiona.</value>
   </data>
@@ -14907,6 +14910,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Klucz tożsamości tego komputera został zastąpiony. Aby dalej korzystać ze sparowanych telefonów i tabletów, należy ponownie zeskanować na każdym z nich kod QR tego komputera.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Zatrzymano pętlę zdarzeń</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Zdarzenia stale wyzwalały się nawzajem, dlatego Macro Deck zatrzymał ten łańcuch. Sprawdź automatyzacje i widżety, które na siebie reagują.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Nieudana próba logowania</value>

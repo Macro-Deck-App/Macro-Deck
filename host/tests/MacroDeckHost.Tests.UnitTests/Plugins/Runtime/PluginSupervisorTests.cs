@@ -191,6 +191,131 @@ internal sealed class PluginSupervisorTests
 		});
 	}
 
+	private void HostPortNotPublishedYet()
+	{
+		_listenerState = new HostListenerState(PublicEndpointSet.HttpOnly(50000), false);
+	}
+
+	[Test]
+	public async Task A_start_before_the_host_port_is_known_launches_once_it_is_with_that_port()
+	{
+		HostPortNotPublishedYet();
+		var supervisor = CreateSupervisor();
+
+		var starting = supervisor.Start(PluginId);
+		await _time.WaitForScheduleAsync(0).WaitAsync(TimeSpan.FromSeconds(5));
+		var launchedEarly = _launcher.Requests.Count;
+
+		_listenerState.SetLoopbackPort(50123);
+		var result = await starting.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(launchedEarly, Is.Zero);
+			Assert.That(result.Success, Is.True, result.Message);
+			Assert.That(_launcher.Requests.Single().Environment["MACRO_DECK_PLUGIN_HOST_URL"],
+				Is.EqualTo("http://127.0.0.1:50123"));
+		});
+	}
+
+	[Test]
+	public async Task A_restart_waits_for_the_host_port_too()
+	{
+		HostPortNotPublishedYet();
+		var supervisor = CreateSupervisor();
+
+		var restarting = supervisor.Restart(PluginId);
+		await _time.WaitForScheduleAsync(0).WaitAsync(TimeSpan.FromSeconds(5));
+		var launchedEarly = _launcher.Requests.Count;
+		_listenerState.SetLoopbackPort(50123);
+		await restarting.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(launchedEarly, Is.Zero);
+			Assert.That(_launcher.Requests.Single().Environment["MACRO_DECK_PLUGIN_HOST_URL"],
+				Is.EqualTo("http://127.0.0.1:50123"));
+		});
+	}
+
+	[Test]
+	public async Task A_start_under_an_installer_hold_waits_for_the_host_port_too()
+	{
+		HostPortNotPublishedYet();
+		var supervisor = CreateSupervisor();
+		await using var hold = await supervisor.HoldLaunches(PluginId);
+
+		var starting = hold.Start();
+		await _time.WaitForScheduleAsync(0).WaitAsync(TimeSpan.FromSeconds(5));
+		var launchedEarly = _launcher.Requests.Count;
+		_listenerState.SetLoopbackPort(50123);
+		await starting.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(launchedEarly, Is.Zero);
+			Assert.That(_launcher.Requests.Single().Environment["MACRO_DECK_PLUGIN_HOST_URL"],
+				Is.EqualTo("http://127.0.0.1:50123"));
+		});
+	}
+
+	[Test]
+	public async Task A_start_gives_up_with_a_retryable_error_when_the_host_port_never_arrives()
+	{
+		HostPortNotPublishedYet();
+		var supervisor = CreateSupervisor();
+
+		var starting = supervisor.Start(PluginId);
+		await _time.WaitForScheduleAsync(0).WaitAsync(TimeSpan.FromSeconds(5));
+		_time.Advance(TimeSpan.FromSeconds(31));
+		var result = await starting.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginSupervisorError.HostNotReady));
+			Assert.That(_launcher.Requests, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task Stop_ends_a_start_waiting_for_the_host_port_and_a_later_start_works()
+	{
+		HostPortNotPublishedYet();
+		var supervisor = CreateSupervisor();
+
+		var starting = supervisor.Start(PluginId);
+		await _time.WaitForScheduleAsync(0).WaitAsync(TimeSpan.FromSeconds(5));
+		var stopped = await supervisor.Stop(PluginId, PluginStopReason.UserRequested);
+		var result = await starting.WaitAsync(TimeSpan.FromSeconds(5));
+		_listenerState.SetLoopbackPort(50123);
+		var again = await supervisor.Start(PluginId).WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stopped.Success, Is.True, stopped.Message);
+			Assert.That(result.Error, Is.EqualTo(PluginSupervisorError.NotRunning));
+			Assert.That(again.Success, Is.True, again.Message);
+		});
+	}
+
+	[Test]
+	public async Task Host_shutdown_ends_a_start_waiting_for_the_host_port()
+	{
+		HostPortNotPublishedYet();
+		var supervisor = CreateSupervisor();
+
+		var starting = supervisor.Start(PluginId);
+		await _time.WaitForScheduleAsync(0).WaitAsync(TimeSpan.FromSeconds(5));
+		await supervisor.StopAll(PluginStopReason.HostShutdown);
+		var result = await starting.WaitAsync(TimeSpan.FromSeconds(5));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(PluginSupervisorError.HostShuttingDown));
+			Assert.That(_launcher.Requests, Is.Empty);
+		});
+	}
+
 	[Test]
 	public async Task A_framework_dependent_plugin_is_launched_through_the_selected_muxer()
 	{
