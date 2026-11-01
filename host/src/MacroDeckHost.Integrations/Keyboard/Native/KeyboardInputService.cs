@@ -1,3 +1,4 @@
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Integrations.Keyboard.Models;
 using MacroDeckHost.Platform.Processes;
@@ -24,6 +25,10 @@ public sealed class KeyboardInputService : IKeyboardInputService
 	}
 
 	public bool IsSupported => _provider.IsSupported;
+
+	public bool IsDegraded => _provider.IsDegraded;
+
+	public LocalizedText DegradedReason => _provider.DegradedReason;
 
 	public bool RequiresPermission => _provider.RequiresPermission;
 

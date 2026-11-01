@@ -14,7 +14,10 @@ internal sealed class RecordingMediator : IMediator
 		if (notification is not null)
 		{
 			BeforePublish?.Invoke(notification);
-			Published.Add(notification);
+			lock (Published)
+			{
+				Published.Add(notification);
+			}
 		}
 
 		return default;

@@ -161,7 +161,8 @@ to store a new random number in a variable each time the action runs.
 ## A folder that opens by itself
 
 **Automatic activation** opens a folder on a device when an app gets focus, for example your
-**Photoshop** folder, and can return to the previous folder when you switch away.
+**Photoshop** folder, and can return to the previous folder when you switch away. On Linux, see
+[Keyboard actions or Automatic activation do not reach an app on Wayland](/guide/troubleshooting/#keyboard-actions-or-automatic-activation-do-not-reach-an-app-on-wayland).
 
 ## Actions
 

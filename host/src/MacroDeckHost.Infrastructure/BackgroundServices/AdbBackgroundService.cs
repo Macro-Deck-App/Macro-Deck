@@ -93,10 +93,9 @@ public sealed class AdbBackgroundService : HostReadyBackgroundService
 		_lastBroadcastStatus = status;
 		_lastBroadcastDevices = devices;
 
-		// Deliberately no payload: the adb pane state (resolved executable path, device serials, ports)
-		// is admin-only, but IUiTransport.Send reaches every UI client, including USB-attached
-		// devices. Receivers refetch the admin-gated GET instead of trusting anything carried here.
-		await _transport.Send(new AdbStateChangedEvent { ChangedAt = _timeProvider.GetUtcNow() }, stoppingToken);
+		await _transport.SendToGroup(UiAdminGroups.Admin,
+			new AdbStateChangedEvent { ChangedAt = _timeProvider.GetUtcNow() },
+			stoppingToken);
 	}
 
 	private async Task SafeRun(Func<Task> action, string what, CancellationToken stoppingToken)

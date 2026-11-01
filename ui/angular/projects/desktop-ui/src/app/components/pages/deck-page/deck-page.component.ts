@@ -321,7 +321,10 @@ export class DeckPageComponent {
       return;
     }
 
-    await this.folderService.removeWidget(ids[0]);
+    const result = await this.folderService.removeWidget(ids[0]);
+    if (!result.success) {
+      this.pageError.set(result.error?.message || this.localization.translateKey(AppStrings.Deck.DeleteWidgetFailed));
+    }
   }
 
   cancelWidgetDelete(): void {
@@ -393,9 +396,15 @@ export class DeckPageComponent {
     const cutOrigins = allCutOrigins.filter(o => !replaced.has(o.widgetId));
 
     if (cutOrigins.length === 1) {
-      await this.folderService.removeWidget(cutOrigins[0].widgetId, cutOrigins[0].folderId);
+      const result = await this.folderService.removeWidget(cutOrigins[0].widgetId, cutOrigins[0].folderId);
+      if (!result.success) {
+        this.pageError.set(result.error?.message || this.localization.translateKey(AppStrings.Deck.DeleteWidgetFailed));
+      }
     } else if (cutOrigins.length > 1) {
-      await this.folderService.removeWidgets(cutOrigins.map(o => o.widgetId), cutOrigins[0].folderId);
+      const result = await this.folderService.removeWidgets(cutOrigins.map(o => o.widgetId), cutOrigins[0].folderId);
+      if (!result.success) {
+        this.pageError.set(result.error?.message || this.localization.translateKey(AppStrings.Deck.DeleteWidgetsFailed));
+      }
     }
 
     this.clipboard.clear();

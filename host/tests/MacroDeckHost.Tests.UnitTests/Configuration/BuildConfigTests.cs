@@ -80,4 +80,26 @@ public class BuildConfigTests
 			Assert.That(HostEndpoints.ResolveLoopbackPort("invalid"), Is.EqualTo(channelDefault));
 		});
 	}
+
+	[TestCase(true, "/tmp/", "/cfg", "/home/a", "/cfg/macro-deck")]
+	[TestCase(true, "/tmp", "/cfg", "/home/a", "/cfg/macro-deck")]
+	[TestCase(true, "/tmp/", null, "/home/a", "/home/a/.config/macro-deck")]
+	[TestCase(true, "/tmp/", "relative", "/home/a", "/home/a/.config/macro-deck")]
+	[TestCase(true, "/tmp/", null, "relative", null)]
+	[TestCase(true, "/tmp/", null, null, null)]
+	[TestCase(true, "/tmp/own/", null, "/home/a", null)]
+	[TestCase(false, "/tmp/", null, "/home/a", null)]
+	public void The_per_user_directory_applies_only_to_the_shared_linux_tmp(
+		bool isLinux,
+		string temporaryDirectory,
+		string? configHome,
+		string? home,
+		string? expected)
+	{
+		var directory = HostEndpoints.ResolvePerUserDirectory(isLinux,
+			temporaryDirectory,
+			name => name == "XDG_CONFIG_HOME" ? configHome : home);
+
+		Assert.That(directory, Is.EqualTo(expected));
+	}
 }

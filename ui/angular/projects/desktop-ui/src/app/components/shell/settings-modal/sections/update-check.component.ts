@@ -109,6 +109,10 @@ export class UpdateCheckComponent {
       case 'installing':
         return t(AppStrings.Settings.Update.Installing);
       case 'failed':
+        if (this.updates.failure() === 'install') {
+          const failed = this.updates.error() ?? t(AppStrings.Update.Details.DownloadFailed, { error: '' }).trim();
+          return `${failed} ${t(AppStrings.Update.Details.ManualDownloadHint, { url: this.updates.manualDownloadUrl() })}`;
+        }
         return this.updates.error() ?? t(AppStrings.Settings.Update.CheckFailed);
       default:
         return t(AppStrings.Settings.Update.IdleStatus);

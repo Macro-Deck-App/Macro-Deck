@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>इस डेटा फ़ोल्डर का पिछली बार Macro Deck के नए संस्करण से उपयोग किया गया था। वह संस्करण फिर से इंस्टॉल करें; आपका डेटा नहीं बदला गया है।</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>इस खाते में एक और Macro Deck होस्ट पहले से चल रहा है। उसे बंद करें या कंप्यूटर पुनः आरंभ करें, फिर Macro Deck दोबारा शुरू करें।</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck होस्ट बाइनरी गायब है:
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck उसके APT रिपॉज़िटरी से इंस्�
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck होस्ट तक पहुँच नहीं है, इसलिए कोई बैकअप नहीं बनाया जा सका।</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck रिकवरी कुंजी की प्रतीक्षा कर रहा है और अपना डेटा नहीं पढ़ सकता, इसलिए यह अपडेट बैकअप के बिना जारी है।</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>बैकअप के बिना अपडेट हो रहा है</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck पुष्टि नहीं कर सका कि बैकअप बनाया गया है।</value>
@@ -1492,6 +1501,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>क्या आप वाकई इन {count} विजेट को हटाना चाहते हैं? इसे पूर्ववत नहीं किया जा सकता।</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>विजेट हटाया नहीं जा सका</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>विजेट हटाए नहीं जा सके</value>
@@ -3023,6 +3035,27 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>प्लगइन को रोका नहीं जा सका, इसलिए कुछ भी नहीं हटाया गया। फिर से कोशिश करें।</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck अभी शुरू हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया। कृपया कुछ देर बाद फिर से कोशिश करें।</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>प्लगइन का मैनिफ़ेस्ट नहीं पढ़ा जा सका।</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>इस प्लगइन का इस सिस्टम के लिए कोई संस्करण नहीं है।</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>इस प्लगइन को शुरू करने के लिए कोई .NET रनटाइम नहीं मिला। कृपया एक इंस्टॉल करें, फिर प्लगइन को दोबारा शुरू करें।</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>कोई भी इंस्टॉल किया गया .NET रनटाइम आवश्यक संस्करण {required} को पूरा नहीं करता। कृपया इसे इंस्टॉल करें, फिर प्लगइन को दोबारा शुरू करें।</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>इंस्टॉलेशन रद्द कर दिया गया और पिछली स्थिति बहाल कर दी गई।</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>इंस्टॉलेशन रद्द कर दिया गया, लेकिन पिछली स्थिति बहाल नहीं की जा सकी। नया संस्करण अभी भी सक्रिय हो सकता है।</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
@@ -8820,6 +8853,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>यह कीबोर्ड लक्ष्यीकरण मोड इस प्लेटफ़ॉर्म पर समर्थित नहीं है।</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Wayland पर कीबोर्ड इनपुट सीमित है</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>अनुमति दें</value>
   </data>
@@ -8834,6 +8870,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>कीबोर्ड सिमुलेशन उपलब्ध नहीं</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>यह Wayland सत्र है, इसलिए कीबोर्ड इनपुट XWayland से होकर चलता है। XWayland से चलने वाले ऐप कुंजियाँ और टेक्स्ट पाते हैं। नेटिव Wayland ऐप शायद न पाएँ, और किसी ऐप को लक्ष्य करने वाली कीबोर्ड कार्रवाइयाँ उन्हें नहीं ढूँढ पातीं।</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>कीबोर्ड</value>
@@ -11717,6 +11756,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>सिस्टम का आउटपुट वॉल्यूम उपलब्ध नहीं है।</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>यह Wayland सत्र है, इसलिए Macro Deck केवल XWayland से चलने वाले ऐप देखता है। जब तक नेटिव Wayland ऐप पर फ़ोकस है, फ़ोकस किए गए ऐप्लिकेशन के वेरिएबल अपना पिछला मान रखते हैं।</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Wayland पर फ़ोकस किए गए ऐप की पहचान सीमित है</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>कोई समर्थित GPU नहीं मिला। Linux पर GPU मेट्रिक्स के लिए amdgpu ड्राइवर या nvidia-smi चाहिए।</value>
@@ -14897,6 +14942,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>इस कंप्यूटर की पहचान कुंजी बदल दी गई है। हर पेयर किए गए फ़ोन या टैबलेट पर इस कंप्यूटर का QR कोड फिर से स्कैन करें, ताकि आप इसका उपयोग जारी रख सकें।</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>इवेंट लूप रोका गया</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>इवेंट एक-दूसरे को लगातार ट्रिगर कर रहे थे, इसलिए Macro Deck ने यह शृंखला रोक दी। एक-दूसरे पर प्रतिक्रिया देने वाले ऑटोमेशन और विजेट जाँचें।</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>लॉगिन का प्रयास विफल</value>
   </data>
@@ -17659,7 +17710,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>की रिंग सुरक्षित करने के लिए अपनी बैकअप रिकवरी कुंजी निर्यात करें। तब तक वह डिस्क पर पढ़ी जा सकने वाली स्थिति में रहती है।</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>जब यह कंप्यूटर लॉक हो, तब कार्रवाई चलने से रोकता है, चाहे यहाँ आप कुछ भी चुनें। Linux पर Macro Deck यह पता नहीं लगा सकता कि यह कंप्यूटर लॉक है, इसलिए कार्रवाइयाँ चलती रहती हैं और कनेक्ट किए गए क्लाइंट लॉक नहीं होते।</value>
+    <value>जब यह कंप्यूटर लॉक हो, तब कार्रवाई चलने से रोकता है, चाहे यहाँ आप कुछ भी चुनें। Linux पर इसके लिए ऐसा डेस्कटॉप चाहिए जो लॉक की सूचना दे, जैसे GNOME या KDE Plasma। अन्यथा कार्रवाइयाँ चलती रहती हैं और कनेक्ट किए गए क्लाइंट लॉक नहीं होते।</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>लॉक स्क्रीन</value>
@@ -19648,6 +19699,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>डाउनलोड विफल हुआ। {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>यदि यह समस्या बनी रहती है, तो {url} से नवीनतम संस्करण डाउनलोड करें और उसे मैन्युअल रूप से इंस्टॉल करें।</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>अपडेट की जाँच नहीं हो सकी। {error}</value>
     <comment>[error:string]</comment>
@@ -21586,6 +21640,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>नियम अपडेट नहीं हो सका</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>यह Wayland सत्र है, इसलिए Macro Deck केवल XWayland से चलने वाले ऐप देखता है। स्वचालित सक्रियण नेटिव Wayland ऐप के लिए कुछ नहीं करता।</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>फ़ोल्डर निर्यात किया गया</value>

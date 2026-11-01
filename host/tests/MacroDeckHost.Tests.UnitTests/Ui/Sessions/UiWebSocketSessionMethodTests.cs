@@ -315,6 +315,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
 			clientFeatures: ClientFeatures,
+			startupReadiness: TestStartupReadiness.Ready(),
 			connectionCancellation: CancellationToken.None);
 	}
 
@@ -385,6 +386,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
 			clientFeatures: ClientFeatures,
+			startupReadiness: TestStartupReadiness.Ready(),
 			connectionCancellation: CancellationToken.None);
 	}
 
@@ -440,6 +442,7 @@ internal sealed class UiWebSocketSessionMethodTests : UiSessionFixture
 			videoStreamProviders: null!,
 			notifications: new NullNotificationManager(),
 			clientFeatures: ClientFeatures,
+			startupReadiness: TestStartupReadiness.Ready(),
 			connectionCancellation: CancellationToken.None);
 	}
 

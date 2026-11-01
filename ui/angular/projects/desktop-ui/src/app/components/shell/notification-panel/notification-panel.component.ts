@@ -13,11 +13,10 @@ import { ExternalLinkService } from '../../../services/external-link.service';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { PluginAdbConsentService } from '../../../services/plugin-adb-consent.service';
 import { PluginCompanionConsentService } from '../../../services/plugin-companion-consent.service';
-import { RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
+import { DOWNLOAD_PAGE_URL, RestartNoticeService, SettingsModalService, UpdateModalService, UpdateService } from '../../../services';
 import { BACKUP_CANCEL_KEY_PREFIX } from '../../../util/backup-progress-display';
 import { NotificationActionEvent, NotificationItemComponent, requiresAttention } from './notification-item.component';
 
-const DOWNLOAD_PAGE_URL = 'https://macro-deck.app/download';
 const TROUBLESHOOTING_GUIDE_URL = 'https://docs.macro-deck.app/guide/troubleshooting/';
 
 @Component({

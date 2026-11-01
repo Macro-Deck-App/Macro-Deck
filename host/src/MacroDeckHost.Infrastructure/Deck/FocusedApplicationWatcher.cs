@@ -24,6 +24,8 @@ public sealed class FocusedApplicationWatcher : IApplicationFocusWatcher, IDispo
 
 	public string? UnsupportedReason => _watcher.UnsupportedReason;
 
+	public bool IsDegraded => _watcher.IsDegraded;
+
 	public async IAsyncEnumerable<FocusedApplication> WatchAsync(
 		[EnumeratorCancellation] CancellationToken cancellationToken)
 	{

@@ -59,8 +59,8 @@ automations turn the tablet off when you lock the computer and on again when you
 stays connected while its screen is off. Automations keep running while the computer is locked, even though
 buttons on the deck do not.
 
-This works on Windows and macOS only. On Linux the variable has no value, so these automations never run, see
-[Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
+On Linux this needs a desktop that reports its lock to Macro Deck. Otherwise the variable stays `false` or has no
+value, and these automations never run, see [Buttons still work while a Linux computer is locked](/guide/troubleshooting/#buttons-still-work-while-a-linux-computer-is-locked).
 
 ## Turn the screen on when Macro Deck starts
 

@@ -6,5 +6,7 @@ public interface IFocusedApplicationWatcher : IDisposable
 
 	string? UnsupportedReason { get; }
 
+	bool IsDegraded => false;
+
 	IAsyncEnumerable<FocusedAppInfo> WatchAsync(CancellationToken cancellationToken);
 }

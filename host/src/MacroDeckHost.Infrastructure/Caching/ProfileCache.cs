@@ -391,6 +391,8 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 		}
 	}
 
+	// Readers enumerate folder.Widgets without a lock, so every writer below swaps in a new list, once
+	// per operation, and never changes a published one.
 	public void AddWidget(Guid folderId, WidgetEntity widget)
 	{
 		AddWidget(folderId, widget, SecretApprovalWrite.Preserve);
@@ -411,7 +413,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			WidgetFontFaceMigration.Normalize(widget, _fontCatalog);
 			WidgetIconReferenceMigration.Normalize(widget);
 
-			folder.Widgets.Add(widget);
+			folder.Widgets = [.. folder.Widgets, widget];
 			Persist(folder.ProfileId, write, [widget.Id]);
 		}
 		finally
@@ -442,8 +444,9 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				// left un-migrated here would otherwise never see any migration at all, since AddWidgets is
 				// never followed by an individual AddWidget for the same widget.
 				WidgetIconReferenceMigration.Normalize(widget);
-				folder.Widgets.Add(widget);
 			}
+
+			folder.Widgets = [.. folder.Widgets, .. widgets];
 
 			Persist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
 		}
@@ -474,7 +477,9 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				return;
 			}
 
-			folder.Widgets[index] = widget;
+			var updated = folder.Widgets.ToList();
+			updated[index] = widget;
+			folder.Widgets = updated;
 			Persist(folder.ProfileId, write, [widget.Id]);
 		}
 		finally
@@ -498,17 +503,19 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				return;
 			}
 
+			var updated = folder.Widgets.ToList();
 			foreach (var widget in widgets)
 			{
-				var index = folder.Widgets.FindIndex(w => w.Id == widget.Id);
+				var index = updated.FindIndex(w => w.Id == widget.Id);
 				if (index < 0)
 				{
 					continue;
 				}
 
-				folder.Widgets[index] = widget;
+				updated[index] = widget;
 			}
 
+			folder.Widgets = updated;
 			Persist(folder.ProfileId, write, widgets.Select(entry => entry.Id));
 		}
 		finally
@@ -559,7 +566,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 				return;
 			}
 
-			folder.Widgets.RemoveAll(w => w.Id == widgetId);
+			folder.Widgets = folder.Widgets.Where(w => w.Id != widgetId).ToList();
 			Persist(folder.ProfileId);
 		}
 		finally
@@ -579,7 +586,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			var idSet = widgetIds.ToHashSet();
-			folder.Widgets.RemoveAll(w => idSet.Contains(w.Id));
+			folder.Widgets = folder.Widgets.Where(w => !idSet.Contains(w.Id)).ToList();
 			Persist(folder.ProfileId);
 		}
 		finally
@@ -608,11 +615,7 @@ public sealed class ProfileCache : IProfileCache, IDisposable
 			}
 
 			var idSet = removeIds.ToHashSet();
-			folder.Widgets.RemoveAll(w => idSet.Contains(w.Id));
-			foreach (var widget in addWidgets)
-			{
-				folder.Widgets.Add(widget);
-			}
+			folder.Widgets = [.. folder.Widgets.Where(w => !idSet.Contains(w.Id)), .. addWidgets];
 
 			Persist(folder.ProfileId, write, addWidgets.Select(entry => entry.Id));
 		}

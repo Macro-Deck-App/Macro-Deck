@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>استُخدم مجلد البيانات هذا آخر مرة بإصدار أحدث من Macro Deck. ثبّت ذلك الإصدار مرة أخرى؛ لم تتغير البيانات.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>يعمل مضيف Macro Deck آخر بالفعل ضمن هذا الحساب. أغلقه أو أعد تشغيل الكمبيوتر، ثم شغّل Macro Deck مرة أخرى.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>ملف المضيف التنفيذي لـ Macro Deck مفقود:
 {paths}</value>
@@ -1153,6 +1156,12 @@
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>المضيف الخاص بـ Macro Deck غير قابل للوصول، لذلك تعذّر إنشاء نسخة احتياطية.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>ينتظر Macro Deck مفتاح الاسترداد ولا يمكنه قراءة بياناته، لذا يستمر هذا التحديث بدون نسخة احتياطية.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>التحديث بدون نسخة احتياطية</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>تعذّر على Macro Deck التأكد من إنشاء نسخة احتياطية.</value>
@@ -1492,6 +1501,9 @@
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>هل أنت متأكد من حذف هذه الأدوات ({count})؟ لا يمكن التراجع عن هذا الإجراء.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>تعذّر حذف الأداة</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>تعذّر حذف الأدوات</value>
@@ -3023,6 +3035,27 @@
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>تعذّر إيقاف المكوّن الإضافي، لذا لم تتم إزالة أي شيء. حاول مرة أخرى.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>لا يزال Macro Deck قيد التشغيل، لذلك لم يتم تشغيل المكوّن الإضافي. حاول مرة أخرى بعد قليل.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>تعذرت قراءة بيان المكوّن الإضافي.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>لا يتوفر لهذا المكوّن الإضافي إصدار لهذا النظام.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>لم يتم العثور على وقت تشغيل .NET لتشغيل هذا المكوّن الإضافي. ثبّت واحدًا ثم شغّل المكوّن الإضافي مرة أخرى.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>لا يلبي أي وقت تشغيل .NET مثبت الإصدار المطلوب {required}. ثبّته ثم شغّل المكوّن الإضافي مرة أخرى.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>تم إلغاء التثبيت واستعادة الحالة السابقة.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>تم إلغاء التثبيت، لكن تعذرت استعادة الحالة السابقة. قد يظل الإصدار الجديد نشطًا.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>يتم إيقاف تشغيل Macro Deck، لذلك لم يتم تشغيل المكوّن الإضافي.</value>
@@ -8820,6 +8853,9 @@
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>وضع الاستهداف هذا لوحة المفاتيح غير مدعوم على هذه المنصة.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>إدخال لوحة المفاتيح محدود على Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>منح الإذن</value>
   </data>
@@ -8834,6 +8870,9 @@
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>محاكاة لوحة المفاتيح غير متاحة</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>هذه جلسة Wayland، لذا يمر إدخال لوحة المفاتيح عبر XWayland. تستقبل التطبيقات العاملة عبر XWayland المفاتيح والنص. قد لا تستقبلها تطبيقات Wayland الأصلية، ولا تستطيع إجراءات لوحة المفاتيح الموجهة إلى تطبيق العثور عليها.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>لوحة المفاتيح</value>
@@ -11717,6 +11756,12 @@
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>مستوى صوت الإخراج في النظام غير متاح.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>هذه جلسة Wayland، لذا يرى Macro Deck فقط التطبيقات العاملة عبر XWayland. أثناء تركيز تطبيق Wayland أصلي، تحتفظ متغيرات التطبيق المركّز عليه بآخر قيمة لها.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>اكتشاف التطبيق المركّز عليه محدود على Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>لم يُكتشف أي معالج رسومات مدعوم. في Linux تحتاج مقاييس GPU إلى برنامج التشغيل amdgpu أو nvidia-smi.</value>
@@ -14897,6 +14942,12 @@
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>تم استبدال مفتاح هوية هذا الكمبيوتر. على كل هاتف أو جهاز لوحي مقترن، امسح رمز الاستجابة السريعة لهذا الكمبيوتر مرة أخرى لمواصلة استخدامه.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>تم إيقاف حلقة الأحداث</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>استمرت الأحداث في تشغيل بعضها بعضًا، لذا أوقف Macro Deck هذه السلسلة. تحقق من عمليات الأتمتة والأدوات التي تتفاعل مع بعضها.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>محاولة تسجيل دخول فاشلة</value>
   </data>
@@ -17659,7 +17710,7 @@
     <value>صدّر مفتاح استرداد النسخة الاحتياطية لحماية حلقة المفاتيح. إلى ذلك الحين تبقى قابلة للقراءة على القرص.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>يمنع تنفيذ الإجراءات أثناء قفل هذا الكمبيوتر، مهما كان اختيارك هنا. على Linux، لا يستطيع Macro Deck معرفة أن هذا الكمبيوتر مقفل، لذا تستمر الإجراءات في العمل ولا يتم قفل العملاء المتصلين.</value>
+    <value>يمنع تنفيذ الإجراءات أثناء قفل هذا الكمبيوتر، مهما كان اختيارك هنا. على Linux، يتطلب ذلك سطح مكتب يبلغ عن القفل، مثل GNOME أو KDE Plasma. وإلا تستمر الإجراءات في العمل ولا يتم قفل العملاء المتصلين.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>شاشة القفل</value>
@@ -19648,6 +19699,9 @@
     <value>فشل التنزيل. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>إذا استمرت هذه المشكلة، فنزّل أحدث إصدار من {url} وثبّته يدويًا.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>تعذّر التحقق من التحديثات. {error}</value>
     <comment>[error:string]</comment>
@@ -21586,6 +21640,9 @@
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>تعذّر تحديث القاعدة</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>هذه جلسة Wayland، لذا يرى Macro Deck فقط التطبيقات العاملة عبر XWayland. لا يعمل التفعيل التلقائي مع تطبيقات Wayland الأصلية.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>تم تصدير المجلد</value>

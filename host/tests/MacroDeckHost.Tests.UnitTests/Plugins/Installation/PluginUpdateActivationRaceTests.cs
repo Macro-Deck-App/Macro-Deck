@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Installation;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
@@ -53,6 +54,8 @@ internal sealed class PluginUpdateActivationRaceTests
 		services.AddSingleton<IPluginRegistrationRepository>(_registrations);
 		services.AddSingleton<IPluginTrustRecordRepository>(_trustRecords);
 		services.AddSingleton<IPluginTrustBaseline>(new FakePluginTrustBaseline());
+		services.AddSingleton(TestLocalization.Resolver);
+		services.AddScoped<IAppPreferenceService>(_ => new FakeDeveloperModePreferences());
 		services.AddSingleton<IPluginRegistrationService>(new RevokingRegistrationService(_registrations));
 		var provider = services.BuildServiceProvider();
 		var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
@@ -257,15 +260,15 @@ internal sealed class PluginUpdateActivationRaceTests
 			cancellation.Token);
 		_registrations.BeforeRevoke = null;
 
-		var launchesBefore = _launcher.Requests.Count;
 		await Tick();
+		var runtime = _supervisor.Snapshot().Single(entry => entry.PluginId == PluginId);
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(result.Success, Is.False);
-			Assert.That(_launcher.Requests,
-				Has.Count.EqualTo(launchesBefore + 1),
-				"the reconcile loop could no longer launch the plugin after a cancelled activation");
+			Assert.That(result.Error, Is.EqualTo(PluginInstallError.Cancelled));
+			Assert.That(result.RolledBack, Is.True);
+			Assert.That(runtime.Version, Is.EqualTo("1.0.0"));
+			Assert.That(runtime.State, Is.AnyOf(PluginRuntimeState.Starting, PluginRuntimeState.Running));
 		});
 	}
 

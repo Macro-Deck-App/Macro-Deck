@@ -93,6 +93,79 @@ internal sealed class ScheduledEventBackgroundServiceTests
 		Assert.That(ScheduledFor(fired), Is.EqualTo(LocalTime(_wednesdayMorning.AddSeconds(10))));
 	}
 
+	[Test]
+	public async Task The_scheduler_never_sleeps_longer_than_a_minute()
+	{
+		var owner = EventTriggerOwner.ForAutomation(Guid.NewGuid());
+		var harness = await Harness.Start(Subscription(owner, TimeEventProvider.DailyEventId, [("time", "\"20:00\"")]));
+
+		var wakes = await harness.PendingWakes();
+		await harness.Stop();
+
+		Assert.That(wakes.Max(), Is.LessThanOrEqualTo(LocalTime(_wednesdayMorning).AddMinutes(1)));
+	}
+
+	[Test]
+	public async Task A_time_missed_while_the_computer_slept_fires_on_the_next_wake()
+	{
+		var owner = EventTriggerOwner.ForAutomation(Guid.NewGuid());
+		var harness = await Harness.Start(Subscription(owner, TimeEventProvider.DailyEventId, [("time", "\"10:30\"")]));
+
+		await harness.PendingWakes();
+		harness.Sleep(TimeSpan.FromHours(1));
+		harness.TickWithoutIndexChange(TimeSpan.FromMinutes(1));
+
+		var fired = await harness.WaitForOccurrence();
+		await harness.Stop();
+		Assert.That(ScheduledFor(fired), Is.EqualTo(LocalTime(_wednesdayMorning.AddMinutes(30))));
+	}
+
+	[Test]
+	public async Task A_timezone_change_moves_a_planned_time()
+	{
+		var utc = TimeZoneInfo.CreateCustomTimeZone("test-a", TimeSpan.Zero, "a", "a");
+		var eastOfIt = TimeZoneInfo.CreateCustomTimeZone("test-b", TimeSpan.FromHours(2), "b", "b");
+		var owner = EventTriggerOwner.ForAutomation(Guid.NewGuid());
+		var harness = await Harness.Start(Subscription(owner, TimeEventProvider.DailyEventId, [("time", "\"20:00\"")]),
+			utc);
+		var start = harness.Now;
+		var expected = new DateTimeOffset(start.Year, start.Month, start.Day, 18, 0, 0, TimeSpan.Zero);
+		if (expected <= start)
+		{
+			expected = expected.AddDays(1);
+		}
+
+		await harness.PendingWakes();
+		harness.ChangeZone(eastOfIt);
+		await harness.Tick(TimeSpan.FromMinutes(1));
+		harness.JumpTo(expected.AddMinutes(1));
+		harness.TickWithoutIndexChange(TimeSpan.FromMinutes(1));
+
+		var fired = await harness.WaitForOccurrence();
+		await harness.Stop();
+		Assert.That(ScheduledFor(fired), Is.EqualTo(expected));
+	}
+
+	[Test]
+	public async Task A_time_missed_in_sleep_still_fires_when_the_zone_changed_too()
+	{
+		var utc = TimeZoneInfo.CreateCustomTimeZone("test-a", TimeSpan.Zero, "a", "a");
+		var eastOfIt = TimeZoneInfo.CreateCustomTimeZone("test-b", TimeSpan.FromHours(2), "b", "b");
+		var owner = EventTriggerOwner.ForAutomation(Guid.NewGuid());
+		(string, string)[] everyTenMinutes = [("every", "10"), ("unit", "\"minutes\"")];
+		var harness = await Harness.Start(Subscription(owner, TimeEventProvider.IntervalEventId, everyTenMinutes), utc);
+		var missed = harness.Now.AddMinutes(10);
+
+		await harness.PendingWakes();
+		harness.Sleep(TimeSpan.FromHours(1));
+		harness.ChangeZone(eastOfIt);
+		harness.TickWithoutIndexChange(TimeSpan.FromMinutes(1));
+
+		var fired = await harness.WaitForOccurrence();
+		await harness.Stop();
+		Assert.That(ScheduledFor(fired), Is.EqualTo(missed));
+	}
+
 	private static DateTimeOffset ScheduledFor(EventOccurrence occurrence)
 	{
 		return DateTimeOffset.Parse((string)occurrence.Parameters["scheduledFor"]!, CultureInfo.InvariantCulture);
@@ -129,9 +202,45 @@ internal sealed class ScheduledEventBackgroundServiceTests
 			_service = service;
 		}
 
-		public static async Task<Harness> Start(EventSubscription subscription)
+		public DateTimeOffset Now => _time.Now;
+
+		public async Task<IReadOnlyList<DateTimeOffset>> PendingWakes()
 		{
-			var time = new FakeTimeProvider { Now = LocalTime(_wednesdayMorning) };
+			await WaitUntil(() => _time.ActiveTimerCount > 0);
+			return _time.ActiveDueTimes;
+		}
+
+		public void Sleep(TimeSpan duration)
+		{
+			_time.Now += duration;
+		}
+
+		public void JumpTo(DateTimeOffset moment)
+		{
+			_time.Now = moment;
+		}
+
+		public void ChangeZone(TimeZoneInfo zone)
+		{
+			_time.Zone = zone;
+		}
+
+		public void TickWithoutIndexChange(TimeSpan delta)
+		{
+			_time.Advance(delta);
+		}
+
+		public async Task Tick(TimeSpan delta)
+		{
+			var planned = _index.PlanCount;
+			_time.Advance(delta);
+			await WaitUntil(() => _index.PlanCount > planned);
+			await WaitUntil(() => _time.ActiveTimerCount > 0);
+		}
+
+		public static async Task<Harness> Start(EventSubscription subscription, TimeZoneInfo? zone = null)
+		{
+			var time = new FakeTimeProvider { Now = LocalTime(_wednesdayMorning), Zone = zone };
 			var index = new FakeSubscriptionIndex();
 			index.Set(subscription);
 			var bus = new RecordingEventBus();

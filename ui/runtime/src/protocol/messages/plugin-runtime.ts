@@ -36,6 +36,7 @@ export interface PluginRuntimeInfo {
   lastError?: string | null;
   bootstrapOutput: string[];
   takenOverByDevelopmentBuild?: boolean;
+  desiredStarted?: boolean;
 }
 
 export interface GetPluginRuntimeResponse {

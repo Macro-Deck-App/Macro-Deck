@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using MacroDeck.Localization;
+using MacroDeckHost.Localization;
 using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Platform.Processes;
 
@@ -31,6 +33,10 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private const nuint ShiftLeftKeysym = 0xFFE1;
 	private const nuint IsoLevel3ShiftKeysym = 0xFE03;
 
+	// X clients resolve a keycode when they read the event, so its mapping has to outlive that read.
+	private const int SpareKeySettleMs = 20;
+	private const int SpareKeyFinalSettleMs = 100;
+
 	private readonly IntPtr _display;
 	private readonly int _spareKeycode;
 	private readonly nuint _root;
@@ -49,6 +55,12 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	public string PlatformName => "Linux (X11 XTest)";
 
 	public bool IsSupported => _display != IntPtr.Zero;
+
+	public bool IsDegraded => IsSupported && LinuxDisplaySession.IsWayland;
+
+	public LocalizedText DegradedReason => IsDegraded
+		? AppStrings.Integrations.Keyboard.Issues.WaylandDegradedReason()
+		: default;
 
 	public bool RequiresPermission => false;
 
@@ -78,26 +90,103 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		var layout = ReadLayout(_display);
 		var level3Mask = layout.Level3Keycode == 0 ? 0 : layout.Level3Mask;
 		var shiftMask = layout.ShiftKeycode == 0 ? 0 : ShiftMask;
-		foreach (var keysym in ToKeysyms(text))
-		{
-			if (TryResolveTyping(keysym,
-				XKeysymToKeycode(_display, keysym),
-				layout.MinKeycode,
-				layout.MaxKeycode,
-				shiftMask,
-				level3Mask,
-				layout.Group,
-				(keycode, state) => LookupKeysym(_display, keycode, state),
-				out var key))
+		TypeKeysyms(ToKeysyms(text),
+			CreateSpareKeycode(_display, _spareKeycode),
+			keysym => ResolveLayoutKey(_display, layout, _spareKeycode, shiftMask, level3Mask, keysym),
+			key => TypeKey(layout, key),
+			keycode =>
 			{
-				TypeKey(layout, key);
-				continue;
-			}
-
-			TypeViaSpareKeycode(keysym);
-		}
+				FakeKey(keycode, true);
+				FakeKey(keycode, false);
+			});
 
 		_ = XFlush(_display);
+	}
+
+	internal static void TypeKeysyms(
+		IEnumerable<nuint> keysyms,
+		SpareKeycode spare,
+		Func<nuint, TypingKey?> resolve,
+		Action<TypingKey> sendKey,
+		Action<uint> sendSpareKey)
+	{
+		try
+		{
+			foreach (var keysym in keysyms)
+			{
+				if (resolve(keysym) is { } key)
+				{
+					sendKey(key);
+				}
+				else if (spare.Map(keysym))
+				{
+					sendSpareKey(spare.Keycode);
+				}
+			}
+		}
+		finally
+		{
+			spare.Clear();
+		}
+	}
+
+	private static TypingKey? ResolveLayoutKey(
+		IntPtr display,
+		TypingLayout layout,
+		int spareKeycode,
+		uint shiftMask,
+		uint level3Mask,
+		nuint keysym)
+	{
+		return TryResolveOutsideSpare(keysym,
+			XKeysymToKeycode(display, keysym),
+			layout.MinKeycode,
+			spareKeycode,
+			shiftMask,
+			level3Mask,
+			layout.Group,
+			(keycode, state) => LookupKeysym(display, keycode, state),
+			out var key)
+			? key
+			: null;
+	}
+
+	// The spare key holds a borrowed keysym while a string is typed, so the layout never resolves through it.
+	internal static bool TryResolveOutsideSpare(
+		nuint keysym,
+		uint candidate,
+		int minKeycode,
+		int spareKeycode,
+		uint shiftMask,
+		uint level3Mask,
+		uint group,
+		Func<uint, uint, nuint> lookup,
+		out TypingKey key)
+	{
+		return TryResolveTyping(keysym,
+			candidate == spareKeycode ? 0 : candidate,
+			minKeycode,
+			spareKeycode - 1,
+			shiftMask,
+			level3Mask,
+			group,
+			lookup,
+			out key);
+	}
+
+	private static SpareKeycode CreateSpareKeycode(IntPtr display, int keycode)
+	{
+		return new SpareKeycode(keycode,
+			keysym =>
+			{
+				_ = XChangeKeyboardMapping(display, keycode, 2, [keysym, keysym], 1);
+				_ = XSync(display, false);
+			},
+			clearing =>
+			{
+				_ = XSync(display, false);
+				Thread.Sleep(clearing ? SpareKeyFinalSettleMs : SpareKeySettleMs);
+			});
 	}
 
 	internal static List<nuint> ToKeysyms(string text)
@@ -293,27 +382,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			}
 		}
 
-		return windows.Count == 0 ? null : new LinuxTargetWindow(_display, _root, windows);
-	}
-
-	private void TypeViaSpareKeycode(nuint keysym)
-	{
-		if (_spareKeycode <= 0)
-		{
-			return;
-		}
-
-		var symbols = new[] { keysym, keysym };
-		_ = XChangeKeyboardMapping(_display, _spareKeycode, 2, symbols, 1);
-		_ = XFlush(_display);
-
-		FakeKey((uint)_spareKeycode, true);
-		FakeKey((uint)_spareKeycode, false);
-		_ = XFlush(_display);
-
-		var cleared = new nuint[] { 0, 0 };
-		_ = XChangeKeyboardMapping(_display, _spareKeycode, 2, cleared, 1);
-		_ = XFlush(_display);
+		return windows.Count == 0 ? null : new LinuxTargetWindow(_display, _root, _spareKeycode, windows);
 	}
 
 	private void SendKey(KeyCode key, bool isPress)
@@ -487,6 +556,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private static extern int XFlush(IntPtr display);
 
 	[DllImport(LibX11)]
+	private static extern int XSync(IntPtr display, [MarshalAs(UnmanagedType.Bool)] bool discard);
+
+	[DllImport(LibX11)]
 	private static extern int XDisplayKeycodes(IntPtr display, out int minKeycodes, out int maxKeycodes);
 
 	[DllImport(LibX11)]
@@ -610,6 +682,57 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	internal readonly record struct TypingKey(uint Keycode, uint Modifiers);
 
+	internal sealed class SpareKeycode
+	{
+		private readonly int _keycode;
+		private readonly Action<nuint> _map;
+		private readonly Action<bool> _settle;
+		private nuint _mapped;
+
+		public SpareKeycode(int keycode, Action<nuint> map, Action<bool> settle)
+		{
+			_keycode = keycode;
+			_map = map;
+			_settle = settle;
+		}
+
+		public uint Keycode => (uint)_keycode;
+
+		public bool Map(nuint keysym)
+		{
+			if (_keycode <= 0)
+			{
+				return false;
+			}
+
+			if (_mapped != keysym)
+			{
+				Change(keysym);
+			}
+
+			return true;
+		}
+
+		public void Clear()
+		{
+			if (_mapped != 0)
+			{
+				Change(0);
+			}
+		}
+
+		private void Change(nuint keysym)
+		{
+			if (_mapped != 0)
+			{
+				_settle(keysym == 0);
+			}
+
+			_map(keysym);
+			_mapped = keysym;
+		}
+	}
+
 	private readonly record struct TypingLayout(
 		uint Group,
 		uint ActiveModifiers,
@@ -643,13 +766,15 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	{
 		private readonly IntPtr _display;
 		private readonly nuint _root;
+		private readonly int _spareKeycode;
 		private readonly IReadOnlyList<nuint> _windows;
 		private readonly Dictionary<KeyCode, uint> _heldMasks = new();
 
-		public LinuxTargetWindow(IntPtr display, nuint root, IReadOnlyList<nuint> windows)
+		public LinuxTargetWindow(IntPtr display, nuint root, int spareKeycode, IReadOnlyList<nuint> windows)
 		{
 			_display = display;
 			_root = root;
+			_spareKeycode = spareKeycode;
 			_windows = windows;
 		}
 
@@ -681,30 +806,22 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		{
 			var layout = ReadLayout(_display);
 			var groupState = (layout.Group & 3) << XkbGroupShift;
-			foreach (var keysym in ToKeysyms(text))
-			{
-				if (!TryResolveTyping(keysym,
-					XKeysymToKeycode(_display, keysym),
-					layout.MinKeycode,
-					layout.MaxKeycode,
-					ShiftMask,
-					layout.Level3Mask,
-					layout.Group,
-					(keycode, state) => LookupKeysym(_display, keycode, state),
-					out var key))
-				{
-					continue;
-				}
-
-				var state = key.Modifiers | groupState;
-				foreach (var window in _windows)
-				{
-					SendKeyEvent(_display, _root, window, key.Keycode, state, true);
-					SendKeyEvent(_display, _root, window, key.Keycode, state, false);
-				}
-			}
+			TypeKeysyms(ToKeysyms(text),
+				CreateSpareKeycode(_display, _spareKeycode),
+				keysym => ResolveLayoutKey(_display, layout, _spareKeycode, ShiftMask, layout.Level3Mask, keysym),
+				key => SendToWindows(key.Keycode, key.Modifiers | groupState),
+				keycode => SendToWindows(keycode, groupState));
 
 			_ = XFlush(_display);
+		}
+
+		private void SendToWindows(uint keycode, uint state)
+		{
+			foreach (var window in _windows)
+			{
+				SendKeyEvent(_display, _root, window, keycode, state, true);
+				SendKeyEvent(_display, _root, window, keycode, state, false);
+			}
 		}
 
 		public void Dispose()

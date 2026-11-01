@@ -1,5 +1,6 @@
 using MacroDeckHost.Api.Support;
 using MacroDeckHost.Application.Portable;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Portable;
@@ -25,6 +26,7 @@ public class ProfilesController : ControllerBase
 	private readonly IUiTransportMessageHandler<MoveProfileRequest, MoveProfileResponse> _moveProfile;
 	private readonly IProfilePortabilityService _portability;
 	private readonly IColorReferenceResolver _colors;
+	private readonly StartupReadiness _readiness;
 
 	public ProfilesController(
 		IUiTransportMessageHandler<GetProfilesRequest, GetProfilesResponse> getProfiles,
@@ -34,9 +36,11 @@ public class ProfilesController : ControllerBase
 		IUiTransportMessageHandler<DuplicateProfileRequest, DuplicateProfileResponse> duplicateProfile,
 		IUiTransportMessageHandler<MoveProfileRequest, MoveProfileResponse> moveProfile,
 		IProfilePortabilityService portability,
-		IColorReferenceResolver colors)
+		IColorReferenceResolver colors,
+		StartupReadiness readiness)
 	{
 		_colors = colors;
+		_readiness = readiness;
 		_getProfiles = getProfiles;
 		_createProfile = createProfile;
 		_updateProfile = updateProfile;
@@ -150,6 +154,8 @@ public class ProfilesController : ControllerBase
 
 	private async Task<ImportProfileResponse> Import(byte[] archiveBytes, string? password, CancellationToken ct)
 	{
+		await _readiness.WhenCachesReady.WaitAsync(ct);
+
 		var result = await _portability.Import(archiveBytes, password, ct);
 		if (!result.Success)
 		{

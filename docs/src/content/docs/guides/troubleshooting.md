@@ -191,8 +191,8 @@ maximum, factor 2). To fail instead:
 error host-not-found: No running Macro Deck host was found. Its loopback port file is written while the host runs and removed when it stops; none was readable at ... Start Macro Deck, pass --host-url <url>, or use --stub-host to run against a disposable stub host instead.
 ```
 
-`run` finds the host through `macro-deck-host.port` (or `macro-deck-host-development.port`) in the system
-temp directory, which exists only while the host runs.
+`run` finds the host through `macro-deck-host.port` (or `macro-deck-host-development.port`), which exists
+only while the host runs. See [Which host `run` uses](/cli/run/#which-host-run-uses) for where it looks.
 
 ```bash
 macrodeck-plugin run --project src/MyPlugin --stub-host                        # no Macro Deck needed
@@ -393,7 +393,7 @@ nobody probes, silently. Remove it; [MDP4002](/reference/analyzers/#mdp4002) cat
 
 Otherwise check that `health.path` matches the route you serve (default `/_macrodeck/health`) and that
 `health.timeoutSeconds` is long enough. `unhealthyThreshold` has a floor of 2, so one missed probe never
-restarts anything.
+marks a plugin unhealthy. While its session is connected a plugin is only degraded and not restarted.
 
 ```bash
 curl http://127.0.0.1:<port>/_macrodeck/diagnostics
@@ -459,8 +459,8 @@ system `dotnet` (in `DOTNET_ROOT`, then `PATH`, then well-known locations) that 
 higher major never satisfies a lower one unless the runtimeconfig allows rolling forward. A host run from
 source (`dotnet run`) has no bundled runtime and relies on the system search alone.
 
-Install the matching runtime, then restart Macro Deck: installed runtimes are read once per host
-process. Until then the plugin stays stopped instead of burning restart budget. The selection rule is in
+Install the matching runtime, then start the plugin again: a manual Start looks for runtimes afresh.
+Until then the plugin stays stopped and is not retried automatically. The selection rule is in
 the [manifest reference](/reference/manifest/#runtime).
 
 ### A plugin shows up as dotnet in the process list

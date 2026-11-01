@@ -771,6 +771,35 @@ public class EventSubscriptionMatcherTests
 		});
 	}
 
+	[Test]
+	[SetCulture("de-DE")]
+	public void A_filter_reads_a_payload_number_as_invariant_text()
+	{
+		var subscription = Subscription(null,
+			"""{ "kind": "compare", "left": { "$event": "value" }, "operator": "contains", "right": "1.5" }""");
+
+		Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(NumericPayload(1.5))), Is.True);
+	}
+
+	[Test]
+	[SetCulture("de-DE")]
+	public void A_filter_reads_a_numeric_variable_as_its_stored_text()
+	{
+		var subscription = Subscription(null,
+			"""{ "kind": "compare", "left": { "$var": "threshold" }, "operator": "contains", "right": "1.50" }""");
+		var threshold = new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "threshold",
+			Scope = VariableScope.Global,
+			Type = VariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = "1.50"
+		};
+
+		Assert.That(Matcher().Matches(subscription, _sceneChanged, Context(Payload("Live"), threshold)), Is.True);
+	}
+
 	[TestCase(">")]
 	[TestCase("<")]
 	[TestCase(">=")]

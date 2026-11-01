@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace MacroDeckHost.Infrastructure.Backups;
 
@@ -37,7 +38,7 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 		// under scratch keys. Skipping lets the update that may fix the lock still be installed.
 		if (IsKeyRingLocked())
 		{
-			return new PreUpdateBackupOutcome(true, true, KeyRingLockedReason, null);
+			return new PreUpdateBackupOutcome(true, true, await LockedSkipReason(), null);
 		}
 
 		var settings = await GetBackupSettings();
@@ -51,7 +52,7 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 			return new PreUpdateBackupOutcome(false,
 				false,
 				"A restore is pending; refusing to create a backup before updating.",
-				null);
+				null) { Error = BackupError.RestorePending };
 		}
 
 		var request = new CreateBackupRequest(BackupTrigger.BeforeHostUpdate, $"Before updating to {version}");
@@ -116,8 +117,24 @@ public sealed class PreUpdateBackupCoordinator : IPreUpdateBackupCoordinator
 			? new PreUpdateBackupOutcome(true, false, null, result.Data!.BackupId)
 			: new PreUpdateBackupOutcome(false, false, result.ErrorMessage, null)
 			{
-				Cancelled = result.Error == BackupError.Cancelled
+				Cancelled = result.Error == BackupError.Cancelled,
+				Error = result.Error
 			};
+	}
+
+	// The bootstrapper tells the user about this skip, unless the user asked for no backup at all.
+	// Nothing here may fail the answer: the skip exists so an update that may fix the lock still installs.
+	private async Task<string?> LockedSkipReason()
+	{
+		try
+		{
+			return (await GetBackupSettings()).BeforeHostUpdate ? KeyRingLockedReason : null;
+		}
+		catch (Exception e)
+		{
+			Log.ForContext<PreUpdateBackupCoordinator>().Warning(e, "Could not read the backup settings");
+			return KeyRingLockedReason;
+		}
 	}
 
 	private bool IsKeyRingLocked()

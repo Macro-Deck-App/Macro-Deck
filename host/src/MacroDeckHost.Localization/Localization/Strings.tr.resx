@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Bu veri klasörü en son daha yeni bir Macro Deck sürümü tarafından kullanıldı. O sürümü yeniden yükleyin; verileriniz değiştirilmedi.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Bu hesapta başka bir Macro Deck ana bilgisayarı zaten çalışıyor. Onu kapatın veya bilgisayarı yeniden başlatın, ardından Macro Deck'i tekrar başlatın.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck ana bilgisayar ikili dosyası eksik:
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck APT deposundan yüklendi; yeni sürüm orada yayımlandığında sudo
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck ana bilgisayarına ulaşılamıyor, bu yüzden yedek oluşturulamadı.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck kurtarma anahtarını bekliyor ve verilerini okuyamıyor, bu nedenle bu güncelleme yedeksiz devam ediyor.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Yedeksiz güncelleniyor</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck bir yedeğin oluşturulduğunu doğrulayamadı.</value>
@@ -1492,6 +1501,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Bu {count} widget'ı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Widget silinemedi</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Widget'lar silinemedi</value>
@@ -3023,6 +3035,27 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Eklenti durdurulamadı, bu yüzden hiçbir şey kaldırılmadı. Yeniden deneyin.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck hâlâ başlatılıyor, bu nedenle eklenti başlatılmadı. Birazdan yeniden deneyin.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Eklentinin bildirimi okunamadı.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Bu eklentinin bu sistem için bir sürümü yok.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Bu eklentiyi başlatacak bir .NET çalışma zamanı bulunamadı. Bir tane yükleyin, ardından eklentiyi yeniden başlatın.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Yüklü hiçbir .NET çalışma zamanı gereken {required} sürümünü karşılamıyor. Bu sürümü yükleyin, ardından eklentiyi yeniden başlatın.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Yükleme iptal edildi ve önceki durum geri yüklendi.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Yükleme iptal edildi ancak önceki durum geri yüklenemedi. Yeni sürüm hâlâ etkin olabilir.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck kapanıyor, bu nedenle eklenti başlatılmadı.</value>
@@ -8820,6 +8853,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Bu klavye hedefleme modu bu platformda desteklenmiyor.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Klavye girişi Wayland'de sınırlıdır</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>İzin ver</value>
   </data>
@@ -8834,6 +8870,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Klavye simülasyonu kullanılamıyor</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Bu bir Wayland oturumu olduğundan klavye girişi XWayland üzerinden çalışır. XWayland üzerinden çalışan uygulamalar tuşları ve metni alır. Yerel Wayland uygulamaları almayabilir ve bir uygulamayı hedefleyen klavye eylemleri onları bulamaz.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Klavye</value>
@@ -11717,6 +11756,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Sistemin çıkış ses düzeyi kullanılamıyor.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Bu bir Wayland oturumu olduğundan Macro Deck yalnızca XWayland üzerinden çalışan uygulamaları görür. Yerel bir Wayland uygulaması odaktayken odaklanan uygulama değişkenleri son değerlerini korur.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Odaklanan uygulama algılaması Wayland'de sınırlıdır</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Desteklenen bir GPU algılanmadı. Linux'ta GPU ölçümleri için amdgpu sürücüsü veya nvidia-smi gerekir.</value>
@@ -14897,6 +14942,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Bu bilgisayarın kimlik anahtarı değiştirildi. Eşleştirilmiş her telefonda veya tablette bu bilgisayarın QR kodunu yeniden tarayarak kullanmaya devam edin.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Olay döngüsü durduruldu</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Olaylar birbirini tetiklemeye devam etti, bu nedenle Macro Deck bu zinciri durdurdu. Birbirine tepki veren otomasyonları ve widget'ları kontrol edin.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Başarısız oturum açma denemesi</value>
   </data>
@@ -17659,7 +17710,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Anahtar halkasını korumak için yedek kurtarma anahtarınızı dışa aktarın. O zamana kadar diskte okunabilir kalır.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Bu bilgisayar kilitliyken, burada ne seçerseniz seçin, eylem çalıştırılmasını engeller. Linux'ta Macro Deck bu bilgisayarın kilitli olduğunu algılayamaz; bu nedenle eylemler çalışmaya devam eder ve bağlı istemciler kilitlenmez.</value>
+    <value>Bu bilgisayar kilitliyken, burada ne seçerseniz seçin, eylem çalıştırılmasını engeller. Linux'ta bunun için GNOME veya KDE Plasma gibi kilidi bildiren bir masaüstü gerekir. Aksi takdirde eylemler çalışmaya devam eder ve bağlı istemciler kilitlenmez.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Kilit ekranı</value>
@@ -19648,6 +19699,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>İndirme başarısız oldu. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Bu sorun devam ederse en son sürümü {url} adresinden indirin ve elle kurun.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Güncellemeler denetlenemedi. {error}</value>
     <comment>[error:string]</comment>
@@ -21586,6 +21640,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Kural güncellenemedi</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Bu bir Wayland oturumu olduğundan Macro Deck yalnızca XWayland üzerinden çalışan uygulamaları görür. Otomatik etkinleştirme yerel Wayland uygulamalarında işe yaramaz.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Klasör dışa aktarıldı</value>

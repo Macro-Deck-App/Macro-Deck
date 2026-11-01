@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,9 +13,11 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	private readonly IEventSubscriptionIndex _index;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly StartupReadiness _readiness;
+	private readonly BuiltInIntegrationRegistration _builtInRegistration;
 	private readonly ILogger _logger;
 
-	private readonly ConcurrentDictionary<EventTarget, byte> _inFlight = new();
+	private readonly Lock _gate = new();
+	private readonly Dictionary<EventTarget, EventOccurrence?> _running = [];
 
 	public EventDispatchBackgroundService(
 		IHostApplicationLifetime lifetime,
@@ -23,6 +25,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		IEventSubscriptionIndex index,
 		IServiceScopeFactory scopeFactory,
 		StartupReadiness readiness,
+		BuiltInIntegrationRegistration builtInRegistration,
 		ILogger logger)
 		: base(lifetime)
 	{
@@ -30,6 +33,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		_index = index;
 		_scopeFactory = scopeFactory;
 		_readiness = readiness;
+		_builtInRegistration = builtInRegistration;
 		_logger = logger.ForContext<EventDispatchBackgroundService>();
 	}
 
@@ -37,6 +41,9 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	{
 		await _readiness.WhenReady.WaitAsync(stoppingToken);
 		_index.Rebuild();
+
+		// Rebuilt first so events raised during this wait queue in the bus instead of being dropped.
+		await _builtInRegistration.Completed.WaitAsync(stoppingToken);
 		_readiness.MarkEventDispatchReady();
 
 		var reader = _bus.Reader;
@@ -71,38 +78,93 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		}
 
 		var target = subscription.Target;
-		if (!_inFlight.TryAdd(target, 0))
+		lock (_gate)
 		{
-			_logger.Debug("Skipping event trigger {TriggerId} on {Owner}: previous run still in progress",
-				subscription.TriggerId,
-				subscription.Owner);
-			return;
+			if (_running.TryGetValue(target, out var pending))
+			{
+				Hold(subscription, occurrence, pending);
+				return;
+			}
+
+			_running[target] = null;
 		}
 
-		_ = Task.Run(async () =>
+		_ = Task.Run(() => RunUntilNothingIsPending(subscription, occurrence, stoppingToken), stoppingToken);
+	}
+
+	private void Hold(EventSubscription subscription, EventOccurrence occurrence, EventOccurrence? pending)
+	{
+		if (pending is not null)
+		{
+			_logger.Information("Replacing a waiting occurrence of {EventId} for event trigger {TriggerId} on {Owner}",
+				occurrence.EventId,
+				subscription.TriggerId,
+				subscription.Owner);
+
+			// The deepest depth is kept, or an unrelated occurrence would reset a chain that is running away.
+			occurrence = occurrence with
 			{
-				try
+				CascadeDepth = Math.Max(occurrence.CascadeDepth, pending.CascadeDepth)
+			};
+		}
+
+		_running[subscription.Target] = occurrence;
+	}
+
+	private async Task RunUntilNothingIsPending(
+		EventSubscription subscription,
+		EventOccurrence occurrence,
+		CancellationToken stoppingToken)
+	{
+		var target = subscription.Target;
+		var current = subscription;
+		var next = occurrence;
+
+		while (next is not null)
+		{
+			if (current is not null)
+			{
+				await RunOnce(current, next, stoppingToken);
+			}
+
+			lock (_gate)
+			{
+				next = stoppingToken.IsCancellationRequested ? null : _running[target];
+				if (next is null)
 				{
-					using var scope = _scopeFactory.CreateScope();
-					var runner = scope.ServiceProvider.GetRequiredService<IEventTriggerRunner>();
-					await runner.Run(subscription, occurrence, stoppingToken);
+					_running.Remove(target);
 				}
-				catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+				else
 				{
+					_running[target] = null;
 				}
-				catch (Exception ex)
-				{
-					_logger.Error(ex,
-						"Event trigger {TriggerId} on {Owner} failed for {EventId}",
-						subscription.TriggerId,
-						subscription.Owner,
-						occurrence.EventId);
-				}
-				finally
-				{
-					_inFlight.TryRemove(target, out _);
-				}
-			},
-			stoppingToken);
+			}
+
+			current = next is null ? null : _index.Find(target);
+		}
+	}
+
+	private async Task RunOnce(
+		EventSubscription subscription,
+		EventOccurrence occurrence,
+		CancellationToken stoppingToken)
+	{
+		try
+		{
+			using var scope = _scopeFactory.CreateScope();
+			var runner = scope.ServiceProvider.GetRequiredService<IEventTriggerRunner>();
+			await runner.Run(subscription, occurrence, stoppingToken);
+		}
+		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+		{
+		}
+		catch (Exception ex)
+		{
+			_logger.Error(ex,
+				"Event trigger {TriggerId} on {Owner} failed for {EventId}",
+				subscription.TriggerId,
+				subscription.Owner,
+				occurrence.EventId);
+		}
 	}
 }

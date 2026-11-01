@@ -16,6 +16,6 @@ public sealed class DeveloperModeChangedNotificationHandler : INotificationHandl
 	public ValueTask Handle(DeveloperModeChangedNotification notification, CancellationToken cancellationToken)
 	{
 		var evt = new DeveloperSettingsChangedEvent { Enabled = notification.Enabled };
-		return new ValueTask(_uiTransport.Send(evt, cancellationToken));
+		return new ValueTask(_uiTransport.SendToGroup(UiAdminGroups.Admin, evt, cancellationToken));
 	}
 }

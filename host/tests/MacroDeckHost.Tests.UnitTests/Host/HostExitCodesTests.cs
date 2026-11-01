@@ -6,6 +6,12 @@ namespace MacroDeckHost.Tests.UnitTests.Host;
 public class HostExitCodesTests
 {
 	[Test]
+	public void Another_running_instance_has_the_code_the_bootstrapper_explains()
+	{
+		Assert.That(HostExitCodes.AnotherInstanceRunning, Is.EqualTo(89));
+	}
+
+	[Test]
 	public void The_restart_exit_code_is_the_one_the_shell_expects()
 	{
 		Assert.That(HostExitCodes.RestartRequested, Is.EqualTo(86));

@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>This data folder was last used by a newer version of Macro Deck. Install that version again; your data has not been changed.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Another Macro Deck host is already running under this account. Close it or restart the computer, then start Macro Deck again.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>The Macro Deck host binary is missing:
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck was installed from its APT repository, so run sudo apt update &amp;&a
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>The Macro Deck host is not reachable, so no backup could be created.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck is waiting for the recovery key and cannot read its data, so this update goes ahead without a backup.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Updating without a backup</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck could not confirm that a backup was created.</value>
@@ -1492,6 +1501,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Are you sure you want to delete these {count} widgets? This action cannot be undone.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Failed to delete the widget</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Failed to delete the widgets</value>
@@ -3023,6 +3035,27 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>The plugin could not be stopped, so nothing was removed. Try again.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck is still starting, so the plugin was not started. Try again in a moment.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>The plugin's manifest could not be read.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>This plugin has no version for this system.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>No .NET runtime was found to start this plugin. Install one, then start the plugin again.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>No installed .NET runtime satisfies the required version {required}. Install it, then start the plugin again.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>The installation was cancelled and the previous state was restored.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>The installation was cancelled, but the previous state could not be restored. The new version may still be active.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck is shutting down, so the plugin was not started.</value>
@@ -8821,6 +8854,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>This keyboard targeting mode is not supported on this platform.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Keyboard input is limited on Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Grant permission</value>
   </data>
@@ -8835,6 +8871,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Keyboard simulation unavailable</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>This is a Wayland session, so keyboard input runs through XWayland. Apps that run through XWayland receive keys and text. Native Wayland apps may not, and keyboard actions that target an app can't find them.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Keyboard</value>
@@ -11719,6 +11758,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>The system output volume is not available.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>This is a Wayland session, so Macro Deck only sees apps that run through XWayland. While a native Wayland app has focus, the focused application variables keep their last value.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Focused app detection is limited on Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>No supported GPU was detected. On Linux, GPU metrics need the amdgpu driver or nvidia-smi.</value>
@@ -14899,6 +14944,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>This computer's identity key was replaced. On every paired phone or tablet, scan this computer's QR code again to keep using it.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Event loop stopped</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Events kept triggering each other, so Macro Deck stopped this chain. Check the automations and widgets that react to each other.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Failed login attempt</value>
   </data>
@@ -17661,7 +17712,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Export your backup recovery key to protect the key ring. Until then it stays readable on disk.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blocks action execution while this computer is locked, no matter what you choose here. On Linux, Macro Deck cannot tell that this computer is locked, so actions keep running and connected clients are not locked.</value>
+    <value>Blocks action execution while this computer is locked, no matter what you choose here. On Linux, this needs a desktop that reports its lock, such as GNOME or KDE Plasma. Otherwise actions keep running and connected clients are not locked.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Lock screen</value>
@@ -19650,6 +19701,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>The download failed. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>If this keeps happening, download the latest version from {url} and install it manually.</value>
+    <comment>[url:string]</comment>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Couldn't check for updates. {error}</value>
     <comment>[error:string]</comment>
@@ -21589,6 +21644,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Could not update the rule</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>This is a Wayland session, so Macro Deck only sees apps that run through XWayland. Automatic activation does nothing for native Wayland apps.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Folder exported</value>

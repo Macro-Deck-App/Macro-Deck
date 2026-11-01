@@ -54,7 +54,7 @@ describe('DeckPageComponent copy/cut/paste', () => {
       selectedFolderId: jasmine.createSpy('selectedFolderId').and.returnValue('current-folder'),
       folders: jasmine.createSpy('folders').and.returnValue([]),
       pasteWidget: jasmine.createSpy('pasteWidget').and.resolveTo(widget({ id: 'new-widget' })),
-      removeWidget: jasmine.createSpy('removeWidget').and.resolveTo(undefined),
+      removeWidget: jasmine.createSpy('removeWidget').and.resolveTo({ success: true }),
     };
   });
 
@@ -95,6 +95,17 @@ describe('DeckPageComponent copy/cut/paste', () => {
 
     expect(folderStub.pasteWidget).toHaveBeenCalled();
     expect(folderStub.removeWidget).toHaveBeenCalledWith('src-widget', 'origin-folder');
+    expect(clipboard.hasContent()).toBeFalse();
+  });
+
+  it('shows an error and drops the clipboard when the cut source could not be removed', async () => {
+    const component = createComponent();
+    folderStub.removeWidget.and.resolveTo({ success: false, error: { code: 'INTERNAL_ERROR', message: 'nope' } });
+    clipboard.cut(widget({ id: 'src-widget' }), 'origin-folder');
+
+    await component.onWidgetPaste({ x: 3, y: 0 });
+
+    expect((component as unknown as { deckError: () => string | null }).deckError()).toBe('nope');
     expect(clipboard.hasContent()).toBeFalse();
   });
 
@@ -414,7 +425,7 @@ describe('DeckPageComponent keyboard shortcuts and batch actions', () => {
       currentWidgets: jasmine.createSpy('currentWidgets').and.callFake(() => widgets),
       currentCols: jasmine.createSpy('currentCols').and.returnValue(5),
       currentRows: jasmine.createSpy('currentRows').and.returnValue(3),
-      removeWidget: jasmine.createSpy('removeWidget').and.resolveTo(undefined),
+      removeWidget: jasmine.createSpy('removeWidget').and.resolveTo({ success: true }),
       removeWidgets: jasmine.createSpy('removeWidgets').and.resolveTo({ success: true }),
       pasteWidget: jasmine.createSpy('pasteWidget').and.resolveTo(widget({ id: 'pasted' })),
       pasteWidgets: jasmine.createSpy('pasteWidgets').and.resolveTo({ success: true }),

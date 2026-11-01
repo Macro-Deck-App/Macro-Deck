@@ -73,6 +73,7 @@ export interface GetApplicationFocusCapabilityRequest {}
 export interface GetApplicationFocusCapabilityResponse {
   supported: boolean;
   unsupportedReason?: string;
+  degraded?: boolean;
   preferredIdentityKind: ApplicationIdentityKind;
 }
 

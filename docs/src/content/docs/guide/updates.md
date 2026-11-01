@@ -56,6 +56,11 @@ once you are back on the desktop.
   when you quit Macro Deck.
 - **Later**, or closing the window, leaves the update for now.
 
+If an update cannot be downloaded or installed, the **Software update** dialog says so and points to
+[macro-deck.app/download](https://macro-deck.app/download), where you can download the latest version
+and install it by hand. If the dialog keeps failing on Windows, open the update from the tray icon's
+menu instead: that window does not depend on the main window's connection to Macro Deck.
+
 The update window opens on its own at most once per version while Macro Deck runs, when an update is found
 in the background. It never opens in **Off** or **Automatic** mode, and not when you open the Macro Deck
 window before it appears.
@@ -71,7 +76,8 @@ step 2 of 2, the install. **Cancel update** in either window stops the backup an
 uninstalled; you can install it again later. See [Backups](/guide/backups/).
 
 While Macro Deck asks for the recovery key when it starts, it cannot read its data and so cannot make a
-backup. An update you install then goes ahead without one.
+backup. An update you install then goes ahead without one, and the update window says so, as does a system
+notification if your system shows it.
 
 ## Extension updates
 

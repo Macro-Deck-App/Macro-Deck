@@ -485,6 +485,8 @@ internal sealed class RecordingConsentNotifier : IPluginAdbConsentNotifier
 
 	public List<string> Dismissed { get; } = [];
 
+	public Action? OnNotify { get; set; }
+
 	public Task NotifyIfNeededAsync(
 		string pluginId,
 		string pluginName,
@@ -493,6 +495,8 @@ internal sealed class RecordingConsentNotifier : IPluginAdbConsentNotifier
 		CancellationToken cancellationToken = default)
 	{
 		Installed.Add((pluginId, declaresAdb, previouslyDeclaredAdb));
+		OnNotify?.Invoke();
+		cancellationToken.ThrowIfCancellationRequested();
 		return Task.CompletedTask;
 	}
 

@@ -130,7 +130,7 @@ public static class BackupDtoMapper
 		};
 	}
 
-	private static LocalizedText DefaultMessage(BackupError error)
+	public static LocalizedText DefaultMessage(BackupError error)
 	{
 		return error switch
 		{

@@ -14,6 +14,8 @@ public interface IHostListenerState
 
 	int? LoopbackPort { get; }
 
+	Task LoopbackPortKnown { get; }
+
 	bool PublicListenerAvailable { get; }
 
 	PublicTlsFailure TlsFailure { get; }
@@ -27,6 +29,7 @@ public interface IHostListenerState
 
 public sealed class HostListenerState : IHostListenerState
 {
+	private readonly TaskCompletionSource _loopbackPortKnown = new(TaskCreationOptions.RunContinuationsAsynchronously);
 	private int _loopbackPort;
 
 	public HostListenerState(
@@ -55,6 +58,8 @@ public sealed class HostListenerState : IHostListenerState
 
 	public int? LoopbackPort => Volatile.Read(ref _loopbackPort) is var port and > 0 ? port : null;
 
+	public Task LoopbackPortKnown => _loopbackPortKnown.Task;
+
 	public bool PublicListenerAvailable => PublicEndpoints.HasPublicListener;
 
 	public PublicTlsFailure TlsFailure { get; }
@@ -66,5 +71,9 @@ public sealed class HostListenerState : IHostListenerState
 	public void SetLoopbackPort(int port)
 	{
 		Volatile.Write(ref _loopbackPort, port);
+		if (port > 0)
+		{
+			_loopbackPortKnown.TrySetResult();
+		}
 	}
 }

@@ -42,6 +42,13 @@ internal static class PluginInfrastructureLog
 		logger.Debug(exception, "Health probe for plugin '{PluginId}' at '{Address}' failed.", pluginId, address);
 	}
 
+	public static void ManifestUnreadable(ILogger logger, string pluginId, string? detail)
+	{
+		logger.Warning("The manifest of plugin '{PluginId}' could not be read: {Detail}",
+			SingleLine(pluginId),
+			SingleLine(detail ?? string.Empty));
+	}
+
 	public static void StartFailed(ILogger logger, string pluginId, Exception exception)
 	{
 		logger.Error(exception, "Starting plugin '{PluginId}' failed unexpectedly.", pluginId);

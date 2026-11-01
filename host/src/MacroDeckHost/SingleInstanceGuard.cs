@@ -11,24 +11,54 @@ public static class SingleInstanceGuard
 			: null;
 	}
 
-	public static async Task<bool> IsAnotherInstanceRunning()
+	public static Task<bool> IsAnotherInstanceRunning()
 	{
-		string content;
+		return IsAnotherInstanceRunning(HostEndpoints.LoopbackPortFilePaths,
+			port => LoopbackListenerOwner.Of(port) == ListenerOwner.AnotherUser,
+			IsAnswering);
+	}
+
+	internal static async Task<bool> IsAnotherInstanceRunning(
+		IEnumerable<string> portFilePaths,
+		Func<int, bool> belongsToAnotherUser,
+		Func<int, Task<bool>> isAnswering)
+	{
+		foreach (var path in portFilePaths)
+		{
+			if (await ReadPort(path) is not { } port)
+			{
+				continue;
+			}
+
+			if (belongsToAnotherUser(port))
+			{
+				Log.Debug("The listener on port {Port} from {File} belongs to another user", port, path);
+				continue;
+			}
+
+			if (await isAnswering(port))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static async Task<int?> ReadPort(string path)
+	{
 		try
 		{
-			content = await File.ReadAllTextAsync(HostEndpoints.LoopbackPortFilePath);
+			return ParsePort(await File.ReadAllTextAsync(path));
 		}
-		catch (IOException)
+		catch (Exception e) when (e is IOException or UnauthorizedAccessException)
 		{
-			return false;
+			return null;
 		}
+	}
 
-		var port = ParsePort(content);
-		if (port is null)
-		{
-			return false;
-		}
-
+	private static async Task<bool> IsAnswering(int port)
+	{
 		try
 		{
 			using var client = new HttpClient();

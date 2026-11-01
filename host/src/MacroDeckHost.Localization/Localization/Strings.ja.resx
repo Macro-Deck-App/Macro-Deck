@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>このデータフォルダーは、新しいバージョンの Macro Deck で最後に使用されました。そのバージョンを再インストールしてください。データは変更されていません。</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>このアカウントでは別の Macro Deck ホストがすでに実行中です。それを終了するかコンピューターを再起動してから、Macro Deck をもう一度起動してください。</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Macro Deck のホストバイナリが見つかりません:
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck は APT リポジトリからインストールされています。�
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck のホストに接続できないため、バックアップを作成できません。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck は回復キーを待っていてデータを読み取れないため、この更新はバックアップなしで続行されます。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>バックアップなしで更新しています</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>バックアップが作成されたことを確認できませんでした。</value>
@@ -1492,6 +1501,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>{count} 件のウィジェットを削除しますか？この操作は取り消せません。</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>ウィジェットを削除できませんでした</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>ウィジェットを削除できませんでした</value>
@@ -3023,6 +3035,27 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>プラグインを停止できなかったため、何も削除されていません。もう一度お試しください。</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck がまだ起動中のため、プラグインは起動されませんでした。しばらくしてからもう一度お試しください。</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>プラグインのマニフェストを読み取れませんでした。</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>このプラグインにはこのシステム用のバージョンがありません。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>このプラグインを起動できる .NET ランタイムが見つかりませんでした。インストールしてから、プラグインをもう一度起動してください。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>インストール済みの .NET ランタイムは必要なバージョン {required} を満たしていません。インストールしてから、プラグインをもう一度起動してください。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>インストールはキャンセルされ、以前の状態に戻されました。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>インストールはキャンセルされましたが、以前の状態に戻せませんでした。新しいバージョンがまだ有効な可能性があります。</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck が終了処理中のため、プラグインは起動されませんでした。</value>
@@ -8820,6 +8853,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>この送信方法は、このプラットフォームではサポートされていません。</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Wayland ではキーボード入力が制限されます</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>権限を付与</value>
   </data>
@@ -8834,6 +8870,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>キーボードのシミュレーションを利用できません</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>これは Wayland セッションのため、キーボード入力は XWayland を経由します。XWayland で動作するアプリはキーとテキストを受け取ります。ネイティブの Wayland アプリは受け取れない場合があり、アプリを対象にしたキーボードアクションからも見つけられません。</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>キーボード</value>
@@ -11717,6 +11756,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>システムの出力音量を取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>これは Wayland セッションのため、Macro Deck は XWayland で動作するアプリしか認識できません。ネイティブの Wayland アプリにフォーカスがある間、フォーカス中のアプリケーションの変数は最後の値を保持します。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Wayland ではフォーカス中のアプリの検出が制限されます</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>対応する GPU が検出されませんでした。Linux では、GPU の指標に amdgpu ドライバーまたは nvidia-smi が必要です。</value>
@@ -14897,6 +14942,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>このコンピューターの ID キーが置き換えられました。ペアリング済みのスマートフォンやタブレットでは、このコンピューターの QR コードを再度読み取って、引き続き使用してください。</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>イベントのループを停止しました</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>イベントが互いをトリガーし続けたため、Macro Deck がこの連鎖を停止しました。互いに反応するオートメーションとウィジェットを確認してください。</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>ログインの失敗</value>
   </data>
@@ -17659,7 +17710,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>キーリングを保護するには、バックアップの復旧キーをエクスポートしてください。それまでは、ディスク上で読み取り可能なままです。</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>このコンピューターがロックされている間は、ここでどの設定を選んでいても、アクションの実行をブロックします。Linux では、Macro Deck はこのコンピューターのロックを検出できないため、アクションは引き続き実行され、接続中のクライアントもロックされません。</value>
+    <value>このコンピューターがロックされている間は、ここでどの設定を選んでいても、アクションの実行をブロックします。Linux では、GNOME や KDE Plasma のようにロックを通知するデスクトップが必要です。それ以外の環境では、アクションは引き続き実行され、接続中のクライアントもロックされません。</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>ロック画面</value>
@@ -19648,6 +19699,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>ダウンロードに失敗しました。{error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>この問題が続く場合は、{url} から最新バージョンをダウンロードして手動でインストールしてください。</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>更新を確認できませんでした。{error}</value>
     <comment>[error:string]</comment>
@@ -21586,6 +21640,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>ルールを更新できませんでした</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>これは Wayland セッションのため、Macro Deck は XWayland で動作するアプリしか認識できません。ネイティブの Wayland アプリでは自動アクティブ化は機能しません。</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>フォルダーをエクスポートしました</value>

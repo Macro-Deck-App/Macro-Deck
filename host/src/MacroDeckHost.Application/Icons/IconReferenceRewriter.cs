@@ -2,6 +2,7 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Secrets.Approvals;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using Mediator;
 
@@ -16,16 +17,25 @@ public sealed class IconReferenceRewriter(
 	IFolderCache folderCache,
 	IAutomationCache automationCache,
 	IScriptCache scriptCache,
-	IMediator mediator) : IIconReferenceRewriter
+	IMediator mediator,
+	WidgetLayoutGate? layoutGate = null) : IIconReferenceRewriter
 {
+	private readonly WidgetLayoutGate _layoutGate = layoutGate ?? new WidgetLayoutGate();
+
 	public async Task<int> Replace(Guid fromIconId, Guid toIconId, CancellationToken cancellationToken)
 	{
 		var map = new Dictionary<Guid, Guid> { [fromIconId] = toIconId };
 		var approval = SecretApprovalWrite.Rewrite(snapshot => PortableGuidRemapper.Remap(snapshot, map) ?? snapshot);
 		var rewritten = 0;
 
-		foreach (var folder in folderCache.GetAllFolders())
+		foreach (var folderId in folderCache.GetAllFolders().Select(folder => folder.Id).ToList())
 		{
+			using var lease = await _layoutGate.Enter(cancellationToken);
+			if (folderCache.GetFolderById(folderId) is not { } folder)
+			{
+				continue;
+			}
+
 			var changedWidgets = new List<WidgetEntity>();
 			foreach (var widget in folder.Widgets)
 			{
@@ -40,19 +50,27 @@ public sealed class IconReferenceRewriter(
 			if (changedWidgets.Count > 0)
 			{
 				folderCache.UpdateWidgets(folder.Id, changedWidgets, approval);
-				foreach (var widget in changedWidgets)
-				{
-					await mediator.Publish(new WidgetUpdatedNotification(widget, true), cancellationToken);
-				}
-
-				rewritten += changedWidgets.Count;
 			}
 
 			var viewConfiguration = PortableGuidRemapper.Remap(folder.ViewConfiguration, map);
-			if (!string.Equals(viewConfiguration, folder.ViewConfiguration, StringComparison.Ordinal))
+			var viewChanged = !string.Equals(viewConfiguration, folder.ViewConfiguration, StringComparison.Ordinal);
+			if (viewChanged)
 			{
 				folder.ViewConfiguration = viewConfiguration;
 				await folderCache.AddOrUpdate(folder);
+			}
+
+			lease.Dispose();
+
+			foreach (var widget in changedWidgets)
+			{
+				await mediator.Publish(new WidgetUpdatedNotification(widget, true), cancellationToken);
+			}
+
+			rewritten += changedWidgets.Count;
+
+			if (viewChanged)
+			{
 				await mediator.Publish(new FolderUpdatedNotification(folder), cancellationToken);
 				rewritten++;
 			}

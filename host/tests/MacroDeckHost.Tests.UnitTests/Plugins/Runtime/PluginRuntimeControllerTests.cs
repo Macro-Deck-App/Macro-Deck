@@ -116,6 +116,48 @@ internal sealed class PluginRuntimeControllerTests
 	}
 
 	[Test]
+	public async Task A_start_refused_because_the_host_is_not_ready_is_retryable_and_localized()
+	{
+		var supervisor = new FakePluginSupervisor
+		{
+			StartResults =
+			{
+				["com.example.plugin"] = PluginSupervisorResult.Fail(PluginSupervisorError.HostNotReady)
+			}
+		};
+		var controller = new PluginRuntimeController(supervisor);
+
+		var response = await controller.Start("com.example.plugin", CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(response.Error!.Code, Is.EqualTo("host_not_ready"));
+			Assert.That(response.Error!.Message.ToString(),
+				Is.EqualTo(((LocalizedText)AppStrings.Errors.Plugins.HostNotReady()).ToString()));
+		});
+	}
+
+	[Test]
+	public void A_plugin_that_would_start_on_its_own_reports_it_on_the_wire()
+	{
+		var supervisor = new FakePluginSupervisor();
+		supervisor.SnapshotToReturn.Add(new PluginRuntimeSnapshot
+		{
+			PluginId = "com.example.plugin",
+			DisplayName = "Example",
+			Version = "1.0.0",
+			State = PluginRuntimeState.Stopped,
+			Health = PluginHealthState.Unknown,
+			Managed = true,
+			DesiredStarted = true
+		});
+
+		var response = new PluginRuntimeController(supervisor).GetAll();
+
+		Assert.That(response.Plugins[0].DesiredStarted, Is.True);
+	}
+
+	[Test]
 	public async Task Stop_always_requests_UserRequested_never_an_internal_reason()
 	{
 		var supervisor = new FakePluginSupervisor();

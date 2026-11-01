@@ -25,7 +25,8 @@ public record PluginRuntimeSnapshotBody(
 	DateTimeOffset? NextRestartAt,
 	string? LastError,
 	IReadOnlyList<string> BootstrapOutput,
-	bool TakenOverByDevelopmentBuild);
+	bool TakenOverByDevelopmentBuild,
+	bool DesiredStarted);
 
 public record GetPluginRuntimeResponse(IReadOnlyList<PluginRuntimeSnapshotBody> Plugins);
 
@@ -79,6 +80,7 @@ public class PluginRuntimeController : ControllerBase
 						PluginSupervisorError.TakenOverByDevelopmentBuild =>
 							AppStrings.Errors.Plugins.TakenOverByDevelopmentBuild(),
 						PluginSupervisorError.HostShuttingDown => AppStrings.Errors.Plugins.HostShuttingDown(),
+						PluginSupervisorError.HostNotReady => AppStrings.Errors.Plugins.HostNotReady(),
 						_ => result.Message ?? string.Empty
 					}
 				});
@@ -97,6 +99,7 @@ public class PluginRuntimeController : ControllerBase
 			PluginSupervisorError.LaunchFailed => "launch_failed",
 			PluginSupervisorError.IntegrityFailed => "integrity_failed",
 			PluginSupervisorError.TakenOverByDevelopmentBuild => "taken_over_by_development_build",
+			PluginSupervisorError.HostNotReady => "host_not_ready",
 			_ => "failed"
 		};
 	}
@@ -122,7 +125,8 @@ public class PluginRuntimeController : ControllerBase
 			snapshot.NextRestartAt,
 			snapshot.LastError,
 			snapshot.BootstrapOutput,
-			snapshot.TakenOverByDevelopmentBuild);
+			snapshot.TakenOverByDevelopmentBuild,
+			snapshot.DesiredStarted);
 	}
 
 	private static string ToWireState(PluginRuntimeState state)

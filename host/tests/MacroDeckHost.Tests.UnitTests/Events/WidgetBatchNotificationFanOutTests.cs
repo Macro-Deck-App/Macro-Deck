@@ -15,6 +15,7 @@ using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Variables;
@@ -212,7 +213,10 @@ public class WidgetBatchNotificationFanOutTests
 		var widgetIds = widgets.Select(w => w.Id).ToList();
 		var notification = new WidgetsDeletedNotification(folderId, widgetIds);
 
-		await new WidgetsDeletedNotificationHandler(_transport).Handle(notification, CancellationToken.None);
+		await new WidgetsDeletedNotificationHandler(_transport,
+				new RecordingUiSessionBroker(),
+				new WidgetUiProviderRegistry(_folderCache, [], () => null!, Serilog.Core.Logger.None))
+			.Handle(notification, CancellationToken.None);
 		await new WidgetsDeletedEventIndexHandler(_eventIndex).Handle(notification, CancellationToken.None);
 		await new WidgetsDeletedVariableIndexHandler(_variableIndex).Handle(notification, CancellationToken.None);
 		await new ActionButtonStateVariableWidgetsDeletedHandler(_scopeFactory, _derivedState).Handle(notification,

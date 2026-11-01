@@ -9,6 +9,8 @@ public class GetApplicationFocusCapabilityResponse
 
 	public string? UnsupportedReason { get; set; }
 
+	public bool Degraded { get; set; }
+
 	[JsonConverter(typeof(JsonStringEnumConverter))]
 	public ApplicationIdentityKind PreferredIdentityKind { get; set; }
 }

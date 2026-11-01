@@ -20,7 +20,7 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
     <div class="form-group form-group--dense">
       <label>{{ 'macrodeck.app:ActionBuilder.SetVariable.OperationField' | translate }}</label>
       <shared-select
-        data-testid="set-variable-operation"
+        [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.OperationField' | translate"
         [options]="operationOptions"
         [ngModel]="operation"
         (ngModelChange)="onOperationChange($event)" />
@@ -41,6 +41,7 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
             @switch (variableType) {
               @case ('boolean') {
                 <shared-select
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
                   [placeholder]="'macrodeck.app:ActionBuilder.SetVariable.ChooseTrueOrFalse' | translate"
                   [options]="booleanOptions"
                   [ngModel]="stringValue"
@@ -48,13 +49,14 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
               }
               @case ('color') {
                 <shared-color-picker
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
                   [allowAlpha]="true"
                   [ngModel]="stringValue"
                   (ngModelChange)="write($event)" />
               }
               @case ('numeric') {
                 <shared-input
-                  data-testid="set-variable-value"
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
                   type="number"
                   [step]="numberStep"
                   [ngModel]="stringValue"
@@ -62,7 +64,7 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
               }
               @default {
                 <shared-param-input
-                  data-testid="set-variable-value"
+                  [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
                   [value]="stringValue"
                   [variables]="store.pickerVariables()"
                   [scope]="store.previewScope()"
@@ -115,7 +117,7 @@ export class SetVariableActionFieldsComponent implements OnChanges {
   }
 
   protected get operationOptions(): SelectOption[] {
-    return operationOptionsFor(this.variableType);
+    return operationOptionsFor(this.variableType, key => this.localization.translateKey(key));
   }
 
   protected get operation(): string {

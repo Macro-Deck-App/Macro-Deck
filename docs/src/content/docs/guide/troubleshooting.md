@@ -121,8 +121,8 @@ it again with that package manager instead, for example `sudo apt install --rein
 
 ## Buttons do nothing and devices show a lock screen
 
-On Windows and macOS, Macro Deck does not run actions while the computer it runs on is locked. Unlock the
-computer and try again. Linux works differently, see
+Macro Deck does not run actions while the computer it runs on is locked. Unlock the computer and try again.
+Some Linux computers do not report their lock, see
 [Buttons still work while a Linux computer is locked](#buttons-still-work-while-a-linux-computer-is-locked).
 
 Connected devices show a lock screen for as long as the computer is locked. You can keep the deck
@@ -133,12 +133,18 @@ locked, and the widget keeps showing its content.
 
 ## Buttons still work while a Linux computer is locked
 
-On Linux, Macro Deck cannot tell whether the computer is locked, so locking it changes nothing for Macro
-Deck. Connected devices keep showing the deck, and anyone using one of them or a hardware deck can still press
+On Linux, Macro Deck knows that the computer is locked only when the desktop reports the lock to systemd-logind.
+GNOME and KDE Plasma do. Macro Deck cannot see the lock in these cases:
+
+- A lock screen that does not report to systemd-logind, such as many standalone lockers for window managers.
+- A system without systemd-logind.
+- Macro Deck started before you logged in to the desktop. Restart Macro Deck after logging in.
+
+Locking the computer then changes nothing for Macro Deck. Connected devices keep showing the deck, and anyone using one of them or a hardware deck can still press
 buttons, run scripts and use widgets. Their actions run on the locked computer as if it were unlocked, for
 example opening websites, starting programs or running commands. **Lock clients when this computer is
 locked** in **Settings > Security** has no effect there, and the **System** integration's **Locked** variable
-(`system_locked`) has no value.
+(`system_locked`) stays `false` or has no value.
 
 If nobody else should be able to use the computer through Macro Deck while you are away, quit Macro Deck
 before you leave it.
@@ -209,6 +215,16 @@ never shown.
 
 Only one Macro Deck can run on a computer at a time. If it is already running, starting it again
 does not open a second copy. Look for the running Macro Deck in the system tray or menu bar.
+
+If you quit from the menu bar or system tray while Macro Deck is still restoring a backup or preparing its
+data at startup, it finishes that first, for up to 15 minutes. Until then, starting it again shows nothing.
+
+If Macro Deck says another host is already running under this account, a host is still running without
+its window. Close it or restart the computer, then start Macro Deck again.
+
+On Linux, two users on one computer can each run their own Macro Deck at the same time. The first one
+keeps the default public port, so the second one starts without it: its devices connect once you
+[choose another port](#macro-deck-is-not-listening-on-its-port).
 
 ## Macro Deck shows an older version after you started a new one
 
@@ -283,6 +299,20 @@ another publisher could take over everything that plugin stores, such as its acc
 updates from the plugin's own publisher. If the plugin really changed hands, or you want to switch to the
 other publisher's package, uninstall the plugin first and tick **Also delete the plugin's stored data**,
 then install it again.
+
+## Keyboard actions or Automatic activation do not reach an app on Wayland
+
+Most Linux desktops use Wayland by default. Macro Deck works through X11 there, using XWayland, so it only sees
+apps that run through XWayland:
+
+- **Keyboard:** apps running natively on Wayland may not receive keys or text, and keyboard actions that target
+  an app cannot find them.
+- **Automatic activation:** a folder does not open when a native Wayland app gets focus.
+- **Focused app variables:** they keep their last value while a native Wayland app has focus.
+- **Mouse:** moving to a fixed position may land somewhere else or do nothing.
+
+The **Keyboard** and **System** integrations show a warning for this, and so does the Automatic activation dialog.
+To avoid these limits, log in to an X11 session if your desktop offers one, or run the app through XWayland.
 
 ## A reverse proxy or firewall blocks a connection to a service
 

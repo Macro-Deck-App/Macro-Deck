@@ -19,6 +19,7 @@ describe('notification toasts', () => {
   const titles = (): string[] => toasts().map(toast => toast.querySelector('.wc-toast-message')!.textContent!);
 
   beforeEach(() => {
+    dismissAllToasts();
     root = document.createElement('div');
     document.body.appendChild(root);
     mountToastHost(root, { dismissLabel: 'Dismiss' });

@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>此数据文件夹上次由更新版本的 Macro Deck 使用。请重新安装该版本；数据未被更改。</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>此账户下已有另一个 Macro Deck 主机正在运行。请将其关闭或重启计算机，然后再次启动 Macro Deck。</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>缺少 Macro Deck 主机程序：
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>无法连接 Macro Deck 主机，因此无法创建备份。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck 正在等待恢复密钥，无法读取其数据，因此此次更新将在没有备份的情况下继续。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>正在更新，未创建备份</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck 无法确认备份已创建。</value>
@@ -1492,6 +1501,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>确定要删除这 {count} 个组件吗？此操作无法撤销。</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>无法删除组件</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>无法删除这些组件</value>
@@ -3023,6 +3035,27 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>无法停止插件，因此未删除任何内容。请重试。</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck 仍在启动，因此未启动插件。请稍后重试。</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>无法读取插件清单。</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>此插件没有适用于此系统的版本。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>未找到可用于启动此插件的 .NET 运行时。请安装后重新启动插件。</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>已安装的 .NET 运行时均不满足所需版本 {required}。请安装后重新启动插件。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>安装已取消，已恢复之前的状态。</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>安装已取消，但无法恢复之前的状态。新版本可能仍处于活动状态。</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在关闭，因此未启动插件。</value>
@@ -8820,6 +8853,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>此平台不支持这种键盘目标模式。</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>键盘输入在 Wayland 上受限</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>授予权限</value>
   </data>
@@ -8834,6 +8870,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>键盘模拟不可用</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>这是 Wayland 会话，因此键盘输入通过 XWayland 运行。通过 XWayland 运行的应用可以接收按键和文本。原生 Wayland 应用可能无法接收，并且针对应用的键盘动作也找不到它们。</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>键盘</value>
@@ -11717,6 +11756,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>系统输出音量不可用。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>这是 Wayland 会话，因此 Macro Deck 只能看到通过 XWayland 运行的应用。当原生 Wayland 应用获得焦点时，焦点应用变量会保留上一个值。</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>焦点应用检测在 Wayland 上受限</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>未检测到受支持的 GPU。在 Linux 上，GPU 指标需要 amdgpu 驱动程序或 nvidia-smi。</value>
@@ -14897,6 +14942,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>这台电脑的身份密钥已被替换。请在每台已配对的手机或平板上重新扫描这台电脑的二维码，才能继续使用。</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>事件循环已停止</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>事件不断相互触发，因此 Macro Deck 已停止此链。请检查相互响应的自动化和组件。</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>登录尝试失败</value>
   </data>
@@ -17659,7 +17710,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>请导出你的备份恢复密钥以保护密钥环。在此之前，它在磁盘上保持可读。</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>这台电脑处于锁定状态时会阻止执行动作，无论你在这里如何选择。在 Linux 上，Macro Deck 无法检测这台电脑是否已锁定，因此动作会继续执行，已连接的客户端也不会被锁定。</value>
+    <value>这台电脑处于锁定状态时会阻止执行动作，无论你在这里如何选择。在 Linux 上，需要能报告锁定状态的桌面环境，例如 GNOME 或 KDE Plasma。否则动作会继续执行，已连接的客户端也不会被锁定。</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>锁屏</value>
@@ -19648,6 +19699,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>下载失败。{error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>如果此问题持续出现，请从 {url} 下载最新版本并手动安装。</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>无法检查更新。{error}</value>
     <comment>[error:string]</comment>
@@ -21568,6 +21622,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>无法更新规则</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>这是 Wayland 会话，因此 Macro Deck 只能看到通过 XWayland 运行的应用。自动激活对原生 Wayland 应用不起作用。</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>文件夹已导出</value>

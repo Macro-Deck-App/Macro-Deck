@@ -7,7 +7,7 @@ namespace MacroDeckHost.Application.Calendar;
 
 public sealed class CalendarTriggerScheduler : IDisposable
 {
-	private static readonly TimeSpan _maximumSleep = TimeSpan.FromHours(1);
+	private static readonly TimeSpan _maximumSleep = TimeSpan.FromMinutes(1);
 
 	private static readonly string _startsSoonId
 		= CalendarEventProvider.Qualify(CalendarEventProvider.StartsSoonEventId);

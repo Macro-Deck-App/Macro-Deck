@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Dieser Datenordner wurde zuletzt von einer neueren Version von Macro Deck verwendet. Installiere diese Version wieder; deine Daten wurden nicht verändert.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Unter diesem Konto läuft bereits ein anderer Macro-Deck-Host. Beende ihn oder starte den Computer neu und starte Macro Deck dann erneut.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Die Host-Binärdatei von Macro Deck fehlt:
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck wurde aus seinem APT-Repository installiert. Führe sudo apt update &
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Der Macro-Deck-Host ist nicht erreichbar, daher konnte keine Sicherung erstellt werden.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck wartet auf den Wiederherstellungsschlüssel und kann seine Daten nicht lesen. Dieses Update wird deshalb ohne Sicherung installiert.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Update ohne Sicherung</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck konnte nicht bestätigen, dass eine Sicherung erstellt wurde.</value>
@@ -1492,6 +1501,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Möchtest du diese {count} Widgets wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Das Widget konnte nicht gelöscht werden</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Die Widgets konnten nicht gelöscht werden</value>
@@ -3023,6 +3035,27 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Das Plugin konnte nicht beendet werden, daher wurde nichts entfernt. Versuche es erneut.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck startet noch, daher wurde das Plugin nicht gestartet. Versuche es gleich noch einmal.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Das Manifest des Plugins konnte nicht gelesen werden.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Dieses Plugin hat keine Version für dieses System.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Es wurde keine .NET-Laufzeit zum Starten dieses Plugins gefunden. Installiere eine und starte das Plugin erneut.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Keine installierte .NET-Laufzeit erfüllt die benötigte Version {required}. Installiere sie und starte das Plugin erneut.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Die Installation wurde abgebrochen und der vorherige Stand wiederhergestellt.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Die Installation wurde abgebrochen, der vorherige Stand konnte aber nicht wiederhergestellt werden. Die neue Version ist möglicherweise noch aktiv.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wird beendet, daher wurde das Plugin nicht gestartet.</value>
@@ -8817,6 +8850,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Dieser Tastatur-Zielmodus wird auf dieser Plattform nicht unterstützt.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Tastatureingaben sind unter Wayland eingeschränkt</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Berechtigung erteilen</value>
   </data>
@@ -8831,6 +8867,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Tastatursimulation nicht verfügbar</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Dies ist eine Wayland-Sitzung, daher laufen Tastatureingaben über XWayland. Apps, die über XWayland laufen, empfangen Tasten und Text. Native Wayland-Apps möglicherweise nicht, und Tastaturaktionen mit einer Ziel-App finden sie nicht.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Tastatur</value>
@@ -11714,6 +11753,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Die Systemausgabelautstärke ist nicht verfügbar.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Dies ist eine Wayland-Sitzung, daher sieht Macro Deck nur Apps, die über XWayland laufen. Solange eine native Wayland-App den Fokus hat, behalten die Variablen zur fokussierten Anwendung ihren letzten Wert.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Erkennung der fokussierten App ist unter Wayland eingeschränkt</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Es wurde keine unterstützte GPU erkannt. Unter Linux brauchen GPU-Messwerte den amdgpu-Treiber oder nvidia-smi.</value>
@@ -14894,6 +14939,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Der Identitätsschlüssel dieses Computers wurde ersetzt. Scanne auf jedem gekoppelten Handy oder Tablet den QR-Code dieses Computers erneut, um es weiter zu verwenden.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Ereignisschleife gestoppt</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Ereignisse haben sich immer wieder gegenseitig ausgelöst, deshalb hat Macro Deck diese Kette gestoppt. Prüfe die Automationen und Widgets, die aufeinander reagieren.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Fehlgeschlagener Anmeldeversuch</value>
   </data>
@@ -17656,7 +17707,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Exportiere deinen Backup-Wiederherstellungsschlüssel, um den Schlüsselbund zu schützen. Bis dahin bleibt er auf der Festplatte lesbar.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Die Ausführung von Aktionen wird blockiert, solange dieser Computer gesperrt ist – unabhängig von dieser Einstellung. Unter Linux erkennt Macro Deck nicht, dass dieser Computer gesperrt ist: Aktionen laufen dann weiter und verbundene Clients werden nicht gesperrt.</value>
+    <value>Die Ausführung von Aktionen wird blockiert, solange dieser Computer gesperrt ist – unabhängig von dieser Einstellung. Unter Linux muss die Desktopumgebung die Sperre melden, wie GNOME oder KDE Plasma. Sonst laufen Aktionen weiter und verbundene Clients werden nicht gesperrt.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Sperrbildschirm</value>
@@ -19645,6 +19696,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Der Download ist fehlgeschlagen. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Wenn das weiterhin passiert, lade die neueste Version von {url} herunter und installiere sie manuell.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Die Suche nach Updates ist fehlgeschlagen. {error}</value>
     <comment>[error:string]</comment>
@@ -21564,6 +21618,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Die Regel konnte nicht aktualisiert werden</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Dies ist eine Wayland-Sitzung, daher sieht Macro Deck nur Apps, die über XWayland laufen. Die automatische Aktivierung bewirkt bei nativen Wayland-Apps nichts.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Ordner exportiert</value>

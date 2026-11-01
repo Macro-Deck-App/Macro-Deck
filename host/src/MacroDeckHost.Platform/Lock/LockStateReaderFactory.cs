@@ -14,6 +14,11 @@ public static class LockStateReaderFactory
 			return new MacOsLockStateReader();
 		}
 
+		if (OperatingSystem.IsLinux())
+		{
+			return new LinuxLockStateReader();
+		}
+
 		return new NullLockStateReader();
 	}
 }

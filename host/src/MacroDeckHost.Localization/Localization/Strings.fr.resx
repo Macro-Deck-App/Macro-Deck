@@ -937,6 +937,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Ce dossier de données a été utilisé en dernier par une version plus récente de Macro Deck. Réinstalle cette version ; tes données n'ont pas été modifiées.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Un autre hôte Macro Deck est déjà en cours d'exécution sur ce compte. Ferme-le ou redémarre l'ordinateur, puis relance Macro Deck.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Le binaire hôte de Macro Deck est introuvable:
 {paths}</value>
@@ -1154,6 +1157,12 @@ Macro Deck a été installé depuis son dépôt APT : exécute sudo apt update &
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>L'hôte Macro Deck n'est pas joignable, aucune sauvegarde n'a donc pu être créée.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck attend la clé de récupération et ne peut pas lire ses données : cette mise à jour se poursuit donc sans sauvegarde.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Mise à jour sans sauvegarde</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck n'a pas pu confirmer qu'une sauvegarde avait été créée.</value>
@@ -1493,6 +1502,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Veux-tu vraiment supprimer ces {count} widgets ? Cette opération est irréversible.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Échec de la suppression du widget</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Échec de la suppression des widgets</value>
@@ -3024,6 +3036,27 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Impossible d'arrêter l'extension, rien n'a donc été supprimé. Réessaie.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck est encore en cours de démarrage, l'extension n'a donc pas été démarrée. Réessaie dans un instant.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Le manifeste de l'extension n'a pas pu être lu.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Cette extension n'a pas de version pour ce système.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Aucun runtime .NET n'a été trouvé pour démarrer cette extension. Installe-en un, puis redémarre l'extension.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Aucun runtime .NET installé ne correspond à la version requise {required}. Installe-la, puis redémarre l'extension.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>L'installation a été annulée et l'état précédent a été restauré.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>L'installation a été annulée, mais l'état précédent n'a pas pu être restauré. La nouvelle version est peut-être encore active.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck est en cours de fermeture, l'extension n'a donc pas été démarrée.</value>
@@ -8819,6 +8852,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Ce mode de ciblage clavier n'est pas pris en charge sur cette plateforme.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>La saisie au clavier est limitée sous Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Accorder l'autorisation</value>
   </data>
@@ -8833,6 +8869,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Simulation clavier indisponible</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Ceci est une session Wayland : la saisie au clavier passe donc par XWayland. Les applications qui passent par XWayland reçoivent les touches et le texte. Les applications Wayland natives peuvent ne pas les recevoir, et les actions clavier ciblant une application ne les trouvent pas.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Clavier</value>
@@ -11716,6 +11755,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Le volume de sortie du système n'est pas disponible.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Ceci est une session Wayland : Macro Deck ne voit donc que les applications qui passent par XWayland. Tant qu'une application Wayland native a le focus, les variables de l'application active gardent leur dernière valeur.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>La détection de l'application active est limitée sous Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Aucun GPU pris en charge n'a été détecté. Sous Linux, les métriques GPU nécessitent le pilote amdgpu ou nvidia-smi.</value>
@@ -14896,6 +14941,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>La clé d'identité de cet ordinateur a été remplacée. Sur chaque téléphone ou tablette associé, scanne à nouveau le code QR de cet ordinateur pour continuer à l'utiliser.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Boucle d'événements arrêtée</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Des événements se déclenchaient mutuellement sans fin, Macro Deck a donc arrêté cette chaîne. Vérifie les automatisations et les widgets qui réagissent les uns aux autres.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Tentative de connexion échouée</value>
   </data>
@@ -17658,7 +17709,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Exporte ta clé de récupération de sauvegarde pour protéger le trousseau de clés. En attendant, il reste lisible sur le disque.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Bloque l'exécution des actions pendant que cet ordinateur est verrouillé, quel que soit ton choix ici. Sous Linux, Macro Deck ne peut pas détecter que cet ordinateur est verrouillé : les actions continuent donc de s'exécuter et les clients connectés ne sont pas verrouillés.</value>
+    <value>Bloque l'exécution des actions pendant que cet ordinateur est verrouillé, quel que soit ton choix ici. Sous Linux, il faut un bureau qui signale le verrouillage, comme GNOME ou KDE Plasma. Sinon, les actions continuent de s'exécuter et les clients connectés ne sont pas verrouillés.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Écran de verrouillage</value>
@@ -19647,6 +19698,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Le téléchargement a échoué. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Si le problème persiste, télécharge la dernière version sur {url} et installe-la manuellement.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Impossible de vérifier les mises à jour. {error}</value>
     <comment>[error:string]</comment>
@@ -21566,6 +21620,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Impossible de mettre à jour la règle</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Ceci est une session Wayland : Macro Deck ne voit donc que les applications qui passent par XWayland. L'activation automatique n'a aucun effet sur les applications Wayland natives.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Dossier exporté</value>

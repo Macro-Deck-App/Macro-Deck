@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -24,6 +25,7 @@ public class ProfileService : IProfileService
 	private readonly IWidgetSecretScrubber _widgetSecretScrubber;
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
 	private readonly SecretWriteAuthority? _writeAuthority;
+	private readonly WidgetLayoutGate _layoutGate;
 
 	public ProfileService(
 		IProfileCache profileCache,
@@ -33,7 +35,8 @@ public class ProfileService : IProfileService
 		IWidgetSecretCloner widgetSecretCloner,
 		IWidgetSecretScrubber widgetSecretScrubber,
 		IWidgetVariableCloner widgetVariableCloner,
-		SecretWriteAuthority? writeAuthority = null)
+		SecretWriteAuthority? writeAuthority = null,
+		WidgetLayoutGate? layoutGate = null)
 	{
 		_profileCache = profileCache;
 		_folderCache = folderCache;
@@ -43,6 +46,7 @@ public class ProfileService : IProfileService
 		_widgetSecretScrubber = widgetSecretScrubber;
 		_widgetVariableCloner = widgetVariableCloner;
 		_writeAuthority = writeAuthority;
+		_layoutGate = layoutGate ?? new WidgetLayoutGate();
 	}
 
 	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
@@ -149,6 +153,7 @@ public class ProfileService : IProfileService
 		string? defaultEmptyCellStyle = null,
 		bool? defaultWidgetShadows = null)
 	{
+		using var lease = await _layoutGate.Enter();
 		var profile = _profileCache.GetById(id);
 		if (profile is null)
 		{
@@ -276,6 +281,7 @@ public class ProfileService : IProfileService
 		}
 
 		await _profileCache.AddOrUpdate(profile);
+		lease.Dispose();
 
 		await _mediator.Publish(new ProfileUpdatedNotification(profile));
 

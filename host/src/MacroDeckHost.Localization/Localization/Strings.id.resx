@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Folder data ini terakhir digunakan oleh versi Macro Deck yang lebih baru. Instal ulang versi tersebut; data tidak diubah.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Host Macro Deck lain sudah berjalan di akun ini. Tutup host tersebut atau mulai ulang komputer, lalu jalankan Macro Deck lagi.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>File biner host Macro Deck tidak ditemukan:
 {paths}</value>
@@ -1153,6 +1156,12 @@ Macro Deck dipasang dari repositori APT-nya, jadi jalankan sudo apt update &amp;
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Host Macro Deck tidak dapat dijangkau, sehingga cadangan tidak dapat dibuat.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck sedang menunggu kunci pemulihan dan tidak dapat membaca datanya, sehingga pembaruan ini berlanjut tanpa cadangan.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Memperbarui tanpa cadangan</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck tidak dapat memastikan bahwa cadangan telah dibuat.</value>
@@ -1492,6 +1501,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Yakin ingin menghapus {count} widget ini? Tindakan ini tidak dapat dibatalkan.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Gagal menghapus widget</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Gagal menghapus widget</value>
@@ -3023,6 +3035,27 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Plugin tidak dapat dihentikan, jadi tidak ada yang dihapus. Coba lagi.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck masih dimulai, jadi plugin tidak dijalankan. Coba lagi sebentar lagi.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Manifes plugin tidak dapat dibaca.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Plugin ini tidak memiliki versi untuk sistem ini.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Runtime .NET untuk menjalankan plugin ini tidak ditemukan. Instal runtime, lalu jalankan plugin lagi.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Tidak ada runtime .NET terinstal yang memenuhi versi {required} yang diperlukan. Instal versi tersebut, lalu jalankan plugin lagi.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Instalasi dibatalkan dan keadaan sebelumnya dipulihkan.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Instalasi dibatalkan, tetapi keadaan sebelumnya tidak dapat dipulihkan. Versi baru mungkin masih aktif.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck sedang dimatikan, jadi plugin tidak dijalankan.</value>
@@ -8820,6 +8853,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Mode penargetan keyboard ini tidak didukung di platform ini.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Input keyboard terbatas di Wayland</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Berikan izin</value>
   </data>
@@ -8834,6 +8870,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Simulasi keyboard tidak tersedia</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Ini adalah sesi Wayland, sehingga input keyboard berjalan melalui XWayland. Aplikasi yang berjalan melalui XWayland menerima tombol dan teks. Aplikasi Wayland native mungkin tidak menerimanya, dan aksi keyboard yang menargetkan aplikasi tidak dapat menemukannya.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Keyboard</value>
@@ -11717,6 +11756,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Volume output sistem tidak tersedia.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Ini adalah sesi Wayland, sehingga Macro Deck hanya melihat aplikasi yang berjalan melalui XWayland. Selama aplikasi Wayland native memiliki fokus, variabel aplikasi yang difokuskan mempertahankan nilai terakhirnya.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Deteksi aplikasi yang difokuskan terbatas di Wayland</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Tidak ada GPU yang didukung terdeteksi. Di Linux, metrik GPU memerlukan driver amdgpu atau nvidia-smi.</value>
@@ -14897,6 +14942,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Kunci identitas komputer ini diganti. Pada setiap ponsel atau tablet yang sudah dipasangkan, pindai ulang kode QR komputer ini agar tetap dapat digunakan.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Perulangan peristiwa dihentikan</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Peristiwa terus saling memicu, sehingga Macro Deck menghentikan rantai ini. Periksa otomasi dan widget yang saling bereaksi.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Percobaan masuk gagal</value>
   </data>
@@ -17659,7 +17710,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Ekspor kunci pemulihan cadangan Anda untuk melindungi key ring. Sampai saat itu, key ring tetap dapat dibaca di disk.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Memblokir eksekusi aksi selama komputer ini terkunci, apa pun pilihan Anda di sini. Di Linux, Macro Deck tidak dapat mendeteksi bahwa komputer ini terkunci, sehingga aksi tetap berjalan dan klien yang terhubung tidak dikunci.</value>
+    <value>Memblokir eksekusi aksi selama komputer ini terkunci, apa pun pilihan Anda di sini. Di Linux, hal ini memerlukan desktop yang melaporkan penguncian, seperti GNOME atau KDE Plasma. Jika tidak, aksi tetap berjalan dan klien yang terhubung tidak dikunci.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Layar kunci</value>
@@ -19648,6 +19699,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Unduhan gagal. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Jika masalah ini terus terjadi, unduh versi terbaru dari {url} dan instal secara manual.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Tidak dapat memeriksa pembaruan. {error}</value>
     <comment>[error:string]</comment>
@@ -21586,6 +21640,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Aturan tidak dapat diperbarui</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Ini adalah sesi Wayland, sehingga Macro Deck hanya melihat aplikasi yang berjalan melalui XWayland. Aktivasi otomatis tidak berfungsi untuk aplikasi Wayland native.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Folder diekspor</value>

@@ -937,6 +937,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>Tuto složku dat naposledy použila novější verze Macro Deck. Nainstalujte tuto verzi znovu; data nebyla změněna.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>V tomto účtu už běží jiný hostitel Macro Deck. Ukončete ho nebo restartujte počítač a poté Macro Deck spusťte znovu.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>Chybí spustitelný soubor hostitele Macro Deck:
 {paths}</value>
@@ -1154,6 +1157,12 @@ Macro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v 
   </data>
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Hostitel Macro Deck není dostupný, takže nebylo možné vytvořit zálohu.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck čeká na obnovovací klíč a nemůže číst svá data, proto tato aktualizace pokračuje bez zálohy.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Aktualizace bez zálohy</value>
   </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck se nepodařilo potvrdit vytvoření zálohy.</value>
@@ -1493,6 +1502,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Deck.DeleteWidgetMessage.Other" xml:space="preserve">
     <value>Opravdu odstranit vybrané widgety (počet: {count})? Tento krok nelze vrátit zpět.</value>
     <comment>[plural] [count:int]</comment>
+  </data>
+  <data name="Deck.DeleteWidgetFailed" xml:space="preserve">
+    <value>Odstranění widgetu se nezdařilo</value>
   </data>
   <data name="Deck.DeleteWidgetsFailed" xml:space="preserve">
     <value>Odstranění widgetů se nezdařilo</value>
@@ -3024,6 +3036,27 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Plugin se nepodařilo zastavit, proto nebylo nic odstraněno. Zkuste to znovu.</value>
+  </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck se stále spouští, proto plugin nebyl spuštěn. Zkuste to znovu za chvíli.</value>
+  </data>
+  <data name="Errors.Plugins.ManifestUnreadable" xml:space="preserve">
+    <value>Manifest pluginu nelze přečíst.</value>
+  </data>
+  <data name="Errors.Plugins.NoEntrypointForRuntime" xml:space="preserve">
+    <value>Tento plugin nemá verzi pro tento systém.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeNotFound" xml:space="preserve">
+    <value>Nebyl nalezen žádný modul runtime .NET pro spuštění tohoto pluginu. Nainstalujte jej a spusťte plugin znovu.</value>
+  </data>
+  <data name="Errors.Plugins.DotnetRuntimeVersionMissing" xml:space="preserve">
+    <value>Žádný nainstalovaný modul runtime .NET nesplňuje požadovanou verzi {required}. Nainstalujte ji a spusťte plugin znovu.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledRolledBack" xml:space="preserve">
+    <value>Instalace byla zrušena a předchozí stav byl obnoven.</value>
+  </data>
+  <data name="Errors.Plugins.InstallCancelledNotRolledBack" xml:space="preserve">
+    <value>Instalace byla zrušena, ale předchozí stav nelze obnovit. Nová verze může být stále aktivní.</value>
   </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>
@@ -8819,6 +8852,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Keyboard.Errors.TargetingModeNotSupported" xml:space="preserve">
     <value>Tento režim zaměřování klávesnice není na této platformě podporován.</value>
   </data>
+  <data name="Integrations.Keyboard.Issues.DegradedTitle" xml:space="preserve">
+    <value>Vstup z klávesnice je ve Waylandu omezený</value>
+  </data>
   <data name="Integrations.Keyboard.Issues.GrantPermissionAction" xml:space="preserve">
     <value>Udělit oprávnění</value>
   </data>
@@ -8833,6 +8869,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Keyboard.Issues.UnsupportedTitle" xml:space="preserve">
     <value>Simulace klávesnice není dostupná</value>
+  </data>
+  <data name="Integrations.Keyboard.Issues.WaylandDegradedReason" xml:space="preserve">
+    <value>Toto je relace Wayland, takže vstup z klávesnice prochází přes XWayland. Aplikace běžící přes XWayland přijímají klávesy a text. Nativní aplikace Wayland je přijímat nemusí a akce klávesnice cílené na aplikaci je nenajdou.</value>
   </data>
   <data name="Integrations.Keyboard.Name" xml:space="preserve">
     <value>Klávesnice</value>
@@ -11716,6 +11755,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.System.Errors.VolumeUnavailable" xml:space="preserve">
     <value>Hlasitost systémového výstupu není dostupná.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedDescription" xml:space="preserve">
+    <value>Toto je relace Wayland, takže Macro Deck vidí jen aplikace běžící přes XWayland. Dokud má fokus nativní aplikace Wayland, proměnné aktivní aplikace si ponechají poslední hodnotu.</value>
+  </data>
+  <data name="Integrations.System.Issues.FocusDegradedTitle" xml:space="preserve">
+    <value>Rozpoznání aktivní aplikace je ve Waylandu omezené</value>
   </data>
   <data name="Integrations.System.Issues.GpuMetricsUnavailableDescription" xml:space="preserve">
     <value>Nebyla nalezena žádná podporovaná GPU. V systému Linux vyžadují metriky GPU ovladač amdgpu nebo nvidia-smi.</value>
@@ -14896,6 +14941,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Klíč identity tohoto počítače byl nahrazen. Pro další používání spárovaných telefonů a tabletů je nutné na každém z nich znovu naskenovat QR kód tohoto počítače.</value>
   </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Smyčka událostí zastavena</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Události se navzájem stále spouštěly, proto Macro Deck tento řetězec zastavil. Zkontrolujte automatizace a widgety, které na sebe reagují.</value>
+  </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Neúspěšný pokus o přihlášení</value>
   </data>
@@ -17658,7 +17709,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Exportujte záložní obnovovací klíč pro ochranu klíčenky. Do té doby zůstává čitelná na disku.</value>
   </data>
   <data name="Settings.Security.LockScreenDescription" xml:space="preserve">
-    <value>Blokuje spouštění akcí, když je tento počítač uzamčen, bez ohledu na to, co zde zvolíte. V Linuxu Macro Deck nerozpozná, že je tento počítač uzamčen, takže se akce dál spouštějí a připojení klienti se neuzamknou.</value>
+    <value>Blokuje spouštění akcí, když je tento počítač uzamčen, bez ohledu na to, co zde zvolíte. V Linuxu k tomu musí plocha hlásit uzamčení, například GNOME nebo KDE Plasma. Jinak se akce dál spouštějí a připojení klienti se neuzamknou.</value>
   </data>
   <data name="Settings.Security.LockScreenHeading" xml:space="preserve">
     <value>Uzamčená obrazovka</value>
@@ -19647,6 +19698,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Stahování se nezdařilo. {error}</value>
     <comment>[error:string]</comment>
   </data>
+  <data name="Update.Details.ManualDownloadHint" xml:space="preserve">
+    <value>Pokud se to opakuje, stáhněte nejnovější verzi z {url} a nainstalujte ji ručně.</value>
+  </data>
   <data name="Update.Details.CheckFailed" xml:space="preserve">
     <value>Aktualizace se nepodařilo zkontrolovat. {error}</value>
     <comment>[error:string]</comment>
@@ -21566,6 +21620,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Folder.FocusRule.UpdateFailedDefault" xml:space="preserve">
     <value>Pravidlo se nepodařilo aktualizovat</value>
+  </data>
+  <data name="Widgets.Folder.FocusRule.WaylandDegraded" xml:space="preserve">
+    <value>Toto je relace Wayland, takže Macro Deck vidí jen aplikace běžící přes XWayland. Automatická aktivace nemá u nativních aplikací Wayland žádný účinek.</value>
   </data>
   <data name="Widgets.Folder.FolderExported" xml:space="preserve">
     <value>Složka exportována</value>

@@ -64,6 +64,8 @@ export interface WidgetGridHandle {
 
   tileBox(widgetId: string): UiComponentBox | null;
 
+  flashPressed(widgetId: string): void;
+
   resize(): void;
   destroy(): void;
 }
@@ -559,6 +561,13 @@ export function renderWidgetGrid(
     tileBox(widgetId: string): UiComponentBox | null {
       const tile = tiles[widgetId];
       return tile === undefined ? null : boxOfTile(tile);
+    },
+
+    flashPressed(widgetId: string): void {
+      const tile = tiles[widgetId];
+      if (tile === undefined) return;
+      tile.press.press();
+      tile.press.release();
     },
 
     resize,

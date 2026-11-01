@@ -23,6 +23,7 @@ public class GetApplicationFocusCapabilityRequestMessageHandler
 		{
 			Supported = _watcher.IsSupported,
 			UnsupportedReason = _watcher.UnsupportedReason,
+			Degraded = _watcher.IsDegraded,
 			PreferredIdentityKind = OperatingSystem.IsMacOS()
 				? ApplicationIdentityKind.BundleId
 				: ApplicationIdentityKind.ExecutablePath
