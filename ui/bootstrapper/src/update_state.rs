@@ -179,6 +179,8 @@ pub(crate) struct UpdateSnapshot {
     pub(crate) backup: Option<BackupProgress>,
     #[serde(skip)]
     pub(crate) quit_install_failed: bool,
+    #[serde(skip)]
+    pub(crate) backup_skipped: bool,
 }
 
 pub(crate) struct UpdateState {
@@ -206,6 +208,7 @@ pub(crate) struct UpdateState {
     install_on_quit: bool,
     backup: Option<BackupProgress>,
     quit_install_failed: bool,
+    backup_skipped: bool,
 }
 
 impl UpdateState {
@@ -243,6 +246,7 @@ impl UpdateState {
             install_on_quit: false,
             backup: None,
             quit_install_failed: false,
+            backup_skipped: false,
         }
     }
 
@@ -384,6 +388,7 @@ impl UpdateState {
         self.install_on_quit = false;
         self.backup = None;
         self.quit_install_failed = false;
+        self.backup_skipped = false;
         true
     }
 
@@ -399,12 +404,17 @@ impl UpdateState {
         }
     }
 
+    pub(crate) fn record_backup_skipped(&mut self) {
+        self.backup_skipped = self.phase == UpdatePhase::Installing;
+    }
+
     // Used for both a failed download and a failed install: either way the
     // attempt did not produce an installed update, and `Failed` (rather than
     // going back to `Available`) is what tells the UI there is something to
     // show the user, not just a quiet retry point.
     pub(crate) fn record_install_failed(&mut self, error: String) {
         self.backup = None;
+        self.backup_skipped = false;
         self.phase = UpdatePhase::Failed;
         self.install_on_quit = false;
         self.error = Some(error);
@@ -498,6 +508,7 @@ impl UpdateState {
             install_on_quit: self.install_on_quit && self.phase == UpdatePhase::Downloaded,
             backup: self.backup.clone(),
             quit_install_failed: self.quit_install_failed,
+            backup_skipped: self.backup_skipped,
         }
     }
 }
