@@ -22,7 +22,7 @@ permissions:
 env:
   # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
   # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
-  DOTNET_VERSION: 10.0.401
+  DOTNET_VERSION: 10.0.402
   # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
   NODE_VERSION: '^22.22.3'
   BUILD_CHANNEL: Production

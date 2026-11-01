@@ -22,8 +22,8 @@ env:
   NODE_VERSION: '^22.22.3'
   # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
   # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
-  DOTNET_VERSION: 10.0.401
-  RUST_TOOLCHAIN: '1.99.0'
+  DOTNET_VERSION: 10.0.402
+  RUST_TOOLCHAIN: '1.99.1'
   # CI validates the installed product configuration. Local IDE builds keep
   # the Development default in Directory.Build.props and ui/bootstrapper/build.rs.
   BUILD_CHANNEL: Production
