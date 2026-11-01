@@ -894,6 +894,37 @@ describe('Shell', () => {
       expect(execute).not.toHaveBeenCalled();
     });
 
+    describe('press flash', () => {
+      const flashing = () => (root.querySelector('[data-widget-id="w1"]') as HTMLElement)
+        .classList.contains('deck-grid-tile-pressed');
+
+      it('confirms a press the tree claims', async () => {
+        await deckOf(gridWidget('w1', 0, 0), claimant('ui.button', { events: ['press'] }));
+
+        press('Enter');
+
+        expect(flashing()).toBeTrue();
+      });
+
+      it('confirms a press that takes the tile trigger path', async () => {
+        await deckOf(gridWidget('w1', 0, 0), tree('clock'));
+
+        press('Enter');
+
+        expect(flashing()).toBeTrue();
+        expect(execute).toHaveBeenCalledTimes(1);
+      });
+
+      it('stays dark on a tile that absorbs the press', async () => {
+        const disabled = claimant('ui.button', { events: ['press'], modifiers: { disabled: true } });
+        await deckOf(gridWidget('w1', 0, 0), disabled);
+
+        press('Enter');
+
+        expect(flashing()).toBeFalse();
+      });
+    });
+
     it('keeps a press made while only the remembered tree exists, for the reopened session', async () => {
       const widget = gridWidget('w1', 0, 0);
       const pressable = claimant('ui.button', { events: ['press'] });

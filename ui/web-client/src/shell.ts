@@ -496,8 +496,10 @@ export class Shell {
   private activateFromInput(widgetId: string): boolean {
     const sessions = this.client.widgetSessions;
     const claim = activationClaim(sessions.treeFor(widgetId), this.grid?.tileBox(widgetId) ?? null);
-    if (claim === 'none') return false;
     if (claim === 'absorbed') return true;
+
+    this.grid?.flashPressed(widgetId);
+    if (claim === 'none') return false;
 
     const node = claim.node;
     const activation = activationFor(node);
