@@ -35,8 +35,8 @@ permissions:
   contents: read
 
 env:
-  # Astro 7 requires >=22.12.0, so this is pinned tighter than the repo-wide NODE_VERSION.
-  NODE_VERSION: '22.12'
+  # Astro 7.4 requires >=22.22.0, so this is pinned as tightly as the other workflows.
+  NODE_VERSION: '^22.22.3'
 
 jobs:
   build:
