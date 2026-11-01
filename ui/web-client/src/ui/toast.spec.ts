@@ -6,6 +6,8 @@ describe('toasts', () => {
   const toasts = (): NodeListOf<HTMLElement> => root.querySelectorAll<HTMLElement>('.wc-toast');
 
   beforeEach(() => {
+    // The stack is one module-level list, so a toast raised late by another suite's timer moves in with the host.
+    dismissAllToasts();
     jasmine.clock().install();
     root = document.createElement('div');
     document.body.appendChild(root);
