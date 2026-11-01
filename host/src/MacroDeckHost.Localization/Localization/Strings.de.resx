@@ -3027,6 +3027,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Das Plugin konnte nicht beendet werden, daher wurde nichts entfernt. Versuche es erneut.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck startet noch, daher wurde das Plugin nicht gestartet. Versuche es gleich noch einmal.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wird beendet, daher wurde das Plugin nicht gestartet.</value>
   </data>
@@ -14896,6 +14899,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Der Identitätsschlüssel dieses Computers wurde ersetzt. Scanne auf jedem gekoppelten Handy oder Tablet den QR-Code dieses Computers erneut, um es weiter zu verwenden.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Ereignisschleife gestoppt</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Ereignisse haben sich immer wieder gegenseitig ausgelöst, deshalb hat Macro Deck diese Kette gestoppt. Prüfe die Automationen und Widgets, die aufeinander reagieren.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Fehlgeschlagener Anmeldeversuch</value>

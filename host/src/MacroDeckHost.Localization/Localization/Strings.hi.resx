@@ -3027,6 +3027,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>प्लगइन को रोका नहीं जा सका, इसलिए कुछ भी नहीं हटाया गया। फिर से कोशिश करें।</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck अभी शुरू हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया। कृपया कुछ देर बाद फिर से कोशिश करें।</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck बंद हो रहा है, इसलिए प्लगइन शुरू नहीं किया गया।</value>
   </data>
@@ -14899,6 +14902,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>इस कंप्यूटर की पहचान कुंजी बदल दी गई है। हर पेयर किए गए फ़ोन या टैबलेट पर इस कंप्यूटर का QR कोड फिर से स्कैन करें, ताकि आप इसका उपयोग जारी रख सकें।</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>इवेंट लूप रोका गया</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>इवेंट एक-दूसरे को लगातार ट्रिगर कर रहे थे, इसलिए Macro Deck ने यह शृंखला रोक दी। एक-दूसरे पर प्रतिक्रिया देने वाले ऑटोमेशन और विजेट जाँचें।</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>लॉगिन का प्रयास विफल</value>

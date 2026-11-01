@@ -4,10 +4,19 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using Mediator;
 using Microsoft.Extensions.Hosting;
 
 namespace MacroDeckHost.Application.Events.Handlers;
+
+internal static class VariableEventScope
+{
+	public static bool IsLocalToRun(VariableEntity variable)
+	{
+		return variable.Scope is VariableScope.Script or VariableScope.Automation;
+	}
+}
 
 public sealed class VariableValueChangedEventTriggerHandler
 	: INotificationHandler<VariableValueChangedNotification>
@@ -21,6 +30,11 @@ public sealed class VariableValueChangedEventTriggerHandler
 
 	public ValueTask Handle(VariableValueChangedNotification notification, CancellationToken cancellationToken)
 	{
+		if (VariableEventScope.IsLocalToRun(notification.Variable))
+		{
+			return ValueTask.CompletedTask;
+		}
+
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableChanged),
 			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
@@ -109,6 +123,11 @@ public sealed class VariableCreatedEventTriggerHandler : INotificationHandler<Va
 
 	public ValueTask Handle(VariableCreatedNotification notification, CancellationToken cancellationToken)
 	{
+		if (VariableEventScope.IsLocalToRun(notification.Variable))
+		{
+			return ValueTask.CompletedTask;
+		}
+
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableCreated),
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name }));
 
@@ -127,6 +146,11 @@ public sealed class VariableDeletedEventTriggerHandler : INotificationHandler<Va
 
 	public ValueTask Handle(VariableDeletedNotification notification, CancellationToken cancellationToken)
 	{
+		if (VariableEventScope.IsLocalToRun(notification.Variable))
+		{
+			return ValueTask.CompletedTask;
+		}
+
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableDeleted),
 			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name }));
 

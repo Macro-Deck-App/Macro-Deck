@@ -9,7 +9,7 @@ namespace MacroDeckHost.Infrastructure.BackgroundServices;
 
 public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 {
-	private static readonly TimeSpan _maximumSleep = TimeSpan.FromHours(1);
+	private static readonly TimeSpan _maximumSleep = TimeSpan.FromMinutes(1);
 
 	private readonly IEventBus _bus;
 	private readonly IEventSubscriptionIndex _index;
@@ -18,6 +18,9 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 	private readonly ILogger _logger;
 
 	private readonly SemaphoreSlim _replan = new(0, 1);
+
+	private TimeZoneInfo? _plannedZone;
+	private DateTimeOffset _zoneCheckedAt = DateTimeOffset.MinValue;
 
 	public ScheduledEventBackgroundService(
 		IHostApplicationLifetime lifetime,
@@ -47,6 +50,7 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				var now = _time.GetUtcNow();
+				DropPlansOnZoneChange(due, now);
 				var next = Plan(due, now);
 
 				await FireDue(due, now, stoppingToken);
@@ -55,7 +59,7 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 					? _maximumSleep
 					: Clamp(next.Value - _time.GetUtcNow());
 
-				await _replan.WaitAsync(sleep, stoppingToken);
+				await WaitForReplan(sleep, stoppingToken);
 			}
 		}
 		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -67,9 +71,43 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 		}
 	}
 
+	// The runtime caches the zone for the process, and a monotonic wait does not notice a system change.
+	private void DropPlansOnZoneChange(Dictionary<EventTarget, Planned> due, DateTimeOffset now)
+	{
+		if (now - _zoneCheckedAt < _maximumSleep)
+		{
+			return;
+		}
+
+		_zoneCheckedAt = now;
+		TimeZoneInfo.ClearCachedData();
+
+		var zone = _time.LocalTimeZone;
+		if (_plannedZone is not null && (_plannedZone.Id != zone.Id || !_plannedZone.HasSameRules(zone)))
+		{
+			foreach (var target in due.Where(entry => entry.Value.At > now).Select(entry => entry.Key).ToList())
+			{
+				due.Remove(target);
+			}
+		}
+
+		_plannedZone = zone;
+	}
+
+	private async Task WaitForReplan(TimeSpan timeout, CancellationToken cancellationToken)
+	{
+		using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		var delay = Task.Delay(timeout, _time, linked.Token);
+		var signalled = _replan.WaitAsync(linked.Token);
+
+		await Task.WhenAny(delay, signalled);
+		await linked.CancelAsync();
+		cancellationToken.ThrowIfCancellationRequested();
+	}
+
 	private DateTimeOffset? Plan(Dictionary<EventTarget, Planned> due, DateTimeOffset now)
 	{
-		var timeZone = TimeZoneInfo.Local;
+		var timeZone = _time.LocalTimeZone;
 		var subscriptions = _index.FindByProvider(TimeEventProvider.ProviderIdValue);
 		var live = new HashSet<EventTarget>();
 
@@ -108,7 +146,7 @@ public sealed class ScheduledEventBackgroundService : HostReadyBackgroundService
 		DateTimeOffset now,
 		CancellationToken cancellationToken)
 	{
-		var timeZone = TimeZoneInfo.Local;
+		var timeZone = _time.LocalTimeZone;
 
 		foreach (var (target, planned) in due.Where(entry => entry.Value.At <= now).ToList())
 		{

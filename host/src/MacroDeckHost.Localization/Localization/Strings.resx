@@ -3027,6 +3027,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>The plugin could not be stopped, so nothing was removed. Try again.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck is still starting, so the plugin was not started. Try again in a moment.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck is shutting down, so the plugin was not started.</value>
   </data>
@@ -14901,6 +14904,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>This computer's identity key was replaced. On every paired phone or tablet, scan this computer's QR code again to keep using it.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Event loop stopped</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Events kept triggering each other, so Macro Deck stopped this chain. Check the automations and widgets that react to each other.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Failed login attempt</value>

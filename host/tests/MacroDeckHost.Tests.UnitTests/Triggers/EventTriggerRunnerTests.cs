@@ -15,6 +15,7 @@ public class EventTriggerRunnerTests
 	private StubFolderCache _folders = null!;
 	private StubAutomationCache _automations = null!;
 	private RecordingFlowExecutor _executor = null!;
+	private RecordingEventCascadeNotifier _cascade = null!;
 	private EventTriggerRunner _runner = null!;
 
 	[SetUp]
@@ -23,12 +24,14 @@ public class EventTriggerRunnerTests
 		_folders = new StubFolderCache();
 		_automations = new StubAutomationCache();
 		_executor = new RecordingFlowExecutor();
+		_cascade = new RecordingEventCascadeNotifier();
 		_runner = new EventTriggerRunner(_folders,
 			_automations,
 			new EmptyEventRegistry(),
 			new AlwaysMatchingMatcher(),
 			new EmptyVariableRenderer(),
 			_executor,
+			_cascade,
 			new LoggerConfiguration().CreateLogger());
 	}
 
@@ -40,6 +43,33 @@ public class EventTriggerRunnerTests
 	private static EventOccurrence Occurrence(EventSubscription subscription)
 	{
 		return new EventOccurrence(subscription.EventId, EventOccurrence.NoParameters, subscription.Target);
+	}
+
+	[Test]
+	public async Task A_chain_at_the_limit_is_stopped_and_the_user_is_told()
+	{
+		var automation = _automations.Add(Flows);
+		var subscription = Subscription(EventTriggerOwner.ForAutomation(automation.Id));
+		var occurrence = Occurrence(subscription) with { CascadeDepth = EventCascade.MaxDepth };
+
+		await _runner.Run(subscription, occurrence, CancellationToken.None);
+
+		Assert.That(_executor.Requests, Is.Empty);
+		Assert.That(_cascade.Stopped, Is.EqualTo(new[] { subscription.Owner }));
+	}
+
+	[Test]
+	public async Task A_chain_below_the_limit_runs_and_counts_one_step_deeper_inside_the_flow()
+	{
+		var automation = _automations.Add(Flows);
+		var subscription = Subscription(EventTriggerOwner.ForAutomation(automation.Id));
+		var occurrence = Occurrence(subscription) with { CascadeDepth = EventCascade.MaxDepth - 1 };
+
+		await _runner.Run(subscription, occurrence, CancellationToken.None);
+
+		Assert.That(_executor.DepthInsideFlow, Is.EqualTo(EventCascade.MaxDepth));
+		Assert.That(_cascade.Stopped, Is.Empty);
+		Assert.That(EventCascade.Current, Is.Zero);
 	}
 
 	[Test]
@@ -167,9 +197,12 @@ public class EventTriggerRunnerTests
 	{
 		public List<FlowExecutionRequest> Requests { get; } = [];
 
+		public int DepthInsideFlow { get; private set; }
+
 		public Task<FlowExecutionResult> ExecuteAsync(FlowExecutionRequest request, CancellationToken cancellationToken)
 		{
 			Requests.Add(request);
+			DepthInsideFlow = EventCascade.Current;
 			return Task.FromResult(new FlowExecutionResult
 			{
 				ExecutionId = Guid.NewGuid(),

@@ -3027,6 +3027,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>无法停止插件，因此未删除任何内容。请重试。</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck 仍在启动，因此未启动插件。请稍后重试。</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck 正在关闭，因此未启动插件。</value>
   </data>
@@ -14899,6 +14902,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>这台电脑的身份密钥已被替换。请在每台已配对的手机或平板上重新扫描这台电脑的二维码，才能继续使用。</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>事件循环已停止</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>事件不断相互触发，因此 Macro Deck 已停止此链。请检查相互响应的自动化和组件。</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>登录尝试失败</value>

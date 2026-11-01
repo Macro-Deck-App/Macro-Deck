@@ -3027,6 +3027,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>De plug-in kon niet worden gestopt, dus er is niets verwijderd. Probeer het opnieuw.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck is nog aan het opstarten, daarom is de plug-in niet gestart. Probeer het zo meteen opnieuw.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck wordt afgesloten, daarom is de plug-in niet gestart.</value>
   </data>
@@ -14899,6 +14902,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>De identiteitssleutel van deze computer is vervangen. Scan op elke gekoppelde telefoon of tablet de QR-code van deze computer opnieuw om hem te blijven gebruiken.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Gebeurtenislus gestopt</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Gebeurtenissen bleven elkaar activeren, dus Macro Deck heeft deze keten gestopt. Controleer de automatiseringen en widgets die op elkaar reageren.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Mislukte inlogpoging</value>

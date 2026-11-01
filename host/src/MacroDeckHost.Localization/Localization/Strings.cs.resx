@@ -3028,6 +3028,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>Plugin se nepodařilo zastavit, proto nebylo nic odstraněno. Zkuste to znovu.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>Macro Deck se stále spouští, proto plugin nebyl spuštěn. Zkuste to znovu za chvíli.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>Macro Deck se vypíná, proto plugin nebyl spuštěn.</value>
   </data>
@@ -14898,6 +14901,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>Klíč identity tohoto počítače byl nahrazen. Pro další používání spárovaných telefonů a tabletů je nutné na každém z nich znovu naskenovat QR kód tohoto počítače.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>Smyčka událostí zastavena</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>Události se navzájem stále spouštěly, proto Macro Deck tento řetězec zastavil. Zkontrolujte automatizace a widgety, které na sebe reagují.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>Neúspěšný pokus o přihlášení</value>

@@ -52,6 +52,43 @@ internal static class MacOsRunningApplication
 		}
 	}
 
+	public static bool TryTerminate(int processId)
+	{
+		var pool = objc_autoreleasePoolPush();
+		try
+		{
+			if (!NativeLibrary.TryLoad(AppKit, out _))
+			{
+				return false;
+			}
+
+			var applicationClass = objc_getClass(Utf8("NSRunningApplication"));
+			if (applicationClass == IntPtr.Zero)
+			{
+				return false;
+			}
+
+			var app = objc_msgSend_pid(applicationClass,
+				sel_registerName(Utf8("runningApplicationWithProcessIdentifier:")),
+				processId);
+			if (app == IntPtr.Zero)
+			{
+				return false;
+			}
+
+			_ = objc_msgSend_noArgs(app, sel_registerName(Utf8("terminate")));
+			return true;
+		}
+		catch
+		{
+			return false;
+		}
+		finally
+		{
+			objc_autoreleasePoolPop(pool);
+		}
+	}
+
 	public static MacOsRunningApplicationInfo? TryRead(IntPtr app)
 	{
 		if (app == IntPtr.Zero)
@@ -103,6 +140,9 @@ internal static class MacOsRunningApplication
 
 	[DllImport(LibObjC, EntryPoint = "objc_msgSend")]
 	private static extern IntPtr objc_msgSend_noArgs(IntPtr receiver, IntPtr selector);
+
+	[DllImport(LibObjC, EntryPoint = "objc_msgSend")]
+	private static extern IntPtr objc_msgSend_pid(IntPtr receiver, IntPtr selector, int processId);
 
 	[DllImport(LibObjC, EntryPoint = "objc_msgSend")]
 	private static extern nint objc_msgSend_intRet(IntPtr receiver, IntPtr selector);

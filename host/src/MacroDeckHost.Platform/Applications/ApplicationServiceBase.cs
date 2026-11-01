@@ -173,6 +173,14 @@ internal abstract partial class ApplicationServiceBase(ILogger logger) : IApplic
 
 	protected abstract Task FocusAsync(string path, CancellationToken cancellationToken);
 
+	protected virtual void StopProcess(Process process)
+	{
+		if (!process.CloseMainWindow())
+		{
+			process.Kill();
+		}
+	}
+
 	private Task StopMatchingAsync(string path)
 	{
 		var processes = ProcessMatcher.Find(path);
@@ -182,10 +190,7 @@ internal abstract partial class ApplicationServiceBase(ILogger logger) : IApplic
 			{
 				try
 				{
-					if (!process.CloseMainWindow())
-					{
-						process.Kill();
-					}
+					StopProcess(process);
 				}
 				catch (Exception exception)
 				{

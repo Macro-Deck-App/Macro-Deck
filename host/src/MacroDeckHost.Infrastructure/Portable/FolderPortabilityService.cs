@@ -4,6 +4,7 @@ using MacroDeckHost.Application.Persistence.Profiles;
 using MacroDeckHost.Application.Portable;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Secrets.Approvals;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -23,6 +24,7 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 	private readonly IMediator _mediator;
 	private readonly ILogger _logger;
 	private readonly SecretWriteAuthority? _writeAuthority;
+	private readonly WidgetLayoutGate _layoutGate;
 
 	public FolderPortabilityService(
 		IProfileCache profileCache,
@@ -30,7 +32,8 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		IPortableAssetManager assetManager,
 		IMediator mediator,
 		ILogger logger,
-		SecretWriteAuthority? writeAuthority = null)
+		SecretWriteAuthority? writeAuthority = null,
+		WidgetLayoutGate? layoutGate = null)
 	{
 		_profileCache = profileCache;
 		_folderCache = folderCache;
@@ -38,6 +41,7 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		_mediator = mediator;
 		_logger = logger;
 		_writeAuthority = writeAuthority;
+		_layoutGate = layoutGate ?? new WidgetLayoutGate();
 	}
 
 	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
@@ -175,21 +179,10 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 		// The grids and positions are settled before anything is created: the profile's pinned widgets
 		// render in every folder they reach, so an imported folder has to leave their cells free - and a
 		// folder that cannot is a failed import, not a half-imported tree.
-		var profileFolders = _folderCache.GetFoldersByProfileId(profileId);
-		var profileDefaultRows = targetProfile.DefaultRows;
-		var profileDefaultColumns = targetProfile.DefaultColumns;
-		var foldersForReach = profileFolders.Concat(folders).ToList();
-		foreach (var folder in folders)
+		if (FirstUnplaceableFolder(folders, targetProfile) is { } unplaceable)
 		{
-			var effectiveColumns = GridInheritance.ResolveColumns(folder, foldersForReach, profileDefaultColumns);
-			var effectiveRows = GridInheritance.ResolveRows(folder, foldersForReach, profileDefaultRows);
-			PinnedWidgetLayout.GrowToFitPinned(folder, foldersForReach, effectiveColumns, effectiveRows);
-
-			if (!TryPlaceWidgets(folder, foldersForReach, folder.Columns!.Value, folder.Rows!.Value))
-			{
-				return Fail(PortabilityError.ValidationError,
-					$"'{folder.Name}' does not fit into the profile's grid alongside its pinned widgets");
-			}
+			return Fail(PortabilityError.ValidationError,
+				$"'{unplaceable.Name}' does not fit into the profile's grid alongside its pinned widgets");
 		}
 
 		try
@@ -209,10 +202,19 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 					PortableSecretReferences.Remap(widget.Data, idMap, carriedSecrets));
 			}
 
+			using var lease = await _layoutGate.Enter(cancellationToken);
+			if (FirstUnplaceableFolder(folders, targetProfile) is { } displaced)
+			{
+				return Fail(PortabilityError.ValidationError,
+					$"'{displaced.Name}' does not fit into the profile's grid alongside its pinned widgets");
+			}
+
 			foreach (var folder in folders)
 			{
 				await _folderCache.AddOrUpdate(folder, Approval);
 			}
+
+			lease.Dispose();
 
 			// The minted ids only, never idMap: that one also carries imported asset ids, whose targets are
 			// pre-existing local icons and scripts once dedup hits. Handing those over would let a
@@ -345,6 +347,24 @@ public sealed class FolderPortabilityService : IFolderPortabilityService
 					.ToList()
 			})
 			.ToList();
+	}
+
+	private FolderEntity? FirstUnplaceableFolder(IReadOnlyList<FolderEntity> folders, ProfileEntity profile)
+	{
+		var foldersForReach = _folderCache.GetFoldersByProfileId(profile.Id).Concat(folders).ToList();
+		foreach (var folder in folders)
+		{
+			var effectiveColumns = GridInheritance.ResolveColumns(folder, foldersForReach, profile.DefaultColumns);
+			var effectiveRows = GridInheritance.ResolveRows(folder, foldersForReach, profile.DefaultRows);
+			PinnedWidgetLayout.GrowToFitPinned(folder, foldersForReach, effectiveColumns, effectiveRows);
+
+			if (!TryPlaceWidgets(folder, foldersForReach, folder.Columns!.Value, folder.Rows!.Value))
+			{
+				return folder;
+			}
+		}
+
+		return null;
 	}
 
 	private static bool TryPlaceWidgets(

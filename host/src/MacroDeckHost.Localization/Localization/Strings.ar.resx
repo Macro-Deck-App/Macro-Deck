@@ -3027,6 +3027,9 @@
   <data name="Errors.Plugins.UninstallStopFailed" xml:space="preserve">
     <value>تعذّر إيقاف المكوّن الإضافي، لذا لم تتم إزالة أي شيء. حاول مرة أخرى.</value>
   </data>
+  <data name="Errors.Plugins.HostNotReady" xml:space="preserve">
+    <value>لا يزال Macro Deck قيد التشغيل، لذلك لم يتم تشغيل المكوّن الإضافي. حاول مرة أخرى بعد قليل.</value>
+  </data>
   <data name="Errors.Plugins.HostShuttingDown" xml:space="preserve">
     <value>يتم إيقاف تشغيل Macro Deck، لذلك لم يتم تشغيل المكوّن الإضافي.</value>
   </data>
@@ -14899,6 +14902,12 @@
   </data>
   <data name="Notifications.HostIdentityRenewedMessage" xml:space="preserve">
     <value>تم استبدال مفتاح هوية هذا الكمبيوتر. على كل هاتف أو جهاز لوحي مقترن، امسح رمز الاستجابة السريعة لهذا الكمبيوتر مرة أخرى لمواصلة استخدامه.</value>
+  </data>
+  <data name="Notifications.EventCascadeStopped" xml:space="preserve">
+    <value>تم إيقاف حلقة الأحداث</value>
+  </data>
+  <data name="Notifications.EventCascadeStoppedMessage" xml:space="preserve">
+    <value>استمرت الأحداث في تشغيل بعضها بعضًا، لذا أوقف Macro Deck هذه السلسلة. تحقق من عمليات الأتمتة والأدوات التي تتفاعل مع بعضها.</value>
   </data>
   <data name="Notifications.FailedLogin" xml:space="preserve">
     <value>محاولة تسجيل دخول فاشلة</value>
