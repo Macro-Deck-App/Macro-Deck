@@ -76,7 +76,8 @@ step 2 of 2, the install. **Cancel update** in either window stops the backup an
 uninstalled; you can install it again later. See [Backups](/guide/backups/).
 
 While Macro Deck asks for the recovery key when it starts, it cannot read its data and so cannot make a
-backup. An update you install then goes ahead without one.
+backup. An update you install then goes ahead without one, and the update window says so, as does a system
+notification if your system shows it.
 
 ## Extension updates
 

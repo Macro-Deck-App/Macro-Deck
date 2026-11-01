@@ -1157,6 +1157,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>無法連線至 Macro Deck 主機，因此無法建立備份。</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck 正在等待復原金鑰，無法讀取其資料，因此此次更新將在沒有備份的情況下繼續。</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>正在更新，未建立備份</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck 無法確認備份是否已建立。</value>
   </data>

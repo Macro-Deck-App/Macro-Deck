@@ -1158,6 +1158,12 @@ Macro Deck został zainstalowany z repozytorium APT. Po opublikowaniu nowej wers
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Host Macro Deck jest niedostępny, więc nie udało się utworzyć kopii zapasowej.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck oczekuje na klucz odzyskiwania i nie może odczytać swoich danych, więc ta aktualizacja jest instalowana bez kopii zapasowej.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Aktualizacja bez kopii zapasowej</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck nie mógł potwierdzić utworzenia kopii zapasowej.</value>
   </data>

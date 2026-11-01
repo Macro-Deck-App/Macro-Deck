@@ -1157,6 +1157,12 @@
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>المضيف الخاص بـ Macro Deck غير قابل للوصول، لذلك تعذّر إنشاء نسخة احتياطية.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>ينتظر Macro Deck مفتاح الاسترداد ولا يمكنه قراءة بياناته، لذا يستمر هذا التحديث بدون نسخة احتياطية.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>التحديث بدون نسخة احتياطية</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>تعذّر على Macro Deck التأكد من إنشاء نسخة احتياطية.</value>
   </data>

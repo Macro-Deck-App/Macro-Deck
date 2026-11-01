@@ -1157,6 +1157,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Хост Macro Deck недоступен, поэтому резервную копию создать нельзя.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck ожидает ключ восстановления и не может прочитать свои данные, поэтому обновление выполняется без резервной копии.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Обновление без резервной копии</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck не смог подтвердить создание резервной копии.</value>
   </data>

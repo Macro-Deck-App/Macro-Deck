@@ -1158,6 +1158,12 @@ Macro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v 
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Hostitel Macro Deck není dostupný, takže nebylo možné vytvořit zálohu.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck čeká na obnovovací klíč a nemůže číst svá data, proto tato aktualizace pokračuje bez zálohy.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Aktualizace bez zálohy</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck se nepodařilo potvrdit vytvoření zálohy.</value>
   </data>

@@ -1157,6 +1157,12 @@ O Macro Deck foi instalado pelo repositório APT, então execute sudo apt update
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>O host do Macro Deck não está acessível, então nenhum backup pôde ser criado.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>O Macro Deck está aguardando a chave de recuperação e não consegue ler seus dados, então esta atualização continua sem backup.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Atualização sem backup</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>O Macro Deck não conseguiu confirmar que um backup foi criado.</value>
   </data>

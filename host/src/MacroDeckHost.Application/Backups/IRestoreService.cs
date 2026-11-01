@@ -56,6 +56,8 @@ public interface IRestoreLock
 public sealed record PreUpdateBackupOutcome(bool Success, bool Skipped, string? Reason, Guid? BackupId)
 {
 	public bool Cancelled { get; init; }
+
+	public BackupError? Error { get; init; }
 }
 
 public interface IPreUpdateBackupCoordinator : IRestoreLock

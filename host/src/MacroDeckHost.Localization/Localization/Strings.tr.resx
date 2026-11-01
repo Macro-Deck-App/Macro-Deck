@@ -1157,6 +1157,12 @@ Macro Deck APT deposundan yüklendi; yeni sürüm orada yayımlandığında sudo
   <data name="Bootstrapper.Update.BackupHostUnreachable" xml:space="preserve">
     <value>Macro Deck ana bilgisayarına ulaşılamıyor, bu yüzden yedek oluşturulamadı.</value>
   </data>
+  <data name="Bootstrapper.Update.BackupSkippedMessage" xml:space="preserve">
+    <value>Macro Deck kurtarma anahtarını bekliyor ve verilerini okuyamıyor, bu nedenle bu güncelleme yedeksiz devam ediyor.</value>
+  </data>
+  <data name="Bootstrapper.Update.BackupSkippedTitle" xml:space="preserve">
+    <value>Yedeksiz güncelleniyor</value>
+  </data>
   <data name="Bootstrapper.Update.BackupUnconfirmed" xml:space="preserve">
     <value>Macro Deck bir yedeğin oluşturulduğunu doğrulayamadı.</value>
   </data>
