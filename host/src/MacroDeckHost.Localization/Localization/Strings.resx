@@ -936,6 +936,9 @@
   <data name="Bootstrapper.Errors.DatabaseFromNewerVersion" xml:space="preserve">
     <value>This data folder was last used by a newer version of Macro Deck. Install that version again; your data has not been changed.</value>
   </data>
+  <data name="Bootstrapper.Errors.HostAlreadyRunning" xml:space="preserve">
+    <value>Another Macro Deck host is already running under this account. Close it or restart the computer, then start Macro Deck again.</value>
+  </data>
   <data name="Bootstrapper.Errors.HostBinaryMissing" xml:space="preserve">
     <value>The Macro Deck host binary is missing:
 {paths}</value>

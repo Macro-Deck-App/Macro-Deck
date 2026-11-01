@@ -89,6 +89,7 @@ public static class Program
 			if (await SingleInstanceGuard.IsAnotherInstanceRunning())
 			{
 				Log.Information("Another host instance is already running, exiting");
+				Environment.ExitCode = HostExitCodes.AnotherInstanceRunning;
 				return;
 			}
 
@@ -350,8 +351,7 @@ public static class Program
 		{
 			// Outside the data root on purpose: it must never be backed up, restored, or mistaken for
 			// the real ring.
-			scratchKeys = Path.Combine(Path.GetTempPath(), "macro-deck-locked-keys", Guid.NewGuid().ToString("N"));
-			Directory.CreateDirectory(scratchKeys);
+			scratchKeys = Directory.CreateTempSubdirectory("macro-deck-locked-keys-").FullName;
 
 			Log.Error("The key ring is locked ({Reason}). Stored secrets stay untouched until it is unlocked",
 				plan.LockReason);

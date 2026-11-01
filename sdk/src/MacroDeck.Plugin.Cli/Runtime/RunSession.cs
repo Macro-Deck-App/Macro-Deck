@@ -409,7 +409,7 @@ internal static class RunSession
 		console.WriteError("host-not-found",
 			"No running Macro Deck host was found. Its loopback port file is written while the host runs "
 			+ "and removed when it stops; none was readable at "
-			+ string.Join(" or ", HostDiscovery.ProbedPaths(Path.GetTempPath()))
+			+ string.Join(" or ", HostDiscovery.SearchedPaths())
 			+ ". Start Macro Deck, pass "
 			+ "--host-url <url>, or use --stub-host to run against a disposable stub host instead.");
 		return false;

@@ -103,6 +103,11 @@ macrodeck-plugin run --project src/HelloDeck --stub-host                        
   bound to `macro-deck-host.port` (or `macro-deck-host-development.port` for a Development build) in the
   system temp directory, and deletes it on exit. `run` reads it and points the plugin at
   `http://127.0.0.1:<port>` - the same URL the supervisor injects as `MACRO_DECK_PLUGIN_HOST_URL`.
+- **On Linux with the shared `/tmp`**, a current host also writes the file to `$XDG_CONFIG_HOME/macro-deck`
+  (default `~/.config/macro-deck`), and `run` looks there first, so two users on one machine each find
+  their own host. The temp file stays for older tools and older hosts; `run` skips one whose listener
+  belongs to another user or is gone. With a custom `TMPDIR`, and on macOS and Windows, whose temp
+  directories are per user, only the temp directory is used.
 - Both names are probed. If a Development and a Production host run side by side, the most recently
   written port file wins - the host you started last.
 - No readable port file fails with `host-not-found` (exit 3). `run` never falls back to the stub
