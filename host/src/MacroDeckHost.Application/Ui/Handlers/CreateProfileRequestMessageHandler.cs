@@ -11,17 +11,26 @@ public class
 {
 	private readonly IProfileService _profileService;
 	private readonly IColorReferenceResolver _colors;
+	private readonly StartupReadiness _readiness;
 
-	public CreateProfileRequestMessageHandler(IProfileService profileService, IColorReferenceResolver colors)
+	public CreateProfileRequestMessageHandler(
+		IProfileService profileService,
+		IColorReferenceResolver colors,
+		StartupReadiness readiness)
 	{
 		_colors = colors;
 		_profileService = profileService;
+		_readiness = readiness;
 	}
 
 	public async ValueTask<CreateProfileResponse> Handle(
 		CreateProfileRequest request,
 		CancellationToken cancellationToken)
 	{
+		// Clients connect as soon as Kestrel listens; a profile created before the caches load would
+		// read as an existing install and stop the first start from creating the Default Profile.
+		await _readiness.WhenCachesReady.WaitAsync(cancellationToken);
+
 		var result = await _profileService.Create(request.Name,
 			null,
 			request.DefaultRows,
