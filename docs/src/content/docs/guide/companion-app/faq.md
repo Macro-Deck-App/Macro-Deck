@@ -82,6 +82,14 @@ shows. The tag has to be set up and enabled in the app on this device under **NF
 whether it is. A tag tapped again within a few seconds does nothing on purpose. See
 [NFC tags](/guide/companion-app/nfc-tags/).
 
+## I tapped a widget or ran a script and one step did not happen
+
+A step that uses a stored secret stops running when something changes it, until you approve it on your
+computer. The rest of the flow still runs, and the app shows no message for it: a widget looks as if it worked,
+and a script reports that it ran, for example in Shortcuts or on a tile. Open
+**Approvals** in Macro Deck on your computer, see [Approvals](/guide/tips/#approvals). You cannot approve a step
+from the app.
+
 ## Can I use the app on a device without Google Play services?
 
 Yes. There is a separate version of the Android app that does not need Google Play services, for example for
