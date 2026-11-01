@@ -1,5 +1,5 @@
 import {
-  ClientAppStrings, DEFAULT_WEB_CLIENT_TARGET, VideoStreamClient, WidgetType, type GridWidget, type UiNode,
+  ClientAppStrings, DEFAULT_WEB_CLIENT_TARGET, UiComponents, VideoStreamClient, WidgetType, type GridWidget, type UiNode,
   type UiRenderHost, type WebClientTarget,
 } from '@macro-deck/runtime';
 import { Appearance } from './appearance';
@@ -59,7 +59,7 @@ function pointerEvent(type: string): Event {
 class FakeConnection {
   private next = 0;
 
-  request<T>(type: string): Promise<T> {
+  request<T>(type: string, _payload?: unknown): Promise<T> {
     if (type === 'OpenWidgetUiSession') {
       return Promise.resolve({ accepted: true, sessionId: `s${++this.next}` } as unknown as T);
     }
@@ -786,6 +786,160 @@ describe('Shell', () => {
       client.sessions.treeUpdated('s1', 2, tree('clock'));
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
       expect(executed).toEqual(['w1']);
+    });
+  });
+
+  describe('hardware press on a tile whose tree claims it', () => {
+    interface SentEvent { nodeId: string; name: string; data?: unknown }
+
+    class RecordingConnection extends FakeConnection {
+      readonly sent: SentEvent[] = [];
+
+      override request<T>(type: string, payload?: unknown): Promise<T> {
+        if (type !== 'SendUiEvent') return super.request<T>(type);
+        const { nodeId, name, data } = (payload as SentEvent[])[0];
+        this.sent.push(data === undefined ? { nodeId, name } : { nodeId, name, data });
+        return Promise.resolve({ accepted: true } as unknown as T);
+      }
+    }
+
+    const claimant = (type: string, properties: Record<string, unknown>, children: UiNode[] = []): UiNode =>
+      ({ id: 'root', type: 'ui.stack', properties: {}, children: [{ id: 'node', type, properties, children }] }) as UiNode;
+
+    const press = (key: string) => document.dispatchEvent(new KeyboardEvent('keydown', { key }));
+
+    let connection: RecordingConnection;
+    let execute: jasmine.Spy;
+    let widgetSessions: WidgetSessions;
+
+    async function deckOf(widget: GridWidget, firstTree: UiNode): Promise<void> {
+      connection = new RecordingConnection();
+      widgetSessions = new WidgetSessions(connection, client.sessions);
+      (client as unknown as { widgetSessions: WidgetSessions }).widgetSessions = widgetSessions;
+      execute = spyOn(client, 'executeTrigger').and.returnValue(Promise.resolve() as never);
+      const target = {
+        ...DEFAULT_WEB_CLIENT_TARGET,
+        hardwareInput: {
+          keys: [
+            { key: 'Enter', event: { kind: 'activate' as const } },
+            { key: '1', event: { kind: 'selectIndex' as const, index: 0 } },
+          ],
+        },
+      };
+      client.deck.load([{ ...(folder('root') as unknown as Record<string, unknown>), widgets: [widget] } as never]);
+      new Shell(root, client, host, { ...services(), target });
+      client.app.set({ probed: true, authenticated: true, connected: true, deckRendered: true });
+      widgetSessions.sync([widget]);
+      await settle();
+      client.sessions.treeUpdated('s1', 1, firstTree);
+    }
+
+    it('sends the whole press lifecycle to the node, once, and fires no tile trigger', async () => {
+      await deckOf(gridWidget('w1', 0, 0), claimant('ui.button', { events: ['press', 'press-end', 'press-start'] }));
+
+      press('Enter');
+
+      expect(connection.sent).toEqual([
+        { nodeId: 'node', name: 'press-start' },
+        { nodeId: 'node', name: 'press-end' },
+        { nodeId: 'node', name: 'press' },
+      ]);
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('sends only what the node declares', async () => {
+      await deckOf(gridWidget('w1', 0, 0), claimant('ui.button', { events: ['press'] }));
+
+      press('1');
+
+      expect(connection.sent).toEqual([{ nodeId: 'node', name: 'press' }]);
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('reaches the press handler of a plugin tile instead of its flows', async () => {
+      const plugin = { ...gridWidget('w1', 0, 0), type: 'app.example::tile' } as GridWidget;
+      await deckOf(plugin, claimant('ui.button', { events: ['press'] }));
+
+      press('Enter');
+
+      expect(connection.sent).toEqual([{ nodeId: 'node', name: 'press' }]);
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    it('flips a toggle', async () => {
+      await deckOf(gridWidget('w1', 0, 0), claimant(UiComponents.Toggle, { events: ['change', 'press'], on: true }));
+
+      press('Enter');
+
+      expect(connection.sent).toEqual([{ nodeId: 'node', name: 'change', data: false }]);
+    });
+
+    it('steps a segmented control to its next segment', async () => {
+      const segment = (id: string) => ({ id, type: 'ui.text', properties: { text: id } }) as UiNode;
+      await deckOf(
+        gridWidget('w1', 0, 0),
+        claimant(UiComponents.Segmented, { events: ['change'], selected: 1 }, [segment('a'), segment('b'), segment('c')]));
+
+      press('Enter');
+
+      expect(connection.sent).toEqual([{ nodeId: 'node', name: 'change', data: 2 }]);
+    });
+
+    it('leaves a slider silent, as the desktop does, since it declares no press', async () => {
+      await deckOf(gridWidget('w1', 0, 0), claimant('ui.slider', { events: ['adjust', 'change'] }));
+
+      press('Enter');
+
+      expect(connection.sent).toEqual([]);
+      expect(execute).not.toHaveBeenCalled();
+    });
+
+    describe('press flash', () => {
+      const flashing = () => (root.querySelector('[data-widget-id="w1"]') as HTMLElement)
+        .classList.contains('deck-grid-tile-pressed');
+
+      it('confirms a press the tree claims', async () => {
+        await deckOf(gridWidget('w1', 0, 0), claimant('ui.button', { events: ['press'] }));
+
+        press('Enter');
+
+        expect(flashing()).toBeTrue();
+      });
+
+      it('confirms a press that takes the tile trigger path', async () => {
+        await deckOf(gridWidget('w1', 0, 0), tree('clock'));
+
+        press('Enter');
+
+        expect(flashing()).toBeTrue();
+        expect(execute).toHaveBeenCalledTimes(1);
+      });
+
+      it('stays dark on a tile that absorbs the press', async () => {
+        const disabled = claimant('ui.button', { events: ['press'], modifiers: { disabled: true } });
+        await deckOf(gridWidget('w1', 0, 0), disabled);
+
+        press('Enter');
+
+        expect(flashing()).toBeFalse();
+      });
+    });
+
+    it('keeps a press made while only the remembered tree exists, for the reopened session', async () => {
+      const widget = gridWidget('w1', 0, 0);
+      const pressable = claimant('ui.button', { events: ['press'] });
+      await deckOf(widget, pressable);
+      widgetSessions.sessionClosed('s1');
+
+      press('Enter');
+      expect(connection.sent).toEqual([]);
+
+      widgetSessions.sync([widget]);
+      await settle();
+      client.sessions.treeUpdated('s2', 1, pressable);
+
+      expect(connection.sent).toEqual([{ nodeId: 'node', name: 'press' }]);
+      expect(execute).not.toHaveBeenCalled();
     });
   });
 

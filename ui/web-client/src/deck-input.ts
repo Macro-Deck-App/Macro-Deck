@@ -103,6 +103,8 @@ export class DeckInput {
   }
 
   private activateFocused(): void {
+    if (this.target.modalOpen()) return;
+
     const widget = this.focusedWidget();
     if (widget === null) return;
 

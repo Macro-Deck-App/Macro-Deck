@@ -92,6 +92,25 @@ describe('runtime widget grid', () => {
     expect(container.querySelectorAll('.deck-grid-tile-focused').length).toBe(0);
   });
 
+  it('flashes only the named tile, for the minimum visible time, and ignores an unknown one', () => {
+    jasmine.clock().install();
+    jasmine.clock().mockDate();
+    try {
+      const handle = mount();
+      handle.update([widget('a', 0, 0), widget('b', 1, 0)], () => undefined);
+
+      handle.flashPressed('a');
+      handle.flashPressed('gone');
+      expect(tileOf('a').classList.contains('deck-grid-tile-pressed')).toBeTrue();
+      expect(tileOf('b').classList.contains('deck-grid-tile-pressed')).toBeFalse();
+
+      jasmine.clock().tick(PRESS_FEEDBACK_MIN_VISIBLE_MS);
+      expect(tileOf('a').classList.contains('deck-grid-tile-pressed')).toBeFalse();
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
   it('keeps the focus ring on the right widget when the deck is redrawn', () => {
     const handle = mount();
     handle.update([widget('a', 0, 0), widget('b', 1, 0)], () => undefined);
