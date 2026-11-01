@@ -38,7 +38,7 @@ permissions:
 env:
   # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
   # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
-  DOTNET_VERSION: 10.0.401
+  DOTNET_VERSION: 10.0.402
   # Matches CI: the platform fixtures exercise the installed product configuration.
   BUILD_CHANNEL: Production
 
