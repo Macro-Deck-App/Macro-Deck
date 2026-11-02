@@ -40,6 +40,10 @@ is open.
 If what a press starts fails, or the computer refuses it, for example because it is locked, the app says why in a
 short message: a toast at the bottom on Android, a banner over the deck on iOS.
 
+A press on a widget that is still loading, right after opening a folder or reconnecting, waits up to two seconds and
+then goes through once. If the widget is not ready by then, or you leave the folder first, the press is not run and
+the same message appears.
+
 ## Several computers at once
 
 Leaving a deck does not close its connection. Every computer you opened stays connected while the app runs,
