@@ -249,6 +249,13 @@ internal sealed class HomeAssistantClientTests
 		Assert.ThrowsAsync<HomeAssistantRequestException>(async () => await first);
 		Assert.ThrowsAsync<HomeAssistantRequestException>(async () => await second);
 
+		// The read loop faults the pending commands before it raises the event.
+		var stopwatch = Stopwatch.StartNew();
+		while (disconnects == 0 && stopwatch.Elapsed < TimeSpan.FromSeconds(10))
+		{
+			await Task.Delay(20);
+		}
+
 		_client.Dispose();
 		Assert.That(disconnects, Is.EqualTo(1));
 	}
