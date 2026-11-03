@@ -89,7 +89,7 @@ test('an action editor keeps its draft across a dropped socket and saves both ch
   await desktopTile(page, button.id).click();
   await expect(page.getByText('Loading editor…')).toBeHidden({ timeout: 20_000 });
   await page.getByText('Variable: e2e_cfg').click();
-  const value = page.getByRole('spinbutton', { name: 'Value', exact: true });
+  const value = page.getByRole('textbox', { name: 'Value', exact: true });
   await value.fill('7');
   await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
 
@@ -101,7 +101,7 @@ test('an action editor keeps its draft across a dropped socket and saves both ch
   await expect.poll(() => sockets.length, { message: 'the desktop UI opens a new socket' }).toBeGreaterThan(0);
   await expect(page.locator('app-splash')).toHaveCount(0, { timeout: 30_000 });
 
-  await expect(value).toHaveValue('7');
+  await expect(value).toHaveText('7');
   await page.getByRole('combobox', { name: /^Operation/ }).click();
   await page.getByRole('option', { name: 'Add', exact: true }).click();
   await page.getByRole('button', { name: 'Save', exact: true }).click();

@@ -1,20 +1,24 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, AppStrings, isEventReference, isVariableReference } from '@macro-deck/runtime';
-import { InputComponent, LocalizationService, TranslatePipe } from '@shared';
+import { ActionBlock, ActionBlockParameter, AppStrings, isEventReference, isVariableReference, parseColor } from '@macro-deck/runtime';
+import { LocalizationService, TranslatePipe } from '@shared';
 import type { VariableType } from '@macro-deck/runtime';
 import { ParamInputComponent } from '../../../forms/param-input/param-input.component';
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
 import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
+import { TemplateBuilderComponent } from '../../../template-builder/template-builder.component';
 import { VariablePickerComponent } from '../../../variable-picker/variable-picker.component';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor } from '../../../../domain/set-variable-operations.util';
 
+// The host reads a comma as a thousands separator, so a typed 1,5 would store 15.
+const DECIMAL_COMMA = /^(-?\d+),(\d+)$/;
+
 @Component({
   selector: 'shared-set-variable-action-fields',
   standalone: true,
-  imports: [FormsModule, ColorPickerComponent, InputComponent, ParamInputComponent, SelectComponent, VariablePickerComponent, TranslatePipe],
+  imports: [FormsModule, ColorPickerComponent, ParamInputComponent, SelectComponent, TemplateBuilderComponent, VariablePickerComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="form-group form-group--dense">
@@ -38,39 +42,38 @@ import { SET_VARIABLE_DEFAULT_OPERATION, isOperationAllowed, operationOptionsFor
           </span>
         } @else {
           <div class="value-row">
-            @switch (variableType) {
-              @case ('boolean') {
+            @if (showsFixedControl) {
+              @if (variableType === 'boolean') {
                 <shared-select
                   [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
                   [placeholder]="'macrodeck.app:ActionBuilder.SetVariable.ChooseTrueOrFalse' | translate"
                   [options]="booleanOptions"
                   [ngModel]="stringValue"
                   (ngModelChange)="write($event)" />
-              }
-              @case ('color') {
+              } @else {
                 <shared-color-picker
                   [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
                   [allowAlpha]="true"
                   [ngModel]="stringValue"
                   (ngModelChange)="write($event)" />
               }
-              @case ('numeric') {
-                <shared-input
-                  [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
-                  type="number"
-                  [step]="numberStep"
-                  [ngModel]="stringValue"
-                  (ngModelChange)="write($event === null ? '' : String($event))" />
-              }
-              @default {
-                <shared-param-input
-                  [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
-                  [value]="stringValue"
-                  [variables]="store.pickerVariables()"
-                  [scope]="store.previewScope()"
-                  [scopeRefId]="store.previewScopeRefId()"
-                  (valueChange)="write($event)" />
-              }
+              <shared-template-builder
+                [variables]="store.pickerVariables()"
+                [scope]="store.previewScope()"
+                [scopeRefId]="store.previewScopeRefId()"
+                [resultType]="variableType"
+                [value]="stringValue"
+                (apply$)="write($event)" />
+            } @else {
+              <shared-param-input
+                [ariaLabel]="'macrodeck.app:ActionBuilder.SetVariable.ValueField' | translate"
+                [value]="stringValue"
+                [variables]="store.pickerVariables()"
+                [resultType]="showsVariablePicker ? variableType : undefined"
+                [scope]="store.previewScope()"
+                [scopeRefId]="store.previewScopeRefId()"
+                (valueChange)="writeFromField($event)"
+                (valueBlur)="leaveField($event)" />
             }
             @if (showsVariablePicker) {
               <shared-variable-picker
@@ -92,7 +95,17 @@ export class SetVariableActionFieldsComponent implements OnChanges {
 
   protected readonly store = inject(ActionFlowStore);
 
+  private readonly fieldInUse = signal(false);
+
+  private fieldVariable: unknown;
+
   ngOnChanges(): void {
+    const variable = this.parameterValue('variable');
+    if (variable !== this.fieldVariable) {
+      this.fieldVariable = variable;
+      this.fieldInUse.set(false);
+    }
+
     const type = this.variableType;
     if (type && !isOperationAllowed(this.operation, type)) {
       this.store.updateParam(this.block.id, 'operation', SET_VARIABLE_DEFAULT_OPERATION);
@@ -107,8 +120,6 @@ export class SetVariableActionFieldsComponent implements OnChanges {
       { value: 'false', label: this.localization.translateKey(AppStrings.ActionBuilder.SetVariable.False) },
     ];
   }
-
-  protected readonly String = String;
 
   protected get variableType(): VariableType | undefined {
     const name = this.parameterValue('variable');
@@ -137,10 +148,14 @@ export class SetVariableActionFieldsComponent implements OnChanges {
     return this.variableType ? [this.variableType] : undefined;
   }
 
-  protected get numberStep(): number | undefined {
-    const decimals = this.store.variables()
-      .find(variable => variable.name === this.parameterValue('variable'))?.decimalPlaces;
-    return decimals === undefined || decimals <= 0 ? undefined : Number('1e-' + decimals);
+  protected get showsFixedControl(): boolean {
+    const value = this.stringValue;
+    if (this.fieldInUse()) return false;
+    switch (this.variableType) {
+      case 'boolean': return value === '' || value === 'true' || value === 'false';
+      case 'color': return value === '' || parseColor(value) !== null;
+      default: return false;
+    }
   }
 
   protected get isReference(): boolean {
@@ -157,7 +172,7 @@ export class SetVariableActionFieldsComponent implements OnChanges {
 
   protected get stringValue(): string {
     const value = this.parameterValue('value');
-    return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+    return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? String(value) : '';
   }
 
   protected onOperationChange(operation: string): void {
@@ -165,14 +180,30 @@ export class SetVariableActionFieldsComponent implements OnChanges {
   }
 
   protected write(value: string): void {
-    this.store.updateParam(this.block.id, 'value', value);
+    this.store.updateParam(this.block.id, 'value',
+      this.variableType === 'numeric' ? value.replace(DECIMAL_COMMA, '$1.$2') : value);
+  }
+
+  protected writeFromField(value: string): void {
+    // An emptied contenteditable reports a line break, which no number, boolean or color can hold.
+    const written = this.showsVariablePicker && value.trim() === '' ? '' : value;
+    this.fieldInUse.set(true);
+    this.write(written);
+  }
+
+  protected leaveField(value: string): void {
+    if (value.trim() === '') {
+      this.fieldInUse.set(false);
+    }
   }
 
   protected pickVariable(name: string): void {
+    this.fieldInUse.set(false);
     this.store.updateParam(this.block.id, 'value', { $var: name });
   }
 
   protected pickEventParameter(name: string): void {
+    this.fieldInUse.set(false);
     this.store.updateParam(this.block.id, 'value', { $event: name });
   }
 
