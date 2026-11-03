@@ -39,10 +39,6 @@ public sealed class McpSessionBindingMiddleware
 				{
 					_registry.Bind(created, tokenId);
 				}
-				else
-				{
-					_registry.TouchStateless(tokenId, null, null);
-				}
 
 				return Task.CompletedTask;
 			});

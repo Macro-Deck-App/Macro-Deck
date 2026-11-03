@@ -309,18 +309,24 @@ impl Bridge {
     }
 
     pub async fn close(&self) {
-        let target = self.current_target();
-        if let Some(stream) = self.lock().stream.take() {
-            stream.abort();
-        }
-        let Some(Target {
-            port,
-            session_id: Some(session_id),
-            ..
-        }) = target
-        else {
+        let (ready, previous) = {
+            let mut session = self.lock();
+            if let Some(stream) = session.stream.take() {
+                stream.abort();
+            }
+            (session.ready, previous_session(&session))
+        };
+        let Some((port, session_id)) = previous else {
             return;
         };
+        // The port of an invalidated session must prove the secret again before the token goes there.
+        if !ready && (self.locate)().await != Ok(port) {
+            return;
+        }
+        self.delete_session(port, session_id).await;
+    }
+
+    async fn delete_session(&self, port: u16, session_id: String) {
         let _ = self
             .client
             .delete(endpoint(port))
@@ -331,12 +337,23 @@ impl Bridge {
             .await;
     }
 
+    // A different port means the host restarted and took the old session with it.
+    fn retire(self: &Arc<Self>, previous: Option<(u16, String)>, port: u16) {
+        let Some((previous_port, session_id)) = previous.filter(|(previous, _)| *previous == port)
+        else {
+            return;
+        };
+        let bridge = Arc::clone(self);
+        tokio::spawn(async move { bridge.delete_session(previous_port, session_id).await });
+    }
+
     async fn forward(self: Arc<Self>, message: Value) {
         let request_id = request_id(&message);
         let method = method(&message).map(str::to_string);
         let initialize = method.as_deref() == Some("initialize");
+        let mut previous = None;
         if initialize {
-            self.begin_initialize(&message);
+            previous = self.begin_initialize(&message);
         }
         let mut replayed = false;
         loop {
@@ -352,6 +369,7 @@ impl Bridge {
                     return;
                 }
             };
+            self.retire(previous.take(), target.port);
             match self
                 .exchange(&target, &message, request_id.as_ref(), Sink::Client)
                 .await
@@ -393,7 +411,7 @@ impl Bridge {
         format!("Bearer {}", self.token)
     }
 
-    fn begin_initialize(&self, message: &Value) {
+    fn begin_initialize(&self, message: &Value) -> Option<(u16, String)> {
         let mut session = self.lock();
         if let Some(stream) = session.stream.take() {
             stream.abort();
@@ -401,6 +419,7 @@ impl Bridge {
         session.initialize = Some(message.clone());
         session.ready = false;
         session.generation += 1;
+        previous_session(&session)
     }
 
     async fn fresh_target(&self) -> Result<Target, Failure> {
@@ -465,15 +484,20 @@ impl Bridge {
     }
 
     async fn reinitialize(self: &Arc<Self>) -> Result<Target, Failure> {
-        let (initialize, generation) = {
+        let (initialize, generation, previous) = {
             let session = self.lock();
-            (session.initialize.clone(), session.generation)
+            (
+                session.initialize.clone(),
+                session.generation,
+                previous_session(&session),
+            )
         };
         let Some(mut initialize) = initialize else {
             return Err(Failure::NotInitialized);
         };
         initialize["id"] = json!(REINITIALIZE_ID);
         let port = (self.locate)().await?;
+        self.retire(previous, port);
         let probe = Target {
             port,
             session_id: None,
@@ -497,6 +521,7 @@ impl Bridge {
         let target = {
             let mut session = self.lock();
             if session.generation != generation {
+                self.retire(session_id.map(|id| (port, id)), port);
                 return Err(Failure::NotInitialized);
             }
             session.generation += 1;
@@ -659,6 +684,10 @@ impl Bridge {
             (self.output)(error_response(id, BRIDGE_ERROR_CODE, &message).to_string());
         }
     }
+}
+
+fn previous_session(session: &Session) -> Option<(u16, String)> {
+    session.port.zip(session.session_id.clone())
 }
 
 fn endpoint(port: u16) -> String {
@@ -1161,6 +1190,148 @@ mod tests {
         assert_eq!(answer["error"]["message"], Failure::Lost.message());
         tokio::time::sleep(Duration::from_millis(300)).await;
         assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
+
+    fn session_host(deletes: Arc<Mutex<Vec<String>>>) -> u16 {
+        let initializes = Arc::new(AtomicUsize::new(0));
+        serve(move |request, mut stream| {
+            let session = request.header(SESSION_HEADER).map(str::to_string);
+            match (request.method.as_str(), request.rpc_method().as_str()) {
+                ("DELETE", _) => {
+                    deletes.lock().unwrap().extend(session);
+                    respond_status(&mut stream, "200 OK");
+                }
+                ("GET", _) => respond_status(&mut stream, "405 Method Not Allowed"),
+                (_, "initialize") => {
+                    let n = initializes.fetch_add(1, Ordering::SeqCst) + 1;
+                    respond_json(
+                        &mut stream,
+                        Some(&format!("s{n}")),
+                        &initialize_result(&request.json()["id"]),
+                    );
+                }
+                (_, "tools/call") if request.json()["params"]["name"] == "wait" => {
+                    open_event_stream(&mut stream);
+                    for _ in 0..100 {
+                        if deletes.lock().unwrap().contains(&session.clone().unwrap()) {
+                            break;
+                        }
+                        std::thread::sleep(Duration::from_millis(50));
+                    }
+                    let _ = stream.shutdown(std::net::Shutdown::Both);
+                }
+                (_, "tools/call") => {
+                    open_event_stream(&mut stream);
+                    let _ = stream.shutdown(std::net::Shutdown::Both);
+                }
+                (_, "tools/list") => respond_json(
+                    &mut stream,
+                    None,
+                    &json!({ "jsonrpc": "2.0", "id": request.json()["id"], "result": { "tools": [] } }),
+                ),
+                _ => respond_status(&mut stream, "202 Accepted"),
+            }
+        })
+    }
+
+    async fn deletes_settle(deletes: &Arc<Mutex<Vec<String>>>) -> Vec<String> {
+        tokio::time::sleep(Duration::from_millis(300)).await;
+        deletes.lock().unwrap().clone()
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn a_session_replaced_after_a_lost_call_is_closed_and_its_waiting_call_fails() {
+        let deletes = Arc::new(Mutex::new(Vec::new()));
+        let port = session_host(Arc::clone(&deletes));
+        let (output, mut receiver) = collecting();
+        let bridge = bridge(fixed_port(port), output);
+        initialize(&bridge, &mut receiver).await;
+        bridge
+            .handle_line(
+                r#"{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"wait"}}"#,
+            )
+            .await;
+        bridge
+            .handle_line(
+                r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"run_action"}}"#,
+            )
+            .await;
+        assert_eq!(next(&mut receiver).await["id"], 2);
+        bridge
+            .handle_line(r#"{"jsonrpc":"2.0","id":3,"method":"tools/list"}"#)
+            .await;
+        let mut answers = [next(&mut receiver).await, next(&mut receiver).await];
+        answers.sort_by_key(|answer| answer["id"].as_i64());
+        assert_eq!(answers[0]["id"], 1);
+        assert_eq!(answers[0]["error"]["message"], Failure::Lost.message());
+        assert_eq!(answers[1]["result"]["tools"], json!([]));
+        assert_eq!(deletes_settle(&deletes).await, ["s1"]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn a_session_invalidated_by_a_lost_call_is_closed_when_the_client_leaves() {
+        let deletes = Arc::new(Mutex::new(Vec::new()));
+        let port = session_host(Arc::clone(&deletes));
+        let (output, mut receiver) = collecting();
+        let bridge = bridge(fixed_port(port), output);
+        initialize(&bridge, &mut receiver).await;
+        bridge
+            .handle_line(
+                r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"run_action"}}"#,
+            )
+            .await;
+        assert_eq!(next(&mut receiver).await["id"], 2);
+        bridge.close().await;
+        assert_eq!(deletes_settle(&deletes).await, ["s1"]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn a_second_initialize_closes_the_previous_session() {
+        let deletes = Arc::new(Mutex::new(Vec::new()));
+        let port = session_host(Arc::clone(&deletes));
+        let (output, mut receiver) = collecting();
+        let bridge = bridge(fixed_port(port), output);
+        initialize(&bridge, &mut receiver).await;
+        deletes_settle(&deletes).await;
+        initialize(&bridge, &mut receiver).await;
+        assert_eq!(deletes_settle(&deletes).await, ["s1"]);
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn a_session_on_a_port_the_host_left_is_never_closed_there() {
+        let (left, moved) = (
+            Arc::new(Mutex::new(Vec::new())),
+            Arc::new(Mutex::new(Vec::new())),
+        );
+        let ports = [
+            session_host(Arc::clone(&left)),
+            session_host(Arc::clone(&moved)),
+        ];
+        let current = Arc::new(AtomicUsize::new(0));
+        let selected = Arc::clone(&current);
+        let locate: Locate = Arc::new(move || {
+            let port = ports[selected.load(Ordering::SeqCst)];
+            Box::pin(async move { Ok(port) })
+        });
+        let (output, mut receiver) = collecting();
+        let bridge = bridge(locate, output);
+        initialize(&bridge, &mut receiver).await;
+        bridge
+            .handle_line(
+                r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"run_action"}}"#,
+            )
+            .await;
+        assert_eq!(next(&mut receiver).await["id"], 2);
+        current.store(1, Ordering::SeqCst);
+        bridge.close().await;
+        assert!(deletes_settle(&left).await.is_empty());
+        initialize(&bridge, &mut receiver).await;
+        bridge
+            .handle_line(r#"{"jsonrpc":"2.0","id":3,"method":"tools/list"}"#)
+            .await;
+        assert_eq!(next(&mut receiver).await["id"], 3);
+        assert!(deletes_settle(&left).await.is_empty());
+        assert!(deletes_settle(&moved).await.is_empty());
     }
 
     #[tokio::test(flavor = "multi_thread")]
