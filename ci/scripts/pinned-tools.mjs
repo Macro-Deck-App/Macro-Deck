@@ -34,6 +34,20 @@ export const TOOL_SETS = {
 			executable: true
 		}
 	],
+	'emoji-font': [
+		{
+			file: 'NotoColorEmoji.ttf',
+			url: 'https://raw.githubusercontent.com/googlefonts/noto-emoji/99701e07d3d1fe1bdbcdb14964547f0fd592966f/2D/fonts/NotoColorEmoji.ttf',
+			sha256: '15671215ab769fdc7162a045d56fd7d7e477c51b04e6b3c761d914d8fdd6cc44',
+			executable: false
+		},
+		{
+			file: 'NotoColorEmoji-OFL.txt',
+			url: 'https://raw.githubusercontent.com/googlefonts/noto-emoji/99701e07d3d1fe1bdbcdb14964547f0fd592966f/2D/fonts/LICENSE',
+			sha256: '6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2',
+			executable: false
+		}
+	],
 	'codesigntool-windows': [
 		{
 			file: 'CodeSignTool-v1.3.0-windows.zip',

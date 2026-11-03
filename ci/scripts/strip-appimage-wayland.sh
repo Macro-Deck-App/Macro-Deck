@@ -19,8 +19,9 @@
 # neither passes it nor offers an environment hook, so the exclusion cannot be
 # requested through `tauri build`.
 #
-# It also writes the bundled Ubuntu libraries' notices (appimage-library-notices.mjs) and
-# repacks with the pinned runtime, so it always repacks.
+# It also writes the bundled Ubuntu libraries' notices (appimage-library-notices.mjs), adds the
+# bitmap emoji font with its licence (emoji-font.mjs) and repacks with the pinned runtime, so it
+# always repacks.
 #
 # linuxdeploy may patch the host's ELF files, so an install manifest in the AppImage is rewritten
 # from what it actually ships and signed again (needs TAURI_SIGNING_PRIVATE_KEY), then verified.
@@ -38,6 +39,7 @@ appimage_dir=${1:?usage: strip-appimage-wayland.sh <appimageDir>}
 arch=${ARCH:-x86_64}
 scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 notices_tool="$scripts_dir/appimage-library-notices.mjs"
+emoji_tool="$scripts_dir/emoji-font.mjs"
 manifest_tool="$scripts_dir/make-install-manifest.mjs"
 public_key_config="$scripts_dir/../../ui/bootstrapper/tauri.conf.json"
 notices_path=usr/share/doc/macro-deck/THIRD-PARTY-NOTICES-LINUX-LIBRARIES
@@ -83,6 +85,12 @@ node "$notices_tool" fetch-runtime "$runtime"
 # Generated after the strip so the removed libraries are not attributed.
 node "$notices_tool" generate "$appdir"
 
+# The bundled WebKit aborts on the COLRv1 emoji font recent distributions ship, so the app brings a
+# bitmap build. Added after generate, which would not know the file, and before the repack.
+emoji_dir="$work/emoji-font"
+node "$scripts_dir/pinned-tools.mjs" fetch emoji-font "$emoji_dir"
+node "$emoji_tool" install "$emoji_dir/NotoColorEmoji.ttf" "$emoji_dir/NotoColorEmoji-OFL.txt" "$appdir" "$notices_path"
+
 # Repack with the pinned plugin the build job seeded for Tauri, so the squashfs settings match. It is
 # verified again here because this step holds the signing key.
 tools_dir="${XDG_CACHE_HOME:-$HOME/.cache}/tauri"
@@ -125,6 +133,10 @@ if [ -z "$(find "$verify_appdir" -maxdepth 1 -name '*.desktop')" ]; then
 fi
 if ! cmp -s "$appdir/$notices_path" "$verify_appdir/$notices_path"; then
 	echo "error: repacked AppImage does not carry the generated $notices_path" >&2
+	exit 1
+fi
+if ! cmp -s "$emoji_dir/NotoColorEmoji.ttf" "$verify_appdir/usr/share/macro-deck/fonts/NotoColorEmoji.ttf"; then
+	echo "error: repacked AppImage does not carry the bundled emoji font" >&2
 	exit 1
 fi
 node "$notices_tool" check-runtime "$appimage"

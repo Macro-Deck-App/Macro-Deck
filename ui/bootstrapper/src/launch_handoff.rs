@@ -110,6 +110,8 @@ pub fn hand_over(app: &AppHandle, executable: PathBuf, argv: Vec<String>, cwd: S
     tauri::async_runtime::spawn(async move {
         host::stop(&app).await;
         let mut command = Command::new(&executable);
+        #[cfg(target_os = "linux")]
+        crate::font_guard::restore_for_child(&mut command);
         command
             .args(argv.iter().skip(1))
             .env(host::RELAUNCH_MARKER_ENVIRONMENT_VARIABLE, "1");
