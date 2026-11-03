@@ -18,9 +18,16 @@
   min-width: 0;
 }
 
-.value-row > *:not(shared-variable-picker) {
+.value-row > *:not(shared-variable-picker, shared-template-builder) {
   flex: 1 1 0;
   min-width: 0;
+}
+
+.value-row > shared-template-builder ::ng-deep .tb-trigger {
+  @include ds.control-base;
+  @include ds.control-interactive;
+  width: auto;
+  height: auto;
 }
 
 @include ds.variable-reference-chip;
