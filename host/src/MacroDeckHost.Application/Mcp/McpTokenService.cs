@@ -30,17 +30,23 @@ public class McpTokenService : IMcpTokenService
 	private readonly IMcpConnections _connections;
 	private readonly TimeProvider _timeProvider;
 	private readonly IMcpSecretLedger? _secrets;
+	private readonly IMcpRiskPolicy? _policy;
+	private readonly IMcpConfirmationStore? _confirmations;
 
 	public McpTokenService(
 		IMcpAccessTokenRepository repository,
 		IMcpConnections connections,
 		TimeProvider timeProvider,
-		IMcpSecretLedger? secrets = null)
+		IMcpSecretLedger? secrets = null,
+		IMcpRiskPolicy? policy = null,
+		IMcpConfirmationStore? confirmations = null)
 	{
 		_repository = repository;
 		_connections = connections;
 		_timeProvider = timeProvider;
 		_secrets = secrets;
+		_policy = policy;
+		_confirmations = confirmations;
 	}
 
 	public async Task<McpAccessTokenCreated> Create(string name)
@@ -105,6 +111,11 @@ public class McpTokenService : IMcpTokenService
 
 		await _repository.Revoke(id, _timeProvider.GetUtcNow().UtcDateTime);
 		_connections.TerminateForToken(id);
+		_confirmations?.AbandonForToken(id);
+		if (_policy is not null)
+		{
+			await _policy.ClearAllowances(id);
+		}
 
 		return McpAccessTokenRevokeResult.Revoked;
 	}
@@ -126,6 +137,11 @@ public class McpTokenService : IMcpTokenService
 		if (_secrets is not null)
 		{
 			await _secrets.ForgetToken(id);
+		}
+
+		if (_policy is not null)
+		{
+			await _policy.ClearAllowances(id);
 		}
 
 		return McpAccessTokenDeleteResult.Deleted;

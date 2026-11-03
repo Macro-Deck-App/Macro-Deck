@@ -26,6 +26,7 @@ describe('AiClientsSettingsComponent', () => {
       'setMcpPolicy',
       'onNotification',
       'downloadClaudeDesktopExtension',
+      'removeMcpAllowedAction',
     ]);
     fileSave = jasmine.createSpyObj<FileSaveService>('FileSaveService', ['save']);
     fileSave.save.and.resolveTo({ status: 'saved', viaDialog: true });
@@ -35,7 +36,15 @@ describe('AiClientsSettingsComponent', () => {
     api.downloadClaudeDesktopExtension.and.resolveTo({ ok: true, blob: EXTENSION });
     api.getMcpTokens.and.resolveTo({
       tokens: [
-        { id: 'live', name: 'Claude', createdAt: '2026-10-01T10:00:00Z', connectionCount: 1 },
+        {
+          id: 'live',
+          name: 'Claude',
+          createdAt: '2026-10-01T10:00:00Z',
+          connectionCount: 1,
+          allowedActions: [
+            { integrationId: 'app.macro-deck.keyboard', actionId: 'press-key', integrationName: 'Keyboard', actionName: 'Press key' },
+          ],
+        },
         { id: 'old', name: 'Old laptop', createdAt: '2026-09-01T10:00:00Z', revokedAt: '2026-09-02T10:00:00Z', connectionCount: 0 },
       ],
     });
@@ -56,6 +65,7 @@ describe('AiClientsSettingsComponent', () => {
     });
     api.setMcpPolicy.and.resolveTo({ success: true });
     api.deleteMcpToken.and.resolveTo({ success: true });
+    api.removeMcpAllowedAction.and.resolveTo({ success: true });
 
     await TestBed.configureTestingModule({
       imports: [AiClientsSettingsComponent],
@@ -98,6 +108,21 @@ describe('AiClientsSettingsComponent', () => {
       jasmine.stringContaining('Old laptop'),
     ]);
     expect(query(f, 'mcp-connection-row')[0]?.textContent).toContain('claude-code 2.1');
+  });
+
+  it('lists what a token may always do and asks again once an action is removed', async () => {
+    const f = await create();
+
+    const allowed = query(f, 'mcp-allowed-actions');
+    expect(allowed.length).toBe(1);
+    expect(allowed[0].textContent).toContain('Press key');
+    expect(allowed[0].textContent).toContain('Keyboard');
+
+    click(query(f, 'mcp-remove-allowed-action')[0]);
+    await settle(f);
+
+    expect(api.removeMcpAllowedAction).toHaveBeenCalledWith('live', 'app.macro-deck.keyboard', 'press-key');
+    expect(query(f, 'mcp-allowed-actions').length).toBe(0);
   });
 
   it('offers revoke for a live token and remove only for a revoked one', async () => {

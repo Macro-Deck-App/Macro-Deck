@@ -2991,6 +2991,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Es existiert kein Zugriffstoken mit dieser ID.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Diese Anfrage wartet nicht mehr auf eine Antwort.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Diese Aktion ist für diesen Client nicht mehr immer erlaubt.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Die Migration konnte nicht abgeschlossen werden.</value>
   </data>
@@ -15123,6 +15129,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{name} wartet in Macro Deck auf deine Freigabe.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} möchte, dass du in Macro Deck etwas erlaubst oder ablehnst.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Ein KI-Client wartet auf deine Antwort</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Ein Entwicklungs-Build möchte ein Plugin übernehmen</value>
   </data>
@@ -17332,6 +17344,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Aktionen, die KI-Clients ausführen dürfen</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Die Aktion konnte nicht entfernt werden. Versuch es noch einmal.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Vor {action} wieder fragen</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Immer erlaubt</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Aktualisieren</value>
@@ -25472,6 +25493,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} bittet Macro Deck, Folgendes zu tun:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Deine Antwort konnte nicht weitergegeben werden. Versuch es noch einmal.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Diese Aktionen für {client} immer erlauben</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Anfrage eines KI-Clients bestätigen</value>

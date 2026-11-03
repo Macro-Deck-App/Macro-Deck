@@ -2991,6 +2991,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>不存在具有该 ID 的访问令牌。</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>该请求已不再等待答复。</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>此操作不再始终允许该客户端执行。</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>无法完成迁移。</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>{name}正在 Macro Deck 中等待你的批准。</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} 请求你在 Macro Deck 中允许或拒绝一项操作。</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>AI 客户端正在等待你的答复</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>有开发版本想要接管一个插件</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>AI 客户端可以运行的操作</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>无法移除该操作。请重试。</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>执行 {action} 前再次询问</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>始终允许</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>刷新</value>
@@ -25478,6 +25499,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} 请求 Macro Deck 执行以下操作：</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>无法传递你的答复。请重试。</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>始终允许 {client} 执行这些操作</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>确认 AI 客户端请求</value>

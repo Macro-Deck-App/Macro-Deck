@@ -2991,6 +2991,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>その ID のアクセス トークンは存在しません。</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>このリクエストはもう回答を待っていません。</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>このアクションは、このクライアントに対して常に許可されなくなりました。</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>移行を完了できませんでした。</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{name} が Macro Deck での承認を待っています。</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} が Macro Deck での許可または拒否を求めています。</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>AI クライアントが回答を待っています</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>開発ビルドがプラグインの置き換えを求めています</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>AI クライアントが実行できるアクション</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>アクションを削除できませんでした。もう一度お試しください。</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>{action} の前に再度確認</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>常に許可</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>更新</value>
@@ -25496,6 +25517,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} が Macro Deck に次の操作を求めています:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>回答を送信できませんでした。もう一度お試しください。</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>{client} にこれらのアクションを常に許可</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>AI クライアントの要求の確認</value>

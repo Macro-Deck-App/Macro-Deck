@@ -2991,6 +2991,12 @@
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>لا يوجد رمز وصول بهذا المعرّف.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>لم يعد هذا الطلب بانتظار إجابة.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>لم يعد هذا الإجراء مسموحًا دائمًا لهذا العميل.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>تعذّر إكمال الترحيل.</value>
   </data>
@@ -15126,6 +15132,12 @@
     <value>{name} بانتظار موافقتك في Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>يطلب {client} السماح بأمر ما أو رفضه في Macro Deck.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>عميل ذكاء اصطناعي بانتظار إجابتك</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>يريد إصدار تطوير استبدال مكوّن إضافي</value>
   </data>
@@ -17335,6 +17347,15 @@
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>الإجراءات التي يمكن لعملاء الذكاء الاصطناعي تشغيلها</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>تعذّرت إزالة الإجراء. حاول مرة أخرى.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>السؤال مجددًا قبل {action}</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>مسموح دائمًا</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>تحديث</value>
@@ -25496,6 +25517,12 @@
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>يطلب {client} من Macro Deck تنفيذ ما يلي:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>تعذّر تمرير إجابتك. حاول مرة أخرى.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>السماح دائمًا بهذه الإجراءات لـ {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>تأكيد طلب عميل الذكاء الاصطناعي</value>

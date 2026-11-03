@@ -2991,6 +2991,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Токен доступа с таким идентификатором не существует.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Этот запрос больше не ожидает ответа.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Это действие больше не разрешено этому клиенту всегда.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Не удалось завершить миграцию.</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>{name} ожидает вашего подтверждения в Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} просит разрешить или отклонить запрос в Macro Deck.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>ИИ-клиент ожидает вашего ответа</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Сборка для разработки хочет заменить плагин</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Действия, которые могут запускать ИИ-клиенты</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Не удалось удалить действие. Повторите попытку.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Снова спрашивать перед действием «{action}»</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Всегда разрешено</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Обновить</value>
@@ -25496,6 +25517,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} просит Macro Deck выполнить следующее:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Не удалось передать ответ. Повторите попытку.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Всегда разрешать эти действия для {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Подтвердите запрос ИИ-клиента</value>

@@ -2992,6 +2992,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Aucun jeton d'accès ne porte cet identifiant.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Cette demande n'attend plus de réponse.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Cette action n'est plus toujours autorisée pour ce client.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>La migration n'a pas pu être terminée.</value>
   </data>
@@ -15125,6 +15131,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>{name} attend ton approbation dans Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} te demande d'autoriser ou de refuser quelque chose dans Macro Deck.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Un client IA attend ta réponse</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Une build de développement veut prendre le contrôle d'une extension</value>
   </data>
@@ -17334,6 +17346,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Actions que les clients IA peuvent exécuter</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Impossible de supprimer l'action. Réessaie.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Redemander avant {action}</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Toujours autorisées</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Actualiser</value>
@@ -25474,6 +25495,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} demande à Macro Deck de faire ceci :</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Impossible de transmettre ta réponse. Réessaie.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Toujours autoriser ces actions pour {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Confirme une demande du client IA</value>

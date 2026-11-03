@@ -589,7 +589,7 @@ public sealed class McpChangeSet : IMcpChangeSet
 				}
 			}
 
-			switch (await _risk.Classify(integrationId, actionId))
+			switch (await _risk.Classify(context.TokenId, integrationId, actionId))
 			{
 				case McpRiskMode.Off:
 					context.Problem($"{path} block {block.Id}",

@@ -67,6 +67,27 @@
                 </shared-button>
               }
             </div>
+            @if (token.allowedActions?.length) {
+              <div class="ai-clients__allowed" data-testid="mcp-allowed-actions">
+                <span class="ai-clients__allowed-label">{{ 'macrodeck.app:Settings.Mcp.AllowedActionsLabel' | translate }}</span>
+                <ul class="ai-clients__allowed-list">
+                  @for (action of token.allowedActions; track action.integrationId + '/' + action.actionId) {
+                    <li class="ai-clients__allowed-item">
+                      <span class="ai-clients__allowed-name">{{ actionName(action) }}</span>
+                      <span class="ai-clients__secondary">{{ integrationName(action) }}</span>
+                      <shared-button
+                        variant="ghost"
+                        size="compact"
+                        data-testid="mcp-remove-allowed-action"
+                        [ariaLabel]="'macrodeck.app:Settings.Mcp.AllowedActionRemoveLabel' | translate:{ action: actionName(action) }"
+                        (click)="removeAllowedAction(token, action)">
+                        {{ 'macrodeck.app:Developer.Tokens.RemoveAction' | translate }}
+                      </shared-button>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
           </li>
         }
       </ul>

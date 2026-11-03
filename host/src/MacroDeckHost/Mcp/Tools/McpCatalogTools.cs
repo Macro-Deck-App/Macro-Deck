@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
 using MacroDeckHost.Application.Ui.Transport.Messages.Events;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace MacroDeckHost.Mcp.Tools;
@@ -55,6 +56,7 @@ public sealed class McpCatalogTools
 		+ "start automations, and widget types with their data schemas. Parameters marked secret take a secret "
 		+ "reference created with set_secret, never a value.")]
 	public async Task<McpCatalogResult> Catalog(
+		RequestContext<CallToolRequestParams> context,
 		[Description("Optional: actions, events or widgetTypes. Omit to get all three.")]
 		string? kind = null,
 		[Description("Optional: only entries of this integration or provider id.")]
@@ -67,14 +69,19 @@ public sealed class McpCatalogTools
 				$"kind must be one of: {KindActions}, {KindEvents}, {KindWidgetTypes}.");
 		}
 
-		var actions = kind is null or KindActions ? await Actions(integrationId, cancellationToken) : null;
+		var actions = kind is null or KindActions
+			? await Actions(McpConsent.TokenId(context), integrationId, cancellationToken)
+			: null;
 		var events = kind is null or KindEvents ? await Events(integrationId, cancellationToken) : null;
 		var widgetTypes = kind is null or KindWidgetTypes ? await WidgetTypes(integrationId, cancellationToken) : null;
 
 		return new McpCatalogResult(McpContract.Version, actions, events, widgetTypes);
 	}
 
-	private async Task<IReadOnlyList<McpActionInfo>> Actions(string? integrationId, CancellationToken cancellationToken)
+	private async Task<IReadOnlyList<McpActionInfo>> Actions(
+		Guid tokenId,
+		string? integrationId,
+		CancellationToken cancellationToken)
 	{
 		var response = await _getActions.Handle(new GetActionsRequest(), cancellationToken);
 		var result = new List<McpActionInfo>();
@@ -89,7 +96,7 @@ public sealed class McpCatalogTools
 					?? MacroDeck.Sdk.Actions.ActionRiskCategory.None)
 				.ToString()
 				.ToLowerInvariant(),
-				PolicyName(await _risk.Classify(action.IntegrationId, action.Id)),
+				PolicyName(await _risk.Classify(tokenId, action.IntegrationId, action.Id)),
 				await Parameters(action.Parameters)));
 		}
 

@@ -2992,6 +2992,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Přístupový token s tímto ID neexistuje.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Tento požadavek již nečeká na odpověď.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Tato akce již pro tohoto klienta není vždy povolena.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Migraci se nepodařilo dokončit.</value>
   </data>
@@ -15125,6 +15131,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Plugin {name} čeká na schválení v Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} žádá o povolení nebo odmítnutí požadavku v Macro Decku.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Klient AI čeká na odpověď</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Vývojové sestavení žádá o převzetí pluginu</value>
   </data>
@@ -17334,6 +17346,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Akce, které mohou klienti AI spouštět</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Akci se nepodařilo odebrat. Zkuste to znovu.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Znovu se zeptat před akcí {action}</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Vždy povoleno</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Obnovit</value>
@@ -25474,6 +25495,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} žádá Macro Deck o provedení následujícího:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Odpověď se nepodařilo předat. Zkuste to znovu.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Vždy povolit tyto akce pro {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Potvrzení požadavku klienta AI</value>

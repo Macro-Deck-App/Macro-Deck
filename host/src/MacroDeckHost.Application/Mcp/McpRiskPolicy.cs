@@ -22,16 +22,25 @@ public sealed record McpProviderPolicy(
 
 public interface IMcpRiskPolicy
 {
-	Task<McpRiskMode> Classify(string integrationId, string actionId);
+	Task<McpRiskMode> Classify(Guid? tokenId, string integrationId, string actionId);
 
 	Task<IReadOnlyList<McpProviderPolicy>> Providers();
 
 	Task SetOverride(string integrationId, McpRiskMode? mode);
+
+	Task<IReadOnlyList<McpActionRef>> Allowances(Guid tokenId);
+
+	Task Allow(Guid tokenId, IReadOnlyList<McpActionRef> actions);
+
+	Task<bool> RemoveAllowance(Guid tokenId, McpActionRef action);
+
+	Task ClearAllowances(Guid tokenId);
 }
 
 public sealed class McpRiskPolicy : IMcpRiskPolicy
 {
 	public const string PreferenceKey = "mcp.riskPolicy";
+	public const string AllowancesPreferenceKey = "mcp.tokenAllowances";
 
 	private readonly IAppPreferenceRepository _preferences;
 	private readonly IIntegrationRegistry _registry;
@@ -42,7 +51,7 @@ public sealed class McpRiskPolicy : IMcpRiskPolicy
 		_registry = registry;
 	}
 
-	public async Task<McpRiskMode> Classify(string integrationId, string actionId)
+	public async Task<McpRiskMode> Classify(Guid? tokenId, string integrationId, string actionId)
 	{
 		var overrides = await Overrides();
 		if (overrides is null)
@@ -50,7 +59,18 @@ public sealed class McpRiskPolicy : IMcpRiskPolicy
 			return McpRiskMode.Off;
 		}
 
-		return overrides.TryGetValue(integrationId, out var mode) ? mode : DefaultFor(integrationId, actionId);
+		var hasOverride = overrides.TryGetValue(integrationId, out var mode);
+		if (hasOverride && mode == McpRiskMode.Off)
+		{
+			return McpRiskMode.Off;
+		}
+
+		if (tokenId is { } id && (await Allowances(id)).Contains(new McpActionRef(integrationId, actionId)))
+		{
+			return McpRiskMode.Allow;
+		}
+
+		return hasOverride ? mode : DefaultFor(integrationId, actionId);
 	}
 
 	public async Task<IReadOnlyList<McpProviderPolicy>> Providers()
@@ -82,6 +102,45 @@ public sealed class McpRiskPolicy : IMcpRiskPolicy
 		}
 
 		await _preferences.SetValue(PreferenceKey, JsonSerializer.Serialize(overrides));
+	}
+
+	public async Task<IReadOnlyList<McpActionRef>> Allowances(Guid tokenId)
+	{
+		return (await AllAllowances()).GetValueOrDefault(tokenId) ?? [];
+	}
+
+	public async Task Allow(Guid tokenId, IReadOnlyList<McpActionRef> actions)
+	{
+		var all = await AllAllowances();
+		all[tokenId] = (all.GetValueOrDefault(tokenId) ?? [])
+			.Concat(actions)
+			.Distinct()
+			.OrderBy(action => action.IntegrationId, StringComparer.Ordinal)
+			.ThenBy(action => action.ActionId, StringComparer.Ordinal)
+			.ToList();
+		await SaveAllowances(all);
+	}
+
+	public async Task<bool> RemoveAllowance(Guid tokenId, McpActionRef action)
+	{
+		var all = await AllAllowances();
+		if (all.GetValueOrDefault(tokenId) is not { } allowed || !allowed.Contains(action))
+		{
+			return false;
+		}
+
+		all[tokenId] = allowed.Where(candidate => candidate != action).ToList();
+		await SaveAllowances(all);
+		return true;
+	}
+
+	public async Task ClearAllowances(Guid tokenId)
+	{
+		var all = await AllAllowances();
+		if (all.Remove(tokenId))
+		{
+			await SaveAllowances(all);
+		}
 	}
 
 	// Built-in actions declare what they can do (IActionDefinition.RiskCategory); plugin, unknown and
@@ -124,5 +183,31 @@ public sealed class McpRiskPolicy : IMcpRiskPolicy
 		{
 			return null;
 		}
+	}
+
+	// Unreadable allowances fall back to none: every action asks again, nothing is allowed by accident.
+	private async Task<Dictionary<Guid, List<McpActionRef>>> AllAllowances()
+	{
+		var raw = (await _preferences.GetByKey(AllowancesPreferenceKey))?.Value;
+		if (string.IsNullOrWhiteSpace(raw))
+		{
+			return [];
+		}
+
+		try
+		{
+			return JsonSerializer.Deserialize<Dictionary<Guid, List<McpActionRef>>>(raw) ?? [];
+		}
+		catch (JsonException)
+		{
+			return [];
+		}
+	}
+
+	private Task SaveAllowances(Dictionary<Guid, List<McpActionRef>> all)
+	{
+		return _preferences.SetValue(AllowancesPreferenceKey,
+			JsonSerializer.Serialize(all.Where(entry => entry.Value.Count > 0)
+				.ToDictionary(entry => entry.Key, entry => entry.Value)));
 	}
 }

@@ -2991,6 +2991,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>해당 ID의 액세스 토큰이 없습니다.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>이 요청은 더 이상 응답을 기다리지 않습니다.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>이 작업은 더 이상 이 클라이언트에 항상 허용되지 않습니다.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>마이그레이션을 완료할 수 없습니다.</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>{name}이(가) Macro Deck에서 승인을 기다리고 있습니다.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client}이(가) Macro Deck에서 허용 또는 거부를 요청합니다.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>AI 클라이언트가 응답을 기다리고 있습니다</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>개발 빌드가 플러그인을 대체하려고 합니다</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>AI 클라이언트가 실행할 수 있는 동작</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>작업을 제거할 수 없습니다. 다시 시도하세요.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>{action} 전에 다시 묻기</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>항상 허용</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>새로 고침</value>
@@ -25496,6 +25517,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client}이(가) Macro Deck에 다음 작업을 요청합니다:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>응답을 전달할 수 없습니다. 다시 시도하세요.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>{client}에 이 작업을 항상 허용</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>AI 클라이언트 요청 확인</value>
