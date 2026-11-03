@@ -302,10 +302,26 @@ actions with their provider, for run_action also its values (secret values only 
 **Decline**; once it is answered the host sends `notifications/elicitation/complete`. The answer is bound
 to that exact call either way.
 
+A client that declares neither, such as Claude Desktop, is asked in Macro Deck itself. The desktop app
+shows the same lines in a dialog, with an entry in its notifications and an operating system
+notification. The question can only be answered in the desktop app on the same computer: the host
+refuses the answer from any other connection, an MCP token included.
+
+- The host holds the call for up to 45 seconds. An answer in that time lets the call go on, or ends it
+  with `CONFIRMATION_DECLINED`.
+- Without an answer the call returns `CONFIRMATION_PENDING`, and the question stays open for 5 minutes.
+  Once the user allowed it, the same tool called again with the same arguments runs once without asking
+  again. The order of the arguments does not matter; other arguments ask again.
+- When the question asks only about actions, the dialog also offers **Always allow these actions for
+  `<token>`**. From then on those actions run for that token without asking, and its `catalog` reports
+  them with `policy: "allow"`. A provider set to **Off** still blocks them. The user removes them under
+  **Settings > AI clients**, and revoking the token removes them too.
+
 | Code | When |
 | --- | --- |
-| `CONFIRMATION_DECLINED` | The user said no, did not open the page, or did not answer it in time |
-| `CONFIRMATION_UNAVAILABLE` | The client declares neither form nor URL elicitation |
+| `CONFIRMATION_DECLINED` | The user said no, did not open the page, or did not answer in time |
+| `CONFIRMATION_PENDING` | The client cannot ask, and the user has not answered in Macro Deck yet. Call the same tool again with the same arguments once they did |
+| `CONFIRMATION_UNAVAILABLE` | Part of `macrodeck-mcp/1`, but no longer returned: a client that cannot ask is asked in Macro Deck instead |
 
 ## Variables and attribution
 
@@ -323,7 +339,7 @@ provider makes for another reason in that window is refused too, and a write an 
 | `NOT_FOUND` | No entry with that id |
 | `PROVIDER_BLOCKED` | The action's provider is turned off for AI clients |
 | `FOREIGN_SECRET_REF` | A secret reference this client did not create |
-| `CONFIRMATION_DECLINED`, `CONFIRMATION_UNAVAILABLE` | See [Action policy](#action-policy) |
+| `CONFIRMATION_DECLINED`, `CONFIRMATION_PENDING`, `CONFIRMATION_UNAVAILABLE` | See [Action policy](#action-policy) |
 | `VARIABLE_APPROVAL_REQUIRED` | See [Variables and attribution](#variables-and-attribution) |
 | `REF_UNRESOLVED`, `ACTION_NOT_FOUND`, `PARAMETER_REQUIRED`, `EVENT_NOT_FOUND`, `WIDGET_TYPE_NOT_FOUND`, `INVALID_DATA`, `UNSUPPORTED`, `APPLY_FAILED`, `ENTITY_CHANGED_SINCE` | Problems reported by `apply_changes` and `undo` |
 

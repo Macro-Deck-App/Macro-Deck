@@ -2991,6 +2991,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Tidak ada token akses dengan ID tersebut.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Permintaan ini tidak lagi menunggu jawaban.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Tindakan ini tidak lagi selalu diizinkan untuk klien ini.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Migrasi tidak dapat diselesaikan.</value>
   </data>
@@ -15126,6 +15132,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>{name} menunggu persetujuan Anda di Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} meminta Anda mengizinkan atau menolak sesuatu di Macro Deck.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Klien AI sedang menunggu jawaban Anda</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Build pengembangan ingin mengambil alih sebuah plugin</value>
   </data>
@@ -17335,6 +17347,15 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Aksi yang boleh dijalankan klien AI</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Tindakan tidak dapat dikeluarkan. Coba lagi.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Tanyakan lagi sebelum {action}</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Selalu diizinkan</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Muat ulang</value>
@@ -25496,6 +25517,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} meminta Macro Deck melakukan hal berikut:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Jawaban Anda tidak dapat diteruskan. Coba lagi.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Selalu izinkan tindakan ini untuk {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Konfirmasi permintaan klien AI</value>

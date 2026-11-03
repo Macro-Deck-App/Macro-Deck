@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AppStrings } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
-import { ClaudeDesktopExtensionDownload, CreateMcpTokenRequest, CreateMcpTokenResponse, McpConnection, McpEndpoint, McpProviderPolicy, McpRiskMode, McpToken, McpTokenActionResponse } from '../shared/transport/mcp-messages';
+import { ClaudeDesktopExtensionDownload, CreateMcpTokenRequest, CreateMcpTokenResponse, McpAllowedAction, McpConnection, McpEndpoint, McpProviderPolicy, McpRiskMode, McpToken, McpTokenActionResponse } from '../shared/transport/mcp-messages';
 
 @Injectable({ providedIn: 'root' })
 export class McpSettingsService {
@@ -55,6 +55,20 @@ export class McpSettingsService {
     if (response.success) {
       this.providers.update(providers => providers.map(provider =>
         provider.integrationId === integrationId ? { ...provider, override: mode } : provider));
+    }
+    return response;
+  }
+
+  async removeAllowedAction(tokenId: string, action: McpAllowedAction): Promise<McpTokenActionResponse> {
+    const response = await this.api.removeMcpAllowedAction(tokenId, action.integrationId, action.actionId);
+    if (response.success) {
+      this.tokens.update(tokens => tokens.map(token => token.id !== tokenId
+        ? token
+        : {
+          ...token,
+          allowedActions: (token.allowedActions ?? []).filter(allowed =>
+            allowed.integrationId !== action.integrationId || allowed.actionId !== action.actionId),
+        }));
     }
     return response;
   }

@@ -2,11 +2,18 @@ using MacroDeck.Localization;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Ui.Transport.Messages;
+using MacroDeckHost.Auth;
 using MacroDeckHost.Localization;
 using MacroDeckHost.Mcp;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MacroDeckHost.Api.Controllers;
+
+public record McpAllowedActionBody(
+	string IntegrationId,
+	string ActionId,
+	LocalizedText IntegrationName,
+	LocalizedText ActionName);
 
 public record McpTokenBody(
 	Guid Id,
@@ -14,7 +21,8 @@ public record McpTokenBody(
 	DateTime CreatedAt,
 	DateTime? LastUsedAt,
 	DateTime? RevokedAt,
-	int ConnectionCount);
+	int ConnectionCount,
+	IReadOnlyList<McpAllowedActionBody> AllowedActions);
 
 public record GetMcpTokensResponse(IReadOnlyList<McpTokenBody> Tokens);
 
@@ -49,6 +57,18 @@ public record GetMcpPolicyResponse(IReadOnlyList<McpProviderPolicyBody> Provider
 
 public record SetMcpPolicyBody(string IntegrationId, McpRiskMode? Mode);
 
+public record McpPendingConfirmationBody(
+	string Id,
+	string ClientName,
+	IReadOnlyList<string> Lines,
+	bool AlwaysAllowable,
+	DateTime CreatedAt,
+	DateTime ExpiresAt);
+
+public record GetMcpConfirmationsResponse(IReadOnlyList<McpPendingConfirmationBody> Confirmations);
+
+public record AllowMcpConfirmationBody(bool AlwaysAllow = false);
+
 [ApiController]
 [Route("api/mcp")]
 public class McpController : ControllerBase
@@ -58,19 +78,22 @@ public class McpController : ControllerBase
 	private readonly IMcpRiskPolicy _policy;
 	private readonly IIntegrationRegistry _integrations;
 	private readonly McpTextResolver _text;
+	private readonly IMcpConfirmationStore _confirmations;
 
 	public McpController(
 		IMcpTokenService tokenService,
 		IMcpConnections connections,
 		IMcpRiskPolicy policy,
 		IIntegrationRegistry integrations,
-		McpTextResolver text)
+		McpTextResolver text,
+		IMcpConfirmationStore confirmations)
 	{
 		_tokenService = tokenService;
 		_connections = connections;
 		_policy = policy;
 		_integrations = integrations;
 		_text = text;
+		_confirmations = confirmations;
 	}
 
 	[HttpGet("policy")]
@@ -147,10 +170,69 @@ public class McpController : ControllerBase
 	{
 		var connections = _connections.Snapshot();
 		var tokens = await _tokenService.GetAll();
+		var bodies = new List<McpTokenBody>();
+		foreach (var token in tokens)
+		{
+			bodies.Add(ToBody(token,
+				connections.Count(connection => connection.TokenId == token.Id),
+				await AllowedActions(token.Id)));
+		}
 
-		return new GetMcpTokensResponse(tokens
-			.Select(token => ToBody(token, connections.Count(connection => connection.TokenId == token.Id)))
-			.ToList());
+		return new GetMcpTokensResponse(bodies);
+	}
+
+	[HttpDelete("tokens/{id:guid}/allowed-actions/{integrationId}/{actionId}")]
+	public async Task<McpTokenActionResponse> RemoveAllowedAction(Guid id, string integrationId, string actionId)
+	{
+		return await _policy.RemoveAllowance(id, new McpActionRef(integrationId, actionId))
+			? new McpTokenActionResponse(true, null)
+			: Failure("not_found", AppStrings.Errors.Mcp.AllowedActionNotFound());
+	}
+
+	[HttpGet("confirmations")]
+	public IActionResult GetConfirmations()
+	{
+		if (!TrustedDesktop(out var rejection))
+		{
+			return rejection!;
+		}
+
+		return Ok(new GetMcpConfirmationsResponse(_confirmations.PendingInApp()
+			.Select(entry => new McpPendingConfirmationBody(entry.Id,
+				entry.ClientName,
+				entry.Lines,
+				entry.AlwaysAllowable,
+				entry.CreatedAt,
+				entry.ExpiresAt))
+			.ToList()));
+	}
+
+	[HttpPost("confirmations/{id}/allow")]
+	public async Task<IActionResult> AllowConfirmation(string id, AllowMcpConfirmationBody body)
+	{
+		if (!TrustedDesktop(out var rejection))
+		{
+			return rejection!;
+		}
+
+		var result = _confirmations.AnswerInApp(id, true, out var entry);
+		if (result == McpInAppAnswerResult.Answered && body.AlwaysAllow && entry is { AlwaysAllowable: true })
+		{
+			await _policy.Allow(entry.TokenId, entry.Actions);
+		}
+
+		return Ok(Answered(result));
+	}
+
+	[HttpPost("confirmations/{id}/decline")]
+	public IActionResult DeclineConfirmation(string id)
+	{
+		if (!TrustedDesktop(out var rejection))
+		{
+			return rejection!;
+		}
+
+		return Ok(Answered(_confirmations.AnswerInApp(id, false, out _)));
 	}
 
 	[HttpPost("tokens")]
@@ -168,7 +250,7 @@ public class McpController : ControllerBase
 		var created = await _tokenService.Create(name);
 
 		return StatusCode(StatusCodes.Status201Created,
-			new CreateMcpTokenResponse(true, null, ToBody(created.Token, 0), created.PlaintextToken));
+			new CreateMcpTokenResponse(true, null, ToBody(created.Token, 0, []), created.PlaintextToken));
 	}
 
 	[HttpPost("tokens/{id:guid}/revoke")]
@@ -215,13 +297,65 @@ public class McpController : ControllerBase
 		return new McpTokenActionResponse(false, new TransportError { Code = code, Message = message });
 	}
 
-	private static McpTokenBody ToBody(McpAccessToken token, int connectionCount)
+	private async Task<IReadOnlyList<McpAllowedActionBody>> AllowedActions(Guid tokenId)
+	{
+		var allowed = await _policy.Allowances(tokenId);
+		if (allowed.Count == 0)
+		{
+			return [];
+		}
+
+		var known = _integrations.GetActions(false)
+			.ToDictionary(action => new McpActionRef(action.OwnerId, action.LocalId));
+		return allowed.Select(action => known.TryGetValue(action, out var descriptor)
+				? new McpAllowedActionBody(action.IntegrationId,
+					action.ActionId,
+					descriptor.Owner.Name,
+					descriptor.Definition.Name)
+				: new McpAllowedActionBody(action.IntegrationId,
+					action.ActionId,
+					action.IntegrationId,
+					action.ActionId))
+			.ToList();
+	}
+
+	private static McpTokenActionResponse Answered(McpInAppAnswerResult result)
+	{
+		return result switch
+		{
+			McpInAppAnswerResult.Answered => new McpTokenActionResponse(true, null),
+			McpInAppAnswerResult.AlreadyAnswered => Failure("already_answered",
+				AppStrings.Errors.Mcp.ConfirmationNotFound()),
+			_ => Failure("not_found", AppStrings.Errors.Mcp.ConfirmationNotFound())
+		};
+	}
+
+	// Like plugin pairing, an answer is a decision of someone at this computer: an admin token on the
+	// public listener, and with it the web client, cannot answer on the user's behalf.
+	private bool TrustedDesktop(out IActionResult? rejection)
+	{
+		if (!LoopbackConnection.IsTrusted(HttpContext))
+		{
+			rejection = Problem(statusCode: StatusCodes.Status403Forbidden,
+				title: "AI client requests can only be answered in the desktop app.");
+			return false;
+		}
+
+		rejection = null;
+		return true;
+	}
+
+	private static McpTokenBody ToBody(
+		McpAccessToken token,
+		int connectionCount,
+		IReadOnlyList<McpAllowedActionBody> allowedActions)
 	{
 		return new McpTokenBody(token.Id,
 			token.Name,
 			token.CreatedAt,
 			token.LastUsedAt,
 			token.RevokedAt,
-			connectionCount);
+			connectionCount,
+			allowedActions);
 	}
 }

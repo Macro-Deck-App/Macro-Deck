@@ -2991,6 +2991,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Er bestaat geen toegangstoken met dat ID.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Dit verzoek wacht niet meer op een antwoord.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Deze actie is niet meer altijd toegestaan voor deze client.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>De migratie kon niet worden voltooid.</value>
   </data>
@@ -15126,6 +15132,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>{name} wacht op je goedkeuring in Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} wil dat je iets toestaat of weigert in Macro Deck.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Een AI-client wacht op je antwoord</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Een ontwikkelbuild wil een plug-in overnemen</value>
   </data>
@@ -17335,6 +17347,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Acties die AI-clients mogen uitvoeren</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>De actie kon niet worden verwijderd. Probeer het opnieuw.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Opnieuw vragen vóór {action}</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Altijd toegestaan</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Vernieuwen</value>
@@ -25496,6 +25517,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} vraagt Macro Deck om het volgende te doen:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Je antwoord kon niet worden doorgegeven. Probeer het opnieuw.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Deze acties altijd toestaan voor {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Bevestig een verzoek van de AI-client</value>

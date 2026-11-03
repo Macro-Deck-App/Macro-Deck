@@ -2991,6 +2991,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>इस ID वाला कोई ऐक्सेस टोकन मौजूद नहीं है।</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>यह अनुरोध अब उत्तर की प्रतीक्षा नहीं कर रहा है।</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>यह कार्रवाई अब इस क्लाइंट के लिए हमेशा अनुमत नहीं है।</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>माइग्रेशन पूरा नहीं किया जा सका।</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>{name} Macro Deck में आपकी मंज़ूरी का इंतज़ार कर रहा है।</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} चाहता है कि आप Macro Deck में किसी अनुरोध को अनुमति दें या अस्वीकार करें।</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>एक AI क्लाइंट आपके उत्तर की प्रतीक्षा कर रहा है</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>एक डेवलपमेंट बिल्ड एक प्लगइन पर कब्ज़ा करना चाहता है</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>वे एक्शन जिन्हें AI क्लाइंट चला सकते हैं</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>कार्रवाई नहीं हटाई जा सकी। फिर से प्रयास करें।</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>{action} से पहले फिर से पूछें</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>हमेशा अनुमत</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>रीफ़्रेश करें</value>
@@ -25496,6 +25517,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} Macro Deck से यह करने का अनुरोध करता है:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>आपका उत्तर आगे नहीं भेजा जा सका। फिर से प्रयास करें।</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>{client} के लिए इन कार्रवाइयों को हमेशा अनुमति दें</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>AI क्लाइंट के अनुरोध की पुष्टि करें</value>

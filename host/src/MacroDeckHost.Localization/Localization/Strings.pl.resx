@@ -2992,6 +2992,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Token dostępu o tym identyfikatorze nie istnieje.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>To żądanie nie czeka już na odpowiedź.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Ta akcja nie jest już zawsze dozwolona dla tego klienta.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Nie udało się ukończyć migracji.</value>
   </data>
@@ -15125,6 +15131,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wtyczka {name} czeka na zatwierdzenie w Macro Decku.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} prosi o zezwolenie lub odrzucenie żądania w Macro Decku.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Klient AI czeka na odpowiedź</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Kompilacja deweloperska chce przejąć wtyczkę</value>
   </data>
@@ -17334,6 +17346,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Akcje, które mogą uruchamiać klienci AI</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Nie można usunąć akcji. Spróbuj ponownie.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Pytaj ponownie przed akcją {action}</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Zawsze dozwolone</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Odśwież</value>
@@ -25474,6 +25495,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} prosi Macro Deck o wykonanie następujących czynności:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Nie można przekazać odpowiedzi. Spróbuj ponownie.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Zawsze zezwalaj na te akcje dla {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Potwierdzenie żądania klienta AI</value>

@@ -412,6 +412,7 @@ import {
   ClaudeDesktopExtensionDownload,
   CreateMcpTokenRequest,
   CreateMcpTokenResponse,
+  GetMcpConfirmationsResponse,
   GetMcpConnectionsResponse,
   GetMcpPolicyResponse,
   GetMcpTokensResponse,
@@ -947,6 +948,24 @@ export class ApiService {
 
   setMcpPolicy(request: SetMcpPolicyRequest): Promise<McpTokenActionResponse> {
     return this.http('PUT', '/api/mcp/policy', request);
+  }
+
+  removeMcpAllowedAction(tokenId: string, integrationId: string, actionId: string): Promise<McpTokenActionResponse> {
+    return this.http('DELETE', `/api/mcp/tokens/${encodeURIComponent(tokenId)}/allowed-actions/`
+      + `${encodeURIComponent(integrationId)}/${encodeURIComponent(actionId)}`);
+  }
+
+  // Desktop-only: the host refuses these off the trusted loopback connection.
+  getMcpConfirmations(): Promise<GetMcpConfirmationsResponse> {
+    return this.http('GET', '/api/mcp/confirmations');
+  }
+
+  allowMcpConfirmation(id: string, alwaysAllow: boolean): Promise<McpTokenActionResponse> {
+    return this.http('POST', `/api/mcp/confirmations/${encodeURIComponent(id)}/allow`, { alwaysAllow });
+  }
+
+  declineMcpConfirmation(id: string): Promise<McpTokenActionResponse> {
+    return this.http('POST', `/api/mcp/confirmations/${encodeURIComponent(id)}/decline`);
   }
 
   getPluginSessions(): Promise<GetPluginSessionsResponse> {

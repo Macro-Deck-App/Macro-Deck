@@ -1,0 +1,46 @@
+@if (pending(); as request) {
+  <shared-modal
+    [heading]="'macrodeck.app:Mcp.Confirmation.PageTitle' | translate"
+    size="medium"
+    [closeOnOverlay]="false"
+    [showFooter]="true"
+    (close)="decline()">
+    <div class="mcp-confirmation">
+      <p class="mcp-confirmation-lead">
+        {{ 'macrodeck.app:Mcp.Confirmation.Lead' | translate:{ client: request.clientName } }}
+      </p>
+
+      <ul class="mcp-confirmation-lines">
+        @for (line of request.lines; track $index) {
+          <li>{{ line }}</li>
+        }
+      </ul>
+
+      <div class="mcp-confirmation-warning">
+        <span class="icon icon-alert-triangle icon-sm"></span>
+        <p>{{ 'macrodeck.app:Mcp.Confirmation.Hint' | translate }}</p>
+      </div>
+
+      @if (request.alwaysAllowable) {
+        <shared-checkbox
+          name="alwaysAllow"
+          [label]="'macrodeck.app:Mcp.Confirmation.AlwaysAllow' | translate:{ client: request.clientName }"
+          [ngModel]="alwaysAllow()"
+          (ngModelChange)="alwaysAllow.set($event)" />
+      }
+
+      @if (errorMessage(); as error) {
+        <p class="mcp-confirmation-error">{{ error }}</p>
+      }
+    </div>
+
+    <div modal-footer>
+      <shared-button variant="secondary" [disabled]="busy()" (click)="decline()">
+        {{ 'macrodeck.app:Mcp.Confirmation.DeclineAction' | translate }}
+      </shared-button>
+      <shared-button variant="primary" [loading]="busy()" [disabled]="busy()" (click)="allow()">
+        {{ 'macrodeck.app:Mcp.Elicitation.ConfirmTitle' | translate }}
+      </shared-button>
+    </div>
+  </shared-modal>
+}

@@ -9,7 +9,7 @@ actions. They never see your secrets. Everything is set up in **Settings > AI cl
 
 Only apps on the same computer as Macro Deck can connect.
 
-![The AI clients settings with the server address, an access token with its connected clients, and the actions AI clients may run](../../../assets/guide/mcp-settings.png)
+![The AI clients settings with the server address, an access token with an action it may always run, and the actions AI clients may run](../../../assets/guide/mcp-settings.png)
 
 ## Create an access token
 
@@ -78,13 +78,31 @@ page works once and for 10 minutes. A step that uses a stored secret still needs
 Under **Actions AI clients may run** you choose for each provider:
 
 - **Allow**: AI clients run its actions directly.
-- **Ask first**: Macro Deck asks you before every one of its actions and runs it only if you agree. A client
-  with its own confirmation dialog shows the question there. A client without one, such as Claude Desktop,
-  opens a Macro Deck page in your browser instead, where you choose **Allow** or **Decline**. The page
-  works once and for 5 minutes, and runs nothing until you answer.
+- **Ask first**: Macro Deck asks you before every one of its actions and runs it only if you agree.
 - **Off**: AI clients cannot run its actions.
 
-![The Macro Deck page asking you to allow or decline an action an AI client wants to run](../../../assets/guide/mcp-confirm.png)
+Where the question appears depends on the client:
+
+- A client with its own confirmation dialog shows the question there.
+- Some clients open a Macro Deck page in your browser instead, where you choose **Allow** or **Decline**.
+  The page works once and for 5 minutes.
+
+  ![The Macro Deck page asking you to allow or decline an action an AI client wants to run](../../../assets/guide/mcp-confirm.png)
+
+- A client that can do neither, such as Claude Desktop, gets the question in Macro Deck itself: a window
+  opens in the app, together with a notification. Choose **Allow** or **Decline** there. If you answer
+  within 45 seconds, the action runs right away. Otherwise the client is told that Macro Deck is waiting
+  for you, and the action runs when the client tries again after you allowed it. The question stays open
+  for 5 minutes.
+
+Nothing runs until you answer.
+
+![The Macro Deck window asking you to allow or decline an action Claude Desktop wants to run](../../../assets/guide/mcp-confirm-in-app.png)
+
+When the question is only about actions, you can tick **Always allow these actions for** the client. From
+then on that client runs them without asking; other clients still ask. Each token lists its always
+allowed actions under **Always allowed**, and **Remove** makes Macro Deck ask again. Revoking the token
+removes them too. A provider set to **Off** stays off.
 
 **Default** keeps Macro Deck's choice, shown next to it. Built-in actions that run programs and scripts,
 press keys, use files or the network, or shut the computer down ask first by default, and so does every

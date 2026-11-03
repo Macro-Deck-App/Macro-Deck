@@ -589,11 +589,13 @@ The client usually shows the code Macro Deck answered with. The full list is in
 - **An action is refused** (`PROVIDER_BLOCKED`). Its provider is set to **Off** under **Actions AI clients
   may run** in **Settings > AI clients**.
 - **An action that asks first did not run** (`CONFIRMATION_DECLINED`). You chose **Decline**, or the
-  Macro Deck page for clients without their own confirmation dialog was not answered within 5 minutes.
-  Ask the client to try again and answer the question.
-- **It cannot ask you before an action** (`CONFIRMATION_UNAVAILABLE`). The provider is set to **Ask
-  first**, but your client can show neither its own question nor a Macro Deck page. Set the provider to
-  **Allow** if the client may run its actions without asking, or use a client that can ask.
+  question in Macro Deck was not answered within 5 minutes. Ask the client to try again and answer the
+  question.
+- **The client says Macro Deck is waiting for your answer** (`CONFIRMATION_PENDING`). Your client cannot
+  ask you itself, so Macro Deck asks in its own window. Choose **Allow** or **Decline** there, then tell
+  the client to try again. If no question appears, open the Macro Deck window: the question shows only in
+  the desktop app on this computer, and its notification may have been hidden by your system's
+  notification settings.
 
 ## Installing on Linux
 
