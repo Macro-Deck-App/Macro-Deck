@@ -25594,4 +25594,98 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Secret</value>
   </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Wake device</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Sends a Wake on LAN magic packet to a saved device. A sent packet does not confirm that the device woke up.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>The saved device to wake</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Choose a device</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Add a device</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Save a device to wake from Macro Deck. Wake on LAN has to be turned on in the device's firmware and network adapter settings.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>This setup step is not known. Start again.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC address</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>The hardware address of the device's network adapter</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Enter a MAC address with 12 hexadecimal digits, for example AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Broadcast address</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Keep 255.255.255.255 for this network, or enter the broadcast address of the device's subnet, for example 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Enter an IPv4 address, for example 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>The UDP port the packet is sent to. Most devices listen on port 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Enter a port from 1 to 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Packets</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>How many packets to send. Send more than one to a device that does not always wake up.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Enter a number from 1 to 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Delay between packets (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>How long to wait between two packets, in milliseconds</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Enter a delay from 0 to 10000 milliseconds.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Choose a device to wake.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>The selected device no longer exists. Choose another device.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>The saved settings of {device} are not valid. Edit the device and save it again.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Sending the packet to {address} was not allowed. Check that broadcasts are permitted and, on macOS, that Macro Deck has Local Network access.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>There is no route to {address}. Check the broadcast address and, on macOS, that Macro Deck has Local Network access.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>The packet to {address} could not be sent.</value>
+    <comment>[address:string]</comment>
+  </data>
 </root>

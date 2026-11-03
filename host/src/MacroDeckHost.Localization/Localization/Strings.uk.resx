@@ -25587,4 +25587,98 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Секрет</value>
   </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Розбудити пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Надсилає магічний пакет Wake on LAN на збережений пристрій. Надсилання пакета не підтверджує, що пристрій прокинувся.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Збережений пристрій, який потрібно розбудити</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Виберіть пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Додати пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Збережіть пристрій, який потрібно будити з Macro Deck. Wake on LAN має бути увімкнено в мікропрограмі та в налаштуваннях мережевого адаптера пристрою.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Цей крок налаштування невідомий. Почніть спочатку.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC-адреса</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Апаратна адреса мережевого адаптера пристрою</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Введіть MAC-адресу з 12 шістнадцяткових цифр, наприклад AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Широкомовна адреса</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Залиште 255.255.255.255 для цієї мережі або введіть широкомовну адресу підмережі пристрою, наприклад 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Введіть адресу IPv4, наприклад 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>UDP-порт, на який надсилається пакет. Більшість пристроїв слухають порт 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Введіть порт від 1 до 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Кількість пакетів</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Скільки пакетів надіслати. Для пристрою, який прокидається не завжди, вкажіть більше одного.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Введіть число від 1 до 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Пауза між пакетами (мс)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Час очікування між двома пакетами в мілісекундах</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Введіть паузу від 0 до 10000 мілісекунд.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Виберіть пристрій, який потрібно розбудити.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Вибраний пристрій більше не існує. Виберіть інший пристрій.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>Збережені налаштування {device} недійсні. Змініть пристрій і збережіть його знову.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Надсилання пакета на {address} не дозволено. Перевірте, чи дозволено широкомовне розсилання і чи має Macro Deck у macOS доступ до локальної мережі.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>Немає маршруту до {address}. Перевірте широкомовну адресу і чи має Macro Deck у macOS доступ до локальної мережі.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Не вдалося надіслати пакет на {address}.</value>
+    <comment>[address:string]</comment>
+  </data>
 </root>

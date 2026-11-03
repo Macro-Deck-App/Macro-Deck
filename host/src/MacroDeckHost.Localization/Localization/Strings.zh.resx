@@ -25569,4 +25569,98 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>密钥</value>
   </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>网络唤醒</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>唤醒设备</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>向已保存的设备发送网络唤醒魔术包。发送成功并不代表设备已被唤醒。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>设备</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>要唤醒的已保存设备</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>选择设备</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>添加设备</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>保存要从 Macro Deck 唤醒的设备。需要在设备的固件和网卡设置中启用网络唤醒。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>未知的设置步骤。请重新开始。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC 地址</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>设备网卡的硬件地址</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>请输入由 12 位十六进制数字组成的 MAC 地址，例如 AA:BB:CC:DD:EE:FF。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>广播地址</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>对于当前网络保留 255.255.255.255，或输入设备所在子网的广播地址，例如 192.168.2.255。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>请输入 IPv4 地址，例如 192.168.1.255。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>端口</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>数据包发送到的 UDP 端口。大多数设备监听端口 9。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>请输入 1 到 65535 之间的端口。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>数据包数量</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>要发送的数据包数量。对于不能每次都被唤醒的设备，可发送多个。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>请输入 1 到 10 之间的数字。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>数据包间隔（毫秒）</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>两个数据包之间的等待时间，单位为毫秒</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>请输入 0 到 10000 毫秒之间的间隔。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>请选择要唤醒的设备。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>所选设备已不存在。请选择其他设备。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} 的已保存设置无效。请编辑该设备并重新保存。</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>不允许向 {address} 发送数据包。请检查是否允许广播，以及在 macOS 上 Macro Deck 是否有本地网络访问权限。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>没有到 {address} 的路由。请检查广播地址，以及在 macOS 上 Macro Deck 是否有本地网络访问权限。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>无法向 {address} 发送数据包。</value>
+    <comment>[address:string]</comment>
+  </data>
 </root>
