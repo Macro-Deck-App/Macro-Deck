@@ -337,6 +337,90 @@ public partial class McpEndpointTests
 	}
 
 	[Test]
+	public async Task A_session_is_listed_with_its_client_from_the_handshake_until_the_client_closes_it()
+	{
+		var token = await CreateToken();
+		var client = await Connect(token.Plaintext, LegacyProtocol);
+
+		var connected = await Connections(token.Id);
+		await client.DisposeAsync();
+		var closed = await Connections(token.Id);
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(connected.Select(ClientLabel), Is.EqualTo(new[] { "test-client 1.0" }));
+			Assert.That(closed, Is.Empty);
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_stateless_client_is_listed_with_its_client_before_calling_a_tool()
+	{
+		var token = await CreateToken();
+		await using var client = await Connect(token.Plaintext, null);
+		await client.ListToolsAsync();
+
+		var connections = await Connections(token.Id);
+
+		Assert.That(connections.Select(ClientLabel), Is.EqualTo(new[] { "test-client 1.0" }));
+	}
+
+	[Test]
+	public async Task A_request_the_server_rejects_lists_no_connection()
+	{
+		var token = await CreateToken();
+		using var request = new HttpRequestMessage(HttpMethod.Post, "/mcp");
+		request.Headers.Add(FakeConnectionStartupFilter.ShapeHeader,
+			nameof(FakeConnectionShape.LoopbackWithoutCredential));
+		request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Plaintext);
+		request.Headers.Accept.ParseAdd("application/json");
+		request.Headers.Accept.ParseAdd("text/event-stream");
+		request.Headers.Add("MCP-Protocol-Version", "2026-07-28");
+		request.Content = JsonContent.Create(new { jsonrpc = "2.0", id = 1, method = "tools/list" });
+
+		var response = await _client.SendAsync(request);
+		var body = await response.Content.ReadAsStringAsync();
+		var connections = await Connections(token.Id);
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(body, Does.Contain("error"));
+			Assert.That(connections, Is.Empty);
+			return Task.CompletedTask;
+		});
+	}
+
+	[TestCase(LegacyProtocol)]
+	[TestCase(null)]
+	public async Task A_client_whose_token_is_revoked_during_a_call_is_no_longer_listed(string? protocolVersion)
+	{
+		var token = await CreateToken();
+		IReadOnlyList<JsonElement>? duringCall = null;
+		await using var client = await Connect(token.Plaintext,
+			protocolVersion,
+			async (_, _) =>
+			{
+				duringCall = await Connections(token.Id);
+				await Send(HttpMethod.Post, $"/api/mcp/tokens/{token.Id}/revoke", FakeConnectionShape.Loopback);
+				return new ElicitResult { Action = "decline" };
+			});
+
+		var call = Task.Run(async () => await client.CallToolAsync("set_secret",
+			new Dictionary<string, object?> { ["kind"] = "secret", ["label"] = "API key" }));
+		await Task.WhenAny(call);
+
+		var afterRevoke = await Connections(token.Id);
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(duringCall?.Select(ClientLabel), Is.EqualTo(new[] { "test-client 1.0" }));
+			Assert.That(afterRevoke, Is.Empty);
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
 	public async Task The_token_list_reports_created_and_last_used_in_utc_and_in_order()
 	{
 		var created = await CreateToken();
@@ -454,6 +538,22 @@ public partial class McpEndpointTests
 		};
 
 		return await McpClient.CreateAsync(transport, options);
+	}
+
+	private async Task<IReadOnlyList<JsonElement>> Connections(Guid tokenId)
+	{
+		var response = await Send(HttpMethod.Get, "/api/mcp/connections", FakeConnectionShape.Loopback);
+		var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+		return json.GetProperty("connections")
+			.EnumerateArray()
+			.Where(connection => connection.GetProperty("tokenId").GetGuid() == tokenId)
+			.ToList();
+	}
+
+	private static string ClientLabel(JsonElement connection)
+	{
+		var name = connection.GetProperty("clientName").GetString();
+		return $"{name} {connection.GetProperty("clientVersion").GetString()}";
 	}
 
 	private async Task<(Guid Id, string Plaintext)> CreateToken()

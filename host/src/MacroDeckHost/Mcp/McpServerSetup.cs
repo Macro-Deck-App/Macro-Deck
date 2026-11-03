@@ -51,10 +51,12 @@ public static class McpServerSetup
 				// later clients are stateless and get elicitation as multi round-trip results instead.
 				options.SessionMode = HttpServerSessionMode.StatefulForInitializeClients;
 			})
-			.WithRequestFilters(filters => filters.AddCallToolFilter(next => async (context, cancellationToken) =>
+			.WithMessageFilters(filters => filters.AddIncomingFilter(next => async (context, cancellationToken) =>
 			{
+				// Before next so a revoke finds a long first call; after next because initialize sets the client info.
 				TrackClient(context.Services, context.Server, context.User);
-				return await next(context, cancellationToken);
+				await next(context, cancellationToken);
+				TrackClient(context.Services, context.Server, context.User);
 			}))
 			.WithTools<McpCatalogTools>(McpJson.Options)
 			.WithTools<McpEntityTools>(McpJson.Options)
