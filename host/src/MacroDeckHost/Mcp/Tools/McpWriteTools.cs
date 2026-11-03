@@ -85,6 +85,13 @@ public sealed class McpWriteTools
 			context,
 			validation.Confirmations.Select(confirmation => $"{confirmation.Kind}: {confirmation.Detail}").ToList(),
 			texts,
+			validation.Confirmations
+				.Where(confirmation => confirmation.Kind == McpConfirmationKinds.RiskyAction)
+				.Select(confirmation => confirmation is { IntegrationId: { } integrationId, ActionId: { } actionId }
+					? new McpActionRef(integrationId, actionId)
+					: null)
+				.OfType<McpActionRef>()
+				.ToList(),
 			cancellationToken);
 
 		var result = await _changes.Apply(tokenId,

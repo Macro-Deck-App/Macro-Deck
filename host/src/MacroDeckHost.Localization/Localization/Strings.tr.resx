@@ -2991,6 +2991,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Bu kimliğe sahip bir erişim belirteci yok.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Bu istek artık bir yanıt beklemiyor.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Bu eylem artık bu istemci için her zaman izinli değil.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Geçiş tamamlanamadı.</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>{name}, Macro Deck'te onayınızı bekliyor.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client}, Macro Deck'te bir isteğe izin vermenizi veya reddetmenizi istiyor.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>Bir yapay zekâ istemcisi yanıtınızı bekliyor</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Bir geliştirme derlemesi eklentiyi devralmak istiyor</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Yapay zekâ istemcilerinin çalıştırabileceği eylemler</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Eylem kaldırılamadı. Tekrar deneyin.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>{action} öncesinde yeniden sorun</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Her zaman izinli</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Yenile</value>
@@ -25496,6 +25517,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client}, Macro Deck'ten şunu yapmasını istiyor:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Yanıtınız iletilemedi. Tekrar deneyin.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>{client} için bu eylemlere her zaman izin verin</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Yapay zekâ istemcisi isteğini onaylayın</value>

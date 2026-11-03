@@ -8,6 +8,8 @@ namespace MacroDeckHost.Mcp;
 
 public sealed class McpConfirmationGate
 {
+	public static readonly TimeSpan InAppWait = TimeSpan.FromSeconds(45);
+
 	private const string PageState = "page:";
 
 	private readonly McpConfirmationText _text;
@@ -35,6 +37,7 @@ public sealed class McpConfirmationGate
 		RequestContext<CallToolRequestParams> context,
 		IReadOnlyList<string> codes,
 		IReadOnlyList<string> lines,
+		IReadOnlyList<McpActionRef> actions,
 		CancellationToken cancellationToken)
 	{
 		if (codes.Count == 0)
@@ -87,15 +90,11 @@ public sealed class McpConfirmationGate
 
 		if (elicitation?.Url is null || McpPageUrl.Origin(_httpContext.HttpContext) is not { } origin)
 		{
-			throw McpToolErrors.Create(McpConsent.Unavailable,
-				"This needs the user's confirmation, and the client supports neither form nor URL elicitation: "
-				+ string.Join(", ", codes));
+			await AskInApp(server, context, codes, lines, actions, fingerprint, cancellationToken);
+			return;
 		}
 
-		var clientName = context.User?.FindFirst(McpClaimTypes.TokenName)?.Value is { Length: > 0 } tokenName
-			? tokenName
-			: server.ClientInfo?.Name ?? string.Empty;
-		var entry = _store.Create(McpConsent.TokenId(context), clientName, fingerprint, lines);
+		var entry = _store.Create(McpConsent.TokenId(context), ClientName(server, context), fingerprint, lines);
 		throw McpElicitation.Ask(McpConsent.Key,
 			new ElicitRequestParams
 			{
@@ -106,6 +105,55 @@ public sealed class McpConfirmationGate
 					?? string.Empty
 			},
 			PageState + entry.Id);
+	}
+
+	private async Task AskInApp(
+		McpServer server,
+		RequestContext<CallToolRequestParams> context,
+		IReadOnlyList<string> codes,
+		IReadOnlyList<string> lines,
+		IReadOnlyList<McpActionRef> actions,
+		string fingerprint,
+		CancellationToken cancellationToken)
+	{
+		var entry = _store.GetOrCreateInApp(McpConsent.TokenId(context),
+			ClientName(server, context),
+			fingerprint,
+			lines,
+			actions.Distinct().ToList(),
+			codes.All(code => code.StartsWith(McpConfirmationKinds.RiskyAction + ":", StringComparison.Ordinal)));
+
+		var remaining = entry.ExpiresAt - _timeProvider.GetUtcNow().UtcDateTime;
+		var wait = remaining < InAppWait ? remaining : InAppWait;
+		using var timeout = new CancellationTokenSource(wait > TimeSpan.Zero ? wait : TimeSpan.Zero, _timeProvider);
+		using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
+		try
+		{
+			await entry.Completion.WaitAsync(linked.Token);
+		}
+		catch (OperationCanceledException)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+		}
+
+		if (_store.TryConsumeInApp(entry.Id, out var allowed))
+		{
+			if (allowed)
+			{
+				return;
+			}
+
+			throw McpToolErrors.Create(McpConsent.Declined, "The user declined in Macro Deck.");
+		}
+
+		if (entry.Completion.IsCanceled)
+		{
+			throw McpToolErrors.Create(McpConsent.Declined, "The user did not answer in Macro Deck in time.");
+		}
+
+		throw McpToolErrors.Create(McpConsent.Pending,
+			"Macro Deck is asking the user to allow or decline this. Once they answered in Macro Deck, call the "
+			+ "same tool again with the same arguments.");
 	}
 
 	private async Task AwaitPage(
@@ -155,5 +203,12 @@ public sealed class McpConfirmationGate
 		{
 			_store.Abandon(entry.Id);
 		}
+	}
+
+	private static string ClientName(McpServer server, RequestContext<CallToolRequestParams> context)
+	{
+		return context.User?.FindFirst(McpClaimTypes.TokenName)?.Value is { Length: > 0 } tokenName
+			? tokenName
+			: server.ClientInfo?.Name ?? string.Empty;
 	}
 }

@@ -11,6 +11,7 @@ using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Mcp;
+using MacroDeckHost.Mcp.Tools;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.Client;
@@ -522,8 +523,11 @@ public partial class McpEndpointTests
 		}
 	}
 
-	[Test]
-	public async Task A_client_without_any_elicitation_cannot_run_an_ask_first_action()
+	[TestCase("allow", false)]
+	[TestCase("decline", true)]
+	public async Task A_client_without_any_elicitation_asks_in_macro_deck_and_runs_only_once_allowed(
+		string decision,
+		bool refused)
 	{
 		await EnsureTestIntegration();
 		var token = await CreateToken();
@@ -532,21 +536,309 @@ public partial class McpEndpointTests
 		var executedBefore = _send.ExecuteCount;
 		try
 		{
-			var run = await client.CallToolAsync("run_action",
+			var run = RunSend(client, "visible-target");
+			var pending = await WaitForPendingConfirmation();
+			var answer = await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{pending.GetProperty("id").GetString()}/{decision}",
+				FakeConnectionShape.Loopback,
+				body: new { });
+			var result = JsonSerializer.Serialize(await run);
+
+			await Assert.MultipleAsync(async () =>
+			{
+				Assert.That(pending.GetProperty("clientName").GetString(), Is.EqualTo("test client"));
+				Assert.That(pending.GetProperty("lines").ToString(), Does.Contain("visible-target"));
+				Assert.That((await answer.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("success").GetBoolean(),
+					Is.True);
+				Assert.That(result.Contains(McpConsent.Declined), Is.EqualTo(refused), result);
+				Assert.That(_send.ExecuteCount, Is.EqualTo(refused ? executedBefore : executedBefore + 1));
+				Assert.That(await PendingConfirmations(), Is.Empty);
+			});
+		}
+		finally
+		{
+			await DeclinePending();
+			await SetPolicy(null);
+		}
+	}
+
+	[Test]
+	public async Task Two_identical_calls_waiting_for_one_allow_run_the_action_once()
+	{
+		await EnsureTestIntegration();
+		var token = await CreateToken();
+		await using var client = await Connect(token.Plaintext, LegacyProtocol, null, _noElicitation);
+		await SetPolicy(McpRiskMode.Confirm);
+		var executedBefore = _send.ExecuteCount;
+		try
+		{
+			var first = RunSend(client, "twice");
+			var pending = await WaitForPendingConfirmation();
+			var second = RunSend(client, "twice");
+			await Task.Delay(200);
+			await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{pending.GetProperty("id").GetString()}/allow",
+				FakeConnectionShape.Loopback,
+				body: new { });
+			var results = await Task.WhenAll(first, second);
+
+			await Assert.MultipleAsync(() =>
+			{
+				Assert.That(_send.ExecuteCount, Is.EqualTo(executedBefore + 1));
+				Assert.That(results.Count(result => result.IsError != true), Is.EqualTo(1));
+				return Task.CompletedTask;
+			});
+		}
+		finally
+		{
+			await DeclinePending();
+			await SetPolicy(null);
+		}
+	}
+
+	[Test]
+	public async Task Only_the_desktop_app_can_answer_a_request_in_macro_deck()
+	{
+		await EnsureTestIntegration();
+		var token = await CreateToken();
+		await using var client = await Connect(token.Plaintext, LegacyProtocol, null, _noElicitation);
+		await SetPolicy(McpRiskMode.Confirm);
+		var executedBefore = _send.ExecuteCount;
+		try
+		{
+			var run = RunSend(client, "x");
+			var id = (await WaitForPendingConfirmation()).GetProperty("id").GetString();
+			var fromLan = await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{id}/allow",
+				FakeConnectionShape.PublicLan,
+				_adminToken,
+				new { });
+			var listFromLan = await Send(HttpMethod.Get,
+				"/api/mcp/confirmations",
+				FakeConnectionShape.PublicLan,
+				_adminToken);
+			var onPage = await Send(HttpMethod.Get,
+				$"/mcp/confirm/{id}",
+				FakeConnectionShape.LoopbackWithoutCredential);
+			await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{id}/decline",
+				FakeConnectionShape.Loopback,
+				body: new { });
+			await run;
+
+			await Assert.MultipleAsync(() =>
+			{
+				Assert.That(fromLan.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+				Assert.That(listFromLan.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+				Assert.That(onPage.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+				Assert.That(_send.ExecuteCount, Is.EqualTo(executedBefore));
+				return Task.CompletedTask;
+			});
+		}
+		finally
+		{
+			await DeclinePending();
+			await SetPolicy(null);
+		}
+	}
+
+	[Test]
+	public async Task Always_allow_lets_only_this_client_run_the_action_without_asking_until_it_is_removed()
+	{
+		await EnsureTestIntegration();
+		var token = await CreateToken();
+		var other = await CreateToken();
+		await using var client = await Connect(token.Plaintext, LegacyProtocol, null, _noElicitation);
+		await using var otherClient = await Connect(other.Plaintext, LegacyProtocol, null, _noElicitation);
+		await SetPolicy(McpRiskMode.Confirm);
+		var executedBefore = _send.ExecuteCount;
+		try
+		{
+			var run = RunSend(client, "first");
+			var id = (await WaitForPendingConfirmation()).GetProperty("id").GetString();
+			await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{id}/allow",
+				FakeConnectionShape.Loopback,
+				body: new { alwaysAllow = true });
+			await run;
+
+			var unasked = await RunSend(client, "second");
+			var policyForClient = await SendPolicy(client);
+			var policyForOther = await SendPolicy(otherClient);
+			var allowedActions = await AllowedActions(token.Id);
+
+			await SetPolicy(McpRiskMode.Off);
+			var blocked = JsonSerializer.Serialize(await RunSend(client, "blocked"));
+			await SetPolicy(McpRiskMode.Confirm);
+
+			var removed = await Send(HttpMethod.Delete,
+				$"/api/mcp/tokens/{token.Id}/allowed-actions/{TestIntegration}/{SendAction}",
+				FakeConnectionShape.Loopback);
+			var askedAgain = RunSend(client, "third");
+			var pendingAgain = await WaitForPendingConfirmation();
+			await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{pendingAgain.GetProperty("id").GetString()}/decline",
+				FakeConnectionShape.Loopback,
+				body: new { });
+			await askedAgain;
+
+			await Assert.MultipleAsync(async () =>
+			{
+				Assert.That(unasked.IsError, Is.Not.True, JsonSerializer.Serialize(unasked));
+				Assert.That(_send.ExecuteCount, Is.EqualTo(executedBefore + 2));
+				Assert.That(policyForClient, Is.EqualTo("allow"));
+				Assert.That(policyForOther, Is.EqualTo("ask-first"));
+				Assert.That(allowedActions, Is.EqualTo(new[] { $"{TestIntegration}.{SendAction}" }));
+				Assert.That(blocked, Does.Contain(McpRunTools.ProviderBlocked));
+				Assert.That(
+					(await removed.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("success").GetBoolean(),
+					Is.True);
+				Assert.That(await AllowedActions(token.Id), Is.Empty);
+			});
+		}
+		finally
+		{
+			await DeclinePending();
+			await SetPolicy(null);
+		}
+	}
+
+	[Test]
+	public async Task Revoking_a_token_drops_the_actions_it_was_always_allowed_and_its_open_requests()
+	{
+		await EnsureTestIntegration();
+		var token = await CreateToken();
+		await using var client = await Connect(token.Plaintext, LegacyProtocol, null, _noElicitation);
+		await SetPolicy(McpRiskMode.Confirm);
+		try
+		{
+			var waiting = RunSend(client, "still waiting");
+			var stillOpen = (await WaitForPendingConfirmation()).GetProperty("id").GetString();
+			var run = RunSend(client, "x");
+			var id = await WaitForAnotherPendingConfirmation(stillOpen);
+			await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{id}/allow",
+				FakeConnectionShape.Loopback,
+				body: new { alwaysAllow = true });
+			await run;
+			var before = await AllowedActions(token.Id);
+
+			await Send(HttpMethod.Post, $"/api/mcp/tokens/{token.Id}/revoke", FakeConnectionShape.Loopback);
+			var lateAllow = await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{stillOpen}/allow",
+				FakeConnectionShape.Loopback,
+				body: new { alwaysAllow = true });
+			await Task.WhenAny(waiting, Task.Delay(TimeSpan.FromSeconds(10)));
+
+			await Assert.MultipleAsync(async () =>
+			{
+				Assert.That(before, Is.Not.Empty);
+				Assert.That(await PendingConfirmations(), Is.Empty);
+				Assert.That((await lateAllow.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("success")
+					.GetBoolean(),
+					Is.False);
+				Assert.That(await AllowedActions(token.Id), Is.Empty);
+			});
+		}
+		finally
+		{
+			await DeclinePending();
+			await SetPolicy(null);
+		}
+	}
+
+	private static Task<CallToolResult> RunSend(McpClient client, string target)
+	{
+		return client.CallToolAsync("run_action",
 				new Dictionary<string, object?>
 				{
 					["integrationId"] = TestIntegration,
 					["actionId"] = SendAction,
-					["parameters"] = new Dictionary<string, object?> { ["target"] = "x" }
-				});
+					["parameters"] = new Dictionary<string, object?> { ["target"] = target }
+				})
+			.AsTask();
+	}
 
-			Assert.That(JsonSerializer.Serialize(run), Does.Contain(McpConsent.Unavailable));
-			Assert.That(_send.ExecuteCount, Is.EqualTo(executedBefore));
-		}
-		finally
+	private static async Task<string?> SendPolicy(McpClient client)
+	{
+		var catalog = await client.CallToolAsync("catalog",
+			new Dictionary<string, object?> { ["kind"] = "actions", ["integrationId"] = TestIntegration });
+		return catalog.StructuredContent!.Value.GetProperty("actions")
+			.EnumerateArray()
+			.Single(action => action.GetProperty("actionId").GetString() == SendAction)
+			.GetProperty("policy")
+			.GetString();
+	}
+
+	private async Task<IReadOnlyList<string>> AllowedActions(Guid tokenId)
+	{
+		var tokens = await (await Send(HttpMethod.Get, "/api/mcp/tokens", FakeConnectionShape.Loopback)).Content
+			.ReadFromJsonAsync<JsonElement>();
+		return tokens.GetProperty("tokens")
+			.EnumerateArray()
+			.Single(token => token.GetProperty("id").GetGuid() == tokenId)
+			.GetProperty("allowedActions")
+			.EnumerateArray()
+			.Select(action
+				=> $"{action.GetProperty("integrationId").GetString()}.{action.GetProperty("actionId").GetString()}")
+			.ToList();
+	}
+
+	private async Task<IReadOnlyList<JsonElement>> PendingConfirmations()
+	{
+		var response = await Send(HttpMethod.Get, "/api/mcp/confirmations", FakeConnectionShape.Loopback);
+		return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("confirmations")
+			.EnumerateArray()
+			.ToList();
+	}
+
+	private async Task DeclinePending()
+	{
+		foreach (var pending in await PendingConfirmations())
 		{
-			await SetPolicy(null);
+			await Send(HttpMethod.Post,
+				$"/api/mcp/confirmations/{pending.GetProperty("id").GetString()}/decline",
+				FakeConnectionShape.Loopback,
+				body: new { });
 		}
+	}
+
+	private async Task<string?> WaitForAnotherPendingConfirmation(string? known)
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(10);
+		while (DateTime.UtcNow < deadline)
+		{
+			var other = (await PendingConfirmations())
+				.Select(pending => pending.GetProperty("id").GetString())
+				.FirstOrDefault(id => id != known);
+			if (other is not null)
+			{
+				return other;
+			}
+
+			await Task.Delay(20);
+		}
+
+		Assert.Fail("No second request appeared in Macro Deck.");
+		return null;
+	}
+
+	private async Task<JsonElement> WaitForPendingConfirmation()
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(10);
+		while (DateTime.UtcNow < deadline)
+		{
+			var pending = await PendingConfirmations();
+			if (pending.Count > 0)
+			{
+				return pending[^1];
+			}
+
+			await Task.Delay(20);
+		}
+
+		Assert.Fail("No request appeared in Macro Deck.");
+		return default;
 	}
 
 	private async Task<HttpResponseMessage> PostPageForm(string path, Dictionary<string, string> form)

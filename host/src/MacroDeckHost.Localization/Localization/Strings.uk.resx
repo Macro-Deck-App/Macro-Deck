@@ -2991,6 +2991,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Mcp.TokenNotFound" xml:space="preserve">
     <value>Токена доступу з таким ідентифікатором не існує.</value>
   </data>
+  <data name="Errors.Mcp.ConfirmationNotFound" xml:space="preserve">
+    <value>Цей запит більше не очікує на відповідь.</value>
+  </data>
+  <data name="Errors.Mcp.AllowedActionNotFound" xml:space="preserve">
+    <value>Ця дія більше не завжди дозволена для цього клієнта.</value>
+  </data>
   <data name="Errors.Migration.OperationFailed" xml:space="preserve">
     <value>Міграцію не вдалося завершити.</value>
   </data>
@@ -15126,6 +15132,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>{name} очікує на ваше підтвердження в Macro Deck.</value>
     <comment>[name:string]</comment>
   </data>
+  <data name="Notifications.McpConfirmationRequestedMessage" xml:space="preserve">
+    <value>{client} просить дозволити або відхилити запит у Macro Deck.</value>
+  </data>
+  <data name="Notifications.McpConfirmationRequested" xml:space="preserve">
+    <value>ШІ-клієнт очікує на вашу відповідь</value>
+  </data>
   <data name="Notifications.PluginTakeoverRequested" xml:space="preserve">
     <value>Збірка для розробки хоче перейняти плагін</value>
   </data>
@@ -17335,6 +17347,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Settings.Mcp.PolicyTitle" xml:space="preserve">
     <value>Дії, які можуть запускати ШІ-клієнти</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveFailed" xml:space="preserve">
+    <value>Не вдалося вилучити дію. Спробуйте ще раз.</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionRemoveLabel" xml:space="preserve">
+    <value>Знову питати перед дією «{action}»</value>
+  </data>
+  <data name="Settings.Mcp.AllowedActionsLabel" xml:space="preserve">
+    <value>Завжди дозволено</value>
   </data>
   <data name="Settings.Mcp.RefreshAction" xml:space="preserve">
     <value>Оновити</value>
@@ -25496,6 +25517,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Mcp.Confirmation.Lead" xml:space="preserve">
     <value>{client} просить Macro Deck виконати таке:</value>
+  </data>
+  <data name="Mcp.Confirmation.AnswerFailed" xml:space="preserve">
+    <value>Не вдалося передати відповідь. Спробуйте ще раз.</value>
+  </data>
+  <data name="Mcp.Confirmation.AlwaysAllow" xml:space="preserve">
+    <value>Завжди дозволяти ці дії для {client}</value>
   </data>
   <data name="Mcp.Confirmation.PageTitle" xml:space="preserve">
     <value>Підтвердьте запит ШІ-клієнта</value>

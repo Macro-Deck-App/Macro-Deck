@@ -83,8 +83,8 @@ public sealed class McpRunTools
 		var tokenId = McpConsent.TokenId(context);
 		RefuseForeignSecrets(tokenId, JsonSerializer.Serialize(parameters));
 
-		var details = new List<(string Code, string Text)>();
-		await AddRisk(integrationId, actionId, details, parameters);
+		var details = new List<(string Code, string Text, McpActionRef? Action)>();
+		await AddRisk(tokenId, integrationId, actionId, details, parameters);
 		var protectedNames = _references.ProtectedVariables();
 		var steered = (parameters ?? [])
 			.Values
@@ -96,7 +96,8 @@ public sealed class McpRunTools
 		foreach (var name in steered)
 		{
 			details.Add(($"{McpConfirmationKinds.ProtectedVariable}: {name}",
-				await _confirmation.ProtectedVariable(name)));
+				await _confirmation.ProtectedVariable(name),
+				null));
 		}
 
 		await Confirm(server, context, details, cancellationToken);
@@ -140,16 +141,18 @@ public sealed class McpRunTools
 		}
 
 		RefuseForeignSecrets(tokenId, JsonSerializer.Serialize(inputs));
-		var details = new List<(string Code, string Text)>();
+		var details = new List<(string Code, string Text, McpActionRef? Action)>();
 		foreach (var reachable in _inspector.ReachableFromScript(id))
 		{
-			await AddRisk(reachable.IntegrationId, reachable.ActionId, details);
+			await AddRisk(tokenId, reachable.IntegrationId, reachable.ActionId, details);
 		}
 
 		var steering = _inspector.SteeringScriptInputs(id);
 		foreach (var name in (inputs ?? []).Keys.Where(steering.Contains))
 		{
-			details.Add(($"{McpConfirmationKinds.SteeringValue}: {name}", await _confirmation.SteeringValue(name)));
+			details.Add(($"{McpConfirmationKinds.SteeringValue}: {name}",
+				await _confirmation.SteeringValue(name),
+				null));
 		}
 
 		await Confirm(server, context, details, cancellationToken);
@@ -188,16 +191,18 @@ public sealed class McpRunTools
 		var tokenId = McpConsent.TokenId(context);
 		RefuseForeignSecrets(tokenId, JsonSerializer.Serialize(parameters));
 
-		var details = new List<(string Code, string Text)>();
+		var details = new List<(string Code, string Text, McpActionRef? Action)>();
 		foreach (var reachable in _inspector.ReachableFromEvent(eventId))
 		{
-			await AddRisk(reachable.IntegrationId, reachable.ActionId, details);
+			await AddRisk(tokenId, reachable.IntegrationId, reachable.ActionId, details);
 		}
 
 		var steering = _inspector.SteeringEventParameters(eventId);
 		foreach (var name in (parameters ?? []).Keys.Where(steering.Contains))
 		{
-			details.Add(($"{McpConfirmationKinds.SteeringValue}: {name}", await _confirmation.SteeringValue(name)));
+			details.Add(($"{McpConfirmationKinds.SteeringValue}: {name}",
+				await _confirmation.SteeringValue(name),
+				null));
 		}
 
 		await Confirm(server, context, details, cancellationToken);
@@ -219,19 +224,21 @@ public sealed class McpRunTools
 	}
 
 	private async Task AddRisk(
+		Guid tokenId,
 		string integrationId,
 		string actionId,
-		List<(string Code, string Text)> details,
+		List<(string Code, string Text, McpActionRef? Action)> details,
 		IReadOnlyDictionary<string, JsonElement>? parameters = null)
 	{
-		switch (await _risk.Classify(integrationId, actionId))
+		switch (await _risk.Classify(tokenId, integrationId, actionId))
 		{
 			case McpRiskMode.Off:
 				throw McpToolErrors.Create(ProviderBlocked,
 					$"{integrationId}.{actionId} is turned off for AI clients.");
 			case McpRiskMode.Confirm:
 				details.Add(($"{McpConfirmationKinds.RiskyAction}: {integrationId}.{actionId}",
-					await _confirmation.RiskyAction(integrationId, actionId, parameters)));
+					await _confirmation.RiskyAction(integrationId, actionId, parameters),
+					new McpActionRef(integrationId, actionId)));
 				break;
 		}
 	}
@@ -239,7 +246,7 @@ public sealed class McpRunTools
 	private Task Confirm(
 		McpServer server,
 		RequestContext<CallToolRequestParams> context,
-		List<(string Code, string Text)> details,
+		List<(string Code, string Text, McpActionRef? Action)> details,
 		CancellationToken cancellationToken)
 	{
 		var distinct = details.DistinctBy(detail => detail.Code, StringComparer.Ordinal).ToList();
@@ -247,6 +254,7 @@ public sealed class McpRunTools
 			context,
 			distinct.Select(detail => detail.Code).ToList(),
 			distinct.Select(detail => detail.Text).ToList(),
+			distinct.Select(detail => detail.Action).OfType<McpActionRef>().ToList(),
 			cancellationToken);
 	}
 

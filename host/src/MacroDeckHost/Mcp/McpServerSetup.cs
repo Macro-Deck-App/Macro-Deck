@@ -34,6 +34,7 @@ public static class McpServerSetup
 		services.AddSingleton<IMcpRunInspector, McpRunInspector>();
 		services.AddScoped<IMcpChangeSet, McpChangeSet>();
 		services.AddHostedService<McpDeferredScrubService>();
+		services.AddHostedService<McpConfirmationNotifier>();
 		services.AddScoped<SecretScrubDeferral>();
 
 		services.AddMcpServer(options =>

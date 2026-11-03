@@ -8,7 +8,7 @@ import { SelectComponent, SelectOption } from '../../../forms/select/select.comp
 import { ConfirmationModalComponent } from '../../../overlay/confirmation-modal/confirmation-modal.component';
 import { FileSaveService } from '../../../../services/file-save.service';
 import { McpSettingsService } from '../../../../services/mcp-settings.service';
-import { McpProviderPolicy, McpRiskMode, McpToken } from '../../../../shared/transport/mcp-messages';
+import { McpAllowedAction, McpProviderPolicy, McpRiskMode, McpToken } from '../../../../shared/transport/mcp-messages';
 
 interface RevealedToken {
   id: string;
@@ -207,6 +207,25 @@ export class AiClientsSettingsComponent {
     const response = await this.mcp.deleteToken(token.id);
     if (!response.success) {
       this.showError(response.error?.message, AppStrings.Developer.Tokens.RemoveFailed);
+    }
+  }
+
+  actionName(action: McpAllowedAction): string {
+    return resolveLocalizedText(action.actionName, this.localization) || action.actionId;
+  }
+
+  integrationName(action: McpAllowedAction): string {
+    return resolveLocalizedText(action.integrationName, this.localization) || action.integrationId;
+  }
+
+  async removeAllowedAction(token: McpToken, action: McpAllowedAction): Promise<void> {
+    try {
+      const response = await this.mcp.removeAllowedAction(token.id, action);
+      if (!response.success) {
+        this.showError(response.error?.message, AppStrings.Settings.Mcp.AllowedActionRemoveFailed);
+      }
+    } catch {
+      this.showError(undefined, AppStrings.Settings.Mcp.AllowedActionRemoveFailed);
     }
   }
 

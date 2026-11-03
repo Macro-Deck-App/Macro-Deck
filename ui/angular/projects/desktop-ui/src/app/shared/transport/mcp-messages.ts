@@ -1,5 +1,12 @@
 import { LocalizedText, ResultResponse } from '@macro-deck/runtime';
 
+export interface McpAllowedAction {
+  integrationId: string;
+  actionId: string;
+  integrationName: LocalizedText;
+  actionName: LocalizedText;
+}
+
 export interface McpToken {
   id: string;
   name: string;
@@ -7,6 +14,7 @@ export interface McpToken {
   lastUsedAt?: string | null;
   revokedAt?: string | null;
   connectionCount: number;
+  allowedActions?: McpAllowedAction[];
 }
 
 export interface McpConnection {
@@ -65,4 +73,17 @@ export interface GetMcpPolicyResponse {
 export interface SetMcpPolicyRequest {
   integrationId: string;
   mode: McpRiskMode | null;
+}
+
+export interface McpPendingConfirmation {
+  id: string;
+  clientName: string;
+  lines: string[];
+  alwaysAllowable: boolean;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface GetMcpConfirmationsResponse {
+  confirmations: McpPendingConfirmation[];
 }

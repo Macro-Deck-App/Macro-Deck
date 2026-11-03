@@ -50,7 +50,8 @@ public class McpRiskPolicyTests
 		ActionRiskCategory category,
 		McpRiskMode expected)
 	{
-		Assert.That(await _policy.Classify(BuiltIn, category.ToString().ToLowerInvariant()), Is.EqualTo(expected));
+		Assert.That(await _policy.Classify(null, BuiltIn, category.ToString().ToLowerInvariant()),
+			Is.EqualTo(expected));
 	}
 
 	[Test]
@@ -58,9 +59,11 @@ public class McpRiskPolicyTests
 	{
 		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That(await _policy.Classify(Plugin, "none"), Is.EqualTo(McpRiskMode.Confirm));
-			Assert.That(await _policy.Classify("com.example.offline", "anything"), Is.EqualTo(McpRiskMode.Confirm));
-			Assert.That(await _policy.Classify(BuiltIn, "an-action-that-went-away"), Is.EqualTo(McpRiskMode.Confirm));
+			Assert.That(await _policy.Classify(null, Plugin, "none"), Is.EqualTo(McpRiskMode.Confirm));
+			Assert.That(await _policy.Classify(null, "com.example.offline", "anything"),
+				Is.EqualTo(McpRiskMode.Confirm));
+			Assert.That(await _policy.Classify(null, BuiltIn, "an-action-that-went-away"),
+				Is.EqualTo(McpRiskMode.Confirm));
 		});
 	}
 
@@ -68,16 +71,16 @@ public class McpRiskPolicyTests
 	public async Task A_user_override_wins_and_removing_it_restores_the_default()
 	{
 		await _policy.SetOverride(Plugin, McpRiskMode.Allow);
-		var allowed = await _policy.Classify(Plugin, "none");
+		var allowed = await _policy.Classify(null, Plugin, "none");
 		await _policy.SetOverride(BuiltIn, McpRiskMode.Off);
-		var off = await _policy.Classify(BuiltIn, "none");
+		var off = await _policy.Classify(null, BuiltIn, "none");
 		await _policy.SetOverride(Plugin, null);
 
 		await Assert.MultipleAsync(async () =>
 		{
 			Assert.That(allowed, Is.EqualTo(McpRiskMode.Allow));
 			Assert.That(off, Is.EqualTo(McpRiskMode.Off));
-			Assert.That(await _policy.Classify(Plugin, "none"), Is.EqualTo(McpRiskMode.Confirm));
+			Assert.That(await _policy.Classify(null, Plugin, "none"), Is.EqualTo(McpRiskMode.Confirm));
 		});
 	}
 
@@ -88,8 +91,8 @@ public class McpRiskPolicyTests
 
 		await Assert.MultipleAsync(async () =>
 		{
-			Assert.That(await _policy.Classify(BuiltIn, "none"), Is.EqualTo(McpRiskMode.Off));
-			Assert.That(await _policy.Classify(Plugin, "none"), Is.EqualTo(McpRiskMode.Off));
+			Assert.That(await _policy.Classify(null, BuiltIn, "none"), Is.EqualTo(McpRiskMode.Off));
+			Assert.That(await _policy.Classify(null, Plugin, "none"), Is.EqualTo(McpRiskMode.Off));
 		});
 	}
 
