@@ -25587,4 +25587,169 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Segredo</value>
   </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>Latência</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>Perda de pacotes</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>Última resposta</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>Destino online</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Quando um destino de ping volta a responder depois de ficar offline.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>Destino offline</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Quando um destino de ping deixa de responder tantos pings seguidos quanto o limite de falhas dele.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>Latência (ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>Etapa de configuração desconhecida.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>Digite um nome para este destino.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>Digite um nome de host, um endereço IPv4 ou um endereço IPv6.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>Digite um número inteiro de segundos entre {minimum} e {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>Digite um número inteiro de milissegundos entre {minimum} e {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>O tempo limite deve ser menor que o intervalo.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>Digite um número inteiro entre {minimum} e {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>O nome de host ou o endereço IPv4 ou IPv6 do dispositivo para o ping.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>Intervalo (segundos)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>Com que frequência o destino recebe ping.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>Tempo limite (milissegundos)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>Quanto tempo esperar por cada resposta.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>Falhas até offline</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>Quantos pings seguidos precisam falhar antes que o destino conte como offline, assim um único pacote perdido é ignorado.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Destino de ping</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>O Macro Deck faz ping neste dispositivo regularmente e mostra se ele responde e com que rapidez.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Não foi possível criar um nome de variável exclusivo. Renomeie o destino e tente novamente.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>O ping não é permitido</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>Este sistema não permite que o Macro Deck envie solicitações de ping, então os destinos de ping não podem ser verificados. No Linux, permita o ping sem privilégios com a configuração net.ipv4.ping_group_range.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Status do ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Mostra se um destino de ping está acessível e com que rapidez responde.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Nenhum destino de ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>Offline</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>Aguardando resposta</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping não permitido</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>Sem resposta</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>Inacessível</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>Nome não encontrado</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Falha no ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>Perda de pacotes: {loss} %</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>O destino de ping exibido por este widget.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>Primeiro destino</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>Nome de exibição</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>Nome do destino</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>Mostrar latência</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>Mostrar perda de pacotes</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>Mostrar histórico de latência</value>
+  </data>
 </root>

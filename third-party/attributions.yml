@@ -200,6 +200,7 @@ assets:
       - host/src/MacroDeckHost.Integrations/Imap/Icons/imap-icon.svg
       - host/src/MacroDeckHost.Integrations/Keyboard/Icons/keyboard-icon.svg
       - host/src/MacroDeckHost.Integrations/Mouse/Icons/mouse-icon.svg
+      - host/src/MacroDeckHost.Integrations/Ping/Icons/ping-icon.svg
       - host/src/MacroDeckHost.Integrations/System/Icons/system-icon.svg
       - host/src/MacroDeckHost.Integrations/Voicemeeter/Icons/voicemeeter-icon.svg
       - host/src/MacroDeckHost.Integrations/Weather/Icons/weather-icon.svg

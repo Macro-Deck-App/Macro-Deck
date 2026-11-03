@@ -25569,4 +25569,169 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>密钥</value>
   </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>在线</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>延迟</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>丢包率</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>最后响应</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>目标上线</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>当 Ping 目标在离线后再次响应时。</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>目标离线</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>当 Ping 目标连续未响应的次数达到其失败阈值时。</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>目标</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>主机</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>延迟（毫秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>未知的设置步骤。</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>请输入此目标的名称。</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>请输入主机名、IPv4 地址或 IPv6 地址。</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>请输入 {minimum} 到 {maximum} 之间的整数秒数。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>请输入 {minimum} 到 {maximum} 之间的整数毫秒数。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>超时必须短于间隔。</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>请输入 {minimum} 到 {maximum} 之间的整数。</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>主机</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>要 Ping 的设备的主机名、IPv4 或 IPv6 地址。</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>间隔（秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>Ping 目标的频率。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>超时（毫秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>等待每次响应的时间。</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>判定离线前的失败次数</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>连续多少次 Ping 失败后目标才算离线，这样可以忽略单个丢包。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping 目标</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck 会定期 Ping 此设备，并显示它是否响应以及响应速度。</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>无法创建唯一的变量名称。请重命名目标后重试。</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>不允许 Ping</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>此系统不允许 Macro Deck 发送 Ping 请求，因此无法检查 Ping 目标。在 Linux 上，请通过 net.ipv4.ping_group_range 设置允许非特权 Ping。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping 状态</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>显示 Ping 目标是否可达以及响应速度。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>没有 Ping 目标</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>在线</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>离线</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>正在等待响应</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>不允许 Ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>无响应</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>无法访问</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>找不到名称</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping 失败</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} 毫秒</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>丢包率 {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>目标</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>此小组件显示的 Ping 目标。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>第一个目标</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>显示名称</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>目标名称</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>显示延迟</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>显示丢包率</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>显示延迟历史</value>
+  </data>
 </root>

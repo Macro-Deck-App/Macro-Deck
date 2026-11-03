@@ -25587,4 +25587,169 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>シークレット</value>
   </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>オンライン</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>遅延</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>パケットロス</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>最終応答</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>ターゲットがオンライン</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Ping ターゲットがオフラインの後に再び応答したとき。</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>ターゲットがオフライン</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Ping ターゲットが失敗のしきい値と同じ回数だけ連続して応答しなかったとき。</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>ターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>ホスト</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>遅延（ミリ秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定ステップです。</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>このターゲットの名前を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>ホスト名、IPv4 アドレス、または IPv6 アドレスを入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum} から {maximum} までの整数で秒数を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum} から {maximum} までの整数でミリ秒数を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>タイムアウトは間隔より短くする必要があります。</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum} から {maximum} までの整数を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>ホスト</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>Ping を送るデバイスのホスト名、IPv4 または IPv6 アドレスです。</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>間隔（秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>ターゲットに Ping を送る頻度です。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>タイムアウト（ミリ秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>各応答を待つ時間です。</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>オフラインと判定するまでの失敗回数</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>ターゲットをオフラインとみなすまでに連続して失敗する必要がある Ping の回数です。単発のパケットロスは無視されます。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping ターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck はこのデバイスに定期的に Ping を送り、応答の有無と速さを表示します。</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>一意の変数名を作成できませんでした。ターゲットの名前を変更してもう一度お試しください。</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping が許可されていません</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>このシステムでは Macro Deck が Ping リクエストを送信できないため、Ping ターゲットを確認できません。Linux では net.ipv4.ping_group_range 設定で特権なしの Ping を許可してください。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping ステータス</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Ping ターゲットに到達できるかどうかと応答の速さを表示します。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Ping ターゲットなし</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>オンライン</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>オフライン</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>応答を待機中</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping 不許可</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>応答なし</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>到達不可</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>名前が見つかりません</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping 失敗</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ミリ秒</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>パケットロス {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>ターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>このウィジェットに表示する Ping ターゲットです。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>最初のターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>ターゲットの名前</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>遅延を表示</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>パケットロスを表示</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>遅延の履歴を表示</value>
+  </data>
 </root>

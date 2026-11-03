@@ -25587,4 +25587,169 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>सीक्रेट</value>
   </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>ऑनलाइन</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>लेटेंसी</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>पैकेट लॉस</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>अंतिम जवाब</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>लक्ष्य ऑनलाइन</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>जब कोई Ping लक्ष्य ऑफ़लाइन होने के बाद फिर से जवाब देता है।</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>लक्ष्य ऑफ़लाइन</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>जब कोई Ping लक्ष्य अपनी विफलता सीमा जितनी बार लगातार जवाब नहीं देता।</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>होस्ट</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>लेटेंसी (ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>अज्ञात सेटअप चरण।</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>इस लक्ष्य के लिए एक नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>होस्ट नाम, IPv4 पता या IPv6 पता दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum} से {maximum} तक सेकंड की पूर्ण संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum} से {maximum} तक मिलीसेकंड की पूर्ण संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>टाइमआउट अंतराल से छोटा होना चाहिए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum} से {maximum} तक एक पूर्ण संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>होस्ट</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>जिस डिवाइस को Ping करना है उसका होस्ट नाम, IPv4 या IPv6 पता।</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>अंतराल (सेकंड)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>लक्ष्य को कितनी बार Ping किया जाए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>टाइमआउट (मिलीसेकंड)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>हर जवाब के लिए कितनी देर प्रतीक्षा की जाए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>ऑफ़लाइन से पहले विफलताएँ</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>लक्ष्य को ऑफ़लाइन मानने से पहले लगातार कितने Ping विफल होने चाहिए, ताकि एक अकेला खोया पैकेट अनदेखा हो जाए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck इस डिवाइस को नियमित रूप से Ping करता है और दिखाता है कि यह जवाब देता है या नहीं और कितनी तेज़ी से।</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>एक अद्वितीय वेरिएबल नाम नहीं बनाया जा सका। लक्ष्य का नाम बदलें और फिर से प्रयास करें।</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping की अनुमति नहीं है</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>यह सिस्टम Macro Deck को Ping अनुरोध भेजने की अनुमति नहीं देता, इसलिए Ping लक्ष्यों की जाँच नहीं की जा सकती। Linux पर net.ipv4.ping_group_range सेटिंग से बिना विशेषाधिकार वाले Ping की अनुमति दें।</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping स्थिति</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>दिखाता है कि Ping लक्ष्य पहुँच योग्य है या नहीं और यह कितनी तेज़ी से जवाब देता है।</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>कोई Ping लक्ष्य नहीं</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>ऑनलाइन</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>ऑफ़लाइन</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>जवाब की प्रतीक्षा</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping की अनुमति नहीं</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>कोई जवाब नहीं</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>पहुँच से बाहर</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>नाम नहीं मिला</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping विफल</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>पैकेट लॉस: {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>वह Ping लक्ष्य जिसे यह विजेट दिखाता है।</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>पहला लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>प्रदर्शन नाम</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>लक्ष्य का नाम</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>लेटेंसी दिखाएँ</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>पैकेट लॉस दिखाएँ</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>लेटेंसी इतिहास दिखाएँ</value>
+  </data>
 </root>

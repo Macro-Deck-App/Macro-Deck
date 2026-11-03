@@ -25587,4 +25587,169 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>비밀</value>
   </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>온라인</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>지연 시간</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>패킷 손실</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>마지막 응답</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>대상 온라인</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Ping 대상이 오프라인 후 다시 응답할 때입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>대상 오프라인</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Ping 대상이 실패 임계값만큼 연속으로 응답하지 않을 때입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>대상</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>호스트</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>지연 시간(ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>알 수 없는 설정 단계입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>이 대상의 이름을 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>호스트 이름, IPv4 주소 또는 IPv6 주소를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum}에서 {maximum} 사이의 정수 초를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum}에서 {maximum} 사이의 정수 밀리초를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>시간 제한은 간격보다 짧아야 합니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum}에서 {maximum} 사이의 정수를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>호스트</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>Ping을 보낼 장치의 호스트 이름, IPv4 또는 IPv6 주소입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>간격(초)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>대상에 Ping을 보내는 빈도입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>시간 제한(밀리초)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>각 응답을 기다리는 시간입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>오프라인 판정 전 실패 횟수</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>대상이 오프라인으로 간주되기 전에 연속으로 실패해야 하는 Ping 횟수입니다. 패킷 하나가 손실되는 것은 무시됩니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping 대상</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck이 이 장치에 정기적으로 Ping을 보내고 응답 여부와 속도를 표시합니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>고유한 변수 이름을 만들 수 없습니다. 대상 이름을 바꾸고 다시 시도하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping이 허용되지 않음</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>이 시스템에서는 Macro Deck이 Ping 요청을 보낼 수 없으므로 Ping 대상을 확인할 수 없습니다. Linux에서는 net.ipv4.ping_group_range 설정으로 권한 없는 Ping을 허용하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping 상태</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Ping 대상에 연결할 수 있는지와 응답 속도를 표시합니다.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Ping 대상 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>온라인</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>오프라인</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>응답 대기 중</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping 허용 안 됨</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>응답 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>연결할 수 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>이름을 찾을 수 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping 실패</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency}ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>패킷 손실 {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>대상</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>이 위젯에 표시되는 Ping 대상입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>첫 번째 대상</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>표시 이름</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>대상 이름</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>지연 시간 표시</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>패킷 손실 표시</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>지연 시간 기록 표시</value>
+  </data>
 </root>
