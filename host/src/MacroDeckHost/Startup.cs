@@ -543,6 +543,7 @@ public class Startup
 		services.AddScoped<IEventTriggerContextResolver, EventTriggerContextResolver>();
 
 		services.AddSingleton<VariableRegistry>();
+		services.AddSingleton<IVariableEventAudience, VariableEventAudience>();
 		services.AddSingleton<IColorReferenceResolver, ColorReferenceResolver>();
 		services.AddSingleton<ColorChangeSignal>();
 		services.AddSingleton<PluginColorWatches>();
@@ -1101,6 +1102,7 @@ public class Startup
 		services.AddSingleton<IHostOptionsSource, ProcessesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, AudioDevicesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, VariablesOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, EventVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, UserVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, MusicPlayerInstancesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, CalendarAccountsOptionsSource>();
