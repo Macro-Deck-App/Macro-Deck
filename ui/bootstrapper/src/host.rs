@@ -7,7 +7,7 @@ use std::future::Future;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::sync::atomic::{AtomicBool, AtomicU16, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU16, AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -146,6 +146,7 @@ pub struct HostState {
     pub ready: AtomicBool,
     pub shutdown_expected: AtomicBool,
     adopted: AtomicBool,
+    taken_over: AtomicU32,
     pub log_tail: Arc<LogTail>,
     heartbeat: Arc<HostHeartbeat>,
     stopping: AtomicBool,
@@ -163,6 +164,7 @@ impl HostState {
             ready: AtomicBool::new(false),
             shutdown_expected: AtomicBool::new(false),
             adopted: AtomicBool::new(false),
+            taken_over: AtomicU32::new(0),
             log_tail: Arc::new(LogTail::new(40)),
             heartbeat: Arc::new(HostHeartbeat::default()),
             stopping: AtomicBool::new(false),
@@ -175,6 +177,13 @@ impl HostState {
         match self.ui_port.load(Ordering::SeqCst) {
             0 => None,
             port => Some(port),
+        }
+    }
+
+    fn taken_over_pid(&self) -> Option<u32> {
+        match self.taken_over.load(Ordering::SeqCst) {
+            0 => None,
+            pid => Some(pid),
         }
     }
 
@@ -405,9 +414,7 @@ async fn wait_until(mut gone: impl FnMut() -> bool, timeout: Duration) -> bool {
     }
 }
 
-// It stopped listening at the start of its shutdown, while plugins and data writes go on. It
-// answered before, so it is past any restore, and forcing it cannot cut one short.
-async fn wait_for_replaced_host(pid: u32) {
+async fn wait_for_replaced_host(pid: u32) -> bool {
     let gone = wait_out_replaced_host(
         || replaced_host_running(pid),
         || async move {
@@ -432,6 +439,29 @@ async fn wait_for_replaced_host(pid: u32) {
             "[host] the replaced host {pid} is still running after the kill"
         ));
     }
+    gone
+}
+
+async fn stop_previous_host(config_dir: &Path) -> bool {
+    let Some(pid) = host_process::load(config_dir).filter(|pid| replaced_host_running(*pid)) else {
+        return true;
+    };
+    logging::info(&format!(
+        "[host] the previous host {pid} is still running; waiting for it to exit"
+    ));
+    if let (Some(port), Some(secret)) = (
+        read_persisted_port(config_dir),
+        loopback_secret::load(config_dir),
+    ) {
+        loopback_secret::set_secret(secret);
+        if loopback_secret::prove(port, ADOPTION_PROBE_TIMEOUT).await {
+            logging::info(&format!(
+                "[host] asking the previous host on port {port} to stop"
+            ));
+            let _ = post_shutdown(port, "replaced").await;
+        }
+    }
+    wait_for_replaced_host(pid).await
 }
 
 async fn wait_out_replaced_host<Running, Term, Termed>(
@@ -724,6 +754,10 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                     .ok()
                     .and_then(|mut supervisor| supervisor.adopt(Instant::now()));
                 state.ui_port.store(port, Ordering::SeqCst);
+                let taken_over = host_process::load(port_file_dir)
+                    .filter(|pid| replaced_host_running(*pid))
+                    .unwrap_or(0);
+                state.taken_over.store(taken_over, Ordering::SeqCst);
                 if let Some(generation) = generation {
                     state.adopted.store(true, Ordering::SeqCst);
                     spawn_adoption_monitor(app.clone(), generation, port);
@@ -738,28 +772,16 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
                     "[host] replacing the running host {} on port {port} with {own_version}",
                     running_version.as_deref().unwrap_or("of unknown version")
                 ));
-                let previous = host_process::load(port_file_dir);
                 let _ = post_shutdown(port, "replaced").await;
                 if !wait_until_unreachable(port, REPLACED_HOST_STOP_TIMEOUT).await {
                     logging::error(&format!(
                         "[host] the replaced host on port {port} is still running; not starting a second one"
                     ));
-                    let started = state
-                        .supervisor
-                        .lock()
-                        .map(|mut supervisor| supervisor.start())
-                        .unwrap_or(false);
-                    if started {
-                        let reason = localization::t_args(
-                            keys::ERRORS_PORT_IN_USE,
-                            &[("port", &port.to_string())],
-                        );
-                        give_up(app, Some(reason), ExitStatus::NotRecorded, String::new()).await;
-                    }
-                    return false;
-                }
-                if let Some(pid) = previous {
-                    wait_for_replaced_host(pid).await;
+                    let reason = localization::t_args(
+                        keys::ERRORS_PORT_IN_USE,
+                        &[("port", &port.to_string())],
+                    );
+                    return refuse_to_start(app, reason).await;
                 }
             }
             Adoption::Ignore => {
@@ -778,6 +800,11 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         }
     }
 
+    if !stop_previous_host(port_file_dir).await {
+        logging::error("[host] the previous host is still running; not starting a second one");
+        return refuse_to_start(app, localization::t(keys::ERRORS_HOST_ALREADY_RUNNING)).await;
+    }
+
     let started = state
         .supervisor
         .lock()
@@ -787,6 +814,19 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         return false;
     }
     supervise(app, None).await
+}
+
+async fn refuse_to_start(app: &AppHandle, reason: String) -> bool {
+    let state = app.state::<Arc<HostState>>();
+    let started = state
+        .supervisor
+        .lock()
+        .map(|mut supervisor| supervisor.start())
+        .unwrap_or(false);
+    if started {
+        give_up(app, Some(reason), ExitStatus::NotRecorded, String::new()).await;
+    }
+    false
 }
 
 enum LaunchError {
@@ -910,6 +950,7 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
 
     if let Ok(mut slot) = state.child.lock() {
         *slot = Some((generation, child));
+        state.taken_over.store(0, Ordering::SeqCst);
         state.exited.store(false, Ordering::SeqCst);
         state.ready.store(false, Ordering::SeqCst);
         crate::install_integrity::host_gone();
@@ -1155,7 +1196,10 @@ fn spawn_adoption_monitor(app: AppHandle, generation: u64, port: u16) {
             std::thread::sleep(ADOPTED_HOST_POLL_INTERVAL);
         }
 
-        state.exited.store(true, Ordering::SeqCst);
+        let taken_over = state.taken_over_pid();
+        if taken_over.is_none() {
+            state.exited.store(true, Ordering::SeqCst);
+        }
         state.ready.store(false, Ordering::SeqCst);
         loopback_secret::forget_verified_port();
         crate::install_integrity::host_gone();
@@ -1163,9 +1207,10 @@ fn spawn_adoption_monitor(app: AppHandle, generation: u64, port: u16) {
             return;
         }
         logging::warn(&format!(
-            "[host] the adopted host released loopback port {port}; its exit code is unknown, relaunching Macro Deck once it had time to exit"
+            "[host] the adopted host released loopback port {port}; its exit code is unknown, relaunching Macro Deck once it exited"
         ));
-        std::thread::sleep(ADOPTED_HOST_EXIT_GRACE);
+        outlive_adopted_host(taken_over, replaced_host_running, ADOPTED_HOST_EXIT_GRACE);
+        state.exited.store(true, Ordering::SeqCst);
 
         let shutdown_expected = state.shutdown_expected.load(Ordering::SeqCst);
         let action = state
@@ -1177,6 +1222,15 @@ fn spawn_adoption_monitor(app: AppHandle, generation: u64, port: u16) {
             relaunch_for_host(&app, None);
         }
     });
+}
+
+fn outlive_adopted_host(pid: Option<u32>, running: impl Fn(u32) -> bool, grace: Duration) {
+    match pid {
+        Some(pid) => {
+            tauri::async_runtime::block_on(wait_until(|| !running(pid), grace));
+        }
+        None => std::thread::sleep(grace),
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -1520,6 +1574,7 @@ pub async fn resume_after_failed_update(app: &AppHandle) {
         state.exited.load(Ordering::SeqCst),
         state.adopted.load(Ordering::SeqCst),
         answering,
+        state.taken_over_pid().map(replaced_host_running),
     ) {
         AfterFailedStop::Rewatch => {
             let generation = state
@@ -1568,12 +1623,14 @@ pub fn after_failed_stop(
     child_exited: bool,
     adopted: bool,
     answering: bool,
+    taken_over_running: Option<bool>,
 ) -> AfterFailedStop {
-    match (spawned, child_exited, adopted, answering) {
-        (true, false, _, _) => AfterFailedStop::GiveUp,
-        (true, true, _, _) | (false, _, _, false) => AfterFailedStop::Restart,
-        (false, _, true, true) => AfterFailedStop::Rewatch,
-        (false, _, false, true) => AfterFailedStop::GiveUp,
+    let present = taken_over_running.unwrap_or(answering);
+    match (spawned, child_exited, adopted, present, answering) {
+        (true, false, ..) => AfterFailedStop::GiveUp,
+        (true, true, ..) | (false, _, _, false, _) => AfterFailedStop::Restart,
+        (false, _, true, true, true) => AfterFailedStop::Rewatch,
+        (false, _, _, true, _) => AfterFailedStop::GiveUp,
     }
 }
 
@@ -1712,7 +1769,12 @@ async fn stop_host(app: &AppHandle, reason: &str, graceful_timeout: Duration) ->
 
     logging::warn("[host] did not stop in time; ending the host process");
     let state = app.state::<Arc<HostState>>();
-    if term_then_wait(child_pid(&state), || host_stopped(app, port)).await {
+    let target = stop_target(
+        child_pid(&state),
+        state.taken_over_pid(),
+        replaced_host_running,
+    );
+    if term_then_wait(target, || host_stopped(app, port)).await {
         return true;
     }
     kill_child(&state);
@@ -1749,6 +1811,14 @@ pub fn process_group_signal_target(pid: u32) -> Option<i32> {
         return None;
     }
     i32::try_from(pid).ok().map(|pid| -pid)
+}
+
+pub fn stop_target(
+    child: Option<u32>,
+    taken_over: Option<u32>,
+    running: impl Fn(u32) -> bool,
+) -> Option<u32> {
+    child.or_else(|| taken_over.filter(|pid| running(*pid)))
 }
 
 fn child_pid(state: &HostState) -> Option<u32> {
@@ -1803,6 +1873,14 @@ fn kill_child(state: &HostState) {
         }
     }
 
+    #[cfg(unix)]
+    if !state.spawned() {
+        if let Some(pid) = stop_target(None, state.taken_over_pid(), replaced_host_running) {
+            signal_process_group(pid, libc::SIGKILL);
+        }
+        return;
+    }
+
     if let Ok(mut slot) = state.child.lock() {
         if let Some((_, child)) = slot.as_mut() {
             #[cfg(unix)]
@@ -1837,6 +1915,7 @@ async fn host_stopped(app: &AppHandle, port: Option<u16>) -> bool {
         spawned,
         state.exited.load(Ordering::SeqCst),
         answering,
+        state.taken_over_pid().map(replaced_host_running),
         binary_is_replaceable(app),
     )
 }
@@ -1845,9 +1924,14 @@ pub fn is_stopped(
     spawned: bool,
     child_exited: bool,
     answering: bool,
+    taken_over_running: Option<bool>,
     binary_replaceable: bool,
 ) -> bool {
-    let process_gone = if spawned { child_exited } else { !answering };
+    let process_gone = if spawned {
+        child_exited
+    } else {
+        taken_over_running.map_or(!answering, |running| !running)
+    };
     process_gone && binary_replaceable
 }
 
@@ -2614,14 +2698,14 @@ mod tests {
         // Regression guard for issue #131: the host keeps running (and keeps its
         // binary locked) after Kestrel stopped answering, so "not answering" must
         // never be mistaken for "stopped".
-        assert!(!is_stopped(true, false, false, true));
-        assert!(is_stopped(true, true, false, true));
+        assert!(!is_stopped(true, false, false, None, true));
+        assert!(is_stopped(true, true, false, None, true));
     }
 
     #[test]
     fn an_adopted_host_counts_as_stopped_once_it_stops_answering() {
-        assert!(!is_stopped(false, false, true, true));
-        assert!(is_stopped(false, false, false, true));
+        assert!(!is_stopped(false, false, true, None, true));
+        assert!(is_stopped(false, false, false, None, true));
     }
 
     #[test]
@@ -2651,11 +2735,11 @@ mod tests {
     #[test]
     fn a_host_that_survived_the_update_stop_is_not_started_a_second_time() {
         assert_eq!(
-            after_failed_stop(true, false, false, false),
+            after_failed_stop(true, false, false, false, None),
             AfterFailedStop::GiveUp
         );
         assert_eq!(
-            after_failed_stop(false, false, false, true),
+            after_failed_stop(false, false, false, true, None),
             AfterFailedStop::GiveUp
         );
     }
@@ -2663,7 +2747,7 @@ mod tests {
     #[test]
     fn a_taken_over_host_that_survived_the_update_stop_is_watched_again() {
         assert_eq!(
-            after_failed_stop(false, false, true, true),
+            after_failed_stop(false, false, true, true, None),
             AfterFailedStop::Rewatch
         );
     }
@@ -2671,17 +2755,89 @@ mod tests {
     #[test]
     fn a_host_that_is_gone_after_a_failed_update_stop_is_started_again() {
         assert_eq!(
-            after_failed_stop(true, true, false, false),
+            after_failed_stop(true, true, false, false, None),
             AfterFailedStop::Restart
         );
         assert_eq!(
-            after_failed_stop(false, false, false, false),
+            after_failed_stop(false, false, false, false, None),
             AfterFailedStop::Restart
         );
         assert_eq!(
-            after_failed_stop(false, false, true, false),
+            after_failed_stop(false, false, true, false, None),
             AfterFailedStop::Restart
         );
+    }
+
+    #[test]
+    fn a_taken_over_host_counts_as_stopped_only_once_its_process_exited() {
+        assert!(!is_stopped(false, false, false, Some(true), true));
+        assert!(is_stopped(false, false, false, Some(false), true));
+    }
+
+    #[test]
+    fn a_taken_over_host_still_running_after_the_update_stop_is_not_started_a_second_time() {
+        assert_eq!(
+            after_failed_stop(false, false, true, false, Some(true)),
+            AfterFailedStop::GiveUp
+        );
+        assert_eq!(
+            after_failed_stop(false, false, true, true, Some(true)),
+            AfterFailedStop::Rewatch
+        );
+        assert_eq!(
+            after_failed_stop(false, false, true, false, Some(false)),
+            AfterFailedStop::Restart
+        );
+    }
+
+    #[test]
+    fn a_stop_ends_the_own_child_or_else_a_taken_over_host_that_still_runs() {
+        assert_eq!(stop_target(Some(10), Some(20), |_| true), Some(10));
+        assert_eq!(stop_target(None, Some(20), |_| true), Some(20));
+        assert_eq!(stop_target(None, Some(20), |_| false), None);
+        assert_eq!(stop_target(None, None, |_| true), None);
+    }
+
+    #[test]
+    fn a_recorded_pid_that_is_no_host_does_not_delay_the_start() {
+        let dir = std::env::temp_dir().join(format!("md-previous-host-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        host_process::persist(&dir, std::process::id()).unwrap();
+        let started = Instant::now();
+
+        let stopped = tauri::async_runtime::block_on(stop_previous_host(&dir));
+
+        std::fs::remove_dir_all(&dir).unwrap();
+        assert!(stopped);
+        assert!(started.elapsed() < Duration::from_secs(1));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn an_adopted_host_is_outlived_as_soon_as_its_process_exits() {
+        let mut child = Command::new("sleep").arg("0.3").spawn().unwrap();
+        let pid = child.id();
+        let started = Instant::now();
+
+        outlive_adopted_host(
+            Some(pid),
+            |pid| host_process::is_host_process(pid, "sleep"),
+            Duration::from_secs(10),
+        );
+
+        child.wait().unwrap();
+        assert!(started.elapsed() >= Duration::from_millis(300));
+        assert!(started.elapsed() < Duration::from_secs(5));
+    }
+
+    #[test]
+    fn an_adopted_host_without_a_pid_gets_the_full_grace() {
+        let grace = Duration::from_millis(200);
+        let started = Instant::now();
+
+        outlive_adopted_host(None, |_| true, grace);
+
+        assert!(started.elapsed() >= grace);
     }
 
     #[test]
@@ -2873,8 +3029,8 @@ mod tests {
 
     #[test]
     fn a_locked_binary_keeps_the_host_from_counting_as_stopped() {
-        assert!(!is_stopped(true, true, false, false));
-        assert!(!is_stopped(false, false, false, false));
+        assert!(!is_stopped(true, true, false, None, false));
+        assert!(!is_stopped(false, false, false, None, false));
     }
 
     #[test]
