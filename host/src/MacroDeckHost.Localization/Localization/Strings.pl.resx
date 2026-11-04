@@ -20288,6 +20288,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Wyświetlacz jest utrzymywany w stanie aktywnym.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Dotknij dowolnego miejsca, aby utrzymać wyświetlacz w stanie aktywnym.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Przeglądarka lub system operacyjny odmówiły utrzymania aktywnego wyświetlacza (np. z powodu oszczędzania baterii).</value>
   </data>

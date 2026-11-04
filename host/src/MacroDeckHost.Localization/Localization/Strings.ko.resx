@@ -20289,6 +20289,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>디스플레이가 켜진 상태를 유지하고 있습니다.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>디스플레이 켜짐을 유지하려면 아무 곳이나 탭하세요.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>브라우저나 운영체제가 디스플레이를 켜 둔 상태를 거부했습니다(예: 절전 모드).</value>
   </data>

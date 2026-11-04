@@ -20289,6 +20289,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>正在保持屏幕常亮。</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>轻触任意位置以保持屏幕常亮。</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>浏览器或操作系统拒绝保持屏幕常亮（例如省电模式）。</value>
   </data>

@@ -20289,6 +20289,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Экран не даёт перейти в спящий режим.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Коснитесь экрана в любом месте, чтобы он не гас.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Браузер или операционная система не разрешили не давать экрану гаснуть (например, из-за режима экономии батареи).</value>
   </data>

@@ -20289,6 +20289,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Дисплей утримується в активному стані.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Торкніться будь-де, щоб дисплей не вимикався.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Браузер або операційна система відмовили в утриманні дисплея в активному стані (наприклад, через режим енергозбереження).</value>
   </data>

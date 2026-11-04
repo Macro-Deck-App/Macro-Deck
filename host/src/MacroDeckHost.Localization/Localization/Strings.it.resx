@@ -20288,6 +20288,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Lo schermo viene mantenuto attivo.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Tocca in un punto qualsiasi per mantenere lo schermo attivo.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Il browser o il sistema operativo ha rifiutato di mantenere attivo lo schermo (ad es. risparmio energetico).</value>
   </data>

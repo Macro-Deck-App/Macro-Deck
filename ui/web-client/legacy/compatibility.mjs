@@ -164,8 +164,9 @@ export const JS_APIS_ALLOWED_BELOW_FLOOR = {
     + 'languages to browsers that are already the slowest ones the deck runs on.',
   IntersectionObserver: 'Feature-detected by the video stream view; without it a stream opens as soon as it is '
     + 'mounted instead of when it is scrolled into view, and is suspended only while the page is hidden.',
-  'navigator.wakeLock': 'Feature-detected before use; without it the screen sleeps on its own, '
-    + 'which is a comfort the deck loses rather than a function.',
+  'navigator.wakeLock': 'Feature-detected before use; without it the deck keeps the display awake '
+    + 'with a looping silent clip where inline playback exists, and otherwise the screen sleeps on its '
+    + 'own, which is a comfort the deck loses rather than a function.',
 };
 
 /** Constructs that predate every browser on the floor. Listed rather than assumed. */

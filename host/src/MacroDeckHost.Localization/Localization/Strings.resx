@@ -20294,6 +20294,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>The display is being kept awake.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Tap anywhere to keep the display awake.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>The browser or operating system refused to keep the display awake (e.g. battery saver).</value>
   </data>

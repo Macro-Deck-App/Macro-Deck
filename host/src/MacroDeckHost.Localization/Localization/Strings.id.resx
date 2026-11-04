@@ -20289,6 +20289,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Layar sedang dijaga agar tetap menyala.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Ketuk di mana saja agar layar tetap menyala.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Browser atau sistem operasi menolak menjaga layar tetap menyala (misalnya penghemat baterai).</value>
   </data>

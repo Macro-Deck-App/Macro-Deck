@@ -158,8 +158,11 @@ const legacy = await buildLegacy({ out, scriptName, styleName, hash });
 // offline asks for, and the worker itself must never end up inside its own cache. Nor does the
 // resolved stylesheet: only engines without custom properties load it, and none of those has a
 // service worker, so precaching it would cost every other client a download it never reads.
+
+// Media is fetched with Range requests, and WebKit will not play a clip a worker answers in full.
+const isMediaClip = file => /\.(mp4|webm)$/.test(file);
 const assets = (await listFiles(out))
-  .filter(file => !file.endsWith('.map') && file !== WORKER_FILE && !isLegacyAsset(file))
+  .filter(file => !file.endsWith('.map') && file !== WORKER_FILE && !isLegacyAsset(file) && !isMediaClip(file))
   .sort();
 
 const fingerprints = [];

@@ -428,6 +428,7 @@ describe('client settings', () => {
       ['unsupported', ClientAppStrings.WebClient.KeepAwake.Unsupported],
       ['insecureOrigin', ClientAppStrings.WebClient.KeepAwake.InsecureOrigin],
       ['pending', ClientAppStrings.WebClient.KeepAwake.Pending],
+      ['awaitingGesture', ClientAppStrings.WebClient.KeepAwake.AwaitingTap],
     ];
 
     explained.forEach(entry => {
@@ -469,6 +470,19 @@ describe('client settings', () => {
       toggle.dispatchEvent(new Event('change'));
 
       expect(fixture.wakeLock.setEnabled).toHaveBeenCalledWith(true);
+    });
+
+    it('can still be turned off while it waits for a tap', () => {
+      const fixture = create();
+      fixture.wakeLock.status = 'awaitingGesture';
+      fixture.wakeLock.on = true;
+      fixture.handle.open();
+
+      const toggle = wakeLockToggle()!;
+      toggle.checked = false;
+      toggle.dispatchEvent(new Event('change'));
+
+      expect(fixture.wakeLock.setEnabled).toHaveBeenCalledWith(false);
     });
 
     it('reports a status the store reaches on its own into the open dialog', () => {

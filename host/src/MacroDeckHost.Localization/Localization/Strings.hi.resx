@@ -20289,6 +20289,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>डिस्प्ले को चालू रखा जा रहा है।</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>डिस्प्ले चालू रखने के लिए कहीं भी टैप करें।</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>ब्राउज़र या ऑपरेटिंग सिस्टम ने डिस्प्ले को चालू रखने से इनकार किया (जैसे बैटरी सेवर के कारण)।</value>
   </data>
