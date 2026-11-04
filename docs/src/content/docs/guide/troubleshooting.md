@@ -350,6 +350,11 @@ connection and names the cause in the setup and under **Integrations**:
 - **Macro Deck could not find out why:** check all of the above. The [logs](#where-to-find-the-logs)
   contain a warning with the program, session and privileges Macro Deck found.
 
+If the setup says that **Discord refused the permissions Macro Deck needs**, Discord does not let your
+account use the application you entered. Create the application in the Discord Developer Portal with
+the same account that is signed in to the Discord desktop app. If you use Discord's account switcher,
+check which account is active. An application owned by a team works only for members of that team.
+
 ## Spotify sign-in says Spotify could not be reached
 
 After you log in to Spotify, the setup says **Spotify could not be reached or did not respond in time**.

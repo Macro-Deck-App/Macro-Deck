@@ -144,6 +144,55 @@ internal sealed class DiscordConfigFlowTests
 	}
 
 	[Test]
+	public async Task A_scope_refused_by_discords_oauth2_check_is_retried_without_notification_access()
+	{
+		_client.Fails("AUTHORIZE", InvalidScope());
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Complete));
+		var second = _client.CallsTo("AUTHORIZE").Last();
+		Assert.Multiple(() =>
+		{
+			Assert.That(_client.CallsTo("AUTHORIZE").Count(), Is.EqualTo(2));
+			Assert.That(second.ArgsJson, Does.Not.Contain("rpc.notifications.read"));
+			Assert.That(second.ArgsJson, Does.Contain("rpc.voice.write"));
+		});
+	}
+
+	[Test]
+	public async Task Scopes_refused_even_without_notification_access_explain_the_team_requirement()
+	{
+		_client.Fails("AUTHORIZE", InvalidScope()).Fails("AUTHORIZE", InvalidScope());
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("team of the application"));
+		});
+	}
+
+	[Test]
+	public async Task Another_oauth2_error_is_not_retried_and_keeps_discords_reason()
+	{
+		_client.Fails("AUTHORIZE",
+			new DiscordRpcException(5000, "OAuth2 Error: access_denied: The resource owner denied the request."));
+		await Submit("credentials", Credentials());
+
+		var result = await Submit("authorize", new Dictionary<string, object?>(StringComparer.Ordinal));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_client.CallsTo("AUTHORIZE").Count(), Is.EqualTo(1));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("access_denied"));
+		});
+	}
+
+	[Test]
 	public async Task A_missing_discord_client_is_reported_as_such()
 	{
 		_client.ConnectException = new DiscordIpcUnavailableException("nothing listening");
@@ -305,6 +354,12 @@ internal sealed class DiscordConfigFlowTests
 			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
 			Assert.That(result.NextStep!.StepId, Is.EqualTo("credentials"));
 		});
+	}
+
+	private static DiscordRpcException InvalidScope()
+	{
+		return new DiscordRpcException(5000,
+			"OAuth2 Error: invalid_scope: The requested scope is invalid, unknown, or malformed.");
 	}
 
 	private static Dictionary<string, object?> Credentials(string clientId = "123456", string secret = "shh")
