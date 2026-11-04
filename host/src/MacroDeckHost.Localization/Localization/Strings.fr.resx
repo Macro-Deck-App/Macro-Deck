@@ -20288,6 +20288,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>L'écran est maintenu allumé.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Touche n'importe où pour maintenir l'écran allumé.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Le navigateur ou le système d'exploitation a refusé de maintenir l'écran allumé (p. ex. économiseur de batterie).</value>
   </data>

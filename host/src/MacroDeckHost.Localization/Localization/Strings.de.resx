@@ -20286,6 +20286,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Der Bildschirm wird wach gehalten.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Tippe irgendwo, um den Bildschirm wach zu halten.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Der Browser oder das Betriebssystem hat verweigert, den Bildschirm wach zu halten (z. B. wegen Energiesparmodus).</value>
   </data>

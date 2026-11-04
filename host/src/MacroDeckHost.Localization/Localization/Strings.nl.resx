@@ -20289,6 +20289,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Het scherm wordt wakker gehouden.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Tik ergens om het scherm wakker te houden.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>De browser of het besturingssysteem heeft geweigerd het scherm wakker te houden (bijv. batterijbesparing).</value>
   </data>

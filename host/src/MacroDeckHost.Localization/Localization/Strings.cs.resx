@@ -20288,6 +20288,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Displej je udržován v aktivním stavu.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Klepnutím kamkoli udržíte displej v aktivním stavu.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Prohlížeč nebo operační systém odmítl udržet displej v aktivním stavu (např. kvůli spořiči baterie).</value>
   </data>

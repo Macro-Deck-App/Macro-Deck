@@ -178,6 +178,7 @@ export function gearIcon(): SVGElement {
 function wakeLockStatusKey(status: WakeLockStatus): string | null {
   switch (status) {
     case 'active': return ClientAppStrings.WebClient.KeepAwake.Active;
+    case 'awaitingGesture': return ClientAppStrings.WebClient.KeepAwake.AwaitingTap;
     case 'suspended': return ClientAppStrings.WebClient.KeepAwake.Suspended;
     case 'denied': return ClientAppStrings.WebClient.KeepAwake.Denied;
     case 'unsupported': return ClientAppStrings.WebClient.KeepAwake.Unsupported;

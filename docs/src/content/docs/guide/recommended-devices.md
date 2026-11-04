@@ -13,7 +13,7 @@ general rules behind them, which systems the web client and the companion app ru
 | --- | --- | :---: | --- |
 | Amazon Fire HD 10 (9th gen) | Android 9 | 🟢 | Works great. For the best experience, Google Play Services should be installed manually. |
 | iPad Air 2 | iOS 15 | 🟡 | Works great with both the companion app and the web client, but long-term compatibility cannot be guaranteed. |
-| Echo Show (1st gen) | Android 11 | 🟡 | Works great with the companion app and the web client, but requires a jailbreak. |
+| Echo Show (1st gen) | Android 11 | 🟡 | Works great with the companion app and the web client, but requires a jailbreak. In the Silk browser, turn on **Keep display awake** so Silk does not close the deck. |
 | iPad 2 | iOS 9 | 🔴 | No companion app, and the web client is really slow. |
 
 ## Add your device

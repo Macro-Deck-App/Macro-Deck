@@ -20289,6 +20289,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>ディスプレイをスリープさせないようにしています。</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>ディスプレイをスリープさせないようにするには、画面のどこかをタップしてください。</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>ブラウザーまたは OS がディスプレイのスリープ防止を拒否しました（バッテリーセーバーなど）。</value>
   </data>

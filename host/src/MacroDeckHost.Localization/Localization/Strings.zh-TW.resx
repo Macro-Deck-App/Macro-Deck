@@ -20289,6 +20289,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>螢幕正在保持喚醒狀態。</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>輕觸任意位置以保持螢幕喚醒。</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>瀏覽器或作業系統拒絕保持螢幕喚醒（例如省電模式）。</value>
   </data>

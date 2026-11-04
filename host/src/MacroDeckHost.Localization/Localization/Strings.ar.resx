@@ -20289,6 +20289,9 @@
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>الشاشة تبقى مُنشَّطة.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>انقر في أي مكان لإبقاء الشاشة مُنشَّطة.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>رفض المتصفح أو نظام التشغيل إبقاء الشاشة مُنشَّطة (مثل موفّر البطارية).</value>
   </data>
