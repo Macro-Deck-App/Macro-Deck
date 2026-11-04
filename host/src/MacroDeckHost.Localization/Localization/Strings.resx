@@ -19190,6 +19190,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Something unexpected went wrong.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Force refresh</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Store registry refresh</value>
   </data>

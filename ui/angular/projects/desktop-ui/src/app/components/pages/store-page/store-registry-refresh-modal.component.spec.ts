@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EMPTY } from 'rxjs';
 
-import { AppStrings, StoreRegistryRefreshRunBody } from '@macro-deck/runtime';
+import { AppStrings, StoreRegistryRefreshRunBody, Strings } from '@macro-deck/runtime';
 import { ApiService, LocalizationService } from '@shared';
 import { StoreRegistryRefreshModalComponent } from './store-registry-refresh-modal.component';
 
@@ -101,6 +101,85 @@ describe('StoreRegistryRefreshModalComponent', () => {
     show(run({ trigger: 'Scheduled' }));
 
     expect(text()).toContain(translate(AppStrings.Store.RegistryRefresh.Step.StartedScheduled));
+  });
+
+  function forceRefreshButton(): HTMLButtonElement | null {
+    const buttons = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'));
+    return buttons.find(button =>
+      button.textContent?.trim() === translate(AppStrings.Store.RegistryRefresh.ForceRefresh)) ?? null;
+  }
+
+  function upToDate(trigger: StoreRegistryRefreshRunBody['trigger']): StoreRegistryRefreshRunBody {
+    return run({
+      trigger,
+      state: 'Succeeded',
+      entries: [
+        { at: '2026-09-15T10:00:00Z', step: 'Started' },
+        { at: '2026-09-15T10:00:01Z', step: 'FetchingManifest' },
+        { at: '2026-09-15T10:00:02Z', step: 'UpToDate', sequence: 161 },
+      ],
+    });
+  }
+
+  for (const trigger of ['Manual', 'Scheduled'] as const) {
+    it(`offers a forced refresh when a ${trigger.toLowerCase()} refresh found nothing new`, () => {
+      show(upToDate(trigger));
+      let requested = 0;
+      fixture.componentInstance.forceRefresh.subscribe(() => requested++);
+
+      forceRefreshButton()?.click();
+
+      expect(text()).toContain(translate(AppStrings.Store.RegistryRefresh.Step.UpToDate, { sequence: 161 }));
+      expect(forceRefreshButton()).not.toBeNull();
+      expect(requested).toBe(1);
+    });
+  }
+
+  it('offers no forced refresh while a refresh runs, after one applied a new version, or after one failed', () => {
+    const outcomes = [
+      run(),
+      run({
+        state: 'Succeeded',
+        entries: [
+          { at: '2026-09-15T10:00:00Z', step: 'Started' },
+          { at: '2026-09-15T10:00:03Z', step: 'Applied', sequence: 162 },
+        ],
+      }),
+      run({
+        state: 'Failed',
+        entries: [
+          { at: '2026-09-15T10:00:00Z', step: 'Started' },
+          { at: '2026-09-15T10:00:01Z', step: 'Failed', error: 'network_failure' },
+        ],
+      }),
+    ];
+
+    const offered = outcomes.map(outcome => {
+      show(outcome);
+      return forceRefreshButton() !== null;
+    });
+
+    expect(offered).toEqual([false, false, false]);
+  });
+
+  it('puts the outcome of a finished refresh at the top and lists the steps it took as done', () => {
+    show(upToDate('Manual'));
+
+    const subtitle = (fixture.nativeElement as HTMLElement).querySelector('.srr-subtitle');
+    const steps = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.srr-step'));
+    expect(subtitle?.textContent).toContain(translate(AppStrings.Store.RegistryRefresh.Step.UpToDate, { sequence: 161 }));
+    expect(steps.map(step => step.classList.contains('srr-step-done'))).toEqual([true, true]);
+  });
+
+  it('closes from the footer whatever state the refresh is in', () => {
+    show(run());
+    let closed = 0;
+    fixture.componentInstance.closed.subscribe(() => closed++);
+
+    const buttons = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'));
+    buttons.find(button => button.textContent?.trim() === translate(Strings.Common.Done))?.click();
+
+    expect(closed).toBe(1);
   });
 
   it('already reads as refreshing before the host has described the run', () => {

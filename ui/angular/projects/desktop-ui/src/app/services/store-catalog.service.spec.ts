@@ -235,6 +235,15 @@ describe('StoreCatalogService', () => {
       notifications.get('StoreRegistryRefreshChangedEvent')?.next({ run });
     }
 
+    it('asks the host for a forced refresh only when one is requested', async () => {
+      api.refreshStoreRegistry.and.resolveTo({ success: false, registry: registry() });
+
+      await service.refreshRegistry();
+      await service.refreshRegistry(true);
+
+      expect(api.refreshStoreRegistry.calls.allArgs()).toEqual([[false], [true]]);
+    });
+
     it('does not ask the host for a second refresh while one is running', async () => {
       pushRun(refreshRun());
 

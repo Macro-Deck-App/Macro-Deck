@@ -19185,6 +19185,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Wystąpił nieoczekiwany błąd.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Wymuś odświeżenie</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Odświeżanie rejestru Store</value>
   </data>

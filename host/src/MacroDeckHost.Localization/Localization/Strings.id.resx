@@ -19186,6 +19186,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Terjadi kesalahan yang tidak terduga.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Paksa segarkan</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Penyegaran registri toko</value>
   </data>

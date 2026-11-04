@@ -19186,6 +19186,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Beklenmeyen bir hata oluştu.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Zorla yenile</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Mağaza kayıt defteri yenileme</value>
   </data>

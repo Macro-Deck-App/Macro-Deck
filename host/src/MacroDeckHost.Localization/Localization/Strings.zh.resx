@@ -19186,6 +19186,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>出现了意外错误。</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>强制刷新</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>商店注册表刷新</value>
   </data>
