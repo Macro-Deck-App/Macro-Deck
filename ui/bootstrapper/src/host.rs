@@ -1873,6 +1873,14 @@ fn kill_child(state: &HostState) {
         }
     }
 
+    #[cfg(unix)]
+    if !state.spawned() {
+        if let Some(pid) = stop_target(None, state.taken_over_pid(), replaced_host_running) {
+            signal_process_group(pid, libc::SIGKILL);
+        }
+        return;
+    }
+
     if let Ok(mut slot) = state.child.lock() {
         if let Some((_, child)) = slot.as_mut() {
             #[cfg(unix)]
@@ -1882,13 +1890,7 @@ fn kill_child(state: &HostState) {
                 }
             }
             let _ = child.kill();
-            return;
         }
-    }
-
-    #[cfg(unix)]
-    if let Some(pid) = stop_target(None, state.taken_over_pid(), replaced_host_running) {
-        signal_process_group(pid, libc::SIGKILL);
     }
 }
 
