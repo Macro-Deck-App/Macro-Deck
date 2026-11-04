@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Testing;
 using MacroDeckHost.Tests.SystemTests.Support;
 
@@ -56,10 +57,19 @@ internal sealed class RealPluginLifecycleTests : SystemTestFixture
 	// in the host proves both directions of the live session.
 	private static async Task SetThresholdAndObserveAsync(HostInstance host, string integrationId, int threshold)
 	{
-		var result = await host.RunActionAsync(integrationId,
-			"set-alert-threshold",
-			new { thresholdCelsius = threshold });
-		Assert.That((bool?)result["success"], Is.True, result.ToJsonString());
+		// Running and healthy can come from the health probe before the session attaches, and an action in
+		// that window answers the retryable CAPABILITY_UNAVAILABLE.
+		JsonNode? result = null;
+		await Poll.UntilAsync(async () =>
+			{
+				result = await host.RunActionAsync(integrationId,
+					"set-alert-threshold",
+					new { thresholdCelsius = threshold });
+				return (string?)result["error"]?["code"] != "CAPABILITY_UNAVAILABLE";
+			},
+			HostPlugins.StartTimeout,
+			"the plugin session attached");
+		Assert.That((bool?)result!["success"], Is.True, result.ToJsonString());
 
 		var expected = threshold.ToString(CultureInfo.InvariantCulture);
 		await Poll.UntilAsync(async () => await host.VariableAsync(ThresholdVariable) is { } variable
