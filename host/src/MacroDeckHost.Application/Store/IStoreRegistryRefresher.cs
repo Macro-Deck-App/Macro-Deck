@@ -12,5 +12,10 @@ public interface IStoreRegistryRefresher
 		StoreRegistryRefreshTrigger trigger,
 		CancellationToken cancellationToken = default);
 
+	Task<Result<RegistryRefreshError>> Refresh(
+		StoreRegistryRefreshTrigger trigger,
+		bool force,
+		CancellationToken cancellationToken = default);
+
 	Task LoadCachedRegistry(CancellationToken cancellationToken = default);
 }

@@ -19186,6 +19186,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Сталася непередбачена помилка.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Оновити примусово</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Оновлення реєстру магазину</value>
   </data>

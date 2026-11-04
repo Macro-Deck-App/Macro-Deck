@@ -1073,8 +1073,8 @@ export class ApiService {
     return this.http('GET', '/api/store/status');
   }
 
-  refreshStoreRegistry(): Promise<RefreshStoreRegistryResponse> {
-    return this.http('POST', '/api/store/registry/refresh');
+  refreshStoreRegistry(force = false): Promise<RefreshStoreRegistryResponse> {
+    return this.http('POST', force ? '/api/store/registry/refresh?force=true' : '/api/store/registry/refresh');
   }
 
   getStoreCatalog(options?: {

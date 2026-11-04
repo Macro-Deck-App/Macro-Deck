@@ -19183,6 +19183,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Etwas Unerwartetes ist schiefgelaufen.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Aktualisierung erzwingen</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Store-Registry-Aktualisierung</value>
   </data>

@@ -909,9 +909,12 @@ The **⋮** menu at the top right of the Store has **Refresh Store** and **Store
 fetches the latest catalog and opens a log of each step as it happens. Macro Deck also refreshes on its own
 a few seconds after it starts and then once an hour. While a refresh runs, the Store header says
 **Refreshing…** in every window, and choosing **Refresh Store** again opens the log of that refresh instead of
-starting a second one. If the store registry is being updated while a refresh runs, the log says so and Macro
-Deck tries again a few times over about five minutes before it reports a failure. **Store settings** opens
-**Settings > Store**.
+starting a second one. If the Store still hands out an older catalog than the one Macro Deck already has, as
+can happen right after the Store was updated, the log says so and Macro Deck tries again a few times over about
+five minutes before it reports a failure. When the log says nothing is new, **Force refresh** at the bottom of
+the log discards the copy of the catalog on your computer and downloads it again, for example when the Store
+shows entries that look outdated. The old copy stays in use until the new one has been checked. **Store
+settings** opens **Settings > Store**.
 
 **Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
 version and any update waiting for them. While updates are waiting, **Installed** shows how many. Update one

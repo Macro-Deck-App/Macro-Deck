@@ -19186,6 +19186,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>發生未預期的錯誤。</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>強制重新整理</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>重新整理商店登錄庫</value>
   </data>

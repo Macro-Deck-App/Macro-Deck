@@ -19186,6 +19186,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Er ging iets onverwachts mis.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Vernieuwen forceren</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Storeregister vernieuwen</value>
   </data>

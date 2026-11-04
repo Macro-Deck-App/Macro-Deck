@@ -8563,6 +8563,7 @@ export const AppStrings = {
 			Thanks: 'macrodeck.app:Store.RatingPrompt.Thanks',
 		},
 		RegistryRefresh: {
+			ForceRefresh: 'macrodeck.app:Store.RegistryRefresh.ForceRefresh',
 			Heading: 'macrodeck.app:Store.RegistryRefresh.Heading',
 			InProgressAction: 'macrodeck.app:Store.RegistryRefresh.InProgressAction',
 			LogLabel: 'macrodeck.app:Store.RegistryRefresh.LogLabel',
@@ -17340,6 +17341,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Store.RegistryRefresh.Error.SnapshotUnchanged': 'The catalog has not changed.',
 	'macrodeck.app:Store.RegistryRefresh.Error.StorageFailure': 'The new catalog could not be saved.',
 	'macrodeck.app:Store.RegistryRefresh.Error.Unknown': 'Something unexpected went wrong.',
+	'macrodeck.app:Store.RegistryRefresh.ForceRefresh': 'Force refresh',
 	'macrodeck.app:Store.RegistryRefresh.Heading': 'Store registry refresh',
 	'macrodeck.app:Store.RegistryRefresh.InProgressAction': 'Refreshing…',
 	'macrodeck.app:Store.RegistryRefresh.LogLabel': 'Refresh log',

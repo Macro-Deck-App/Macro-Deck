@@ -19186,6 +19186,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>कुछ अप्रत्याशित गड़बड़ी हुई।</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>बलपूर्वक ताज़ा करें</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>स्टोर रजिस्ट्री ताज़ा करना</value>
   </data>

@@ -92,6 +92,14 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 			StoreRegistryRefreshTrigger trigger,
 			CancellationToken cancellationToken = default)
 		{
+			return Refresh(trigger, false, cancellationToken);
+		}
+
+		public Task<Result<RegistryRefreshError>> Refresh(
+			StoreRegistryRefreshTrigger trigger,
+			bool force,
+			CancellationToken cancellationToken = default)
+		{
 			Interlocked.Increment(ref _count);
 			return Task.FromResult(Result.Ok<RegistryRefreshError>());
 		}
@@ -117,6 +125,14 @@ internal sealed class StoreRegistryRefreshBackgroundServiceTests
 
 		public Task<Result<RegistryRefreshError>> Refresh(
 			StoreRegistryRefreshTrigger trigger,
+			CancellationToken cancellationToken = default)
+		{
+			return Refresh(trigger, false, cancellationToken);
+		}
+
+		public Task<Result<RegistryRefreshError>> Refresh(
+			StoreRegistryRefreshTrigger trigger,
+			bool force,
 			CancellationToken cancellationToken = default)
 		{
 			Trigger = trigger;
