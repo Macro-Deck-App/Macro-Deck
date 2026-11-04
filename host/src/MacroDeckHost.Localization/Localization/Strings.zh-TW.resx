@@ -25587,4 +25587,98 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>機密</value>
   </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>網路喚醒</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>喚醒裝置</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>向已儲存的裝置傳送網路喚醒魔術封包。傳送成功並不代表裝置已被喚醒。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>裝置</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>要喚醒的已儲存裝置</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>選擇裝置</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>新增裝置</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>儲存要從 Macro Deck 喚醒的裝置。必須在裝置的韌體與網路介面卡設定中啟用網路喚醒。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>不明的設定步驟。請重新開始。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC 位址</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>裝置網路介面卡的硬體位址</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>請輸入由 12 個十六進位數字組成的 MAC 位址，例如 AA:BB:CC:DD:EE:FF。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>廣播位址</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>目前網路請保留 255.255.255.255，或輸入裝置所在子網路的廣播位址，例如 192.168.2.255。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>請輸入 IPv4 位址，例如 192.168.1.255。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>連接埠</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>封包傳送到的 UDP 連接埠。大多數裝置會監聽連接埠 9。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>請輸入 1 到 65535 之間的連接埠。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>封包數量</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>要傳送的封包數量。對於無法每次都被喚醒的裝置，可傳送多個。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>請輸入 1 到 10 之間的數字。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>封包間隔（毫秒）</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>兩個封包之間的等待時間，單位為毫秒</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>請輸入 0 到 10000 毫秒之間的間隔。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>請選擇要喚醒的裝置。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>所選裝置已不存在。請選擇其他裝置。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} 已儲存的設定無效。請編輯該裝置並重新儲存。</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>不允許向 {address} 傳送封包。請檢查是否允許廣播，以及在 macOS 上 Macro Deck 是否有區域網路存取權。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>沒有通往 {address} 的路由。請檢查廣播位址，以及在 macOS 上 Macro Deck 是否有區域網路存取權。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>無法向 {address} 傳送封包。</value>
+    <comment>[address:string]</comment>
+  </data>
 </root>

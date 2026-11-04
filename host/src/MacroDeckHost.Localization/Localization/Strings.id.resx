@@ -25587,4 +25587,98 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Rahasia</value>
   </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Bangunkan perangkat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Mengirim magic packet Wake on LAN ke perangkat yang disimpan. Paket yang terkirim tidak memastikan bahwa perangkat sudah menyala.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Perangkat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Perangkat tersimpan yang akan dibangunkan</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Pilih perangkat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Tambah perangkat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Simpan perangkat untuk dibangunkan dari Macro Deck. Wake on LAN harus diaktifkan di firmware dan pengaturan adaptor jaringan perangkat.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Langkah penyiapan ini tidak dikenal. Mulai lagi.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>Alamat MAC</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Alamat perangkat keras adaptor jaringan perangkat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Masukkan alamat MAC dengan 12 digit heksadesimal, misalnya AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Alamat broadcast</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Biarkan 255.255.255.255 untuk jaringan ini, atau masukkan alamat broadcast subnet perangkat, misalnya 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Masukkan alamat IPv4, misalnya 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>Port UDP tujuan pengiriman paket. Sebagian besar perangkat mendengarkan di port 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Masukkan port dari 1 sampai 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Jumlah paket</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Berapa paket yang dikirim. Kirim lebih dari satu ke perangkat yang tidak selalu menyala.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Masukkan angka dari 1 sampai 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Jeda antarpaket (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Lama waktu tunggu di antara dua paket, dalam milidetik</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Masukkan jeda dari 0 sampai 10000 milidetik.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Pilih perangkat yang akan dibangunkan.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Perangkat yang dipilih sudah tidak ada. Pilih perangkat lain.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>Pengaturan tersimpan untuk {device} tidak valid. Edit perangkat lalu simpan lagi.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Pengiriman paket ke {address} tidak diizinkan. Periksa apakah broadcast diizinkan dan, di macOS, apakah Macro Deck memiliki akses Jaringan Lokal.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>Tidak ada rute ke {address}. Periksa alamat broadcast dan, di macOS, apakah Macro Deck memiliki akses Jaringan Lokal.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Paket ke {address} tidak dapat dikirim.</value>
+    <comment>[address:string]</comment>
+  </data>
 </root>
