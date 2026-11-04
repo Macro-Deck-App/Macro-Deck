@@ -6,6 +6,10 @@ const UNIVERSAL_OPERATORS: ReadonlyArray<ComparisonOperator> =
   ['==', '!=', 'isEmpty', 'isNotEmpty', 'isAvailable', 'isNotAvailable'];
 
 export const VARIABLES_OPTIONS_SOURCE_ID = 'macrodeck.variables';
+export const EVENT_VARIABLES_OPTIONS_SOURCE_ID = 'macrodeck.event-variables';
+
+const VARIABLE_PICKER_SOURCE_IDS: ReadonlySet<string> =
+  new Set([VARIABLES_OPTIONS_SOURCE_ID, EVENT_VARIABLES_OPTIONS_SOURCE_ID]);
 
 export const BOOLEAN_VALUE_OPTIONS: { label: string; value: string }[] = [
   { label: 'true', value: 'true' },
@@ -19,7 +23,7 @@ export function refineEventConfigurationParameters(
 ): ActionBlockParameter[] {
   if (!definition) return parameters;
 
-  const picker = parameters.find(p => p.optionsSourceId === VARIABLES_OPTIONS_SOURCE_ID);
+  const picker = parameters.find(p => !!p.optionsSourceId && VARIABLE_PICKER_SOURCE_IDS.has(p.optionsSourceId));
   const watchedName = typeof picker?.value === 'string' ? picker.value : '';
   if (!watchedName) return parameters;
 
