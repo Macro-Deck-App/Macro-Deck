@@ -853,6 +853,8 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
     loopback_secret::set_secret(secret.clone());
 
     let mut command = Command::new(&binary);
+    #[cfg(target_os = "linux")]
+    crate::font_guard::restore_for_child(&mut command);
     command
         .current_dir(binary.parent().unwrap_or(Path::new(".")))
         .env("MACRODECK_HOST_PORT", port.to_string())
@@ -1006,7 +1008,10 @@ pub(crate) fn relaunch(app: &AppHandle) -> bool {
         return false;
     };
 
-    match Command::new(&binary)
+    let mut command = Command::new(&binary);
+    #[cfg(target_os = "linux")]
+    crate::font_guard::restore_for_child(&mut command);
+    match command
         .args(relaunch_arguments(std::env::args_os()))
         .env(RELAUNCH_MARKER_ENVIRONMENT_VARIABLE, "1")
         .spawn()
