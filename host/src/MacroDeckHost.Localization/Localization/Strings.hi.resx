@@ -20289,6 +20289,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>डिस्प्ले को चालू रखा जा रहा है।</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>डिस्प्ले चालू रखने के लिए कहीं भी टैप करें।</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>ब्राउज़र या ऑपरेटिंग सिस्टम ने डिस्प्ले को चालू रखने से इनकार किया (जैसे बैटरी सेवर के कारण)।</value>
   </data>
@@ -25751,5 +25754,99 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>लेटेंसी इतिहास दिखाएँ</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>डिवाइस जगाएँ</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>सहेजे गए डिवाइस पर Wake on LAN मैजिक पैकेट भेजता है। पैकेट भेजे जाने से यह पुष्टि नहीं होती कि डिवाइस जाग गया है।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>डिवाइस</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>जगाने के लिए सहेजा गया डिवाइस</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>डिवाइस चुनें</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>डिवाइस जोड़ें</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck से जगाने के लिए डिवाइस सहेजें। डिवाइस के फ़र्मवेयर और नेटवर्क एडेप्टर सेटिंग्स में Wake on LAN चालू होना चाहिए।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>यह सेटअप चरण ज्ञात नहीं है। फिर से शुरू करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC पता</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>डिवाइस के नेटवर्क एडेप्टर का हार्डवेयर पता</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>12 हेक्साडेसिमल अंकों वाला MAC पता दर्ज करें, उदाहरण के लिए AA:BB:CC:DD:EE:FF।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>ब्रॉडकास्ट पता</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>इस नेटवर्क के लिए 255.255.255.255 रहने दें, या डिवाइस के सबनेट का ब्रॉडकास्ट पता दर्ज करें, उदाहरण के लिए 192.168.2.255।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>IPv4 पता दर्ज करें, उदाहरण के लिए 192.168.1.255।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>पोर्ट</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>वह UDP पोर्ट जिस पर पैकेट भेजा जाता है। अधिकांश डिवाइस पोर्ट 9 पर सुनते हैं।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1 से 65535 तक का पोर्ट दर्ज करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>पैकेट की संख्या</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>कितने पैकेट भेजने हैं। जो डिवाइस हमेशा नहीं जागता, उसे एक से अधिक भेजें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1 से 10 तक की संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>पैकेट के बीच देरी (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>दो पैकेट के बीच प्रतीक्षा का समय, मिलीसेकंड में</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0 से 10000 मिलीसेकंड तक की देरी दर्ज करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>जगाने के लिए डिवाइस चुनें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>चुना गया डिवाइस अब मौजूद नहीं है। कोई दूसरा डिवाइस चुनें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} की सहेजी गई सेटिंग्स मान्य नहीं हैं। डिवाइस संपादित करें और उसे फिर से सहेजें।</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>{address} पर पैकेट भेजने की अनुमति नहीं मिली। जाँचें कि ब्रॉडकास्ट की अनुमति है और macOS पर Macro Deck के पास लोकल नेटवर्क की पहुँच है।</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address} तक कोई रूट नहीं है। ब्रॉडकास्ट पता जाँचें और देखें कि macOS पर Macro Deck के पास लोकल नेटवर्क की पहुँच है।</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>{address} पर पैकेट नहीं भेजा जा सका।</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

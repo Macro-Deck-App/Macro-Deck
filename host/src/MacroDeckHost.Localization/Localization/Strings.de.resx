@@ -20286,6 +20286,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Der Bildschirm wird wach gehalten.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Tippe irgendwo, um den Bildschirm wach zu halten.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Der Browser oder das Betriebssystem hat verweigert, den Bildschirm wach zu halten (z. B. wegen Energiesparmodus).</value>
   </data>
@@ -25727,5 +25730,99 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>Latenzverlauf anzeigen</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Gerät aufwecken</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Sendet ein Wake-on-LAN-Magic-Packet an ein gespeichertes Gerät. Ein gesendetes Paket bestätigt nicht, dass das Gerät aufgewacht ist.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Gerät</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Das gespeicherte Gerät, das aufgeweckt wird</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Wähle ein Gerät</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Gerät hinzufügen</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Speichere ein Gerät, das du aus Macro Deck aufwecken willst. Wake on LAN muss in der Firmware und in den Netzwerkadapter-Einstellungen des Geräts eingeschaltet sein.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Dieser Einrichtungsschritt ist unbekannt. Beginne von vorn.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC-Adresse</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Die Hardwareadresse des Netzwerkadapters des Geräts</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Gib eine MAC-Adresse mit 12 Hexadezimalziffern ein, zum Beispiel AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Broadcast-Adresse</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Behalte 255.255.255.255 für dieses Netzwerk oder gib die Broadcast-Adresse des Subnetzes des Geräts ein, zum Beispiel 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Gib eine IPv4-Adresse ein, zum Beispiel 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>Der UDP-Port, an den das Paket gesendet wird. Die meisten Geräte lauschen auf Port 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Gib einen Port von 1 bis 65535 ein.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Pakete</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Wie viele Pakete gesendet werden. Sende mehr als eins an ein Gerät, das nicht immer aufwacht.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Gib eine Zahl von 1 bis 10 ein.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Pause zwischen Paketen (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Wie lange zwischen zwei Paketen gewartet wird, in Millisekunden</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Gib eine Pause von 0 bis 10000 Millisekunden ein.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Wähle ein Gerät, das aufgeweckt werden soll.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Das ausgewählte Gerät existiert nicht mehr. Wähle ein anderes Gerät.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>Die gespeicherten Einstellungen von {device} sind ungültig. Bearbeite das Gerät und speichere es erneut.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Das Paket an {address} durfte nicht gesendet werden. Prüfe, ob Broadcasts erlaubt sind und ob Macro Deck unter macOS Zugriff auf das lokale Netzwerk hat.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>Es gibt keine Route zu {address}. Prüfe die Broadcast-Adresse und ob Macro Deck unter macOS Zugriff auf das lokale Netzwerk hat.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Das Paket an {address} konnte nicht gesendet werden.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

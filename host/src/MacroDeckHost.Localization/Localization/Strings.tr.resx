@@ -20289,6 +20289,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Ekran uyanık tutuluyor.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Ekranı açık tutmak için herhangi bir yere dokunun.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Tarayıcı veya işletim sistemi ekranın açık kalmasını reddetti (ör. pil tasarrufu).</value>
   </data>
@@ -25751,5 +25754,99 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>Gecikme geçmişini göster</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Cihazı uyandır</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Kayıtlı bir cihaza Wake on LAN sihirli paketi gönderir. Gönderilen bir paket, cihazın uyandığını doğrulamaz.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Cihaz</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Uyandırılacak kayıtlı cihaz</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Bir cihaz seçin</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Cihaz ekle</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck'ten uyandırmak için bir cihaz kaydedin. Wake on LAN, cihazın donanım yazılımında ve ağ bağdaştırıcısı ayarlarında açık olmalıdır.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Bu kurulum adımı bilinmiyor. Yeniden başlayın.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC adresi</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Cihazın ağ bağdaştırıcısının donanım adresi</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>12 onaltılık basamaktan oluşan bir MAC adresi girin, örneğin AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Yayın adresi</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Bu ağ için 255.255.255.255 değerini koruyun veya cihazın alt ağının yayın adresini girin, örneğin 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Bir IPv4 adresi girin, örneğin 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Bağlantı noktası</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>Paketin gönderildiği UDP bağlantı noktası. Çoğu cihaz 9 numaralı bağlantı noktasını dinler.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1 ile 65535 arasında bir bağlantı noktası girin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Paket sayısı</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Kaç paket gönderileceği. Her zaman uyanmayan bir cihaza birden fazla gönderin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1 ile 10 arasında bir sayı girin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Paketler arası gecikme (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>İki paket arasında beklenecek süre, milisaniye cinsinden</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0 ile 10000 milisaniye arasında bir gecikme girin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Uyandırılacak bir cihaz seçin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Seçilen cihaz artık mevcut değil. Başka bir cihaz seçin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} için kaydedilen ayarlar geçerli değil. Cihazı düzenleyin ve yeniden kaydedin.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Paketin {address} adresine gönderilmesine izin verilmedi. Yayınlara izin verildiğini ve macOS'ta Macro Deck'in yerel ağ erişimi olduğunu kontrol edin.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address} adresine giden bir yol yok. Yayın adresini ve macOS'ta Macro Deck'in yerel ağ erişimi olduğunu kontrol edin.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Paket {address} adresine gönderilemedi.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

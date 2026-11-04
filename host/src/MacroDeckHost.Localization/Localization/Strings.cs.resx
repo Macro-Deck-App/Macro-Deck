@@ -20288,6 +20288,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Displej je udržován v aktivním stavu.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Klepnutím kamkoli udržíte displej v aktivním stavu.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Prohlížeč nebo operační systém odmítl udržet displej v aktivním stavu (např. kvůli spořiči baterie).</value>
   </data>
@@ -25729,5 +25732,99 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>Zobrazit historii latence</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Probudit zařízení</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Odešle magický paket Wake on LAN na uložené zařízení. Odeslaný paket nepotvrzuje, že se zařízení probudilo.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Zařízení</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Uložené zařízení, které se má probudit</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Vyberte zařízení</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Přidat zařízení</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Uložte zařízení, které se má probouzet z Macro Decku. Wake on LAN musí být zapnuté ve firmwaru a v nastavení síťového adaptéru zařízení.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Tento krok nastavení není známý. Začněte znovu.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>Adresa MAC</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Hardwarová adresa síťového adaptéru zařízení</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Zadejte adresu MAC s 12 šestnáctkovými číslicemi, například AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Adresa všesměrového vysílání</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Pro tuto síť ponechte 255.255.255.255, nebo zadejte adresu všesměrového vysílání podsítě zařízení, například 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Zadejte adresu IPv4, například 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>Port UDP, na který se paket odešle. Většina zařízení naslouchá na portu 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Zadejte port od 1 do 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Počet paketů</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Kolik paketů se odešle. Pro zařízení, které se ne vždy probudí, nastavte více než jeden.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Zadejte číslo od 1 do 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Prodleva mezi pakety (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Doba čekání mezi dvěma pakety v milisekundách</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Zadejte prodlevu od 0 do 10000 milisekund.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Vyberte zařízení, které se má probudit.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Vybrané zařízení již neexistuje. Vyberte jiné zařízení.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>Uložená nastavení zařízení {device} nejsou platná. Upravte zařízení a znovu je uložte.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Odeslání paketu na {address} nebylo povoleno. Zkontrolujte, zda je všesměrové vysílání povoleno a zda má Macro Deck v systému macOS přístup k místní síti.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>K adrese {address} neexistuje žádná trasa. Zkontrolujte adresu všesměrového vysílání a zda má Macro Deck v systému macOS přístup k místní síti.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Paket na {address} nelze odeslat.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

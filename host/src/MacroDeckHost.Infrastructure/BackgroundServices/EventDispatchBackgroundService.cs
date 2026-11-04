@@ -11,6 +11,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 {
 	private readonly IEventBus _bus;
 	private readonly IEventSubscriptionIndex _index;
+	private readonly IVariableEventAudience _variableAudience;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly StartupReadiness _readiness;
 	private readonly BuiltInIntegrationRegistration _builtInRegistration;
@@ -23,6 +24,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		IHostApplicationLifetime lifetime,
 		IEventBus bus,
 		IEventSubscriptionIndex index,
+		IVariableEventAudience variableAudience,
 		IServiceScopeFactory scopeFactory,
 		StartupReadiness readiness,
 		BuiltInIntegrationRegistration builtInRegistration,
@@ -31,6 +33,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	{
 		_bus = bus;
 		_index = index;
+		_variableAudience = variableAudience;
 		_scopeFactory = scopeFactory;
 		_readiness = readiness;
 		_builtInRegistration = builtInRegistration;
@@ -72,7 +75,8 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 
 	private void Dispatch(EventSubscription subscription, EventOccurrence occurrence, CancellationToken stoppingToken)
 	{
-		if (EventSubscriptionMatcher.QuickReject(subscription, occurrence))
+		if (EventSubscriptionMatcher.QuickReject(subscription, occurrence)
+			|| occurrence.Target is null && !_variableAudience.Reaches(subscription.Owner, occurrence))
 		{
 			return;
 		}

@@ -3,6 +3,7 @@ import { isSecureContext } from '@macro-deck/runtime';
 export interface WakeLockHandle {
   release(): Promise<void>;
   onRelease(callback: () => void): void;
+  onBlockedChange?(callback: (blocked: boolean) => void): void;
 }
 
 export interface WakeLockBackend {
@@ -19,7 +20,7 @@ interface NavigatorWakeLockApi {
 }
 
 export function browserWakeLockBackend(): WakeLockBackend | null {
-  if (typeof navigator === 'undefined') return null;
+  if (typeof navigator === 'undefined' || !isSecureContext()) return null;
   // `navigator.wakeLock` is not in every lib.dom snapshot, so it is reached through a narrow cast.
   const api = (navigator as unknown as { wakeLock?: NavigatorWakeLockApi }).wakeLock;
   if (!api) return null;
@@ -32,12 +33,229 @@ export function browserWakeLockBackend(): WakeLockBackend | null {
   };
 }
 
+const CLIPS: ReadonlyArray<{ src: string; type: string }> = [
+  { src: './keep-awake.mp4', type: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' },
+  { src: './keep-awake.webm', type: 'video/webm; codecs="vp8, vorbis"' },
+];
+
+const GESTURES = ['pointerup', 'touchend', 'click', 'keydown'];
+
+function supportsInlinePlayback(video: HTMLVideoElement): boolean {
+  // Before iOS 10 an iPhone ignores playsinline and opens every video in the fullscreen player.
+  return 'playsInline' in video || !/iPhone|iPod/.test(navigator.userAgent);
+}
+
+function playableClip(video: HTMLVideoElement): string | null {
+  for (let index = 0; index < CLIPS.length; index++) {
+    if (video.canPlayType(CLIPS[index].type) !== '') return CLIPS[index].src;
+  }
+  return null;
+}
+
+// NotAllowedError is the autoplay rule; AbortError is a pause, such as Alexa taking audio focus,
+// landing before playback started. Both wait for the next tap.
+function waitsForGesture(error: unknown): boolean {
+  const name = typeof error === 'object' && error !== null ? (error as { name?: unknown }).name : undefined;
+  return name === 'NotAllowedError' || name === 'AbortError';
+}
+
+export function mediaWakeLockBackend(
+  createVideo: () => HTMLVideoElement = () => document.createElement('video'),
+): WakeLockBackend | null {
+  if (typeof document === 'undefined' || typeof navigator === 'undefined') return null;
+  const probe = createVideo();
+  if (typeof probe.canPlayType !== 'function' || !supportsInlinePlayback(probe)) return null;
+  const src = playableClip(probe);
+  if (src === null) return null;
+
+  return { request: () => holdMedia(createVideo(), src) };
+}
+
+function holdMedia(video: HTMLVideoElement, src: string): Promise<WakeLockHandle> {
+  return new Promise<WakeLockHandle>((resolve, reject) => {
+    let settled = false;
+    let stopped = false;
+    let blocked = true;
+    let armed = false;
+    let releaseListener: (() => void) | null = null;
+    let blockedListener: ((blocked: boolean) => void) | null = null;
+
+    const handle: WakeLockHandle = {
+      release: () => {
+        stop();
+        return Promise.resolve();
+      },
+      onRelease: callback => { releaseListener = callback; },
+      onBlockedChange: callback => {
+        blockedListener = callback;
+        callback(blocked);
+      },
+    };
+
+    const settle = (): void => {
+      if (settled) return;
+      settled = true;
+      resolve(handle);
+    };
+
+    const setBlocked = (next: boolean): void => {
+      if (stopped || blocked === next) return;
+      blocked = next;
+      setArmed(next);
+      if (blockedListener !== null) blockedListener(next);
+    };
+
+    const attempt = (): void => {
+      if (stopped) return;
+      let result: Promise<void> | undefined;
+      try {
+        result = video.play() as Promise<void> | undefined;
+      } catch {
+        lose();
+        return;
+      }
+      if (result === undefined || typeof result.then !== 'function') {
+        // Engines older than the promise-returning play() report the outcome only through events.
+        settle();
+        setArmed(blocked);
+        return;
+      }
+      result.then(
+        () => {
+          settle();
+          setBlocked(false);
+        },
+        error => {
+          if (stopped) return;
+          if (!waitsForGesture(error)) {
+            lose();
+            return;
+          }
+          settle();
+          setArmed(true);
+        });
+    };
+
+    const lose = (): void => {
+      if (stopped) return;
+      stop();
+      if (!settled) {
+        settled = true;
+        reject(new Error('media playback failed'));
+        return;
+      }
+      if (releaseListener !== null) releaseListener();
+    };
+
+    const onPlaying = (): void => setBlocked(false);
+    // Alexa speaking or another app taking audio focus pauses the clip; that is an interruption to
+    // recover from on the next touch, not a refusal.
+    const onInterrupted = (): void => {
+      if (document.hidden) return;
+      setBlocked(true);
+    };
+    const onVisibilityChange = (): void => {
+      if (!document.hidden || stopped) return;
+      stop();
+      settle();
+      if (releaseListener !== null) releaseListener();
+    };
+
+    function setArmed(on: boolean): void {
+      if (armed === on || (on && stopped)) return;
+      armed = on;
+      for (let index = 0; index < GESTURES.length; index++) {
+        if (on) document.addEventListener(GESTURES[index], attempt, true);
+        else document.removeEventListener(GESTURES[index], attempt, true);
+      }
+    }
+
+    function stop(): void {
+      if (stopped) return;
+      setArmed(false);
+      stopped = true;
+      video.removeEventListener('playing', onPlaying);
+      video.removeEventListener('pause', onInterrupted);
+      video.removeEventListener('ended', onInterrupted);
+      video.removeEventListener('error', lose);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      video.pause();
+      if (video.parentNode !== null) video.parentNode.removeChild(video);
+    }
+
+    video.loop = true;
+    video.muted = false;
+    video.preload = 'auto';
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('aria-hidden', 'true');
+    video.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
+    video.addEventListener('playing', onPlaying);
+    video.addEventListener('pause', onInterrupted);
+    video.addEventListener('ended', onInterrupted);
+    video.addEventListener('error', lose);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    video.src = src;
+    document.body.appendChild(video);
+    attempt();
+  });
+}
+
+// Silk closes an idle page whether or not the screen is held, so there the clip runs as well and is
+// the part that has to hold; a refused or lost native lock does not end it.
+function combinedWakeLockBackend(native: WakeLockBackend, media: WakeLockBackend): WakeLockBackend {
+  return {
+    request: () => {
+      const nativeHandle = native.request().then(handle => handle, () => null);
+      const releaseNative = (): void => {
+        void nativeHandle.then(handle => {
+          if (handle !== null) void handle.release();
+        });
+      };
+      return media.request().then(
+        mediaHandle => ({
+          release: () => {
+            releaseNative();
+            return mediaHandle.release();
+          },
+          onRelease: (callback: () => void) => mediaHandle.onRelease(() => {
+            releaseNative();
+            callback();
+          }),
+          onBlockedChange: (callback: (blocked: boolean) => void) => {
+            if (mediaHandle.onBlockedChange) mediaHandle.onBlockedChange(callback);
+            else callback(false);
+          },
+        }),
+        error => {
+          releaseNative();
+          throw error;
+        });
+    },
+  };
+}
+
+function isSilk(): boolean {
+  return typeof navigator !== 'undefined' && /\bSilk\//.test(navigator.userAgent);
+}
+
+export function preferredWakeLockBackend(
+  native: WakeLockBackend | null = browserWakeLockBackend(),
+  media: () => WakeLockBackend | null = mediaWakeLockBackend,
+): WakeLockBackend | null {
+  if (native !== null && !isSilk()) return native;
+  const fallback = media();
+  if (native === null) return fallback;
+  return fallback === null ? native : combinedWakeLockBackend(native, fallback);
+}
+
 export type WakeLockStatus =
   | 'insecureOrigin'
   | 'unsupported'
   | 'off'
   | 'pending'
   | 'active'
+  | 'awaitingGesture'
   | 'suspended'
   | 'denied';
 
@@ -54,7 +272,7 @@ export class WakeLock {
 
   constructor(
     clientType: string,
-    private readonly backend: WakeLockBackend | null = browserWakeLockBackend(),
+    private readonly backend: WakeLockBackend | null = preferredWakeLockBackend(),
   ) {
     this.storageKey = `md.wake-lock.${clientType}.enabled`;
     this.enabledPreference = this.readPreference();
@@ -157,8 +375,14 @@ export class WakeLock {
           return;
         }
         this.sentinel = handle;
-        this.setStatus('active');
         handle.onRelease(() => this.handleSentinelReleased(handle));
+        if (handle.onBlockedChange) {
+          handle.onBlockedChange(blocked => {
+            if (this.sentinel === handle) this.setStatus(blocked ? 'awaitingGesture' : 'active');
+          });
+        } else {
+          this.setStatus('active');
+        }
       },
       () => {
         this.pending = false;
@@ -181,6 +405,7 @@ export class WakeLock {
       this.releasingHandle = null;
       return;
     }
+    if (this.sentinel !== handle) return;
     this.sentinel = null;
     // Never re-request from here. Only record why it is gone: a hidden document explains itself,
     // anything else reads as a refusal.
@@ -206,12 +431,11 @@ export class WakeLock {
   }
 
   private canOperate(): boolean {
-    return this.backend !== null && isSecureContext();
+    return this.backend !== null;
   }
 
   private initialStatus(): WakeLockStatus {
-    if (!isSecureContext()) return 'insecureOrigin';
-    if (this.backend === null) return 'unsupported';
+    if (this.backend === null) return isSecureContext() ? 'unsupported' : 'insecureOrigin';
     return 'off';
   }
 

@@ -20289,6 +20289,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Het scherm wordt wakker gehouden.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Tik ergens om het scherm wakker te houden.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>De browser of het besturingssysteem heeft geweigerd het scherm wakker te houden (bijv. batterijbesparing).</value>
   </data>
@@ -25751,5 +25754,99 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>Latentiegeschiedenis tonen</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Apparaat wekken</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Stuurt een Wake on LAN-magic packet naar een opgeslagen apparaat. Een verzonden pakket bevestigt niet dat het apparaat is ontwaakt.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Apparaat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Het opgeslagen apparaat dat gewekt wordt</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Kies een apparaat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Apparaat toevoegen</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Sla een apparaat op dat je vanuit Macro Deck wilt wekken. Wake on LAN moet aanstaan in de firmware en de netwerkadapterinstellingen van het apparaat.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Deze instelstap is onbekend. Begin opnieuw.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC-adres</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Het hardwareadres van de netwerkadapter van het apparaat</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Voer een MAC-adres in met 12 hexadecimale cijfers, bijvoorbeeld AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Broadcastadres</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Laat 255.255.255.255 staan voor dit netwerk, of voer het broadcastadres van het subnet van het apparaat in, bijvoorbeeld 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Voer een IPv4-adres in, bijvoorbeeld 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Poort</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>De UDP-poort waarnaar het pakket wordt verzonden. De meeste apparaten luisteren op poort 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Voer een poort van 1 tot 65535 in.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Pakketten</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Hoeveel pakketten er worden verzonden. Stuur er meer dan één naar een apparaat dat niet altijd ontwaakt.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Voer een getal van 1 tot 10 in.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Pauze tussen pakketten (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Hoe lang er tussen twee pakketten wordt gewacht, in milliseconden</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Voer een pauze van 0 tot 10000 milliseconden in.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Kies een apparaat om te wekken.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Het gekozen apparaat bestaat niet meer. Kies een ander apparaat.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>De opgeslagen instellingen van {device} zijn ongeldig. Bewerk het apparaat en sla het opnieuw op.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Het pakket naar {address} mocht niet worden verzonden. Controleer of broadcasts zijn toegestaan en of Macro Deck op macOS toegang heeft tot het lokale netwerk.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>Er is geen route naar {address}. Controleer het broadcastadres en of Macro Deck op macOS toegang heeft tot het lokale netwerk.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Het pakket naar {address} kon niet worden verzonden.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

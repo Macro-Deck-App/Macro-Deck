@@ -603,8 +603,17 @@ A script started with **Run Script** sees only its own variables, not those of t
 automation that started it; pass values to it as inputs instead.
 
 **Variable Changed**, **Variable Created** and **Variable Deleted** do not run for the variables of a script
-or an automation. They do run for the variables of a widget, also when a global variable has the same
-name, because the event only knows the name.
+or an automation. For a widget's variables they follow the same order as a step:
+
+- A widget's own trigger runs for that widget's variable, and for a global one only when the widget has
+  no variable of that name.
+- An automation, and any other widget without a variable of that name, run for a widget's variable
+  only when no global variable has that name, as with the
+  [countdown, stopwatch](#countdown-and-stopwatch) and [calendar](#calendar-widget) variables. With a
+  global `count`, a widget's `count` runs none of them.
+
+This also holds for a trigger that does not pick a variable. Their variable picker lists only names
+these events can run for.
 
 Deleting a widget, script or automation deletes its variables, and duplicating one copies them. When you
 export or share widgets, the scripts they use bring their variables along. The **Variables** page still
@@ -860,7 +869,8 @@ of one inside Macro Deck.
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
 [SoundPad](/guide/soundpad/), [AutoHotkey](/guide/autohotkey/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord,
 [Discord Webhooks](/guide/discord-webhooks/), Google Calendar,
-Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/), [Ping](/guide/ping/) and more. Turn on the ones you use under **Integrations**.
+Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/), [Ping](/guide/ping/),
+[Wake on LAN](/guide/wake-on-lan/) and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page listing ADB, Discord, Email (IMAP), Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 

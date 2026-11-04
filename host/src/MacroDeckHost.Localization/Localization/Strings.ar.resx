@@ -20289,6 +20289,9 @@
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>الشاشة تبقى مُنشَّطة.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>انقر في أي مكان لإبقاء الشاشة مُنشَّطة.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>رفض المتصفح أو نظام التشغيل إبقاء الشاشة مُنشَّطة (مثل موفّر البطارية).</value>
   </data>
@@ -25751,5 +25754,99 @@
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>عرض سجل زمن الاستجابة</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>إيقاظ الجهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>يرسل حزمة Wake on LAN السحرية إلى جهاز محفوظ. إرسال الحزمة لا يؤكد أن الجهاز قد استيقظ.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>الجهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>الجهاز المحفوظ المراد إيقاظه</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>اختر جهازًا</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>إضافة جهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>احفظ جهازًا لإيقاظه من Macro Deck. يجب تفعيل Wake on LAN في البرنامج الثابت للجهاز وفي إعدادات محوّل الشبكة.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>خطوة الإعداد هذه غير معروفة. ابدأ من جديد.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>عنوان MAC</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>العنوان المادي لمحوّل الشبكة في الجهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>أدخل عنوان MAC مكوّنًا من 12 رقمًا سداسيًا عشريًا، مثل AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>عنوان البث</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>أبقِ 255.255.255.255 لهذه الشبكة، أو أدخل عنوان البث للشبكة الفرعية التي يتصل بها الجهاز، مثل 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>أدخل عنوان IPv4، مثل 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>المنفذ</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>منفذ UDP الذي تُرسل إليه الحزمة. تستمع معظم الأجهزة على المنفذ 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>أدخل منفذًا من 1 إلى 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>عدد الحزم</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>عدد الحزم المرسلة. أرسل أكثر من حزمة إلى جهاز لا يستيقظ دائمًا.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>أدخل رقمًا من 1 إلى 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>المهلة بين الحزم (مللي ثانية)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>مدة الانتظار بين حزمتين، بالمللي ثانية</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>أدخل مهلة من 0 إلى 10000 مللي ثانية.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>اختر جهازًا لإيقاظه.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>الجهاز المحدد لم يعد موجودًا. اختر جهازًا آخر.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>الإعدادات المحفوظة لـ {device} غير صالحة. عدّل الجهاز واحفظه مرة أخرى.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>لم يُسمح بإرسال الحزمة إلى {address}. تحقق من السماح بالبث، ومن أن Macro Deck لديه إذن الوصول إلى الشبكة المحلية على macOS.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>لا يوجد مسار إلى {address}. تحقق من عنوان البث، ومن أن Macro Deck لديه إذن الوصول إلى الشبكة المحلية على macOS.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>تعذّر إرسال الحزمة إلى {address}.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

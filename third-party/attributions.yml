@@ -203,6 +203,7 @@ assets:
       - host/src/MacroDeckHost.Integrations/Ping/Icons/ping-icon.svg
       - host/src/MacroDeckHost.Integrations/System/Icons/system-icon.svg
       - host/src/MacroDeckHost.Integrations/Voicemeeter/Icons/voicemeeter-icon.svg
+      - host/src/MacroDeckHost.Integrations/WakeOnLan/Icons/wake-on-lan-icon.svg
       - host/src/MacroDeckHost.Integrations/Weather/Icons/weather-icon.svg
       - ui/angular/projects/desktop-ui/src/app/components/action-builder/action-card/nested-action-list.component.html
       - ui/angular/projects/desktop-ui/src/app/components/config-flow/config-field.component.ts

@@ -20289,6 +20289,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>ディスプレイをスリープさせないようにしています。</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>ディスプレイをスリープさせないようにするには、画面のどこかをタップしてください。</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>ブラウザーまたは OS がディスプレイのスリープ防止を拒否しました（バッテリーセーバーなど）。</value>
   </data>
@@ -25751,5 +25754,99 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
     <value>遅延の履歴を表示</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>デバイスを起動</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>保存したデバイスに Wake on LAN のマジックパケットを送信します。パケットを送信しても、デバイスが起動したことは確認されません。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>デバイス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>起動する保存済みデバイス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>デバイスを選択</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>デバイスを追加</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck から起動するデバイスを保存します。デバイスのファームウェアとネットワークアダプターの設定で Wake on LAN を有効にする必要があります。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定手順です。最初からやり直してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC アドレス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>デバイスのネットワークアダプターのハードウェアアドレス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>12 桁の 16 進数で MAC アドレスを入力してください。例: AA:BB:CC:DD:EE:FF</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>ブロードキャストアドレス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>このネットワークでは 255.255.255.255 のままにするか、デバイスのサブネットのブロードキャストアドレスを入力してください。例: 192.168.2.255</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>IPv4 アドレスを入力してください。例: 192.168.1.255</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>ポート</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>パケットの送信先 UDP ポートです。ほとんどのデバイスはポート 9 で待ち受けます。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1 から 65535 までのポートを入力してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>パケット数</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>送信するパケットの数です。起動しにくいデバイスには複数送信してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1 から 10 までの数を入力してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>パケット間の待機時間 (ミリ秒)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>2 つのパケットの間に待機する時間 (ミリ秒)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0 から 10000 ミリ秒までの待機時間を入力してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>起動するデバイスを選択してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>選択したデバイスはもう存在しません。別のデバイスを選択してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} の保存済み設定が無効です。デバイスを編集して保存し直してください。</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>{address} へのパケット送信が許可されませんでした。ブロードキャストが許可されているか、macOS では Macro Deck にローカルネットワークへのアクセスが許可されているかを確認してください。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address} への経路がありません。ブロードキャストアドレスと、macOS では Macro Deck にローカルネットワークへのアクセスが許可されているかを確認してください。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>{address} にパケットを送信できませんでした。</value>
+    <comment>[address:string]</comment>
   </data>
 </root>
