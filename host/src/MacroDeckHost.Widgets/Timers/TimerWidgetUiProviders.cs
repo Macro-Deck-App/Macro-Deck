@@ -3,6 +3,7 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
@@ -94,12 +95,18 @@ public sealed class TimerWidgetSessionFactory
 {
 	private readonly IHostLockState _lockState;
 	private readonly IUiTransport _transport;
+	private readonly VirtualWidgetPress? _virtualPress;
 
-	public TimerWidgetSessionFactory(TimerWidgetCoordinator timers, IHostLockState lockState, IUiTransport transport)
+	public TimerWidgetSessionFactory(
+		TimerWidgetCoordinator timers,
+		IHostLockState lockState,
+		IUiTransport transport,
+		VirtualWidgetPress? virtualPress = null)
 	{
 		Timers = timers;
 		_lockState = lockState;
 		_transport = transport;
+		_virtualPress = virtualPress;
 	}
 
 	internal TimerWidgetCoordinator Timers { get; }
@@ -135,6 +142,16 @@ public sealed class TimerWidgetSessionFactory
 		}
 
 		var face = new UiState<TimerFace>(TimerFace.Idle(config, Timers.Store.Now));
+
+		if (_virtualPress?.VirtualWidgetIdOf(surface) is { } virtualWidgetId)
+		{
+			return new VirtualWidgetUiSession(surface,
+				virtualWidgetId,
+				VirtualWidgetGestures.PressAndLongPress,
+				_virtualPress,
+				_lockState,
+				events => TimerWidgetView.Build(face, settings, WidgetSafeArea.RadiusOf(surface), events));
+		}
 
 		return new StaticWidgetUiSession(new UiView(surface,
 			TimerWidgetView.Build(face, settings, WidgetSafeArea.RadiusOf(surface))));

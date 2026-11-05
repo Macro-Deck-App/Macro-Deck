@@ -8,6 +8,7 @@ using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Plugin.Protocol.Serialization;
 using MacroDeck.Plugin.Protocol.Versioning;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins.Capabilities;
 using MacroDeckHost.Tests.PluginContractTests.Harness;
@@ -75,15 +76,52 @@ internal sealed class VirtualProfilesContractTests : CapabilityContractFixture
 			Assert.That(profile.Folders.Single().Widgets.Single().Id, Is.EqualTo("play"));
 		});
 
-		await provider.HandleWidgetInteractionAsync(string.Empty, "main", "play", new WidgetInteraction("press"));
+		await provider.HandleWidgetInteractionAsync("car-thing",
+			"main",
+			"play",
+			new WidgetInteraction("onShortPress"));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(profileIntegration.LastInteraction!.Value.ProfileId, Is.EqualTo(string.Empty));
+			Assert.That(profileIntegration.LastInteraction!.Value.ProfileId, Is.EqualTo("car-thing"));
 			Assert.That(profileIntegration.LastInteraction!.Value.FolderId, Is.EqualTo("main"));
 			Assert.That(profileIntegration.LastInteraction!.Value.WidgetId, Is.EqualTo("play"));
-			Assert.That(profileIntegration.LastInteraction!.Value.Interaction.TriggerType, Is.EqualTo("press"));
+			Assert.That(profileIntegration.LastInteraction!.Value.Interaction.TriggerType, Is.EqualTo("onShortPress"));
 		});
+	}
+
+	[Test]
+	public async Task A_catalog_change_hands_the_host_the_profiles_before_and_after_it()
+	{
+		var mixer = new MutableProfileIntegration(Mixer("Spotify"));
+		await ConnectAsync([new VirtualProfilesCapabilityHandler([mixer], TestMetadata.Default)],
+			[Provider()],
+			[CapabilityKinds.VirtualProfiles]);
+
+		mixer.Profiles = [Mixer("Spotify 40%")];
+		await Registrar.ApplyStateUpdateAsync(PluginId, CapabilityKinds.VirtualProfiles);
+
+		var changed = Mediator.Published.OfType<VirtualProfilesChangedNotification>().Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed.IntegrationId, Is.EqualTo(PluginId));
+			Assert.That(changed.Previous.Single().Folders.Single().Widgets.Single().Data,
+				Is.EqualTo(Mixer("Spotify").Folders.Single().Widgets.Single().Data));
+			Assert.That(changed.Current.Single().Folders.Single().Widgets.Single().Data,
+				Is.EqualTo(Mixer("Spotify 40%").Folders.Single().Widgets.Single().Data));
+		});
+	}
+
+	private static VirtualProfileDescriptor Mixer(string label)
+	{
+		return new VirtualProfileDescriptor("mixer",
+			"Mixer",
+			ProfileLayout.Grid(1, 1),
+			[
+				new VirtualFolderDescriptor("page-1",
+					"Page 1",
+					[new VirtualWidgetDescriptor("app-0", "ActionButton", 0, 0, Data: $$"""{"label":"{{label}}"}""")])
+			]);
 	}
 
 	[Test]
@@ -247,6 +285,29 @@ internal sealed class VirtualProfilesContractTests : CapabilityContractFixture
 			WidgetInteraction interaction)
 		{
 			await Task.Delay(Timeout.Infinite, CancellationToken.None);
+		}
+	}
+
+	private sealed class MutableProfileIntegration(VirtualProfileDescriptor profile)
+		: IPluginIntegration, IProfileProvider
+	{
+		public IReadOnlyList<VirtualProfileDescriptor> Profiles { get; set; } = [profile];
+
+		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
+		{
+			return Profiles;
 		}
 	}
 

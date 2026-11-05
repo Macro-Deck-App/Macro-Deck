@@ -82,10 +82,9 @@ public sealed record VirtualProfilesResult
 /// <summary>
 /// Arguments for the <c>widget-interaction</c> operation, mirroring
 /// <c>IProfileProvider.HandleWidgetInteractionAsync</c>'s parameters plus <c>WidgetInteraction</c>'s
-/// single field. <see cref="ProfileId" /> is carried faithfully rather than re-derived host-side: the
-/// host's own in-process <c>ProfileRegistry</c> always passes <see cref="string.Empty" /> for it (see
-/// <c>ProfileRegistry.RouteAsync</c>), and the remote path must not diverge from that by trying to
-/// "fix" or backfill it.
+/// single field. All three ids are the plugin's own local ids. <see cref="ProfileId" /> is carried
+/// faithfully rather than re-derived on either side, so the remote path always matches what the host's
+/// in-process <c>ProfileRegistry</c> passes. Hosts before 3.0.1 send an empty <see cref="ProfileId" />.
 /// </summary>
 public sealed record WidgetInteractionArguments
 {
@@ -95,6 +94,6 @@ public sealed record WidgetInteractionArguments
 
 	public required string WidgetId { get; init; }
 
-	/// <summary>Mirrors the action-button trigger names, e.g. "press", "release".</summary>
+	/// <summary>A widget trigger name, e.g. "onShortPress", "onLongPress", "onDoublePress".</summary>
 	public required string TriggerType { get; init; }
 }

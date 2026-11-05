@@ -187,6 +187,11 @@ public class ReadinessGuardedReadHandlersTests
 			return false;
 		}
 
+		public MacroDeckHost.Application.Ui.Transport.Messages.Widgets.Widget? FindVirtualWidget(string widgetId)
+		{
+			return null;
+		}
+
 		public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
 		{
 			return Task.FromResult(false);

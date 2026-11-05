@@ -143,6 +143,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 	private readonly TimeProvider _timeProvider;
 	private readonly SliderVariableBinding? _variable;
 	private readonly SliderDoublePressBinding? _doublePress;
+	private readonly Func<string?, CancellationToken, Task>? _routeDoublePress;
 	private readonly SliderLabelBinding? _label;
 	private readonly bool _interactive;
 	private readonly CancellationTokenSource _lifetime = new();
@@ -192,7 +193,8 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		bool isWidgetSurface,
 		SliderVariableBinding? variable,
 		SliderDoublePressBinding? doublePress = null,
-		SliderLabelBinding? label = null)
+		SliderLabelBinding? label = null,
+		Func<string?, CancellationToken, Task>? routeDoublePress = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(lockState);
@@ -203,6 +205,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		_timeProvider = timeProvider;
 		_variable = variable;
 		_doublePress = doublePress;
+		_routeDoublePress = routeDoublePress;
 		_label = label;
 		_interactive = isWidgetSurface && variable is not null;
 	}
@@ -231,7 +234,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 			UiEventHandler.OnAsync(UiComponentEvents.Change, HandleChangePushAsync)
 		];
 
-		if (_doublePress is not null)
+		if (_doublePress is not null || _routeDoublePress is not null)
 		{
 			handlers.Add(UiEventHandler.On(UiComponentEvents.DoublePress, (UiEventData _) => HandleDoublePress()));
 			handlers.Add(UiEventHandler.OnAsync(UiComponentEvents.DoublePress,
@@ -453,6 +456,12 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		{
 			_heldValue = null;
 			_holdUntil = null;
+		}
+
+		if (_routeDoublePress is { } route)
+		{
+			await route(originClientId, cancellationToken).ConfigureAwait(false);
+			return;
 		}
 
 		var binding = _doublePress!;

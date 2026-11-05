@@ -5,9 +5,13 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Components;
+using MacroDeck.Sdk.Profiles;
 using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.HostLocking;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Ui.Transport.Messages.Actions;
+using MacroDeckHost.Application.Ui.Sessions.InProcess;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Transport;
@@ -487,6 +491,19 @@ public class ActionButtonWidgetUiProviderTests
 		};
 	}
 
+	private static VariableEntity GlobalVariable(string name, string value)
+	{
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = VariableScope.Global,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = value
+		};
+	}
+
 	private static VariableEntity WidgetVariable(Guid widgetId, string name, string value)
 	{
 		return new VariableEntity
@@ -516,7 +533,8 @@ public class ActionButtonWidgetUiProviderTests
 		VariableRegistry? variables = null,
 		IWidgetRenderSignals? renderSignals = null,
 		FakeWidgetStateService? stateService = null,
-		FakeWidgetIconService? iconService = null)
+		FakeWidgetIconService? iconService = null,
+		VirtualWidgetPress? virtualPress = null)
 	{
 		var readiness = new StartupReadiness();
 		readiness.MarkCachesReady();
@@ -559,7 +577,120 @@ public class ActionButtonWidgetUiProviderTests
 				Serilog.Core.Logger.None),
 			TestLocalization.Resolver,
 			TimeProvider.System,
-			new StubIconPackCache());
+			new StubIconPackCache(),
+			virtualPress);
+	}
+
+	[Test]
+	public async Task A_virtual_widget_shows_the_label_and_colour_its_provider_lists()
+	{
+		const string data = """{"label":"Spotify 40%","backgroundColor":"#20242B","labelColor":"#FFFFFF"}""";
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.ActionButton, data);
+		var provider = Provider(new StubFolderCache(), new RecordingTriggerService(), virtualPress: mixer.Press);
+
+		var session = await provider.CreateSessionAsync(mixer.Request(WidgetTypeIds.ActionButton, data),
+			CancellationToken.None);
+
+		Assert.That(session, Is.Not.Null);
+		Assert.Multiple(() =>
+		{
+			Assert.That(LabelText(session!), Is.EqualTo("Spotify 40%"));
+			Assert.That(FindById(session!.BuildTree().Root, "actionButton")!.Properties["background"].ToString(),
+				Is.EqualTo("#20242b"));
+		});
+	}
+
+	[Test]
+	public async Task A_virtual_widgets_template_label_follows_the_global_variable_it_names()
+	{
+		var variables = new VariableRegistry();
+		variables.Upsert(GlobalVariable("bla", "42"));
+		var renderSignals = new WidgetRenderSignals();
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.ActionButton, TemplateLabelData);
+		var provider = Provider(new StubFolderCache(),
+			new RecordingTriggerService(),
+			variables: variables,
+			renderSignals: renderSignals,
+			virtualPress: mixer.Press);
+		var session = await provider.CreateSessionAsync(mixer.Request(WidgetTypeIds.ActionButton, TemplateLabelData),
+			CancellationToken.None);
+
+		Assert.That(LabelText(session!), Is.EqualTo("Test: 42"));
+
+		variables.Upsert(GlobalVariable("bla", "43"));
+		renderSignals.RaiseVariableChanged();
+		await SettleAsync();
+
+		Assert.That(LabelText(session!), Is.EqualTo("Test: 43"));
+
+		await session!.DisposeAsync();
+	}
+
+	[TestCase(UiComponentEvents.Press, WidgetTriggerTypes.ShortPress)]
+	[TestCase(UiComponentEvents.LongPress, WidgetTriggerTypes.LongPress)]
+	public async Task A_press_on_a_virtual_widget_reaches_its_provider_with_the_trigger_name_every_route_uses(
+		string eventName,
+		string triggerType)
+	{
+		const string data = """{"label":"+"}""";
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.ActionButton, data);
+		var trigger = new RecordingTriggerService();
+		var provider = Provider(new StubFolderCache(), trigger, virtualPress: mixer.Press);
+		var session = await provider.CreateSessionAsync(mixer.Request(WidgetTypeIds.ActionButton, data),
+			CancellationToken.None);
+
+		session!.Dispatch(new UiEvent { NodeId = "actionButton", Name = eventName });
+		await SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(mixer.Integration.Interactions.Single(),
+				Is.EqualTo(("mixer", "page-1", "app-0", new WidgetInteraction(triggerType))));
+			Assert.That(trigger.Calls, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_press_on_a_virtual_widget_is_refused_while_the_host_is_locked()
+	{
+		const string data = """{"label":"+"}""";
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.ActionButton, data);
+		var provider = Provider(new StubFolderCache(),
+			new RecordingTriggerService(),
+			new FakeHostLockState { IsLocked = true },
+			virtualPress: mixer.Press);
+		var session = await provider.CreateSessionAsync(mixer.Request(WidgetTypeIds.ActionButton, data),
+			CancellationToken.None);
+
+		session!.Dispatch(new UiEvent { NodeId = "actionButton", Name = UiComponentEvents.Press });
+		await SettleAsync();
+
+		Assert.That(mixer.Integration.Interactions, Is.Empty);
+	}
+
+	[Test]
+	public async Task A_press_whose_provider_went_away_reports_a_failed_trigger_to_the_pressing_client()
+	{
+		const string data = """{"label":"+"}""";
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.ActionButton, data);
+		var provider = Provider(new StubFolderCache(), new RecordingTriggerService(), virtualPress: mixer.Press);
+		var session = await provider.CreateSessionAsync(mixer.Request(WidgetTypeIds.ActionButton, data),
+			CancellationToken.None);
+		mixer.Integrations.SetEnabled(VirtualWidgetFixture.IntegrationId, false);
+
+		((IOriginAwareUiSession)session!).Dispatch(
+			new UiEvent { NodeId = "actionButton", Name = UiComponentEvents.Press },
+			"client-a");
+		await SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			var (group, status) = mixer.Transport.Statuses.Single();
+			Assert.That(group, Is.EqualTo(UiClientGroups.For("client-a")));
+			Assert.That(status.Status, Is.EqualTo(ActionExecutionStatus.Failed));
+			Assert.That(status.WidgetId, Is.EqualTo(mixer.WidgetId));
+			Assert.That(session.BuildTree().Root, Is.Not.Null);
+		});
 	}
 
 	private static UiSessionRequest PreviewRequest(string data, string? variableScopeWidgetId)
