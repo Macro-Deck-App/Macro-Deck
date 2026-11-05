@@ -1,5 +1,6 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Limits;
+using MacroDeck.Sdk.Identity;
 using MacroDeck.Ui.Model.Identity;
 using MacroDeck.Ui.Model.Surfaces;
 
@@ -360,6 +361,19 @@ public sealed class UiSessionRegistry : IDisposable
 			return _bySessionId.Values
 				.Where(record => (includeConfiguration || !IsConfigSurface(record.Surface))
 					&& string.Equals(WidgetIdOf(record.Surface), widgetId, StringComparison.Ordinal))
+				.Select(Project)
+				.ToList();
+		}
+	}
+
+	public IReadOnlyList<UiSessionSnapshot> SessionsForVirtualWidgetsOf(string integrationId)
+	{
+		lock (_gate)
+		{
+			return _bySessionId.Values
+				.Where(record => !IsConfigSurface(record.Surface)
+					&& QualifiedId.TryParse(WidgetIdOf(record.Surface), out var id)
+					&& string.Equals(id.OwnerId, integrationId, StringComparison.Ordinal))
 				.Select(Project)
 				.ToList();
 		}

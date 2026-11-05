@@ -117,9 +117,8 @@ internal sealed class VirtualProfilesCapabilityHandler(
 				$"No virtual widget '{arguments.WidgetId}' in folder '{arguments.FolderId}' is currently available.");
 		}
 
-		// ProfileId is forwarded exactly as received rather than re-derived: the host's own in-process
-		// ProfileRegistry always sends string.Empty for it (see ProfileRegistry.RouteAsync), and this
-		// remote path must answer identically rather than trying to "fix" or backfill it.
+		// ProfileId is forwarded exactly as received rather than re-derived, so this remote path answers
+		// exactly like the host's in-process ProfileRegistry, including an older host's empty id.
 		await provider.HandleWidgetInteractionAsync(arguments.ProfileId,
 				arguments.FolderId,
 				arguments.WidgetId,

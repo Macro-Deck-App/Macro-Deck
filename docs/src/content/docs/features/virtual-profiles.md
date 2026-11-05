@@ -39,7 +39,7 @@ public sealed class StreamKitIntegration : IPluginIntegration, IProfileProvider
 
 	public Task HandleWidgetInteractionAsync(string profileId, string folderId, string widgetId,
 		WidgetInteraction interaction)
-		=> widgetId == "go-live" && interaction.TriggerType == "press"
+		=> widgetId == "go-live" && interaction.TriggerType == "onShortPress"
 			? _stream.GoLiveAsync()
 			: Task.CompletedTask;
 
@@ -52,12 +52,14 @@ integration.
 
 Things to know:
 
-- **Ids are local.** The host prefixes profile, folder and widget ids as `integrationId::localId`. Don't
-  use `::` in your ids, or the profile, folder or widget is skipped.
+- **Ids are local.** You choose profile, folder and widget ids, and the host hands them back to you as
+  they are. A widget id only has to be unique within its folder, so the same id can appear in every
+  folder. Don't use `::` in your ids, or the profile, folder or widget is skipped.
 - **Interactions are routed to you, not executed.** Virtual widgets aren't stored by the host, so a
-  trigger on one reaches `HandleWidgetInteractionAsync`. The default implementation does nothing.
-- **Don't rely on `profileId`.** The host currently passes an empty string. Identify the widget by
-  `folderId` and `widgetId`, which arrive as your local ids.
+  trigger on one reaches `HandleWidgetInteractionAsync` with your local `profileId`, `folderId` and
+  `widgetId`. The default implementation does nothing.
+- **Tiles draw from your data.** A virtual widget renders from its `Data` exactly as a stored widget of
+  the same type and data does.
 
 ## Describing a profile
 
@@ -76,13 +78,26 @@ Things to know:
 JSON payload a stored widget of that type carries. A type whose provider hasn't connected yet is passed
 through unchanged rather than becoming a button, so it appears once that provider is available.
 
+A virtual widget has no stored widget behind it, so anything that belongs to a stored widget does not
+apply: widget-scoped variables, a slider's own default value variable (bind a slider to a variable with
+`valueVariable`), and a countdown's or stopwatch's running state (they show their idle face). A label
+template such as `{{ vars.volume }}` resolves global variables and follows them as they change.
+
+### Widget ids on the wire
+
+Clients, device providers and plugin-provided widget types see a virtual widget under an id the host
+composes from the integration, profile, folder and widget ids, in the form `integrationId::localId`.
+Treat that id as opaque: don't parse it or build one yourself, and pass it back unchanged where you
+received it. The composed local part may be at most 256 characters, so keep profile, folder and widget
+ids short; a widget whose composed id is longer is skipped and logged.
+
 ## Handling interactions
 
 ```csharp
 public async Task HandleWidgetInteractionAsync(string profileId, string folderId, string widgetId,
 	WidgetInteraction interaction)
 {
-	if (interaction.TriggerType != "press")
+	if (interaction.TriggerType != "onShortPress")
 	{
 		return;
 	}
@@ -99,16 +114,21 @@ public async Task HandleWidgetInteractionAsync(string profileId, string folderId
 }
 ```
 
-`TriggerType` uses the action button's trigger names, such as `"press"` and `"release"`. The host routes
-action button triggers on a virtual widget here. A trigger for a widget id that isn't yours, or from a
-disabled integration, reports a failed trigger to the client.
+`TriggerType` uses the widget trigger names, such as `"onShortPress"`, `"onLongPress"` and
+`"onDoublePress"`. Every route uses the same names: a deck tile, a plugin-provided device and the REST
+API. A press or long press on a virtual Action Button, Countdown or Stopwatch, and a double press on a
+virtual Slider, is routed here instead of running flows, and so is a trigger on any other widget type. A trigger for a widget id that isn't yours, or from a disabled integration, reports a
+failed trigger to the client.
 
 ## Changing the profiles
 
 `GetProfiles` is read every time the host lists profiles or opens a virtual folder, so returning a new
 list is enough in process. Keep it cheap and side-effect free, and build it from state you already hold.
 An out-of-process plugin must tell the host to read it again with
-`CatalogChanged(CapabilityKinds.VirtualProfiles)` on an injected `IPluginCatalogNotifier`.
+`CatalogChanged(CapabilityKinds.VirtualProfiles)` on an injected `IPluginCatalogNotifier`. Tiles that are
+open on a deck then redraw from the new data of their widget, and a tile whose widget you removed stops
+drawing. A widget you added appears the next time the deck loads the folder. An in-process provider has
+no change signal, so its open tiles keep their data until the deck reloads.
 
 ## Edge cases
 

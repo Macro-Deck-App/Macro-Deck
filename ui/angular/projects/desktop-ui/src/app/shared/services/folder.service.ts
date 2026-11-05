@@ -1484,7 +1484,8 @@ export class FolderService {
       }
     }
 
-    if (!this.isGuid(widget.id) || !this.isGuid(folderId)) {
+    const isVirtual = this.isVirtualId(widget.id) && this.isVirtualId(folderId);
+    if (!isVirtual && (!this.isGuid(widget.id) || !this.isGuid(folderId))) {
       console.error('Cannot execute action trigger: widget or folder ID is not a valid GUID', {
         widgetId: widget.id,
         folderId,
@@ -1945,6 +1946,10 @@ export class FolderService {
 
   private generateId(): string {
     return `temp-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  }
+
+  private isVirtualId(value: string): boolean {
+    return value.includes('::');
   }
 
   private isGuid(value: string): boolean {

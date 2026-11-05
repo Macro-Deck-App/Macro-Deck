@@ -36,6 +36,7 @@ using MacroDeck.Sdk;
 using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Identity;
+using MacroDeck.Sdk.Profiles;
 using MacroDeck.Plugin.Protocol.Capabilities.WidgetTypeProvider;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -274,6 +275,27 @@ public sealed class RemotePluginIntegrationRegistrar : IRemotePluginIntegrationR
 		}
 
 		await ApplyRefreshedSnapshotAsync(pluginId, snapshot, cancellationToken).ConfigureAwait(false);
+
+		if (string.Equals(kind, CapabilityKinds.VirtualProfiles, StringComparison.Ordinal))
+		{
+			await PublishVirtualProfilesChangedAsync(pluginId,
+					result.Previous?.Profiles ?? [],
+					snapshot.Profiles,
+					cancellationToken)
+				.ConfigureAwait(false);
+		}
+	}
+
+	private async Task PublishVirtualProfilesChangedAsync(
+		string pluginId,
+		IReadOnlyList<VirtualProfileDescriptor> previous,
+		IReadOnlyList<VirtualProfileDescriptor> current,
+		CancellationToken cancellationToken)
+	{
+		await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
+		var mediator = serviceScope.ServiceProvider.GetRequiredService<IMediator>();
+		await mediator.Publish(new VirtualProfilesChangedNotification(pluginId, previous, current), cancellationToken)
+			.ConfigureAwait(false);
 	}
 
 	private static bool EmailInboxesChanged(

@@ -372,6 +372,11 @@ internal sealed class FakeProfileRegistry : IProfileRegistry
 		return profileId.Contains("::", StringComparison.Ordinal);
 	}
 
+	public MacroDeckHost.Application.Ui.Transport.Messages.Widgets.Widget? FindVirtualWidget(string widgetId)
+	{
+		return null;
+	}
+
 	public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
 	{
 		return Task.FromResult(false);

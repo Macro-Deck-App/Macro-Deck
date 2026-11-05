@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
@@ -46,6 +47,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly ILocalizationResolver _localization;
 	private readonly TimeProvider _timeProvider;
 	private readonly IIconPackCache _iconPackCache;
+	private readonly VirtualWidgetPress? _virtualPress;
 
 	public ActionButtonWidgetUiProvider(
 		IFolderCache folderCache,
@@ -65,9 +67,11 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		ActionProviderProbe providerProbe,
 		ILocalizationResolver localization,
 		TimeProvider timeProvider,
-		IIconPackCache iconPackCache)
+		IIconPackCache iconPackCache,
+		VirtualWidgetPress? virtualPress = null)
 	{
 		_iconPackCache = iconPackCache;
+		_virtualPress = virtualPress;
 		_folderCache = folderCache;
 		_iconResources = iconResources;
 		_resourceStore = resourceStore;
@@ -184,7 +188,10 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			: null;
 
 		var interactive = request.Surface.Kind == UiSurfaceKinds.Widget;
-		var widget = interactive ? FindWidget(request.Surface) : _previewWidgetPlaceholder;
+		var virtualWidgetId = interactive ? _virtualPress?.VirtualWidgetIdOf(request.Surface) : null;
+		var widget = !interactive || virtualWidgetId is not null
+			? _previewWidgetPlaceholder
+			: FindWidget(request.Surface);
 		var variableScopeWidgetId = interactive ? null : VariableScopeWidgetId(request.Surface);
 
 		if (widget is null)
@@ -192,9 +199,10 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			return null;
 		}
 
-		var draftData = interactive || data.ValueKind != JsonValueKind.Object ? null : data.GetRawText();
+		var stored = interactive && virtualWidgetId is null;
+		var draftData = stored || data.ValueKind != JsonValueKind.Object ? null : data.GetRawText();
 		var iconProviderState = new UiState<WidgetIconResolution>(await ResolveInitialIconProviderAsync(widget,
-				interactive,
+				stored,
 				variableScopeWidgetId,
 				draftData,
 				cancellationToken)
@@ -205,7 +213,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		// neither governs. Without this a freshly opened session paints the stored face until the next
 		// transition happens to push a new one - so a mapped button reopened after its variable moved
 		// (or a deck simply navigated back to) shows the wrong state indefinitely.
-		var resolvedState = interactive
+		var resolvedState = stored
 			? await ResolveLiveStateAsync(widget.Id, cancellationToken).ConfigureAwait(false)
 			: null;
 		var activeState = new UiState<string?>(resolvedState?.Id ?? config.InitialStateId);
@@ -213,7 +221,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		var initialLabel
 			= await ResolveInitialLabelAsync(config,
 					activeState.Peek(),
-					interactive,
+					stored,
 					widget,
 					variableScopeWidgetId,
 					cancellationToken)
@@ -238,7 +246,9 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			_labelRenders,
 			interactive,
 			variableScopeWidgetId,
-			draftData);
+			draftData,
+			virtualWidgetId,
+			_virtualPress);
 
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Variables.Colors;
@@ -21,6 +22,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 
 	private readonly IFolderCache _folderCache;
 	private readonly IProfileCache _profileCache;
+	private readonly IProfileRegistry? _profiles;
 	private readonly IWidgetDataSchemaProvider _schemas;
 	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly UiSessionRegistry _registry;
@@ -40,7 +42,8 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		IWidgetProviderAvailability availability,
 		UnavailableWidgetSessionRecovery recovery,
 		IColorReferenceResolver colors,
-		IHostUiCulture? culture = null)
+		IHostUiCulture? culture = null,
+		IProfileRegistry? profiles = null)
 	{
 		_colors = colors;
 		_culture = culture;
@@ -48,6 +51,7 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		_recovery = recovery;
 		_folderCache = folderCache;
 		_profileCache = profileCache;
+		_profiles = profiles;
 		_schemas = schemas;
 		_widgetTypes = widgetTypes;
 		_registry = registry;
@@ -66,41 +70,30 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 
 	private UiSessionOpenTicket OpenLive(OpenWidgetUiSessionRequest request, string ownerPrincipal)
 	{
-		if (!Guid.TryParse(request.WidgetId, out var widgetId))
+		if (ResolveLive(request.WidgetId, request.Ghost, ownerPrincipal) is not { } target)
 		{
 			return UiSessionOpenTicket.Rejected(UiSessionErrorCodes.ProviderUnavailable,
 				"That widget does not exist.");
 		}
 
-		var widget = FindWidget(widgetId);
-		var folder = FindFolderOf(widgetId);
-		if (widget is null)
+		if (_availability.Check(target.Type) is { } missing)
 		{
-			return UiSessionOpenTicket.Rejected(UiSessionErrorCodes.ProviderUnavailable,
-				"That widget does not exist.");
-		}
-
-		if (_availability.Check(widget.Type) is { } missing)
-		{
-			var placeholderId = WidgetUiProviderRegistry.UnavailableProviderIdFor(widgetId, request.Ghost);
-
-			if (FindExisting(placeholderId, ownerPrincipal) is { } shown)
+			if (FindExisting(target.PlaceholderProviderId, ownerPrincipal) is { } shown)
 			{
 				return shown;
 			}
 
-			var placeholder = _broker.Open(placeholderId,
+			var placeholder = _broker.Open(target.PlaceholderProviderId,
 				new UiSurface
 				{
 					Kind = UiSurfaceKinds.Widget,
 					SessionMode = UiSessionModes.Shared,
-					Attributes = UnavailableWidgetUiProvider.Naming(
-						BuildLiveAttributes(widgetId, widget, folder, request.Ghost),
+					Attributes = UnavailableWidgetUiProvider.Naming(BuildLiveAttributes(target, request.Ghost),
 						missing.Name)
 				},
 				ownerPrincipal);
 
-			return _recovery.Track(placeholder, widget.Type) ? placeholder : OpenLive(request, ownerPrincipal);
+			return _recovery.Track(placeholder, target.Type) ? placeholder : OpenLive(request, ownerPrincipal);
 		}
 
 		// A type a provider owns is served by that provider, so the session opens under the provider's own
@@ -108,19 +101,16 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		// lookup and provider invalidation all compare against the real owner, and a synthetic id would
 		// fail every one of them on the first patch. FolderUiSessionOpener made the same call for the same
 		// reason, and reuse is matched on the surface instead.
-		var owner = ProviderOwnerOf(widget.Type);
+		var owner = ProviderOwnerOf(target.Type);
 
-		var providerId = owner
-			?? (request.Ghost
-				? WidgetUiProviderRegistry.GhostProviderIdFor(widgetId, ownerPrincipal)
-				: WidgetUiProviderRegistry.ProviderIdFor(widgetId, ownerPrincipal));
+		var providerId = owner ?? target.InProcessProviderId;
 
 		var existing = owner is null
 			? FindExisting(providerId, ownerPrincipal)
 			: FindExistingSurface(providerId,
 				ownerPrincipal,
 				UiSurfaceKinds.Widget,
-				candidate => Matches(candidate, UiWidgetSurfaceAttributes.WidgetId, widgetId.ToString())
+				candidate => Matches(candidate, UiWidgetSurfaceAttributes.WidgetId, target.WidgetId)
 					&& IsFlagged(candidate, UiWidgetSurfaceAttributes.Ghost) == request.Ghost);
 
 		if (existing is { } opened)
@@ -132,10 +122,36 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		{
 			Kind = UiSurfaceKinds.Widget,
 			SessionMode = UiSessionModes.Shared,
-			Attributes = BuildLiveAttributes(widgetId, widget, folder, request.Ghost)
+			Attributes = BuildLiveAttributes(target, request.Ghost)
 		};
 
 		return _broker.Open(providerId, surface, ownerPrincipal);
+	}
+
+	private LiveWidgetTarget? ResolveLive(string? widgetId, bool ghost, string ownerPrincipal)
+	{
+		if (Guid.TryParse(widgetId, out var id))
+		{
+			return FindWidget(id) is { } widget
+				? new LiveWidgetTarget(id.ToString(),
+					widget.Type,
+					ParseStoredData(_colors.ResolveData(widget.Data, id)),
+					CornerRadiusOf(FindFolderOf(id)),
+					ghost
+						? WidgetUiProviderRegistry.GhostProviderIdFor(id, ownerPrincipal)
+						: WidgetUiProviderRegistry.ProviderIdFor(id, ownerPrincipal),
+					WidgetUiProviderRegistry.UnavailableProviderIdFor(id, ghost))
+				: null;
+		}
+
+		return widgetId is not null && _profiles?.FindVirtualWidget(widgetId) is { } virtualWidget
+			? new LiveWidgetTarget(virtualWidget.Id,
+				virtualWidget.Type,
+				ParseStoredData(_colors.ResolveData(virtualWidget.Data, null)),
+				GridDefaults.WidgetBorderRadius,
+				WidgetUiProviderRegistry.VirtualProviderIdFor(virtualWidget.Id, ownerPrincipal, ghost),
+				WidgetUiProviderRegistry.UnavailableVirtualProviderIdFor(virtualWidget.Id, ghost))
+			: null;
 	}
 
 	private UiSessionOpenTicket OpenPreview(OpenWidgetUiSessionRequest request, string ownerPrincipal, bool isAdmin)
@@ -315,18 +331,14 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 		return surface.Attributes.TryGetValue(key, out var candidate) && candidate.ValueKind == JsonValueKind.True;
 	}
 
-	private Dictionary<string, JsonElement> BuildLiveAttributes(
-		Guid widgetId,
-		WidgetEntity widget,
-		FolderEntity? folder,
-		bool ghost)
+	private Dictionary<string, JsonElement> BuildLiveAttributes(LiveWidgetTarget target, bool ghost)
 	{
 		var attributes = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
 		{
-			[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(widgetId.ToString()),
-			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(widget.Type),
-			[UiWidgetSurfaceAttributes.Data] = ParseStoredData(_colors.ResolveData(widget.Data, widgetId)),
-			[UiWidgetSurfaceAttributes.CornerRadius] = JsonSerializer.SerializeToElement(CornerRadiusOf(folder))
+			[UiWidgetSurfaceAttributes.WidgetId] = JsonSerializer.SerializeToElement(target.WidgetId),
+			[UiWidgetSurfaceAttributes.WidgetType] = JsonSerializer.SerializeToElement(target.Type),
+			[UiWidgetSurfaceAttributes.Data] = target.Data,
+			[UiWidgetSurfaceAttributes.CornerRadius] = JsonSerializer.SerializeToElement(target.CornerRadius)
 		};
 
 		AddCulture(attributes);
@@ -416,4 +428,12 @@ public sealed class WidgetUiSessionOpener : IWidgetUiSessionOpener
 			return _emptyObject;
 		}
 	}
+
+	private sealed record LiveWidgetTarget(
+		string WidgetId,
+		string Type,
+		JsonElement Data,
+		int CornerRadius,
+		string InProcessProviderId,
+		string PlaceholderProviderId);
 }

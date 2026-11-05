@@ -92,9 +92,33 @@ public sealed class ProfileRegistry : IProfileRegistry
 		return QualifiedId.IsQualified(profileId);
 	}
 
+	public Widget? FindVirtualWidget(string widgetId)
+	{
+		if (!VirtualWidgetIds.TryParse(widgetId,
+				out var integrationId,
+				out var localProfileId,
+				out var localFolderId,
+				out var localWidgetId)
+			|| EnabledProviders().FirstOrDefault(i => i.Id == integrationId) is not IProfileProvider provider)
+		{
+			return null;
+		}
+
+		var widget = provider.GetProfiles()
+			.FirstOrDefault(p => p.Id == localProfileId)
+			?.Folders.FirstOrDefault(f => f.Id == localFolderId)
+			?.Widgets.FirstOrDefault(w => w.Id == localWidgetId);
+
+		return widget is null ? null : MapVirtualWidget(integrationId, localProfileId, localFolderId, widget);
+	}
+
 	public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
 	{
-		if (!TryResolveVirtual(widgetId, out var integrationId, out var localWidgetId))
+		if (!VirtualWidgetIds.TryParse(widgetId,
+			out var integrationId,
+			out var localProfileId,
+			out var localFolderId,
+			out var localWidgetId))
 		{
 			return Task.FromResult(false);
 		}
@@ -105,17 +129,17 @@ public sealed class ProfileRegistry : IProfileRegistry
 			return Task.FromResult(false);
 		}
 
-		var localFolderId = TryResolveVirtual(folderId, out _, out var strippedFolderId) ? strippedFolderId : folderId;
-		return RouteAsync(provider, localFolderId, localWidgetId, interaction);
+		return RouteAsync(provider, localProfileId, localFolderId, localWidgetId, interaction);
 	}
 
 	private static async Task<bool> RouteAsync(
 		IProfileProvider provider,
+		string profileId,
 		string folderId,
 		string widgetId,
 		WidgetInteraction interaction)
 	{
-		await provider.HandleWidgetInteractionAsync(string.Empty, folderId, widgetId, interaction);
+		await provider.HandleWidgetInteractionAsync(profileId, folderId, widgetId, interaction);
 		return true;
 	}
 
@@ -178,13 +202,18 @@ public sealed class ProfileRegistry : IProfileRegistry
 			Columns = profile.Layout.Columns
 		};
 
-		dto.Widgets.AddRange(folder.Widgets.Select(w => MapVirtualWidget(integrationId, w)).OfType<Widget>());
+		dto.Widgets.AddRange(folder.Widgets.Select(w => MapVirtualWidget(integrationId, profile.Id, folder.Id, w))
+			.OfType<Widget>());
 		return dto;
 	}
 
-	private Widget? MapVirtualWidget(string integrationId, VirtualWidgetDescriptor widget)
+	private Widget? MapVirtualWidget(
+		string integrationId,
+		string localProfileId,
+		string localFolderId,
+		VirtualWidgetDescriptor widget)
 	{
-		if (!TryQualify(integrationId, widget.Id, "widget", out var widgetId))
+		if (!TryQualifyWidget(integrationId, localProfileId, localFolderId, widget.Id, out var widgetId))
 		{
 			return null;
 		}
@@ -245,6 +274,24 @@ public sealed class ProfileRegistry : IProfileRegistry
 		integrationId = qualifiedId.OwnerId;
 		localId = qualifiedId.LocalId;
 		return true;
+	}
+
+	private bool TryQualifyWidget(
+		string integrationId,
+		string localProfileId,
+		string localFolderId,
+		string localWidgetId,
+		out string qualified)
+	{
+		if (VirtualWidgetIds.TryCreate(integrationId, localProfileId, localFolderId, localWidgetId, out qualified))
+		{
+			return true;
+		}
+
+		_logger.Warning("Skipping virtual widget '{LocalId}' of integration '{IntegrationId}': not a usable id",
+			localWidgetId,
+			integrationId);
+		return false;
 	}
 
 	private bool TryQualify(string integrationId, string localId, string kind, out string qualified)
