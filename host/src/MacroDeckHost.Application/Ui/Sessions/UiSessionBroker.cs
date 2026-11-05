@@ -945,6 +945,14 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		InvalidateProvider(e.IntegrationId,
 			UiSessionErrorCodes.ProviderUnavailable,
 			"The integration serving this view is no longer available.");
+
+		foreach (var session in _registry.SessionsForVirtualWidgetsOf(e.IntegrationId))
+		{
+			_registry.TryInvalidate(session.SessionId,
+				UiSessionErrorCodes.ProviderUnavailable,
+				"The integration serving this view is no longer available.",
+				true);
+		}
 	}
 
 	public void InvalidateWidgetSessions(Guid widgetId)

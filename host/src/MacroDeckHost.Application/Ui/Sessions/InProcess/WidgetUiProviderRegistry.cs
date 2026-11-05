@@ -1,6 +1,8 @@
 using MacroDeck.Sdk.Ui;
 using System.Collections.Concurrent;
+using System.Text;
 using MacroDeckHost.Application.Caching;
+using MacroDeckHost.Application.Profiles;
 using Serilog;
 
 namespace MacroDeckHost.Application.Ui.Sessions.InProcess;
@@ -13,8 +15,10 @@ public sealed class WidgetUiProviderRegistry
 	private const string SamplePreviewPrefix = "widget-preview-sample:";
 	private const string GhostSuffix = ":ghost";
 	private const string UnavailablePrefix = "widget-unavailable:";
+	private const string VirtualPrefix = "widget-virtual:";
 
 	private readonly IFolderCache _folderCache;
+	private readonly IProfileRegistry? _profiles;
 	private readonly IEnumerable<IBuiltInWidgetUiProvider> _providers;
 	private readonly Func<IUiSessionSink> _sink;
 	private readonly ILogger _logger;
@@ -27,9 +31,11 @@ public sealed class WidgetUiProviderRegistry
 		IEnumerable<IBuiltInWidgetUiProvider> providers,
 		Func<IUiSessionSink> sink,
 		ILogger logger,
-		IUiProvider? unavailable = null)
+		IUiProvider? unavailable = null,
+		IProfileRegistry? profiles = null)
 	{
 		_folderCache = folderCache;
+		_profiles = profiles;
 		_providers = providers;
 		_sink = sink;
 		_logger = logger;
@@ -44,6 +50,13 @@ public sealed class WidgetUiProviderRegistry
 	public static string GhostProviderIdFor(Guid widgetId, string principal)
 	{
 		return $"widget:{widgetId:N}:{principal}:ghost";
+	}
+
+	public static string VirtualProviderIdFor(string widgetId, string principal, bool ghost)
+	{
+		return ghost
+			? $"{VirtualPrefix}{EncodeVirtualId(widgetId)}:{principal}{GhostSuffix}"
+			: $"{VirtualPrefix}{EncodeVirtualId(widgetId)}:{principal}";
 	}
 
 	/// <summary>A widget's configuration editor's own id. <paramref name="widgetId" /> is part of it for
@@ -81,6 +94,13 @@ public sealed class WidgetUiProviderRegistry
 		return ghost ? $"{UnavailablePrefix}ghost:{widgetId:N}" : $"{UnavailablePrefix}live:{widgetId:N}";
 	}
 
+	public static string UnavailableVirtualProviderIdFor(string widgetId, bool ghost)
+	{
+		return ghost
+			? $"{UnavailablePrefix}virtual-ghost:{EncodeVirtualId(widgetId)}"
+			: $"{UnavailablePrefix}virtual-live:{EncodeVirtualId(widgetId)}";
+	}
+
 	public static string UnavailableConfigProviderIdFor(Guid widgetId)
 	{
 		return $"{UnavailablePrefix}config:{widgetId:N}";
@@ -98,6 +118,12 @@ public sealed class WidgetUiProviderRegistry
 		if (providerId.StartsWith(UnavailablePrefix, StringComparison.Ordinal))
 		{
 			return _unavailable is null ? null : Adapter(providerId, _unavailable);
+		}
+
+		if (TryParseVirtual(providerId, out var virtualWidgetId))
+		{
+			var type = _profiles?.FindVirtualWidget(virtualWidgetId)?.Type;
+			return type is null ? null : ResolveAdapter(providerId, type);
 		}
 
 		if (TryParseLive(providerId, out var widgetId))
@@ -158,6 +184,31 @@ public sealed class WidgetUiProviderRegistry
 		}
 	}
 
+	public void EvictWidget(string virtualWidgetId)
+	{
+		var encoded = EncodeVirtualId(virtualWidgetId);
+		var livePrefix = VirtualPrefix + encoded + ":";
+		string[] placeholders =
+		[
+			UnavailableVirtualProviderIdFor(virtualWidgetId, false),
+			UnavailableVirtualProviderIdFor(virtualWidgetId, true)
+		];
+
+		foreach (var key in _adapters.Keys)
+		{
+			if (!key.StartsWith(livePrefix, StringComparison.Ordinal)
+				&& !placeholders.Contains(key, StringComparer.Ordinal))
+			{
+				continue;
+			}
+
+			if (_adapters.TryRemove(key, out var adapter))
+			{
+				_ = DisposeEvictedAsync(adapter);
+			}
+		}
+	}
+
 	private async Task DisposeEvictedAsync(InProcessUiSessionProvider adapter)
 	{
 		try
@@ -190,6 +241,35 @@ public sealed class WidgetUiProviderRegistry
 			.SelectMany(folder => folder.Widgets)
 			.FirstOrDefault(widget => widget.Id == widgetId)
 			?.Type;
+	}
+
+	private static string EncodeVirtualId(string widgetId)
+	{
+		return Convert.ToHexString(Encoding.UTF8.GetBytes(widgetId));
+	}
+
+	private static bool TryParseVirtual(string providerId, out string widgetId)
+	{
+		widgetId = string.Empty;
+
+		if (!providerId.StartsWith(VirtualPrefix, StringComparison.Ordinal))
+		{
+			return false;
+		}
+
+		var rest = providerId[VirtualPrefix.Length..];
+		var separator = rest.IndexOf(':');
+		var encoded = separator < 0 ? rest : rest[..separator];
+
+		try
+		{
+			widgetId = Encoding.UTF8.GetString(Convert.FromHexString(encoded));
+			return true;
+		}
+		catch (FormatException)
+		{
+			return false;
+		}
 	}
 
 	private static bool TryParseLive(string providerId, out Guid widgetId)

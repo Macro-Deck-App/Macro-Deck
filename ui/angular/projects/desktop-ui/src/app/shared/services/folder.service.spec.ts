@@ -1175,6 +1175,25 @@ describe('FolderService deck-navigation triggers', () => {
     expect(apiSpy.executeActionButtonTrigger).toHaveBeenCalled();
   });
 
+  it('sends a press on a virtual widget from a plugin profile to the host', async () => {
+    const virtualFolderId = 'com.example.mixer::page-1';
+    const widget: GridWidget = {
+      ...navWidget(undefined),
+      id: 'com.example.mixer::mixer:page-1:clock',
+      folderId: virtualFolderId
+    };
+    service.folders.set([makeFolder(virtualFolderId, [widget])]);
+    service.selectedFolderId.set(virtualFolderId);
+
+    await service.executeActionButtonTrigger(widget, 'onShortPress');
+
+    expect(apiSpy.executeActionButtonTrigger).toHaveBeenCalledWith(jasmine.objectContaining({
+      widgetId: 'com.example.mixer::mixer:page-1:clock',
+      folderId: virtualFolderId,
+      triggerType: 'onShortPress'
+    }));
+  });
+
   it('skips the host call for a trigger type that has no flow', async () => {
     const widget = navWidget(navFlows(folderBId));
     service.folders.set([makeFolder(folderAId, [widget]), makeFolder(folderBId, [])]);

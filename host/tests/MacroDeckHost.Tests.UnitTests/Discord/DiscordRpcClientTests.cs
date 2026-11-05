@@ -116,6 +116,22 @@ internal sealed class DiscordRpcClientTests
 	}
 
 	[Test]
+	public async Task An_oauth2_invalid_scope_error_is_recognised_as_a_scope_error()
+	{
+		var transport = new FakeDiscordIpcTransport
+		{
+			Responder = _ => FakeResponse.Error(5000,
+				"OAuth2 Error: invalid_scope: The requested scope is invalid, unknown, or malformed.")
+		};
+		using var client = new DiscordRpcClient(() => transport);
+		await client.ConnectAsync("1", CancellationToken.None);
+
+		var exception = Assert.ThrowsAsync<DiscordRpcException>(async () => await client.SendCommandAsync("AUTHORIZE"));
+
+		Assert.That(exception!.IsScopeProblem, Is.True);
+	}
+
+	[Test]
 	public async Task Events_without_a_nonce_are_dispatched_to_subscribers()
 	{
 		var transport = new FakeDiscordIpcTransport();

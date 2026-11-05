@@ -4,11 +4,13 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Widgets.Configuration;
 using MacroDeckHost.Widgets.Preview;
@@ -30,6 +32,7 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 	private readonly IUiTransport _uiTransport;
 	private readonly IWidgetRenderSignals _renderSignals;
 	private readonly IIconPackCache _iconPackCache;
+	private readonly VirtualWidgetPress? _virtualPress;
 
 	public SliderWidgetUiProvider(
 		IWidgetIconResources iconResources,
@@ -43,8 +46,10 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 		IFolderCache folderCache,
 		IUiTransport uiTransport,
 		IWidgetRenderSignals renderSignals,
-		IIconPackCache iconPackCache)
+		IIconPackCache iconPackCache,
+		VirtualWidgetPress? virtualPress = null)
 	{
+		_virtualPress = virtualPress;
 		_renderSignals = renderSignals;
 		_iconPackCache = iconPackCache;
 		_triggerService = triggerService;
@@ -146,13 +151,20 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 			? new SliderLabelBinding(config.Label!, _variables, _variableNotifier, scopeWidgetId?.ToString())
 			: null;
 
+		var virtualWidgetId = _virtualPress?.VirtualWidgetIdOf(request.Surface);
 		var session = new SliderWidgetSession(state,
 			_lockState,
 			_timeProvider,
 			isWidgetSurface,
 			variable,
 			doublePress,
-			label);
+			label,
+			virtualWidgetId is null
+				? null
+				: (originClientId, ct) => _virtualPress!.RouteAsync(virtualWidgetId,
+					WidgetTriggerTypes.DoublePress,
+					originClientId,
+					ct));
 
 		var accent = new UiState<string?>(config.Color);
 		var element = SliderWidgetView.Build(variable is null ? config : config with { ValueVariable = variable.Name },

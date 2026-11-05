@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
@@ -17,6 +18,7 @@ using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Persistence;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
@@ -552,6 +554,34 @@ public class SliderWidgetSessionTests
 	}
 
 	[Test]
+	public async Task A_double_press_on_a_virtual_slider_reaches_the_integration_that_provides_it()
+	{
+		const string data = """{"valueVariable":"volume","min":0,"max":100}""";
+		var registry = new VariableRegistry();
+		registry.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "volume",
+			Scope = VariableScope.Global,
+			Type = DomainVariableType.Numeric,
+			Classification = VariableClassification.User,
+			Value = "40"
+		});
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.Slider, data);
+		var provider = ProviderWith(registry, virtualPress: mixer.Press);
+
+		await using var session = (await provider.CreateSessionAsync(mixer.Request(WidgetTypeIds.Slider, data),
+			CancellationToken.None))!;
+		var track = Walk(session.BuildTree().Root).Single(node => node.Type == UiComponents.Slider);
+		session.Dispatch(new UiEvent { NodeId = track.Id, Name = UiComponentEvents.DoublePress });
+		await mixer.Integration.FirstInteraction.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.That(mixer.Integration.Interactions.Single(),
+			Is.EqualTo(("mixer", "page-1", "app-0",
+				new MacroDeck.Sdk.Profiles.WidgetInteraction(WidgetTriggerTypes.DoublePress))));
+	}
+
+	[Test]
 	public async Task An_unbound_deck_tile_gets_its_own_slider_value_once_and_takes_input_through_it()
 	{
 		var registry = new VariableRegistry();
@@ -833,7 +863,8 @@ public class SliderWidgetSessionTests
 
 	private static SliderWidgetUiProvider ProviderWith(
 		VariableRegistry registry,
-		VariableChangeNotifier? notifier = null)
+		VariableChangeNotifier? notifier = null,
+		VirtualWidgetPress? virtualPress = null)
 	{
 		var integrations = new ConfigurableIntegrationRegistry([]);
 		var scopeFactory = new ServiceCollection()
@@ -860,7 +891,8 @@ public class SliderWidgetSessionTests
 			new StubFolderCache(),
 			new NullUiTransport(),
 			new RecordingRenderSignals(),
-			new Devices.Surfaces.StubIconPackCache());
+			new Devices.Surfaces.StubIconPackCache(),
+			virtualPress);
 	}
 
 	private static SliderUnderTest Writable(

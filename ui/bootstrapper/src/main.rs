@@ -14,6 +14,8 @@ mod bridge;
 mod deep_links;
 mod dock_icon;
 mod external_url;
+#[cfg(any(target_os = "linux", all(test, unix)))]
+mod font_guard;
 mod host;
 mod host_error_window;
 #[cfg(windows)]
@@ -226,6 +228,9 @@ fn main() {
     if mcp_bridge::is_invocation(std::env::args_os()) {
         std::process::exit(mcp_bridge::run());
     }
+
+    #[cfg(target_os = "linux")]
+    font_guard::install();
 
     // A relaunch races the instance that started it: the single-instance lock is only released once
     // that process is gone, and claiming it too early makes this instance forward its argv to a

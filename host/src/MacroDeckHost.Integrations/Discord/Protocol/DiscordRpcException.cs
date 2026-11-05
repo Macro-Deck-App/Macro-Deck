@@ -24,7 +24,9 @@ internal sealed class DiscordRpcException : Exception
 
 	public int Code { get; }
 
-	public bool IsScopeProblem => Code is 4006 or 4007;
+	// Discord sends a refused scope as a generic OAuth2 error (5000); only its message names the scope.
+	public bool IsScopeProblem => Code is 4006 or 4007
+		|| Code == 5000 && Message.Contains("invalid_scope", StringComparison.Ordinal);
 
 	public bool IsAuthProblem => Code is 4009 or 4010;
 

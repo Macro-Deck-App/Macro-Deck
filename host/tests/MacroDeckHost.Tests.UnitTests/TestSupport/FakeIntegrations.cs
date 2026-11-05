@@ -595,7 +595,15 @@ internal sealed class FakeProfileProviderIntegration : IIntegration, IProfilePro
 	public IReadOnlyList<IActionDefinition> Actions => [];
 	public string ProviderName => Id;
 
-	public List<(string FolderId, string WidgetId, WidgetInteraction Interaction)> Interactions { get; } = new();
+	private readonly TaskCompletionSource _firstInteraction = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+	public Task FirstInteraction => _firstInteraction.Task;
+
+	public List<(string ProfileId, string FolderId, string WidgetId, WidgetInteraction Interaction)> Interactions
+	{
+		get;
+	}
+		= new();
 
 	public Task InitializeAsync(IIntegrationContext context)
 	{
@@ -620,7 +628,8 @@ internal sealed class FakeProfileProviderIntegration : IIntegration, IProfilePro
 		string widgetId,
 		WidgetInteraction interaction)
 	{
-		Interactions.Add((folderId, widgetId, interaction));
+		Interactions.Add((profileId, folderId, widgetId, interaction));
+		_firstInteraction.TrySetResult();
 		return Task.CompletedTask;
 	}
 }

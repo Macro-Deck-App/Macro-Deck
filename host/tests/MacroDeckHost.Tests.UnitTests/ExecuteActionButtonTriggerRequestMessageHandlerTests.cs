@@ -816,6 +816,11 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			return Virtual;
 		}
 
+		public MacroDeckHost.Application.Ui.Transport.Messages.Widgets.Widget? FindVirtualWidget(string widgetId)
+		{
+			return null;
+		}
+
 		public Task<bool> RouteWidgetInteraction(string folderId, string widgetId, WidgetInteraction interaction)
 		{
 			Routed++;

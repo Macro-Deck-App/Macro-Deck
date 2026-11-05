@@ -7,6 +7,8 @@ using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Domain.Common;
+using MacroDeckHost.Domain.Widgets;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Widgets.Timers;
 
 namespace MacroDeckHost.Tests.UnitTests.Timers;
@@ -51,6 +53,34 @@ public class TimerWidgetUiTests
 				Is.EquivalentTo(new[] { UiComponentEvents.Press, UiComponentEvents.LongPress }));
 			Assert.That(Events(stopwatchSession.BuildTree().Root),
 				Is.EquivalentTo(new[] { UiComponentEvents.Press, UiComponentEvents.LongPress }));
+		});
+	}
+
+	[TestCase(WidgetTypeIds.Countdown, UiComponentEvents.Press, WidgetTriggerTypes.ShortPress)]
+	[TestCase(WidgetTypeIds.Stopwatch, UiComponentEvents.LongPress, WidgetTriggerTypes.LongPress)]
+	public async Task A_press_on_a_virtual_timer_reaches_the_integration_that_provides_it(
+		string widgetType,
+		string eventName,
+		string triggerType)
+	{
+		var mixer = new VirtualWidgetFixture(widgetType, "{}");
+		var sessions
+			= new TimerWidgetSessionFactory(_harness.Coordinator, _harness.LockState, _transport, mixer.Press);
+		IBuiltInWidgetUiProvider provider = widgetType == WidgetTypeIds.Countdown
+			? new CountdownWidgetUiProvider(sessions, _drafts)
+			: new StopwatchWidgetUiProvider(sessions);
+
+		await using var session = (await provider.CreateSessionAsync(mixer.Request(widgetType, "{}"),
+			CancellationToken.None))!;
+		session.Dispatch(new UiEvent { NodeId = session.BuildTree().Root.Id, Name = eventName });
+		await mixer.Integration.FirstInteraction.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Events(session.BuildTree().Root),
+				Is.EquivalentTo(new[] { UiComponentEvents.Press, UiComponentEvents.LongPress }));
+			Assert.That(mixer.Integration.Interactions.Single(),
+				Is.EqualTo(("mixer", "page-1", "app-0", new MacroDeck.Sdk.Profiles.WidgetInteraction(triggerType))));
 		});
 	}
 

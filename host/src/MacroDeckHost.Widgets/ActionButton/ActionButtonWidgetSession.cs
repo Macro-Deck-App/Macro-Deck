@@ -10,6 +10,7 @@ using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport;
@@ -60,6 +61,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	private readonly bool _interactive;
 	private readonly string? _variableScopeWidgetId;
 	private readonly string? _draftData;
+	private readonly string? _virtualWidgetId;
+	private readonly VirtualWidgetPress? _virtualPress;
 
 	// A synthetic subscriber identity, exactly like a connected client's connection id would be, so this
 	// session can register itself in the same trackers a legacy WebSocket subscription uses: that is what
@@ -151,7 +154,9 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		LabelRenderChannel labelRenders,
 		bool interactive,
 		string? variableScopeWidgetId = null,
-		string? draftData = null)
+		string? draftData = null,
+		string? virtualWidgetId = null,
+		VirtualWidgetPress? virtualPress = null)
 	{
 		ArgumentNullException.ThrowIfNull(configState);
 		ArgumentNullException.ThrowIfNull(activeState);
@@ -189,8 +194,12 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_interactive = interactive;
 		_variableScopeWidgetId = variableScopeWidgetId;
 		_draftData = draftData;
+		_virtualWidgetId = virtualWidgetId;
+		_virtualPress = virtualPress;
 		_activeStateIsExplicit = configState.Peek().StoredActiveStateId is not null;
 	}
+
+	private bool IsVirtual => _virtualWidgetId is not null;
 
 	public event EventHandler? Changed;
 
@@ -209,7 +218,11 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 
 		var handlers = new List<UiEventHandler>();
 
-		foreach (var name in _configState.Peek().DeclaredTriggers())
+		IReadOnlyList<string> names = IsVirtual
+			? [UiComponentEvents.Press, UiComponentEvents.LongPress]
+			: _configState.Peek().DeclaredTriggers();
+
+		foreach (var name in names)
 		{
 			var eventName = name;
 			// The Func<UiEventData, UiEventOutcome> overload, deliberately: On(string, Action) also accepts a
@@ -230,6 +243,12 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_view.Changed += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
+
+		if (IsVirtual)
+		{
+			_variableChangedSubscription = _renderSignals.SubscribeVariableChanged(ScheduleDraftLabelResolution);
+			return;
+		}
 
 		if (!_interactive)
 		{
@@ -416,7 +435,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 			return UiEventOutcome.Rejected("The host is locked.");
 		}
 
-		if (eventName == UiComponentEvents.Press && _configState.Peek().CanAdvanceState)
+		if (!IsVirtual && eventName == UiComponentEvents.Press && _configState.Peek().CanAdvanceState)
 		{
 			var next = NextStateId();
 
@@ -459,6 +478,13 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		string? originClientId,
 		CancellationToken cancellationToken)
 	{
+		if (IsVirtual)
+		{
+			await _virtualPress!.RouteAsync(_virtualWidgetId!, triggerType, originClientId, cancellationToken)
+				.ConfigureAwait(false);
+			return;
+		}
+
 		// The profile cache replaces the widget instance on every edit, so the entity this session opened
 		// with is a pre-edit snapshot whose flows a press must not run (issue #683).
 		var widget = _folderCache.GetAllFolders()
@@ -506,7 +532,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		{
 			ExecutionId = Guid.NewGuid().ToString(),
 			Status = ActionExecutionStatus.Failed,
-			WidgetId = _widget.Id.ToString(),
+			WidgetId = _virtualWidgetId ?? _widget.Id.ToString(),
 			TriggerType = _triggerTypeByEventName.GetValueOrDefault(eventName),
 			Error = new TransportError
 				{ Code = ActionExecutionErrorCodes.HostLocked, Message = AppStrings.Errors.Common.HostLocked() }

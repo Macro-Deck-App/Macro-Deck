@@ -25,13 +25,14 @@ pub fn environment_outside(
     variables: impl IntoIterator<Item = (OsString, OsString)>,
     roots: &[PathBuf],
 ) -> Vec<(OsString, OsString)> {
-    variables
+    let outside = variables
         .into_iter()
         .filter(|(name, _)| !FORCED_BY_BUNDLE.iter().any(|forced| name == forced))
         .filter_map(|(name, value)| {
             without_bundled_entries(value, roots).map(|value| (name, value))
         })
-        .collect()
+        .collect();
+    crate::font_guard::restore_variables(outside)
 }
 
 fn without_bundled_entries(value: OsString, roots: &[PathBuf]) -> Option<OsString> {

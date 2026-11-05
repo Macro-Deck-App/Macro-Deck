@@ -353,6 +353,11 @@ connection and names the cause in the setup and under **Integrations**:
 - **Macro Deck could not find out why:** check all of the above. The [logs](#where-to-find-the-logs)
   contain a warning with the program, session and privileges Macro Deck found.
 
+If the setup says that **Discord refused the permissions Macro Deck needs**, Discord does not let your
+account use the application you entered. Create the application in the Discord Developer Portal with
+the same account that is signed in to the Discord desktop app. If you use Discord's account switcher,
+check which account is active. An application owned by a team works only for members of that team.
+
 ## Spotify sign-in says Spotify could not be reached
 
 After you log in to Spotify, the setup says **Spotify could not be reached or did not respond in time**.
@@ -605,3 +610,13 @@ The client usually shows the code Macro Deck answered with. The full list is in
 - **The stable APT suite is empty:** there is no stable release of Macro Deck 3 yet. Use the beta
   suite as described in [Installation](/guide/installation/#debian-and-ubuntu).
 - **Macro Deck is not in the AUR:** that is expected for now. Use the RPM package or the AppImage.
+
+## Emoji look different in the AppImage
+
+The AppImage carries its own web engine, which stops with an error when it draws the colour emoji font that
+recent Linux distributions install (Noto Color Emoji in its COLRv1 form). To prevent that, the AppImage hides
+that font from its own window and uses a bundled copy of Noto Color Emoji instead. Emoji in the Macro Deck
+window can therefore look slightly different from emoji in your other apps. Other programs, and the apps
+Macro Deck starts, keep using your system fonts.
+
+The DEB and RPM packages use your system's web engine and are not affected.

@@ -1,3 +1,7 @@
+using MacroDeck.Sdk.Profiles;
+using MacroDeckHost.Application.Events.Handlers;
+using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeck.Sdk.Widgets;
 using MacroDeck.Localization;
@@ -40,6 +44,10 @@ internal sealed class WidgetUiSessionTests
 	private StubIntegrationRegistry _integrations = null!;
 	private NoPluginConnections _connections = null!;
 	private UnavailableWidgetSessionRecovery _recovery = null!;
+	private ProfileRegistry _profiles = null!;
+
+	private const string VolumeMixer = "com.example.volume-mixer";
+	private const string MixerWidgetId = VolumeMixer + "::mixer:page-1:app-0";
 
 	[SetUp]
 	public void SetUp()
@@ -48,12 +56,22 @@ internal sealed class WidgetUiSessionTests
 		_transport = new RecordingUiSessionTransport();
 		_registry = new UiSessionRegistry(_time);
 		_folders = new FakeFolderCache();
+		_integrations = new StubIntegrationRegistry();
+		_integrations.Add(new FakeProfileProviderIntegration(VolumeMixer, MixerProfile("""{"label":"Spotify"}""")));
+		_widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
+		_profiles = new ProfileRegistry(new EmptyProfileCache(),
+			_folders,
+			_integrations,
+			_widgetTypes,
+			TestDeviceLayoutConstraintTracker.Build(),
+			Serilog.Core.Logger.None,
+			TestColors.None);
 
 		_broker = new UiSessionBroker(new WidgetOnlyResolver(() => _widgetProviders),
 			_transport,
 			_registry,
 			new PluginSessionRegistry(_time, Serilog.Core.Logger.None),
-			new StubIntegrationRegistry(),
+			_integrations,
 			_time,
 			Serilog.Core.Logger.None);
 
@@ -64,10 +82,9 @@ internal sealed class WidgetUiSessionTests
 			],
 			() => _broker,
 			Serilog.Core.Logger.None,
-			new UnavailableWidgetUiProvider());
+			new UnavailableWidgetUiProvider(),
+			_profiles);
 
-		_widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
-		_integrations = new StubIntegrationRegistry();
 		_connections = new NoPluginConnections();
 		var availability = new WidgetProviderAvailability(_widgetTypes, _integrations, _connections);
 		_recovery = new UnavailableWidgetSessionRecovery(_registry, availability, _integrations);
@@ -80,7 +97,8 @@ internal sealed class WidgetUiSessionTests
 			_broker,
 			availability,
 			_recovery,
-			TestColors.None);
+			TestColors.None,
+			profiles: _profiles);
 	}
 
 	[TearDown]
@@ -797,8 +815,7 @@ internal sealed class WidgetUiSessionTests
 		using var draft = JsonDocument.Parse("{}");
 
 		var live = opener.Open(new OpenWidgetUiSessionRequest { WidgetId = widget.Id.ToString() }, DeviceA, false);
-		await new HostUiCultureChangedHandler(culture).Handle(
-			new MacroDeckHost.Application.Events.LocalizationCultureChangedNotification("pt-BR", "en"),
+		await new HostUiCultureChangedHandler(culture).Handle(new LocalizationCultureChangedNotification("pt-BR", "en"),
 			CancellationToken.None);
 		var sample = opener.Open(new OpenWidgetUiSessionRequest
 			{
@@ -852,6 +869,106 @@ internal sealed class WidgetUiSessionTests
 			Assert.That(response.Accepted, Is.False);
 			Assert.That(response.Code, Is.EqualTo(UiSessionErrorCodes.ProviderUnavailable));
 		});
+	}
+
+	[Test]
+	public async Task A_virtual_widget_opens_a_session_drawn_from_the_data_its_provider_lists()
+	{
+		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = MixerWidgetId }, DeviceA, false);
+		await ticket.Ready;
+
+		var session = _registry.Find(ticket.SessionId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.True, ticket.Message);
+			Assert.That(session?.Surface.Attributes[UiWidgetSurfaceAttributes.WidgetId].GetString(),
+				Is.EqualTo(MixerWidgetId));
+			Assert.That(session?.Surface.Attributes[UiWidgetSurfaceAttributes.Data].GetProperty("label").GetString(),
+				Is.EqualTo("Spotify"));
+		});
+	}
+
+	[Test]
+	public void A_virtual_widget_its_provider_does_not_list_is_refused()
+	{
+		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = VolumeMixer + "::mixer:page-1:gone" },
+			DeviceA,
+			false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.False);
+			Assert.That(ticket.Code, Is.EqualTo(UiSessionErrorCodes.ProviderUnavailable));
+		});
+	}
+
+	[Test]
+	public async Task Disabling_the_providing_integration_ends_its_virtual_widget_sessions()
+	{
+		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = MixerWidgetId }, DeviceA, false);
+		await ticket.Ready;
+
+		_integrations.SetEnabled(VolumeMixer, false);
+
+		Assert.That(_registry.WasEnded(ticket.SessionId), Is.True);
+	}
+
+	[Test]
+	public async Task Changed_data_rebuilds_the_open_virtual_widget_and_unchanged_data_leaves_it()
+	{
+		var changed = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = MixerWidgetId }, DeviceA, false);
+		var unchanged = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = VolumeMixer + "::mixer:page-1:up-0" },
+			DeviceA,
+			false);
+		await changed.Ready;
+		await unchanged.Ready;
+
+		await new VirtualProfilesChangedHandler(_registry, _widgetProviders).Handle(
+			new VirtualProfilesChangedNotification(VolumeMixer,
+				[MixerProfile("""{"label":"Spotify"}""")],
+				[MixerProfile("""{"label":"Spotify 40%"}""")]),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.WasEnded(changed.SessionId), Is.True);
+			Assert.That(_registry.WasEnded(unchanged.SessionId), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_widget_its_provider_removed_closes_its_session()
+	{
+		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = MixerWidgetId }, DeviceA, false);
+		await ticket.Ready;
+
+		await new VirtualProfilesChangedHandler(_registry, _widgetProviders).Handle(
+			new VirtualProfilesChangedNotification(VolumeMixer,
+				[MixerProfile("""{"label":"Spotify"}""")],
+				[new VirtualProfileDescriptor("mixer", "Mixer", ProfileLayout.Grid(1, 1), [])]),
+			CancellationToken.None);
+
+		Assert.That(_registry.WasEnded(ticket.SessionId), Is.True);
+	}
+
+	private static VirtualProfileDescriptor MixerProfile(string appData)
+	{
+		return new VirtualProfileDescriptor("mixer",
+			"Mixer",
+			ProfileLayout.Grid(2, 1),
+			[
+				new VirtualFolderDescriptor("page-1",
+					"Page 1",
+					[
+						new VirtualWidgetDescriptor("up-0",
+							WidgetTypeIds.ActionButton,
+							0,
+							0,
+							Data: """{"label":"+"}"""),
+						new VirtualWidgetDescriptor("app-0", WidgetTypeIds.ActionButton, 0, 1, Data: appData)
+					])
+			]);
 	}
 
 	private WidgetEntity AddWidget(string type, string? data)
