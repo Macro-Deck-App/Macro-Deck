@@ -67,7 +67,7 @@ internal sealed class SoundPadPipeClient : ISoundPadClient
 
 	public async Task<bool> IsMutedAsync()
 	{
-		return Value(await _soundpad.IsMuted());
+		return SoundPadResponses.Muted(await _soundpad.IsMuted());
 	}
 
 	public async Task<IReadOnlyList<SoundPadSound>> GetSoundsAsync()
@@ -172,6 +172,26 @@ internal sealed class SoundPadPipeClient : ISoundPadClient
 		{
 			throw new SoundPadCommandException("SoundPad rejected the request");
 		}
+	}
+}
+
+internal static class SoundPadResponses
+{
+	// SoundPad answers IsMuted() with 1 or 0, which SoundpadConnector's BooleanResponse only accepts
+	// as true or false, so it reports the answer as a failure with the raw reply as its message.
+	public static bool Muted(BooleanResponse response)
+	{
+		if (response.IsSuccessful)
+		{
+			return response.Value;
+		}
+
+		return response.ErrorMessage?.Trim() switch
+		{
+			"1" => true,
+			"0" => false,
+			_ => throw new SoundPadCommandException(response.ErrorMessage ?? "SoundPad rejected the request")
+		};
 	}
 }
 
