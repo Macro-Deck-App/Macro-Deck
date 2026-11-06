@@ -16489,6 +16489,15 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Obnovovací klíč</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Vytvořit nový obnovovací klíč?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Dříve vytvořené zálohy stále vyžadují dříve uložený obnovovací klíč, proto je třeba jej také uschovat. Nový klíč se zobrazí v dalším kroku.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Vytvořit nový obnovovací klíč</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Vzdálené</value>
   </data>

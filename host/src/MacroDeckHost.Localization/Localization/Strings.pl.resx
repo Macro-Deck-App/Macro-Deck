@@ -16489,6 +16489,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Klucz odzyskiwania</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Utworzyć nowy klucz odzyskiwania?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Wcześniejsze kopie zapasowe nadal wymagają wcześniej zapisanego klucza odzyskiwania, dlatego należy go również zachować. Nowy klucz zostanie wyświetlony w następnym kroku.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Utwórz nowy klucz odzyskiwania</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Zdalna</value>
   </data>

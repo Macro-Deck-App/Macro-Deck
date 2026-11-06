@@ -16490,6 +16490,15 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Kunci pemulihan</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Buat kunci pemulihan baru?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Cadangan yang dibuat sebelumnya tetap memerlukan kunci pemulihan yang disimpan sebelumnya, jadi simpan juga kunci tersebut. Kunci baru ditampilkan berikutnya.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Buat kunci pemulihan baru</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Jarak jauh</value>
   </data>

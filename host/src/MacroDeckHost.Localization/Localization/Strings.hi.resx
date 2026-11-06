@@ -16490,6 +16490,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>रिकवरी कुंजी</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>नई रिकवरी कुंजी बनाएं?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>पहले बने बैकअप के लिए अब भी वही रिकवरी कुंजी चाहिए जो आपने पहले सहेजी थी, इसलिए उसे भी संभालकर रखें। इसके बाद नई कुंजी दिखाई जाएगी।</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>नई रिकवरी कुंजी बनाएं</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>रिमोट</value>
   </data>

@@ -16490,6 +16490,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>恢复密钥</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>要创建新的恢复密钥吗？</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>之前创建的备份仍需要之前保存的恢复密钥，因此也请保留该密钥。接下来会显示新密钥。</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>创建新的恢复密钥</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>远程</value>
   </data>

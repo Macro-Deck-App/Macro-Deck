@@ -111,6 +111,41 @@ describe('RecoveryKeyModalComponent', () => {
     expect(acknowledged).toHaveBeenCalledTimes(1);
     expect(closed).not.toHaveBeenCalled();
   });
+
+  function pressEscape(): void {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    jasmine.clock().tick(150);
+  }
+
+  for (const [label, mode, requireAcknowledgement] of [
+    ['a new key', 'created', false],
+    ['a key that must be confirmed', 'revealed', true],
+  ] as const) {
+    it(`cannot be dismissed without ticking the checkbox for ${label}`, async () => {
+      fixture = await create(mode, requireAcknowledgement);
+      const closed = jasmine.createSpy('closed');
+      fixture.componentInstance.closed.subscribe(closed);
+
+      expect(fixture.nativeElement.querySelector('.modal-close-btn')).toBeNull();
+      pressEscape();
+
+      expect(closed).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelector('.modal-overlay')).not.toBeNull();
+    });
+  }
+
+  it('can still be dismissed when it only shows the key again', async () => {
+    fixture = await create('revealed');
+    const closed = jasmine.createSpy('closed');
+    fixture.componentInstance.closed.subscribe(closed);
+
+    expect(fixture.nativeElement.querySelector('.modal-close-btn')).not.toBeNull();
+    pressEscape();
+
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
   function downloadButton(): HTMLButtonElement {
     return Array.from(fixture.nativeElement.querySelectorAll('shared-button button'))
       .find(el => (el as HTMLElement).textContent?.includes('Download as file')) as HTMLButtonElement;

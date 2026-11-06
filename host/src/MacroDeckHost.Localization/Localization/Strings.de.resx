@@ -16487,6 +16487,15 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Wiederherstellungsschlüssel</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Neuen Wiederherstellungsschlüssel erstellen?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Sicherungen, die vorher erstellt wurden, brauchen weiterhin den Wiederherstellungsschlüssel, den du früher gespeichert hast. Bewahre ihn also ebenfalls auf. Der neue Schlüssel wird als Nächstes angezeigt.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Neuen Wiederherstellungsschlüssel erstellen</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Remote</value>
   </data>

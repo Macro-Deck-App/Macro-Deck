@@ -16490,6 +16490,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>回復キー</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>新しい回復キーを作成しますか？</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>以前に作成したバックアップには、以前に保存した回復キーが引き続き必要です。そのキーも保管してください。次に新しいキーが表示されます。</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>新しい回復キーを作成</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>リモート</value>
   </data>
