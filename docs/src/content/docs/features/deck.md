@@ -21,6 +21,32 @@ move only that client. A folder or profile that no longer exists is ignored.
 
 `GetFolders()` and `GetProfiles()` return what a folder or profile picker should offer.
 
+## Folders
+
+`GetFolders()` lists every folder of every stored profile, sorted by label. Folders of a virtual profile
+that an integration provides are not listed. Each `DeckFolder` also says where it sits in its profile's
+folder tree, so you can walk the folders the way Macro Deck shows them:
+
+| Member | Meaning |
+| --- | --- |
+| `Id` | The id to pass to `ChangeFolderAsync`. |
+| `Label` | What a picker shows. With more than one profile it is prefixed with the profile name. |
+| `ProfileId` | The profile the folder belongs to. |
+| `ParentId` | The folder it is nested in, or `null` for a top-level folder. A parent is always in the same profile. |
+| `Order` | Its place among the folders that share its parent: lower comes first. A sort key, not a contiguous index; equal values are ordered by `Id`. |
+
+```csharp
+// The folders of the profile a client has open, in the order the folder tree shows them.
+IEnumerable<DeckFolder> Tree(IReadOnlyList<DeckFolder> folders, DeckClient client, string? parentId = null)
+{
+	return folders
+		.Where(f => f.ProfileId == client.ProfileId && f.ParentId == parentId)
+		.OrderBy(f => f.Order)
+		.ThenBy(f => f.Id, StringComparer.Ordinal)
+		.SelectMany(f => Tree(folders, client, f.Id).Prepend(f));
+}
+```
+
 ## Where each client is
 
 There is no single "current folder": two devices can show different folders of the same profile.
@@ -99,3 +125,6 @@ In a plugin, client positions arrive with the deck state the host pushes, not as
 `IDeckNavigator` against an older SDK still compiles and loads. Against a host that predates client
 positions, `GetClients()` returns an empty list and `ClientChanged` never fires. The wire format is
 described in the [protocol reference](/reference/protocol/).
+
+`ProfileId`, `ParentId` and `Order` on `DeckFolder` are `null` from a host that predates them. They are
+optional properties, so code that creates a `DeckFolder` with only `Id` and `Label` still compiles.

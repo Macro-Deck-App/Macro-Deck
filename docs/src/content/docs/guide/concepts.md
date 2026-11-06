@@ -33,6 +33,19 @@ listed on the right. A button with **Change Folder to** opens a subfolder, **Go 
 behind it, so with **Device** empty it moves every connected device. Pick a device there to move only
 that one. If it is not connected at that moment, the action reports an error instead of moving the others.
 
+**Next Folder** and **Previous Folder** step through folders without one action per folder, so adding,
+removing or moving a folder needs no changes to them. **Order** decides the sequence:
+
+- **Folder order**: every folder of the profile that is open, as the folder list shows them, each folder
+  followed by its subfolders.
+- **Alphabetical**: every folder of the profile that is open, sorted by name.
+- **Custom**: only the folders ticked under **Folders**, in the order you ticked them. They can belong to
+  different profiles. From a folder that is not in the list, Next goes to the first and Previous to the last.
+
+**Wrap around**, on by default, continues from the last folder to the first and the other way round. With it
+off, nothing happens at either end. They have the same **Device** setting. With **Device** empty, an
+automation moves every connected device one step on from the folder that device has open.
+
 ## Widgets
 
 The tiles in a folder:

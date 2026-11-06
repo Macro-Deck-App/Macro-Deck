@@ -5621,6 +5621,27 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>इस पर प्रोफ़ाइल बदलें</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>जिन फ़ोल्डरों से होकर जाना है, उसी क्रम में जिसमें आप उन्हें चुनते हैं।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>वर्णानुक्रम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>कस्टम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>फ़ोल्डर क्रम और वर्णानुक्रम खुली प्रोफ़ाइल के सभी फ़ोल्डरों से होकर जाते हैं। कस्टम केवल आपके चुने फ़ोल्डरों से होकर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>फ़ोल्डर क्रम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>क्रम</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>वैकल्पिक। केवल यह डिवाइस नेविगेट करेगा। जिस डिवाइस ने क्रिया चलाई, उसी को नेविगेट करने के लिए खाली छोड़ें, या कोई न चलाए तो सभी डिवाइस।</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>पैरेंट फ़ोल्डर पर जाएं</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>चुने गए क्रम में अगले फ़ोल्डर पर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>अगला फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>चुने गए क्रम में पिछले फ़ोल्डर पर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>पिछला फ़ोल्डर</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>जिस प्रोफ़ाइल पर स्विच करना है।</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>प्रोफ़ाइल</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>आखिरी फ़ोल्डर के बाद पहला और पहले से पहले आखिरी फ़ोल्डर आता है। बंद होने पर दोनों सिरों पर कुछ नहीं होता।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>चक्र में दोहराएँ</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>डिवाइस '{deviceId}' कनेक्ट नहीं है।</value>
@@ -5668,6 +5707,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>कोई प्रोफ़ाइल चुनी नहीं गई थी।</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>खुला फ़ोल्डर नहीं मिला।</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>प्रोफ़ाइल '{profileId}' मौजूद नहीं है।</value>

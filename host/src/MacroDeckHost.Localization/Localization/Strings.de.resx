@@ -5619,6 +5619,27 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Profil wechseln zu</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Die Ordner, die durchlaufen werden, in der Reihenfolge, in der du sie auswählst.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Ordner</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alphabetisch</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Benutzerdefiniert</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Ordnerreihenfolge und Alphabetisch gehen alle Ordner des geöffneten Profils durch. Benutzerdefiniert geht die Ordner durch, die du auswählst.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Ordnerreihenfolge</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Reihenfolge</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Optional. Nur dieses Gerät navigiert. Leer lassen, um das Gerät zu steuern, das die Aktion ausgelöst hat, oder alle Geräte, wenn keines sie ausgelöst hat.</value>
   </data>
@@ -5646,11 +5667,29 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Zum übergeordneten Ordner wechseln</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Wechselt zum nächsten Ordner in der gewählten Reihenfolge.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Nächster Ordner</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Wechselt zum vorherigen Ordner in der gewählten Reihenfolge.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Vorheriger Ordner</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Das Profil, zu dem gewechselt werden soll.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Nach dem letzten Ordner geht es mit dem ersten weiter und vor dem ersten mit dem letzten. Ist es aus, passiert an beiden Enden nichts.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Endlos durchlaufen</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Das Gerät '{deviceId}' ist nicht verbunden.</value>
@@ -5666,6 +5705,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Es wurde kein Profil ausgewählt.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Der geöffnete Ordner wurde nicht gefunden.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Das Profil '{profileId}' existiert nicht.</value>
