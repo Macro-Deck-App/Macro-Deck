@@ -5620,6 +5620,27 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Zmień profil na</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Foldery do przejścia, w kolejności, w jakiej zostały wybrane.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Foldery</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabetycznie</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Niestandardowa</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Kolejność folderów i Alfabetycznie przechodzą przez wszystkie foldery otwartego profilu. Niestandardowa przechodzi przez wybrane foldery.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Kolejność folderów</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Kolejność</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Opcjonalne. Nawiguje tylko to urządzenie. Puste pole oznacza urządzenie, które uruchomiło akcję, a gdy żadne jej nie uruchomiło, wszystkie urządzenia.</value>
   </data>
@@ -5647,11 +5668,29 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Przejdź do folderu nadrzędnego</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Przełącza na następny folder w wybranej kolejności.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Następny folder</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Przełącza na poprzedni folder w wybranej kolejności.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Poprzedni folder</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Profil, na który ma nastąpić przełączenie.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Po ostatnim folderze następuje pierwszy, a przed pierwszym ostatni. Po wyłączeniu na obu końcach nic się nie dzieje.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Zapętlaj</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Urządzenie „{deviceId}” nie jest połączone.</value>
@@ -5667,6 +5706,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Nie wybrano żadnego profilu.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Nie znaleziono otwartego folderu.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Profil „{profileId}” nie istnieje.</value>

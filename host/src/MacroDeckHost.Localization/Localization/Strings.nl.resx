@@ -5621,6 +5621,27 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Profiel wijzigen naar</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>De mappen om doorheen te gaan, in de volgorde waarin je ze kiest.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Mappen</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabetisch</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Aangepast</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Mapvolgorde en Alfabetisch gaan door alle mappen van het geopende profiel. Aangepast gaat door de mappen die je kiest.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Mapvolgorde</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Volgorde</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Optioneel. Alleen dit apparaat navigeert. Laat leeg om het apparaat dat de actie uitvoerde te laten navigeren, of alle apparaten als er geen enkel apparaat was dat de actie uitvoerde.</value>
   </data>
@@ -5648,11 +5669,29 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Naar bovenliggende map</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Gaat naar de volgende map in de gekozen volgorde.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Volgende map</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Gaat naar de vorige map in de gekozen volgorde.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Vorige map</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Het profiel waarnaar je wilt schakelen.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profiel</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Na de laatste map volgt de eerste en vóór de eerste de laatste. Als dit uit staat, gebeurt er aan beide uiteinden niets.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Doorlopen</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Het apparaat '{deviceId}' is niet verbonden.</value>
@@ -5668,6 +5707,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Er is geen profiel geselecteerd.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>De geopende map is niet gevonden.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Het profiel '{profileId}' bestaat niet.</value>

@@ -5621,6 +5621,27 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>プロファイルを次に変更</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>巡回するフォルダーです。選択した順に切り替わります。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>フォルダー</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>アルファベット順</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>「フォルダーの順序」と「アルファベット順」は、開いているプロファイルのすべてのフォルダーを巡回します。「カスタム」は選択したフォルダーだけを巡回します。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>フォルダーの順序</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>順序</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>任意。このデバイスのみがナビゲートします。空欄の場合は、アクションを実行したデバイスがナビゲートします。アクションを実行したデバイスがない場合は、すべてのデバイスがナビゲートします。</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>親フォルダーへ移動</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>選択した順序で次のフォルダーに切り替えます。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>次のフォルダー</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>選択した順序で前のフォルダーに切り替えます。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>前のフォルダー</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>切り替え先のプロファイルです。</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>プロファイル</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>最後のフォルダーの次は最初に、最初のフォルダーの前は最後に戻ります。オフの場合、両端では何も起こりません。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>ループ</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>デバイス「{deviceId}」は接続されていません。</value>
@@ -5668,6 +5707,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>プロファイルが選択されていません。</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>開いているフォルダーが見つかりません。</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>プロファイル「{profileId}」は存在しません。</value>

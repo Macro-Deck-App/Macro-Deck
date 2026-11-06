@@ -5621,6 +5621,27 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Перейти к профилю</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Папки для перехода, в том порядке, в котором они выбраны.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Папки</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>По алфавиту</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Пользовательский</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>«Порядок папок» и «По алфавиту» проходят все папки открытого профиля. «Пользовательский» проходит выбранные папки.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Порядок папок</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Порядок</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Необязательно. Переходить будет только это устройство. Оставьте пустым, чтобы переходило устройство, которое запустило действие, или все устройства, если такого не было.</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Перейти к родительской папке</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Переходит к следующей папке в выбранном порядке.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Следующая папка</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Переходит к предыдущей папке в выбранном порядке.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Предыдущая папка</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Профиль, на который нужно переключиться.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Профиль</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>После последней папки следует первая, а перед первой — последняя. Если выключено, на концах ничего не происходит.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Зациклить</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Устройство '{deviceId}' не подключено.</value>
@@ -5668,6 +5707,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Профиль не выбран.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Открытая папка не найдена.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Профиль '{profileId}' не существует.</value>
