@@ -11919,6 +11919,66 @@
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>معرّف حزمة التطبيق النشط</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>تطبيق مراقَب</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>يعرض Macro Deck ما إذا كان هذا التطبيق قيد التشغيل، وعدد عملياته ونوافذه، وكيفية عرض نوافذه.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>لعبة</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>التطبيق</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>عملية قيد التشغيل، مثل chrome، أو مسار البرنامج.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>أدخل اسمًا لهذا التطبيق.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>اختر تطبيقًا قيد التشغيل أو أدخل مسار برنامج.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>الحد الأقصى للتطبيقات المراقَبة: {count}. أزل تطبيقًا لإضافة آخر.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>تعذر إنشاء اسم متغير فريد. أعد تسمية التطبيق ثم حاول مرة أخرى.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>خطوة إعداد غير معروفة.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>قيد التشغيل</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>العمليات قيد التشغيل</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>النوافذ المفتوحة</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>حالة النافذة</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>حالة نافذة التطبيق النشط</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>عمليات التطبيق النشط</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>حالات النوافذ غير متاحة</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>لا يسمح Wayland لـ Macro Deck بقراءة نوافذ التطبيقات الأخرى. تواصل التطبيقات المراقَبة الإبلاغ عمّا إذا كانت قيد التشغيل وعن عدد عملياتها، لكن حالة نوافذها وعددها تبقى غير متاحة.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>يحتاج Macro Deck إلى إذن إمكانية الوصول لقراءة حالات النوافذ. امنح Macro Deck الإذن من إعدادات النظام ← الخصوصية والأمان ← إمكانية الوصول. وحتى ذلك الحين، تبقى حالة نوافذ التطبيقات المراقَبة وعددها غير متاحة.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>امنح الإذن</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>الحساب المتصل بـ Twitch الذي سيُنفَّذ الإجراء باسمه.</value>
   </data>

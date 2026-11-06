@@ -11916,6 +11916,66 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Bundle-ID der fokussierten Anwendung</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Überwachte Anwendung</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck meldet, ob diese Anwendung läuft, wie viele Prozesse und Fenster sie hat und wie ihre Fenster angezeigt werden.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Spiel</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Anwendung</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Ein laufender Prozess wie chrome oder der Pfad zum Programm.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Gib einen Namen für diese Anwendung ein.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Wähle eine laufende Anwendung oder gib den Pfad zu einem Programm ein.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck überwacht bis zu {count} Anwendungen. Entferne eine, um eine weitere hinzuzufügen.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Es konnte kein eindeutiger Variablenname erstellt werden. Benenne die Anwendung um und versuche es erneut.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Unbekannter Einrichtungsschritt.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Läuft</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Laufende Prozesse</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Offene Fenster</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Fensterzustand</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Fensterzustand der fokussierten Anwendung</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Prozesse der fokussierten Anwendung</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Fensterzustände sind nicht verfügbar</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Unter Wayland kann Macro Deck die Fenster anderer Apps nicht lesen. Überwachte Anwendungen melden weiterhin, ob sie laufen und wie viele Prozesse sie haben, aber Fensterzustand und Fensteranzahl bleiben nicht verfügbar.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck benötigt die Bedienungshilfen-Berechtigung, um Fensterzustände zu lesen. Erlaube Macro Deck unter Systemeinstellungen &gt; Datenschutz &amp; Sicherheit &gt; Bedienungshilfen. Bis dahin bleiben Fensterzustand und Fensteranzahl überwachter Anwendungen nicht verfügbar.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Zugriff erteilen</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Als welches verbundene Twitch-Konto agiert werden soll.</value>
   </data>

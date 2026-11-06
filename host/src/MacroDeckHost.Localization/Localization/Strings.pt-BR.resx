@@ -11919,6 +11919,66 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>ID do bundle do aplicativo em foco</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Aplicativo monitorado</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>O Macro Deck informa se este aplicativo está em execução, quantos processos e janelas ele tem e como suas janelas são exibidas.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Jogo</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplicativo</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Um processo em execução, como chrome, ou o caminho do programa.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Digite um nome para este aplicativo.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Selecione um aplicativo em execução ou digite o caminho de um programa.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Número máximo de aplicativos monitorados: {count}. Remova um para adicionar outro.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Não foi possível criar um nome de variável exclusivo. Renomeie o aplicativo e tente novamente.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Etapa de configuração desconhecida.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Em execução</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Processos em execução</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Janelas abertas</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Estado da janela</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Estado da janela do aplicativo em foco</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Processos do aplicativo em foco</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Estados das janelas indisponíveis</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>O Wayland não permite que o Macro Deck leia as janelas de outros apps. Os aplicativos monitorados continuam informando se estão em execução e quantos processos têm, mas o estado e o número de janelas continuam indisponíveis.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>O Macro Deck precisa de acesso de Acessibilidade para ler o estado das janelas. Aprove o Macro Deck em Ajustes do Sistema &gt; Privacidade e Segurança &gt; Acessibilidade. Até lá, o estado e o número de janelas dos aplicativos monitorados continuam indisponíveis.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Conceder acesso</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Qual conta conectada da Twitch atuará.</value>
   </data>

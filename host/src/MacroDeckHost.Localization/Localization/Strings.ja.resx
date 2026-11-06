@@ -11919,6 +11919,66 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>フォーカス中のアプリケーションのバンドル ID</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>監視対象のアプリケーション</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck は、このアプリケーションが実行中かどうか、プロセスとウィンドウの数、ウィンドウの表示状態を報告します。</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>ゲーム</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>アプリケーション</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>chrome などの実行中のプロセス、またはプログラムのパスです。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>このアプリケーションの名前を入力してください。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>実行中のアプリケーションを選択するか、プログラムのパスを入力してください。</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck で監視できるアプリケーションは最大 {count} 個です。追加するには、いずれかを削除してください。</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>一意の変数名を作成できませんでした。アプリケーションの名前を変更してもう一度お試しください。</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定ステップです。</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>実行中</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>実行中のプロセス</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>開いているウィンドウ</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>ウィンドウの状態</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>フォーカス中のアプリケーションのウィンドウの状態</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>フォーカス中のアプリケーションのプロセス</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>ウィンドウの状態を取得できません</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland では、Macro Deck が他のアプリのウィンドウを読み取ることはできません。監視対象のアプリケーションは引き続き実行中かどうかとプロセス数を報告しますが、ウィンドウの状態とウィンドウ数は取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>ウィンドウの状態を読み取るには、Macro Deck にアクセシビリティへのアクセスが必要です。システム設定 &gt; プライバシーとセキュリティ &gt; アクセシビリティ で Macro Deck を許可してください。許可されるまで、監視対象のアプリケーションのウィンドウの状態とウィンドウ数は取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>アクセスを許可</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>操作に使う、接続済みの Twitch アカウントです。</value>
   </data>

@@ -11919,6 +11919,66 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>फ़ोकस वाले एप्लिकेशन का bundle ID</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>निगरानी वाला एप्लिकेशन</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck बताता है कि यह एप्लिकेशन चल रहा है या नहीं, इसकी कितनी प्रक्रियाएँ और विंडो हैं, और इसकी विंडो कैसे दिखाई जाती हैं।</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>गेम</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>एप्लिकेशन</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>चल रही कोई प्रक्रिया, जैसे chrome, या प्रोग्राम का पथ।</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>इस एप्लिकेशन के लिए एक नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>चल रहा कोई एप्लिकेशन चुनें या किसी प्रोग्राम का पथ दर्ज करें।</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>निगरानी वाले एप्लिकेशन की अधिकतम संख्या: {count}। दूसरा जोड़ने के लिए एक हटाएँ।</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>एक अद्वितीय वेरिएबल नाम नहीं बनाया जा सका। एप्लिकेशन का नाम बदलें और फिर से प्रयास करें।</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>अज्ञात सेटअप चरण।</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>चल रहा है</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>चल रही प्रक्रियाएँ</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>खुली विंडो</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>विंडो स्थिति</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>फ़ोकस वाले एप्लिकेशन की विंडो स्थिति</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>फ़ोकस वाले एप्लिकेशन की प्रक्रियाएँ</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>विंडो स्थितियाँ उपलब्ध नहीं हैं</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland, Macro Deck को अन्य ऐप्स की विंडो पढ़ने नहीं देता। निगरानी वाले एप्लिकेशन अब भी बताते हैं कि वे चल रहे हैं या नहीं और उनकी कितनी प्रक्रियाएँ हैं, लेकिन उनकी विंडो स्थिति और विंडो संख्या उपलब्ध नहीं रहती।</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>विंडो स्थितियाँ पढ़ने के लिए Macro Deck को Accessibility एक्सेस चाहिए। System Settings &gt; Privacy &amp; Security &gt; Accessibility में Macro Deck को अनुमति दें। तब तक निगरानी वाले एप्लिकेशन की विंडो स्थिति और विंडो संख्या उपलब्ध नहीं रहेगी।</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>एक्सेस दें</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>किस जुड़े हुए Twitch खाते की ओर से क्रिया करनी है।</value>
   </data>

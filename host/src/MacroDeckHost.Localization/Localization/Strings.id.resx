@@ -11919,6 +11919,66 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>ID bundle aplikasi yang difokuskan</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Aplikasi yang dipantau</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck melaporkan apakah aplikasi ini berjalan, berapa banyak proses dan jendela yang dimilikinya, serta bagaimana jendelanya ditampilkan.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplikasi</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Proses yang sedang berjalan, seperti chrome, atau jalur ke program.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Masukkan nama untuk aplikasi ini.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Pilih aplikasi yang sedang berjalan atau masukkan jalur ke program.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck memantau hingga {count} aplikasi. Hapus satu untuk menambahkan yang lain.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Nama variabel yang unik tidak dapat dibuat. Ganti nama aplikasi lalu coba lagi.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Langkah penyiapan tidak dikenal.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Berjalan</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Proses yang berjalan</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Jendela yang terbuka</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Status jendela</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Status jendela aplikasi yang difokuskan</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Proses aplikasi yang difokuskan</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Status jendela tidak tersedia</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland tidak mengizinkan Macro Deck membaca jendela aplikasi lain. Aplikasi yang dipantau tetap melaporkan apakah aplikasi tersebut berjalan dan berapa banyak prosesnya, tetapi status dan jumlah jendelanya tetap tidak tersedia.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck memerlukan akses Aksesibilitas untuk membaca status jendela. Izinkan Macro Deck di Pengaturan Sistem &gt; Privasi &amp; Keamanan &gt; Aksesibilitas. Sampai saat itu, status dan jumlah jendela aplikasi yang dipantau tetap tidak tersedia.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Berikan akses</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Akun Twitch yang terhubung mana yang akan bertindak.</value>
   </data>
