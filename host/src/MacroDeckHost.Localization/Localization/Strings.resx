@@ -16553,6 +16553,15 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Recovery key</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Create a new recovery key?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Backups made before still need the recovery key you saved earlier, so keep that key too. The new key is shown next.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Create new recovery key</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Remote</value>
   </data>

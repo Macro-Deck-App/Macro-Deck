@@ -16550,6 +16550,15 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>復原金鑰</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>要建立新的復原金鑰嗎？</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>先前建立的備份仍需要先前儲存的復原金鑰，因此也請保留該金鑰。接下來會顯示新金鑰。</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>建立新的復原金鑰</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>遠端</value>
   </data>

@@ -16549,6 +16549,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Clave de recuperación</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>¿Crear una nueva clave de recuperación?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Las copias de seguridad anteriores siguen necesitando la clave de recuperación que guardaste antes, así que consérvala también. A continuación se muestra la nueva clave.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Crear nueva clave de recuperación</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Remoto</value>
   </data>

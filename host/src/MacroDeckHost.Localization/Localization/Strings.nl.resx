@@ -16550,6 +16550,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Herstelsleutel</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Nieuwe herstelsleutel maken?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Eerder gemaakte back-ups hebben nog steeds de herstelsleutel nodig die je eerder hebt opgeslagen, dus bewaar die ook. De nieuwe sleutel wordt hierna getoond.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Nieuwe herstelsleutel maken</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Extern</value>
   </data>

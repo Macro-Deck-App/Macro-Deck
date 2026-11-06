@@ -16550,6 +16550,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Ключ відновлення</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Створити новий ключ відновлення?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Для створених раніше резервних копій і далі потрібен збережений раніше ключ відновлення, тому збережіть і його. Новий ключ буде показано далі.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Створити новий ключ відновлення</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Віддалена</value>
   </data>

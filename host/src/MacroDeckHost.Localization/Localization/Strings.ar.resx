@@ -16550,6 +16550,15 @@
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>مفتاح الاستعادة</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>هل تريد إنشاء مفتاح استعادة جديد؟</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>لا تزال النسخ الاحتياطية السابقة تحتاج إلى مفتاح الاستعادة الذي حفظته من قبل، لذا احتفظ به أيضًا. سيُعرض المفتاح الجديد بعد ذلك.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>إنشاء مفتاح استعادة جديد</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>عن بُعد</value>
   </data>

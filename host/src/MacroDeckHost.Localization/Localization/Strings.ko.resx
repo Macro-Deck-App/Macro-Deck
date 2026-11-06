@@ -16550,6 +16550,15 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>복구 키</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>새 복구 키를 만드시겠습니까?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>이전에 만든 백업에는 앞서 저장한 복구 키가 계속 필요하므로 그 키도 보관하세요. 다음 단계에서 새 키가 표시됩니다.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>새 복구 키 만들기</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>원격</value>
   </data>

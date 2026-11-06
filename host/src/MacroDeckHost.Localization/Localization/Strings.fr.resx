@@ -16549,6 +16549,15 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Clé de récupération</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Créer une nouvelle clé de récupération ?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Les sauvegardes créées auparavant ont toujours besoin de la clé de récupération que tu as enregistrée, alors conserve-la aussi. La nouvelle clé s'affiche ensuite.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Créer une nouvelle clé de récupération</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Distante</value>
   </data>

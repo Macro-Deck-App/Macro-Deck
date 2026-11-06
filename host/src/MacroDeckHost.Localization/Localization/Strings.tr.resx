@@ -16550,6 +16550,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Kurtarma anahtarı</value>
   </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Yeni bir kurtarma anahtarı oluşturulsun mu?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Daha önce alınan yedekler, daha önce kaydettiğiniz kurtarma anahtarına hâlâ ihtiyaç duyar; bu yüzden o anahtarı da saklayın. Yeni anahtar ardından gösterilir.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Yeni kurtarma anahtarı oluştur</value>
+  </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Uzak</value>
   </data>
