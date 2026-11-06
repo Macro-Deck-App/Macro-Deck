@@ -11919,6 +11919,66 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>获得焦点的应用程序包 ID</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>受监视的应用程序</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck 会报告此应用程序是否正在运行、有多少进程和窗口，以及其窗口的显示方式。</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>游戏</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>应用程序</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>正在运行的进程（例如 chrome），或程序的路径。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>请输入此应用程序的名称。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>请选择正在运行的应用程序，或输入程序的路径。</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck 最多可监视 {count} 个应用程序。请移除一个后再添加。</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>无法创建唯一的变量名称。请重命名应用程序后重试。</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>未知的设置步骤。</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>正在运行</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>正在运行的进程</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>打开的窗口</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>窗口状态</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>获得焦点的应用程序窗口状态</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>获得焦点的应用程序进程</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>窗口状态不可用</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland 不允许 Macro Deck 读取其他应用的窗口。受监视的应用程序仍会报告是否正在运行以及进程数量，但其窗口状态和窗口数量仍不可用。</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck 需要辅助功能权限才能读取窗口状态。请在“系统设置 &gt; 隐私与安全性 &gt; 辅助功能”中允许 Macro Deck。在此之前，受监视的应用程序的窗口状态和窗口数量仍不可用。</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>授予权限</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>以哪个已连接的 Twitch 账户执行操作。</value>
   </data>

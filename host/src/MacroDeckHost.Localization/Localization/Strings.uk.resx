@@ -11919,6 +11919,66 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Ідентифікатор пакета застосунку у фокусі</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Відстежуваний застосунок</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck повідомляє, чи запущено цей застосунок, скільки в нього процесів і вікон і як відображаються його вікна.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Гра</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Застосунок</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Запущений процес, наприклад chrome, або шлях до програми.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Введіть назву цього застосунку.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Виберіть запущений застосунок або введіть шлях до програми.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Максимальна кількість відстежуваних застосунків: {count}. Видаліть один, щоб додати інший.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Не вдалося створити унікальну назву змінної. Перейменуйте застосунок і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Невідомий крок налаштування.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Запущено</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Запущені процеси</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Відкриті вікна</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Стан вікна</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Стан вікна застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Процеси застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Стани вікон недоступні</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland не дозволяє Macro Deck читати вікна інших застосунків. Відстежувані застосунки й далі повідомляють, чи запущені вони та скільки в них процесів, але стан і кількість їхніх вікон залишаються недоступними.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Для зчитування станів вікон Macro Deck потрібен дозвіл «Універсальний доступ». Дозвольте Macro Deck у розділі «Системні параметри» &gt; «Конфіденційність і безпека» &gt; «Універсальний доступ». До того часу стан і кількість вікон відстежуваних застосунків залишаються недоступними.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Надати доступ</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Від імені якого підключеного облікового запису Twitch діяти.</value>
   </data>

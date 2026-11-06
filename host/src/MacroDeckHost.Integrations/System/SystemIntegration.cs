@@ -1,12 +1,14 @@
 using System.Globalization;
 using System.Threading.Channels;
 using MacroDeckHost.Integrations.System.Actions;
+using MacroDeckHost.Integrations.System.Configuration;
 using MacroDeckHost.Integrations.System.Migration;
 using MacroDeckHost.Integrations.System.State;
 using MacroDeckHost.Integrations.System.Variables;
 using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Platform.Focus;
 using MacroDeckHost.Platform.Lock;
+using MacroDeckHost.Platform.Native;
 using MacroDeckHost.Integrations.System.Metrics;
 using MacroDeckHost.Integrations.System.Power;
 using MacroDeckHost.Integrations.System.Providers;
@@ -16,6 +18,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Batteries;
+using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Issues;
 using MacroDeck.Sdk.Logging;
 using MacroDeck.Sdk.Migration;
@@ -26,9 +29,11 @@ using Serilog;
 namespace MacroDeckHost.Integrations.System;
 
 [MacroDeckIntegration]
-public sealed class SystemIntegration
+public sealed partial class SystemIntegration
 	: IIntegration,
 		IVariableProvider,
+		IConfigFlowProvider,
+		IConfigEntryLifecycle,
 		IIntegrationIssueProvider,
 		IIntegrationIconProvider,
 		IMigrationProvider,
@@ -43,6 +48,7 @@ public sealed class SystemIntegration
 	private const string NotificationsIssueId = "notifications-unavailable";
 	private const string GpuMetricsIssueId = "gpu-metrics-unavailable";
 	private const string PowerIssueId = "power-control-unavailable";
+	private const string WindowStateIssueId = "window-state-unavailable";
 
 	private const double BytesPerGigabyte = 1024d * 1024d * 1024d;
 
@@ -55,6 +61,7 @@ public sealed class SystemIntegration
 	private const string InputMutedId = "system-input-muted";
 
 	private static readonly TimeSpan _discoveryInterval = TimeSpan.FromSeconds(5);
+	private static readonly TimeSpan _applicationSampleInterval = TimeSpan.FromSeconds(2);
 
 	private const int MaxIndexedGpus = 8;
 
@@ -86,6 +93,20 @@ public sealed class SystemIntegration
 				DisplayName = AppStrings.Integrations.System.Variables.FocusedAppBundleId()
 			};
 
+	private static readonly VariableDefinition _focusedAppWindowStateVariable =
+		VariableDefinition.Eager("system_focused_app_window_state", VariableType.Text)
+			with
+			{
+				DisplayName = AppStrings.Integrations.System.Variables.FocusedAppWindowState()
+			};
+
+	private static readonly VariableDefinition _focusedAppInstancesVariable =
+		VariableDefinition.Eager("system_focused_app_instances", VariableType.Numeric, 0)
+			with
+			{
+				DisplayName = AppStrings.Integrations.System.Variables.FocusedAppInstances()
+			};
+
 	private readonly IApplicationService _applications;
 	private readonly IVolumeService _volume;
 	private readonly ISystemMetricsService _metrics;
@@ -96,8 +117,17 @@ public sealed class SystemIntegration
 	private readonly NotificationServiceAccessor _notificationServiceAccessor = new();
 	private readonly DesktopNotifierAccessor _desktopNotifierAccessor = new();
 	private readonly SystemBatteryProvider _batteries;
+	private readonly ApplicationSampler _applicationSampler;
 
-	private Channel<FocusedAppInfo?>? _focusChannel;
+	private IIntegrationContext? _context;
+	private volatile List<WatchedApplication> _watched = [];
+	private volatile ApplicationSamples _applicationSamples = ApplicationSamples.Empty;
+	private volatile FocusedAppInfo? _latestFocus;
+	private volatile ApplicationSample? _writtenFocusSample;
+	private CancellationTokenSource? _applicationSampleCancellation;
+	private Task? _applicationSampleLoop;
+
+	private Channel<bool>? _focusChannel;
 	private Task? _focusWriterLoop;
 	private IFocusedApplicationWatcher? _focusWatcher;
 	private CancellationTokenSource? _focusCancellation;
@@ -105,6 +135,8 @@ public sealed class SystemIntegration
 	private VariableHandle? _focusedAppHandle;
 	private VariableHandle? _focusedAppPathHandle;
 	private VariableHandle? _focusedAppBundleIdHandle;
+	private VariableHandle? _focusedAppWindowStateHandle;
+	private VariableHandle? _focusedAppInstancesHandle;
 
 	private readonly IReadOnlyList<VariableDefinition> _fixedVariables;
 	private readonly Lock _refreshLock = new();
@@ -125,7 +157,9 @@ public sealed class SystemIntegration
 			PowerServiceFactory.Create(),
 			LockStateReaderFactory.Create(),
 			FocusedApplicationWatcherFactory.Create,
-			HostBatteryReaderFactory.Create())
+			HostBatteryReaderFactory.Create(),
+			new ProcessSnapshotSource(),
+			ApplicationWindowReaderFactory.Create())
 	{
 	}
 
@@ -137,7 +171,9 @@ public sealed class SystemIntegration
 		IPowerService power,
 		ILockStateReader? lockStateReader = null,
 		Func<IFocusedApplicationWatcher>? focusWatcherFactory = null,
-		IHostBatteryReader? batteryReader = null)
+		IHostBatteryReader? batteryReader = null,
+		IProcessSnapshotSource? processSnapshots = null,
+		IApplicationWindowReader? windowReader = null)
 	{
 		_applications = applications;
 		_volume = volume;
@@ -148,6 +184,8 @@ public sealed class SystemIntegration
 		_batteries = new SystemBatteryProvider(batteryReader ?? new NullHostBatteryReader(),
 			TimeProvider.System,
 			Environment.MachineName);
+		_applicationSampler = new ApplicationSampler(processSnapshots ?? new ProcessSnapshotSource(),
+			windowReader ?? new NullApplicationWindowReader());
 
 		_fixedVariables = BuildVariables(_metrics.GpuCount);
 		_audio = new AudioState([], new HashSet<string>(StringComparer.Ordinal), null);
@@ -203,11 +241,21 @@ public sealed class SystemIntegration
 	public void Dispose()
 	{
 		_batteries.Dispose();
+		_applicationSampler.Dispose();
 	}
 
 	public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new WindowsUtilsMacroDeck2Migration()];
 
 	public IReadOnlyList<VariableDefinition> Variables => _variables;
+
+	public bool AllowsMultipleConfigurations => true;
+
+	public bool RequiresConfiguration => false;
+
+	public IConfigFlow CreateConfigFlow()
+	{
+		return new SystemConfigFlow();
+	}
 
 	private static IReadOnlyList<VariableDefinition> BuildVariables(int gpuCount)
 	{
@@ -357,7 +405,10 @@ public sealed class SystemIntegration
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
 		await StopDiscoveryAsync();
+		await StopApplicationSamplingAsync();
 		await StopFocusWatcherAsync();
+
+		_context = context;
 
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
@@ -370,8 +421,12 @@ public sealed class SystemIntegration
 		_focusedAppHandle = null;
 		_focusedAppPathHandle = null;
 		_focusedAppBundleIdHandle = null;
+		_focusedAppWindowStateHandle = null;
+		_focusedAppInstancesHandle = null;
+		_latestFocus = null;
+		_writtenFocusSample = null;
 
-		var channel = Channel.CreateBounded<FocusedAppInfo?>(new BoundedChannelOptions(1)
+		var channel = Channel.CreateBounded<bool>(new BoundedChannelOptions(1)
 		{
 			FullMode = BoundedChannelFullMode.DropOldest,
 			SingleReader = true
@@ -380,13 +435,15 @@ public sealed class SystemIntegration
 
 		_focusWriterLoop = Task.Run(() => RunFocusWriterLoopAsync(channel.Reader));
 		// Creates the variables from startup even where no focus watcher is supported.
-		channel.Writer.TryWrite(null);
+		channel.Writer.TryWrite(true);
 
 		var watcher = _createFocusWatcher();
 		var focusCancellation = new CancellationTokenSource();
 		_focusWatcher = watcher;
 		_focusCancellation = focusCancellation;
 		_focusReaderLoop = Task.Run(() => RunFocusReaderLoopAsync(watcher, channel.Writer, focusCancellation.Token));
+
+		await LoadWatchedApplicationsAsync(CancellationToken.None);
 
 		await LoadKnownAudioDevicesAsync(context.Storage);
 		// IsInitialized is always true, so the poller may already have registered the fixed list; the
@@ -397,11 +454,16 @@ public sealed class SystemIntegration
 		var cancellation = new CancellationTokenSource();
 		_discoveryCancellation = cancellation;
 		_discoveryLoop = Task.Run(() => RunDiscoveryLoopAsync(cancellation.Token));
+
+		var sampleCancellation = new CancellationTokenSource();
+		_applicationSampleCancellation = sampleCancellation;
+		_applicationSampleLoop = Task.Run(() => RunApplicationSampleLoopAsync(sampleCancellation.Token));
 	}
 
 	public async Task ShutdownAsync()
 	{
 		await StopDiscoveryAsync();
+		await StopApplicationSamplingAsync();
 		_volume.Changed -= OnVolumeChanged;
 		await StopFocusWatcherAsync();
 	}
@@ -434,9 +496,9 @@ public sealed class SystemIntegration
 		_focusWriterLoop = null;
 	}
 
-	private static async Task RunFocusReaderLoopAsync(
+	private async Task RunFocusReaderLoopAsync(
 		IFocusedApplicationWatcher watcher,
-		ChannelWriter<FocusedAppInfo?> writer,
+		ChannelWriter<bool> writer,
 		CancellationToken cancellationToken)
 	{
 		if (!watcher.IsSupported)
@@ -448,7 +510,8 @@ public sealed class SystemIntegration
 		{
 			await foreach (var info in watcher.WatchAsync(cancellationToken))
 			{
-				writer.TryWrite(info);
+				_latestFocus = info;
+				writer.TryWrite(true);
 			}
 		}
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -658,14 +721,16 @@ public sealed class SystemIntegration
 		RequestDefinitionRefresh(moved);
 	}
 
-	// Disks come before audio devices so that a remembered-device list loaded over its cap is what the
-	// host trims at the eager variable limit, never a disk.
+	// Disks and watched applications come before audio devices so that a remembered-device list loaded
+	// over its cap is what the host trims at the eager variable limit, never a disk or an application.
 	private void ComposeVariables()
 	{
 		_variables =
 		[
 			.. _fixedVariables,
 			.. Enumerable.Range(0, _diskSlots.Count).SelectMany(DiskVariables.Declare),
+			.. _watched.SelectMany(application
+				=> ApplicationVariables.Declare(application.Key, application.EntryId, application.Title)),
 			.. _audio.Known.SelectMany(AudioDeviceVariables.Declare)
 		];
 	}
@@ -732,17 +797,33 @@ public sealed class SystemIntegration
 		HashSet<string> Present,
 		string? DefaultOutputId);
 
-	// One consumer on a capacity-1 drop-oldest channel serialises the async variable writes, so rapid
-	// alt-tabbing can never race and leave a stale value.
-	private async Task RunFocusWriterLoopAsync(ChannelReader<FocusedAppInfo?> reader)
+	// One consumer on a capacity-1 drop-oldest channel serialises the async variable writes, and it always
+	// writes the latest focus, so rapid alt-tabbing or a sampler signal can never leave a stale value.
+	private async Task RunFocusWriterLoopAsync(ChannelReader<bool> reader)
 	{
-		await foreach (var info in reader.ReadAllAsync())
+		await foreach (var _ in reader.ReadAllAsync())
 		{
-			await WriteFocusVariablesAsync(info);
+			var info = _latestFocus;
+			var sample = info is null ? null : SampleFocus(info);
+			await WriteFocusVariablesAsync(info, sample);
+			_writtenFocusSample = sample;
 		}
 	}
 
-	private async Task WriteFocusVariablesAsync(FocusedAppInfo? info)
+	private ApplicationSample? SampleFocus(FocusedAppInfo info)
+	{
+		try
+		{
+			return _applicationSampler.Sample([], info).Focused;
+		}
+		catch (Exception ex) when (ex is not OutOfMemoryException)
+		{
+			_logger.Warning(ex, "Could not sample the focused application");
+			return null;
+		}
+	}
+
+	private async Task WriteFocusVariablesAsync(FocusedAppInfo? info, ApplicationSample? sample)
 	{
 		var api = _variableAccessor.Current;
 		if (api is null)
@@ -755,10 +836,15 @@ public sealed class SystemIntegration
 			_focusedAppHandle ??= await ResolveHandleAsync(api, _focusedAppVariable);
 			_focusedAppPathHandle ??= await ResolveHandleAsync(api, _focusedAppPathVariable);
 			_focusedAppBundleIdHandle ??= await ResolveHandleAsync(api, _focusedAppBundleIdVariable);
+			_focusedAppWindowStateHandle ??= await ResolveHandleAsync(api, _focusedAppWindowStateVariable);
+			_focusedAppInstancesHandle ??= await ResolveHandleAsync(api, _focusedAppInstancesVariable);
 
 			await api.SetValueAsync(_focusedAppHandle.Id, info?.ProcessName ?? string.Empty);
 			await api.SetValueAsync(_focusedAppPathHandle.Id, info?.ExecutablePath ?? string.Empty);
 			await api.SetValueAsync(_focusedAppBundleIdHandle.Id, info?.BundleId ?? string.Empty);
+			await api.SetValueAsync(_focusedAppWindowStateHandle.Id,
+				sample?.WindowState is { } state ? ApplicationWindowStates.ToWireValue(state) : string.Empty);
+			await api.SetValueAsync(_focusedAppInstancesHandle.Id, sample?.Instances ?? 0);
 		}
 		catch (Exception ex)
 		{
@@ -806,6 +892,8 @@ public sealed class SystemIntegration
 			"system-locked" when _lock.IsSupported => VariableReading.Of(_lock.IsLocked()),
 			_ when DiskVariables.TryParseId(localId, out var diskIndex, out var statistic) =>
 				await ReadDiskAsync(diskIndex, statistic, cancellationToken),
+			_ when ApplicationVariables.TrySplit(localId, out var entryId, out var slot) => ReadApplication(entryId,
+				slot),
 			_ => await ReadIndexedGpuAsync(localId, cancellationToken)
 		};
 	}
@@ -1000,6 +1088,11 @@ public sealed class SystemIntegration
 			});
 		}
 
+		if (WindowStateIssue() is { } windowStateIssue)
+		{
+			issues.Add(windowStateIssue);
+		}
+
 		if (!_volume.IsSupported)
 		{
 			issues.Add(new IntegrationIssue
@@ -1049,6 +1142,14 @@ public sealed class SystemIntegration
 
 	public Task<IssueResolution> ResolveIssueAsync(string issueId, CancellationToken cancellationToken = default)
 	{
+		if (issueId == WindowStateIssueId
+			&& OperatingSystem.IsMacOS()
+			&& _applicationSampler.Availability == ApplicationWindowAvailability.AccessibilityNotGranted)
+		{
+			MacOsAccessibility.RequestTrust();
+			return Task.FromResult(IssueResolution.Ok());
+		}
+
 		return Task.FromResult(IssueResolution.Failed(AppStrings.Integrations.Issues.CannotResolveAutomatically()));
 	}
 

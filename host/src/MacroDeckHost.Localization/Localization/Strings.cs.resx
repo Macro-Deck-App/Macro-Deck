@@ -11918,6 +11918,66 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Bundle ID aktivní aplikace</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Sledovaná aplikace</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck hlásí, zda tato aplikace běží, kolik má procesů a oken a jak se její okna zobrazují.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Hra</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplikace</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Běžící proces, například chrome, nebo cesta k programu.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Zadejte název této aplikace.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Vyberte běžící aplikaci nebo zadejte cestu k programu.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Maximální počet sledovaných aplikací: {count}. Pro přidání další jednu odeberte.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Nelze vytvořit jedinečný název proměnné. Přejmenujte aplikaci a zkuste to znovu.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Neznámý krok nastavení.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Běží</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Běžící procesy</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Otevřená okna</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Stav okna</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Stav okna aktivní aplikace</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Procesy aktivní aplikace</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Stavy oken nejsou k dispozici</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland neumožňuje aplikaci Macro Deck číst okna jiných aplikací. Sledované aplikace dál hlásí, zda běží a kolik mají procesů, ale stav a počet jejich oken zůstávají nedostupné.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Ke čtení stavů oken potřebuje Macro Deck oprávnění Přístupnost. Povolte Macro Deck v Nastavení systému &gt; Soukromí a zabezpečení &gt; Přístupnost. Do té doby zůstávají stav a počet oken sledovaných aplikací nedostupné.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Udělit přístup</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Který připojený účet Twitch se má použít.</value>
   </data>

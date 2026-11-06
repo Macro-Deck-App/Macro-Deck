@@ -11919,6 +11919,66 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Bundel-ID van toepassing op de voorgrond</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Bewaakte toepassing</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck meldt of deze toepassing draait, hoeveel processen en vensters ze heeft en hoe haar vensters worden weergegeven.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Toepassing</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Een actief proces, zoals chrome, of het pad naar het programma.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Voer een naam voor deze toepassing in.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Kies een actieve toepassing of voer het pad naar een programma in.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck bewaakt maximaal {count} toepassingen. Verwijder er een om een andere toe te voegen.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Er kon geen unieke variabelenaam worden gemaakt. Geef de toepassing een andere naam en probeer het opnieuw.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Onbekende instellingsstap.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Actief</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Actieve processen</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Geopende vensters</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Vensterstatus</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Vensterstatus van toepassing op de voorgrond</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Processen van toepassing op de voorgrond</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Vensterstatussen zijn niet beschikbaar</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland laat Macro Deck de vensters van andere apps niet lezen. Bewaakte toepassingen melden nog steeds of ze draaien en hoeveel processen ze hebben, maar hun vensterstatus en aantal vensters blijven niet beschikbaar.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck heeft toegang via Toegankelijkheid nodig om vensterstatussen te lezen. Sta Macro Deck toe onder Systeeminstellingen &gt; Privacy en beveiliging &gt; Toegankelijkheid. Tot die tijd blijven de vensterstatus en het aantal vensters van bewaakte toepassingen niet beschikbaar.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Toegang verlenen</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Met welk verbonden Twitch-account er wordt gehandeld.</value>
   </data>

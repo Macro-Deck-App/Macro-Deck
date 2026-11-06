@@ -11919,6 +11919,66 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Ön plandaki uygulamanın paket kimliği</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>İzlenen uygulama</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck bu uygulamanın çalışıp çalışmadığını, kaç işlemi ve penceresi olduğunu ve pencerelerinin nasıl gösterildiğini bildirir.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Oyun</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Uygulama</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>chrome gibi çalışan bir işlem veya programın yolu.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Bu uygulama için bir ad girin.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Çalışan bir uygulama seçin veya bir programın yolunu girin.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck en fazla {count} uygulamayı izler. Başka bir uygulama eklemek için birini kaldırın.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Benzersiz bir değişken adı oluşturulamadı. Uygulamayı yeniden adlandırın ve tekrar deneyin.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Bilinmeyen kurulum adımı.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Çalışıyor</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Çalışan işlemler</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Açık pencereler</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Pencere durumu</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Ön plandaki uygulamanın pencere durumu</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Ön plandaki uygulamanın işlemleri</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Pencere durumları kullanılamıyor</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland, Macro Deck'in diğer uygulamaların pencerelerini okumasına izin vermez. İzlenen uygulamalar çalışıp çalışmadıklarını ve kaç işlemleri olduğunu bildirmeye devam eder, ancak pencere durumu ve pencere sayısı kullanılamaz.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck'in pencere durumlarını okuyabilmesi için Erişilebilirlik erişimi gerekir. Sistem Ayarları &gt; Gizlilik ve Güvenlik &gt; Erişilebilirlik altında Macro Deck'e izin verin. O zamana kadar izlenen uygulamaların pencere durumu ve pencere sayısı kullanılamaz.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Erişim izni verin</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Eylemi hangi bağlı Twitch hesabının gerçekleştireceği.</value>
   </data>
