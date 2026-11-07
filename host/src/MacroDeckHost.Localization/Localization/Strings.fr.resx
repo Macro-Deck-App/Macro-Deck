@@ -2546,6 +2546,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>L'action n'a pas répondu à temps</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Cette étape utilise un secret et a été refusée, elle ne s'exécute donc pas.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Cette étape utilise un secret et attend ton approbation.</value>
   </data>
@@ -16115,6 +16118,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Modifié</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Refuser</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Impossible de refuser l'étape.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Rien en attente d'approbation</value>
   </data>
@@ -16122,7 +16131,7 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Toutes les étapes qui utilisent un secret sont approuvées.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Les étapes qui utilisent un secret ne s'exécutent qu'après ton approbation. Vérifie ce qui a changé, puis approuve-les.</value>
+    <value>Les étapes qui utilisent un secret ne s'exécutent qu'après ton approbation. Vérifie ce qui a changé, puis approuve-les ou refuse-les.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Impossible de charger les approbations.</value>

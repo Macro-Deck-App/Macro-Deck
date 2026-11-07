@@ -2545,6 +2545,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>アクションの応答が時間内に返りませんでした</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>このステップはシークレットを使用しており、拒否されたため実行されません。</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>このステップはシークレットを使用しており、承認待ちです。</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>変更あり</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>拒否</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>ステップを拒否できませんでした。</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>承認待ちのステップはありません</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>シークレットを使用するすべてのステップが承認済みです。</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>シークレットを使用するステップは、承認されるまで実行されません。変更内容を確認してから承認してください。</value>
+    <value>シークレットを使用するステップは、承認されるまで実行されません。変更内容を確認してから、承認または拒否してください。</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>承認を読み込めませんでした。</value>

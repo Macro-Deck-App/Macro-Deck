@@ -2545,6 +2545,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>動作未在時限內回應</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>此步驟使用了機密，已遭拒絕，因此不會執行。</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>此步驟使用了機密，正在等待核准。</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>已變更</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>拒絕</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>無法拒絕此步驟。</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>沒有等待核准的步驟</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>所有使用機密的步驟都已核准。</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>使用機密的步驟必須經過核准才會執行。請檢視變更內容，然後予以核准。</value>
+    <value>使用機密的步驟必須經過核准才會執行。請檢視變更內容，然後予以核准或拒絕。</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>無法載入核准項目。</value>

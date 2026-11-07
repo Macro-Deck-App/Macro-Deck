@@ -2545,6 +2545,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>该动作未在规定时间内响应</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>此步骤使用了密钥，已被拒绝，因此不会运行。</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>此步骤使用了密钥，正在等待批准。</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>已更改</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>拒绝</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>无法拒绝该步骤。</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>没有等待批准的步骤</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>所有使用密钥的步骤均已批准。</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>使用密钥的步骤只有在批准后才会运行。请查看更改内容，然后批准。</value>
+    <value>使用密钥的步骤只有在批准后才会运行。请查看更改内容，然后批准或拒绝。</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>无法加载审批。</value>

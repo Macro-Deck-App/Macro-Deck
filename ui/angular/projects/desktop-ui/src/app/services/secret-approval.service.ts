@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import {
   AppStrings,
+  ApproveSecretBlockRequest,
+  ApproveSecretBlockResponse,
   SecretApprovalItem,
   UserNotification,
   UserNotificationsChangedEvent,
@@ -79,18 +81,38 @@ export class SecretApprovalService {
     }
   }
 
-  async approve(item: SecretApprovalItem): Promise<SecretApprovalResult> {
+  approve(item: SecretApprovalItem): Promise<SecretApprovalResult> {
+    return this.decide(
+      item,
+      request => this.api.approveSecretBlock(request),
+      AppStrings.SecretApprovals.ApproveFailed
+    );
+  }
+
+  decline(item: SecretApprovalItem): Promise<SecretApprovalResult> {
+    return this.decide(
+      item,
+      request => this.api.declineSecretBlock(request),
+      AppStrings.SecretApprovals.DeclineFailed
+    );
+  }
+
+  private async decide(
+    item: SecretApprovalItem,
+    send: (request: ApproveSecretBlockRequest) => Promise<ApproveSecretBlockResponse>,
+    failedKey: string
+  ): Promise<SecretApprovalResult> {
     let response;
     try {
-      response = await this.api.approveSecretBlock({
+      response = await send({
         ownerKind: item.ownerKind,
         ownerId: item.ownerId,
         blockId: item.blockId,
         fingerprint: item.fingerprint
       });
     } catch (error) {
-      console.error('Failed to approve secret block:', error);
-      return { ok: false, message: this.localization.translateKey(AppStrings.SecretApprovals.ApproveFailed) };
+      console.error('Failed to decide on secret block:', error);
+      return { ok: false, message: this.localization.translateKey(failedKey) };
     }
 
     if (response.success) {
@@ -105,7 +127,7 @@ export class SecretApprovalService {
     const message = resolveLocalizedText(response.error?.message ?? null, this.localization);
     return {
       ok: false,
-      message: message || this.localization.translateKey(AppStrings.SecretApprovals.ApproveFailed)
+      message: message || this.localization.translateKey(failedKey)
     };
   }
 }
