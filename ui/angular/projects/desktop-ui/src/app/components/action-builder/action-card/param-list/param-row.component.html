@@ -201,6 +201,15 @@
             (click)="reloadDynamicOptions()">
             <span class="icon icon-refresh icon-sm" aria-hidden="true"></span>
           </shared-button>
+          @if (createsUserVariable) {
+            <shared-button
+              variant="ghost"
+              size="icon"
+              [ariaLabel]="'macrodeck.app:Variables.NewVariable' | translate"
+              (click)="openCreateVariable()">
+              <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+            </shared-button>
+          }
         }
         @case ('autocomplete') {
           <shared-combobox
@@ -216,6 +225,15 @@
             (filterChange)="isDynamic && onDynamicFilterChange($event)"
             (opened)="isDynamic && loadDynamicOptions(autocompleteOpenFilter)">
           </shared-combobox>
+          @if (createsUserVariable) {
+            <shared-button
+              variant="ghost"
+              size="icon"
+              [ariaLabel]="'macrodeck.app:Variables.NewVariable' | translate"
+              (click)="openCreateVariable()">
+              <span class="icon icon-plus icon-sm" aria-hidden="true"></span>
+            </shared-button>
+          }
         }
         @case ('widget-target') {
           <shared-widget-target-picker
@@ -457,3 +475,13 @@
     <div class="param-error">{{ message }}</div>
   }
 </div>
+
+@if (creatingVariable()) {
+  <shared-variable-create-dialog
+    [initialName]="stringValue"
+    [scope]="store.previewScope()"
+    [scopeRefId]="store.previewScopeRefId()"
+    [zIndex]="1100"
+    (created)="onVariableCreated($event)"
+    (closed)="creatingVariable.set(false)" />
+}

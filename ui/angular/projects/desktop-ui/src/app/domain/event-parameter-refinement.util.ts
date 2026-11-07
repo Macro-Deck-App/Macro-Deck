@@ -7,6 +7,7 @@ const UNIVERSAL_OPERATORS: ReadonlyArray<ComparisonOperator> =
 
 export const VARIABLES_OPTIONS_SOURCE_ID = 'macrodeck.variables';
 export const EVENT_VARIABLES_OPTIONS_SOURCE_ID = 'macrodeck.event-variables';
+export const USER_VARIABLES_OPTIONS_SOURCE_ID = 'macrodeck.user-variables';
 
 const VARIABLE_PICKER_SOURCE_IDS: ReadonlySet<string> =
   new Set([VARIABLES_OPTIONS_SOURCE_ID, EVENT_VARIABLES_OPTIONS_SOURCE_ID]);

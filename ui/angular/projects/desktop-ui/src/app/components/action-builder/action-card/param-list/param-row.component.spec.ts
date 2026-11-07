@@ -1707,3 +1707,186 @@ describe('ParamRowComponent right-hand modifier keys', () => {
     expect(modifierToggles('app.macro-deck.keyboard', 'plugin.example.hotkey-pressed').length).toBe(4);
   });
 });
+
+describe('ParamRowComponent creating a user variable', () => {
+  let store: jasmine.SpyObj<ActionFlowStore>;
+  let api: jasmine.SpyObj<ApiService>;
+  let loadLabeledOptions: jasmine.Spy;
+  let hostOptions: string[];
+
+  const answerVariable: ActionBlockParameter = {
+    name: 'answerVariable',
+    type: 'autocomplete',
+    label: 'Answer variable',
+    value: 'score',
+    optionsSourceId: 'macrodeck.user-variables',
+  };
+
+  beforeEach(() => {
+    store = jasmine.createSpyObj<ActionFlowStore>(
+      'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel', 'actionRole']);
+    store.errorsFor.and.returnValue([]);
+    store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'widget';
+    (store as unknown as Record<string, unknown>)['previewScopeRefId'] = () => 'w1';
+    (store as unknown as Record<string, unknown>)['previewOwnerWidgetId'] = () => 'w1';
+    (store as unknown as Record<string, unknown>)['previewScopeStates'] = () => undefined;
+
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification', 'getVariables', 'createVariable']);
+    api.onNotification.and.callFake(() => new Subject());
+    api.getVariables.and.resolveTo({ variables: [] });
+    api.createVariable.and.callFake(async request => ({
+      success: true,
+      variable: {
+        id: 'v-new', name: request.name, scope: request.scope, scopeRefId: request.scopeRefId,
+        type: request.type, classification: 'user', value: request.initialValue ?? '',
+      },
+    }));
+    Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
+
+    hostOptions = [];
+    loadLabeledOptions = jasmine.createSpy('loadLabeledOptions').and.callFake(async () => ({
+      options: hostOptions.map(value => ({ value, label: value })),
+    }));
+
+    TestBed.configureTestingModule({
+      imports: [ParamRowComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: api },
+        { provide: ActionFlowStore, useValue: store },
+        {
+          provide: ActionOptionsService,
+          useValue: { loadLabeledOptions, invalidateOptionsSource: jasmine.createSpy('invalidateOptionsSource') },
+        },
+      ],
+    });
+  });
+
+  async function render(param: ActionBlockParameter, extra: Record<string, unknown> = {}) {
+    const fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput('param', param);
+    fixture.componentRef.setInput('block', {
+      id: 'block-1', integrationId: 'app.macro-deck.system', actionId: 'ask-question', parameters: [param],
+    } as ActionBlock);
+    for (const [name, value] of Object.entries(extra)) {
+      fixture.componentRef.setInput(name, value);
+    }
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture;
+  }
+
+  function createButton(fixture: ComponentFixture<ParamRowComponent>): HTMLButtonElement | null {
+    return fixture.nativeElement.querySelector('.param-value .icon-plus')?.closest('button') ?? null;
+  }
+
+  async function settle(fixture: ComponentFixture<ParamRowComponent>): Promise<void> {
+    for (let i = 0; i < 2; i++) {
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+  }
+
+  async function openDialog(fixture: ComponentFixture<ParamRowComponent>): Promise<HTMLElement> {
+    createButton(fixture)!.click();
+    await settle(fixture);
+    return fixture.nativeElement.querySelector('shared-variable-create-dialog');
+  }
+
+  function dialogButton(dialog: HTMLElement, label: string): HTMLButtonElement {
+    return (Array.from(dialog.querySelectorAll('.form-actions button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.trim() === label)!;
+  }
+
+  async function closeAnimation(fixture: ComponentFixture<ParamRowComponent>): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await settle(fixture);
+  }
+
+  it('offers to create a variable on a field fed by the user variables', async () => {
+    const fixture = await render(answerVariable);
+
+    expect(createButton(fixture)).not.toBeNull();
+  });
+
+  it('offers nothing on fields that do not pick user variables', async () => {
+    const everyVariable = await render({ ...answerVariable, optionsSourceId: 'macrodeck.variables' });
+    const freeList = await render({ ...answerVariable, optionsSourceId: undefined });
+    const eventFilter = await render(answerVariable, { eventId: 'macro-deck::variable-changed' });
+
+    expect(createButton(everyVariable)).toBeNull();
+    expect(createButton(freeList)).toBeNull();
+    expect(createButton(eventFilter)).toBeNull();
+  });
+
+  it('opens the create dialog with what is typed in the field and the flow\'s own scope', async () => {
+    const fixture = await render(answerVariable);
+
+    const dialog = await openDialog(fixture);
+
+    expect((dialog.querySelector('shared-input[name="name"] input') as HTMLInputElement).value).toBe('score');
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+    expect(api.createVariable).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'score', scope: 'widget', scopeRefId: 'w1',
+    }));
+  });
+
+  it('puts the created variable in the field and in its suggestions', async () => {
+    const fixture = await render({ ...answerVariable, value: 'scor' });
+    const dialog = await openDialog(fixture);
+    const nameInput = dialog.querySelector('shared-input[name="name"] input') as HTMLInputElement;
+    nameInput.value = 'score';
+    nameInput.dispatchEvent(new Event('input'));
+    hostOptions = ['score'];
+
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+
+    expect(store.updateParam.calls.mostRecent().args.slice(0, 3) as unknown[])
+      .toEqual(['block-1', 'answerVariable', 'score']);
+    expect(fixture.componentInstance.effectiveOptions.map(o => o.value)).toContain('score');
+    expect(fixture.nativeElement.querySelector('shared-variable-create-dialog')).toBeNull();
+  });
+
+  it('shows the created name, not a missing-selection note, when the typed name had no match yet', async () => {
+    const fixture = await render({ ...answerVariable, required: true });
+    fixture.componentInstance.loadDynamicOptions('score');
+    await settle(fixture);
+    const dialog = await openDialog(fixture);
+    hostOptions = ['score'];
+
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+
+    const [, name, value, label] = store.updateParam.calls.mostRecent().args;
+    expect([name, value, label] as unknown[]).toEqual(['answerVariable', 'score', undefined]);
+    expect(fixture.componentInstance.autocompleteDisplayLabel).toBe('');
+  });
+
+  it('hands the created variable to the parent of a nested field', async () => {
+    const fixture = await render(answerVariable, { nested: true });
+    const emitted: unknown[] = [];
+    fixture.componentInstance.nestedChange.subscribe(value => emitted.push(value));
+    const dialog = await openDialog(fixture);
+
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+
+    expect(emitted).toEqual(['score']);
+  });
+
+  it('leaves the field as it was when the dialog is cancelled', async () => {
+    const fixture = await render(answerVariable);
+    const dialog = await openDialog(fixture);
+
+    dialogButton(dialog, 'Cancel').click();
+    await closeAnimation(fixture);
+
+    expect(api.createVariable).not.toHaveBeenCalled();
+    expect(store.updateParam.calls.count()).toBe(0);
+    expect(fixture.nativeElement.querySelector('shared-variable-create-dialog')).toBeNull();
+  });
+});
