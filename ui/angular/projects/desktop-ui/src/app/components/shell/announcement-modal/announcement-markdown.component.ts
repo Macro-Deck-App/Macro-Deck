@@ -14,6 +14,7 @@ const ANNOUNCEMENT: MarkdownOptions = {
   },
   href: href => (/^(https?:|mailto:)/i.test(href.trim()) ? href.trim() : null),
   hideComments: false,
+  interpretHtml: false,
 };
 
 @Component({

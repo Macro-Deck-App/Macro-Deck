@@ -75,7 +75,7 @@ describe('parseMarkdown', () => {
     expect(blockText(blocks)).toBe('click me badge');
   });
 
-  it('renders raw HTML in the source as literal text, never as its own block or element', () => {
+  it('never turns raw HTML into its own block, element or attribute', () => {
     const blocks = parseMarkdown('<script>alert(1)</script>\n\n<div onclick="alert(1)">hi</div>');
 
     for (const block of blocks) {
@@ -85,7 +85,8 @@ describe('parseMarkdown', () => {
     const text = blockText(blocks);
 
     expect(text).toContain('<script>alert(1)</script>');
-    expect(text).toContain('onclick="alert(1)"');
+    expect(text).toContain('hi');
+    expect(text).not.toContain('onclick');
   });
 
   it('parses ATX headings, a bulleted list, a fenced code block and bold text into the expected kinds', () => {
@@ -305,14 +306,15 @@ describe('parseMarkdown', () => {
       expect(JSON.stringify(image)).not.toContain('alert');
     });
 
-    it('leaves other raw HTML as text around the image', () => {
+    it('drops other tags and keeps their text, but leaves text that only looks like a tag', () => {
       expect(images('<p align="center">\n<img src="https://example.com/a.png" alt="A">\n</p>')).toEqual([
-        { kind: 'text', text: '<p align="center">\n' },
         { kind: 'image', src: 'https://example.com/a.png', alt: 'A' },
-        { kind: 'text', text: '\n</p>' },
       ]);
-      expect(images('<div>hi</div>')).toEqual([{ kind: 'text', text: '<div>hi</div>' }]);
-      expect(images('<imgx src="https://example.com/a.png">')).toEqual([{ kind: 'text', text: '<imgx src="https://example.com/a.png">' }]);
+      expect(images('<div>hi &amp; bye</div>')).toEqual([{ kind: 'text', text: 'hi & bye' }]);
+      expect(images('<imgx src="https://example.com/a.png">x')).toEqual([{ kind: 'text', text: 'x' }]);
+      expect(images('<div>\nsee <https://example.com/x> or <user@example.com>\n</div>')).toEqual([
+        { kind: 'text', text: 'see <https://example.com/x> or <user@example.com>' },
+      ]);
     });
 
     it('drops a block whose only content is an unusable image without a description', () => {
@@ -326,6 +328,83 @@ describe('parseMarkdown', () => {
       expect(images('<!-- note --><img src="https://example.com/a.png" alt="A">')).toEqual([
         { kind: 'image', src: 'https://example.com/a.png', alt: 'A' },
       ]);
+    });
+  });
+
+  describe('raw HTML around images', () => {
+    const inlines = (source: string) => parseMarkdown(source).flatMap(block => (block.kind === 'paragraph' ? block.inlines : []));
+    const store = 'https://macro-deck.app/store/com.example.plugin';
+    const light = 'https://assets.macro-deck.app/branding/Badge%20Light.png';
+    const dark = 'https://assets.macro-deck.app/branding/Badge%20Dark.png';
+
+    it('shows a store badge in a picture as one linked image with its dark variant', () => {
+      const readme = [
+        `<a href="${store}">`,
+        '  <picture>',
+        `    <source media="(prefers-color-scheme: dark)" srcset="${dark}">`,
+        `    <img src="${light}" alt="Open in the Macro Deck Store">`,
+        '  </picture>',
+        '</a>',
+      ].join('\n');
+
+      expect(parseMarkdown(readme)).toEqual([{
+        kind: 'paragraph',
+        inlines: [{
+          kind: 'link',
+          href: store,
+          title: null,
+          children: [{ kind: 'image', src: light, alt: 'Open in the Macro Deck Store', darkSrc: dark }],
+        }],
+      }]);
+    });
+
+    it('links a badge whose tags share one line inside a paragraph', () => {
+      expect(inlines(`Get it: <a href="${store}"><img src="${dark}" alt=""></a> now`)).toEqual([
+        { kind: 'text', text: 'Get it: ' },
+        { kind: 'link', href: store, title: null, children: [{ kind: 'image', src: dark, alt: store }] },
+        { kind: 'text', text: ' now' },
+      ]);
+      expect(inlines(`<a href="${store}" title="Store">the store</a>`)).toEqual([
+        { kind: 'link', href: store, title: 'Store', children: [{ kind: 'text', text: 'the store' }] },
+      ]);
+    });
+
+    it('never links an unsafe address and never shows an address the author did not write', () => {
+      expect(inlines(`<a href="javascript:alert(1)"><img src="${light}" alt="A"></a>`)).toEqual([{ kind: 'image', src: light, alt: 'A' }]);
+      expect(inlines(`<a href="/relative">text</a>`)).toEqual([{ kind: 'text', text: 'text' }]);
+      expect(parseMarkdown(`<a href="${store}"></a>`)).toEqual([]);
+      expect(parseMarkdown(`<a href="${store}">\n\n<img src="${light}" alt="A">\n\n</a>`).flatMap(block => (block.kind === 'paragraph' ? block.inlines : []))).toEqual([
+        { kind: 'image', src: light, alt: 'A' },
+      ]);
+    });
+
+    it('picks the light and dark sources by colour scheme and ignores unusable ones', () => {
+      const picture = (sources: string, img = light) => inlines(`<picture>${sources}<img src="${img}" alt="A"></picture>`);
+      const other = 'https://example.com/light.png';
+
+      expect(picture(`<source media="(PREFERS-color-scheme:dark)" srcset="${dark} 2x, https://example.com/x.png 1x">`)).toEqual([
+        { kind: 'image', src: light, alt: 'A', darkSrc: dark },
+      ]);
+      expect(picture(`<source media="(prefers-color-scheme: light)" srcset="${other}"><source media="(prefers-color-scheme: dark)" srcset="${dark}">`)).toEqual([
+        { kind: 'image', src: other, alt: 'A', darkSrc: dark },
+      ]);
+      expect(picture('<source media="(prefers-color-scheme: dark)" srcset="http://example.com/dark.png">')).toEqual([
+        { kind: 'image', src: light, alt: 'A' },
+      ]);
+      expect(picture(`<source media="(min-width: 600px)" srcset="${dark}">`)).toEqual([{ kind: 'image', src: light, alt: 'A' }]);
+      expect(picture(`<source media="(prefers-color-scheme: dark)" srcset="${dark}">`, 'http://example.com/a.png')).toEqual([
+        { kind: 'text', text: 'A' },
+      ]);
+    });
+
+    it('shows script, style and similar tags as written and never swallows the text after them', () => {
+      expect(inlines('<style>\n.badge { color: red; }\n</style>')).toEqual([{ kind: 'text', text: '<style>\n.badge { color: red; }\n</style>' }]);
+      expect(inlines('Set the <title> of the window, then restart')).toEqual([{ kind: 'text', text: 'Set the <title> of the window, then restart' }]);
+      expect(inlines('Before <script>alert("<b>x</b>")</script>after')).toEqual([{ kind: 'text', text: 'Before <script>alert("x")</script>after' }]);
+    });
+
+    it('keeps line breaks', () => {
+      expect(inlines('one<br>two')).toEqual([{ kind: 'text', text: 'one' }, { kind: 'br' }, { kind: 'text', text: 'two' }]);
     });
   });
 });
