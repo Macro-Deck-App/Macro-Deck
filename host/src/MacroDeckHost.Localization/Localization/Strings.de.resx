@@ -2545,6 +2545,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Die Aktion hat nicht rechtzeitig geantwortet</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Dieser Schritt verwendet ein Geheimnis und wurde abgelehnt, deshalb läuft er nicht.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Dieser Schritt verwendet ein Geheimnis und wartet auf deine Freigabe.</value>
   </data>
@@ -16113,6 +16116,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Geändert</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Ablehnen</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Der Schritt konnte nicht abgelehnt werden.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nichts wartet auf Freigabe</value>
   </data>
@@ -16120,7 +16129,7 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Alle Schritte, die ein Geheimnis verwenden, sind freigegeben.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Schritte, die ein Geheimnis verwenden, laufen erst, wenn du sie freigibst. Prüfe, was sich geändert hat, und gib sie dann frei.</value>
+    <value>Schritte, die ein Geheimnis verwenden, laufen erst, wenn du sie freigibst. Prüfe, was sich geändert hat, und gib sie dann frei oder lehne sie ab.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Die Freigaben konnten nicht geladen werden.</value>

@@ -2545,6 +2545,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>The action did not answer in time</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>This step uses a secret and was declined, so it does not run.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>This step uses a secret and is waiting for your approval.</value>
   </data>
@@ -16119,6 +16122,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Changed</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>The step could not be declined.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nothing waiting for approval</value>
   </data>
@@ -16126,7 +16135,7 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Every step that uses a secret is approved.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Steps that use a secret only run after you approve them. Check what changed, then approve them.</value>
+    <value>Steps that use a secret only run after you approve them. Check what changed, then approve or decline them.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Approvals could not be loaded.</value>

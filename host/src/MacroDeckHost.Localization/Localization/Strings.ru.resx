@@ -2545,6 +2545,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Действие не ответило вовремя</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Этот шаг использует секрет и был отклонён, поэтому не выполняется.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Этот шаг использует секрет и ожидает подтверждения.</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Изменено</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Отклонить</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Не удалось отклонить шаг.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Нет шагов, ожидающих подтверждения</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Все шаги, использующие секрет, подтверждены.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Шаги, использующие секрет, выполняются только после подтверждения. Проверьте, что изменилось, и подтвердите их.</value>
+    <value>Шаги, использующие секрет, выполняются только после подтверждения. Проверьте, что изменилось, и подтвердите или отклоните их.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Не удалось загрузить подтверждения.</value>

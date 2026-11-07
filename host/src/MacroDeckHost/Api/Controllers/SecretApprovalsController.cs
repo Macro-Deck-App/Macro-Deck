@@ -30,4 +30,12 @@ public class SecretApprovalsController : ControllerBase
 
 		return _catalog.Approve(body);
 	}
+
+	[HttpPost("decline")]
+	public ApproveSecretBlockResponse Decline(ApproveSecretBlockRequest body)
+	{
+		ArgumentNullException.ThrowIfNull(body);
+
+		return _catalog.Decline(body);
+	}
 }
