@@ -17,6 +17,7 @@ using MacroDeckHost.Integrations.System.Metrics;
 using MacroDeckHost.Integrations.System.Volume;
 using MacroDeckHost.Platform.Applications;
 using MacroDeckHost.Platform.Focus;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.System;
 
@@ -503,7 +504,7 @@ public class SystemIntegrationApplicationTests
 
 		public IIntegrationConfig Config { get; } = config;
 
-		public IDeckNavigator Deck => throw new NotSupportedException();
+		public IDeckNavigator Deck { get; } = new RecordingDeckNavigator();
 
 		public IScriptApi Scripts => throw new NotSupportedException();
 

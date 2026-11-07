@@ -11747,6 +11747,118 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>सूचना दिखाई नहीं जा सकी।</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>सवाल पूछें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>फ़्लो को रोकता है, डेक पर एक सवाल पूछता है और जवाब को एक वेरिएबल में सहेजता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>सवाल का प्रकार</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>हाँ या नहीं</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>सूची से चुनें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>टेक्स्ट दर्ज करें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>सवाल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>संदेश</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>विकल्प</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>हर पंक्ति में एक विकल्प, या एक JSON ऐरे। सूची किसी वेरिएबल से लेने के लिए वेरिएबल डालें। अधिकतम 50 विकल्प, हर एक में अधिकतम 100 अक्षर।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>प्लेसहोल्डर</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>डिफ़ॉल्ट टेक्स्ट</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>कहाँ पूछें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>वह डिवाइस जिसने विजेट दबाया</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>चुना गया डिवाइस</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>सभी कनेक्टेड क्लाइंट</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>डिवाइस</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>टाइमआउट</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>सवाल जवाब का कितनी देर इंतज़ार करे, अधिकतम 9 मिनट।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>जवाब का वेरिएबल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>इसमें true या false, चुना गया आइटम या दर्ज किया गया टेक्स्ट आता है। जवाब न मिलने पर false या खाली टेक्स्ट आता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>स्थान का वेरिएबल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>इसमें चुने गए आइटम का स्थान 0 से शुरू होकर आता है, या जवाब न मिलने पर -1।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>परिणाम का वेरिएबल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>इसमें answered, cancelled, timedOut या noClient आता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>{count} सेकंड बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>{count} सेकंड बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>{count} मिनट बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>{count} मिनट बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>सवाल अभी उपलब्ध नहीं हैं।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>सवाल नहीं दिखाया जा सका।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>विकल्पों की सूची खाली है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>सूची में अनुमत संख्या से अधिक विकल्प हैं (अधिकतम {max})।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>कोई विकल्प अनुमत लंबाई से अधिक है (अधिकतम {max} अक्षर)।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>विकल्पों की सूची दिखाने के लिए बहुत बड़ी है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>जवाब {variable} में सहेजा नहीं जा सका। वेरिएबल का प्रकार जाँचें।</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>चुने गए ऑडियो डिवाइस का वॉल्यूम एक निश्चित स्तर पर सेट करता है।</value>
   </data>

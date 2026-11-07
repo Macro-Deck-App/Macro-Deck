@@ -287,8 +287,9 @@ directory.
 The `deck` snapshot carries `folders`, `profiles`, `clients` and `revision`. Each entry in `folders` has
 `id` and `label`, plus `profileId`, `parentId` (absent for a top-level folder) and `order`, its sort key among
 the folders that share its parent; hosts that predate the tree position omit those three. Each entry in `clients` is one
-connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`
-and `folderId`. `revision` increases with every `deck` push within one host run and starts again when the
+connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`,
+`folderId` and `isDeviceSession` (`true` for a device connected through a device provider; hosts that predate
+it omit it, which reads as `false`). `revision` increases with every `deck` push within one host run and starts again when the
 host restarts; hosts that predate it omit both fields, which read as an empty list and 0. `deck` pushes can
 arrive out of order, so apply one only when its revision is higher than the last one applied in this
 session, always apply revision 0, and reset the last applied revision when a session is not resumed.

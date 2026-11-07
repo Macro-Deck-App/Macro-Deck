@@ -26,7 +26,7 @@ public class SystemIntegrationTests
 	[
 		"launch-application", "open-website", "open-file", "open-folder", "kill-application",
 		"increase-volume", "decrease-volume", "mute-volume", "set-volume",
-		"send-notification", "show-notification", "run-command",
+		"send-notification", "show-notification", "ask-question", "run-command",
 		"lock-computer", "sleep", "hibernate", "restart", "shut-down"
 	];
 
@@ -819,7 +819,7 @@ public class SystemIntegrationTests
 
 		public IIntegrationConfig Config => throw new NotSupportedException();
 
-		public IDeckNavigator Deck => throw new NotSupportedException();
+		public IDeckNavigator Deck { get; } = new RecordingDeckNavigator();
 
 		public IScriptApi Scripts => throw new NotSupportedException();
 

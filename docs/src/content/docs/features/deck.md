@@ -88,6 +88,7 @@ A `DeckClient` carries:
 | `ClientId` | The id to pass as `originClientId` to navigate this client. |
 | `DeviceId` | The paired device behind the client, or `null` for a client that is not a paired device. |
 | `ProfileId`, `FolderId` | What the client has open. |
+| `IsDeviceSession` | `true` for a device connected through a [device provider](/features/devices/). The provider draws the deck, so the client never shows Macro Deck's own UI, such as notification dialogs. `false` for a web or app client. |
 
 `DeckClientChangedEventArgs` carries the new `Client` plus `PreviousProfileId` and `PreviousFolderId`, both
 `null` when the client was not known yet.
@@ -123,7 +124,9 @@ In a plugin, client positions arrive with the deck state the host pushes, not as
 
 `GetClients()` and `ClientChanged` are default interface members, so a type implementing
 `IDeckNavigator` against an older SDK still compiles and loads. Against a host that predates client
-positions, `GetClients()` returns an empty list and `ClientChanged` never fires. The wire format is
+positions, `GetClients()` returns an empty list and `ClientChanged` never fires. A host that predates
+`IsDeviceSession` reports `false` for every client; its device sessions still have client ids starting with
+`device:`. The wire format is
 described in the [protocol reference](/reference/protocol/).
 
 `ProfileId`, `ParentId` and `Order` on `DeckFolder` are `null` from a host that predates them. They are

@@ -333,6 +333,53 @@ describe('the building-block components', () => {
       expect(emitted.map(e => e.name)).toEqual(['change']);
       expect(findInteractiveNode(segmented([]))).toBeNull();
     });
+
+    it('picks a vertical segment by its vertical position', () => {
+      mount(node('s', 'ui.segmented', { selected: 0, direction: 'vertical', events: ['change'] }, [
+        node('a', 'ui.text', { text: 'A' }),
+        node('b', 'ui.text', { text: 'B' }),
+        node('c', 'ui.text', { text: 'C' }),
+      ]));
+      const element = find('.widget-segmented')!;
+      sized(element, 40, 120);
+
+      element.dispatchEvent(pointer('pointerdown', { clientX: 5, clientY: 100 }));
+      element.dispatchEvent(pointer('pointerup', { clientX: 5, clientY: 100 }));
+
+      expect(emitted).toEqual([{ id: 's', name: 'change', payload: 2 }]);
+    });
+
+    it('leaves a touch on a vertical list to the browser, so a pan scrolls and selects nothing', () => {
+      const column = (direction?: string) => node('s', 'ui.segmented', {
+        selected: 0, events: ['change'], ...(direction ? { direction } : {}),
+      }, [node('a', 'ui.text', { text: 'A' }), node('b', 'ui.text', { text: 'B' })]);
+      const down = () => {
+        const event = new Event('pointerdown', { cancelable: true }) as Event & Record<string, number>;
+        Object.assign(event, { clientX: 5, clientY: 90, pointerId: 1, button: 0 });
+        return event;
+      };
+
+      mount(column('vertical'));
+      const element = find('.widget-segmented')!;
+      sized(element, 40, 120);
+      const vertical = down();
+      element.dispatchEvent(vertical);
+      element.dispatchEvent(pointer('pointercancel', { clientY: 30 }));
+
+      expect(element.classList).toContain('widget-segmented-vertical');
+      expect(vertical.defaultPrevented).toBeFalse();
+      expect(emitted).toEqual([]);
+    });
+
+    it('keeps a touch on a horizontal segmented for itself', () => {
+      mount(node('s', 'ui.segmented', { selected: 0, events: ['change'] }, [node('a', 'ui.text', { text: 'A' })]));
+      const row = new Event('pointerdown', { cancelable: true }) as Event & Record<string, number>;
+      Object.assign(row, { clientX: 5, clientY: 5, pointerId: 1, button: 0 });
+
+      find('.widget-segmented')!.dispatchEvent(row);
+
+      expect(row.defaultPrevented).toBeTrue();
+    });
   });
 
   describe('ui.dial', () => {

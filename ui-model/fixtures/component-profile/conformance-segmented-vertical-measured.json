@@ -1,0 +1,243 @@
+{
+  "tree": "conformance-segmented-vertical-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/153.0.8010.12",
+  "cases": [
+    {
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.list": {
+          "type": "ui.list",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 240,
+            "height": 240
+          }
+        },
+        "conformance.choices": {
+          "type": "ui.segmented",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 225,
+            "height": 134.39
+          }
+        },
+        "conformance.choices.intro": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.87,
+            "width": 225,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Intro",
+              "naturalWidth": 30.81,
+              "givenWidth": 225,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.choices.gameplay": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 30.72,
+            "width": 225,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Gameplay",
+              "naturalWidth": 66.23,
+              "givenWidth": 225,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.choices.break": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 64.31,
+            "width": 225,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Break",
+              "naturalWidth": 39.41,
+              "givenWidth": 225,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.choices.outro": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 97.92,
+            "width": 225,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Outro",
+              "naturalWidth": 37.63,
+              "givenWidth": 225,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 20,
+        "height": 240
+      },
+      "basis": 240,
+      "nodes": {
+        "conformance": {
+          "type": "ui.stack",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 20,
+            "height": 240
+          }
+        },
+        "conformance.list": {
+          "type": "ui.list",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 20,
+            "height": 240
+          }
+        },
+        "conformance.choices": {
+          "type": "ui.segmented",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 5,
+            "height": 134.39
+          }
+        },
+        "conformance.choices.intro": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": -2.87,
+            "width": 5,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Intro",
+              "naturalWidth": 30.81,
+              "givenWidth": 5,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.choices.gameplay": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 30.72,
+            "width": 5,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Gameplay",
+              "naturalWidth": 66.23,
+              "givenWidth": 5,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.choices.break": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 64.31,
+            "width": 5,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Break",
+              "naturalWidth": 39.41,
+              "givenWidth": 5,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        },
+        "conformance.choices.outro": {
+          "type": "ui.text",
+          "box": {
+            "x": 0,
+            "y": 97.92,
+            "width": 5,
+            "height": 20.16
+          },
+          "texts": [
+            {
+              "text": "Outro",
+              "naturalWidth": 37.63,
+              "givenWidth": 5,
+              "truncated": {
+                "x": true,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
