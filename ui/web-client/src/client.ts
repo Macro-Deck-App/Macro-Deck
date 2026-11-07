@@ -198,6 +198,8 @@ export class Client {
   private readonly endedSessionStore: WritableStore<{ sessionId: string; code?: string } | null> =
     store<{ sessionId: string; code?: string } | null>(null);
   readonly endedSessions: ReadableStore<{ sessionId: string; code?: string } | null> = this.endedSessionStore;
+  private readonly folderViewCatalogStore: WritableStore<readonly string[]> = store<readonly string[]>([]);
+  readonly folderViewCatalog: ReadableStore<readonly string[]> = this.folderViewCatalogStore;
 
   private readonly usernameStore: WritableStore<string | null> = store<string | null>(null);
   readonly signedInAs: ReadableStore<string | null> = this.usernameStore;
@@ -1170,6 +1172,16 @@ export class Client {
       case 'FolderDeletedEvent':
         if (typeof body['folderId'] === 'string') this.deck.folderDeleted(body['folderId']);
         break;
+      case 'FolderViewCatalogChangedEvent': {
+        const views = Array.isArray(body['folderViews']) ? body['folderViews'] as Array<{ id?: unknown }> : [];
+        const ids: string[] = [];
+        for (let index = 0; index < views.length; index++) {
+          const id = views[index] ? views[index].id : undefined;
+          if (typeof id === 'string') ids.push(id);
+        }
+        this.folderViewCatalogStore.set(ids);
+        break;
+      }
       case 'ProfileUpdatedEvent': {
         // Most folders state no grid of their own and inherit the profile's, which this client
         // reads once while resolving the profile it starts on. Without this the deck went on

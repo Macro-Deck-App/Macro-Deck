@@ -23,17 +23,20 @@ public sealed class ScreenSaverUiSessionOpener : IScreenSaverUiSessionOpener
 	private readonly IScreenSaverRegistry _screenSavers;
 	private readonly UiSessionRegistry _registry;
 	private readonly IUiSessionBroker _broker;
+	private readonly ScreenSaverFallbackRecovery _recovery;
 
 	public ScreenSaverUiSessionOpener(
 		IServiceScopeFactory scopes,
 		IScreenSaverRegistry screenSavers,
 		UiSessionRegistry registry,
-		IUiSessionBroker broker)
+		IUiSessionBroker broker,
+		ScreenSaverFallbackRecovery recovery)
 	{
 		_scopes = scopes;
 		_screenSavers = screenSavers;
 		_registry = registry;
 		_broker = broker;
+		_recovery = recovery;
 	}
 
 	public async Task<OpenScreenSaverUiSessionResponse> OpenAsync(Guid? deviceId, CancellationToken cancellationToken)
@@ -45,9 +48,11 @@ public sealed class ScreenSaverUiSessionOpener : IScreenSaverUiSessionOpener
 
 		var selected = string.IsNullOrEmpty(device.ScreenSaverId) ? BuiltInScreenSavers.Clock : device.ScreenSaverId;
 		var configuration = device.ScreenSaverConfiguration;
+		string? unavailableSelection = null;
 
 		if (!_screenSavers.TryResolve(selected, out var entry))
 		{
+			unavailableSelection = selected;
 			selected = BuiltInScreenSavers.Clock;
 			configuration = null;
 
@@ -68,7 +73,9 @@ public sealed class ScreenSaverUiSessionOpener : IScreenSaverUiSessionOpener
 
 		if (FindExisting(entry.ProviderId, ownerPrincipal, attributes) is { } existing)
 		{
-			return Accepted(existing, selected, interactive);
+			return Settle(existing, unavailableSelection)
+				? Accepted(existing, selected, interactive)
+				: await OpenAsync(deviceId, cancellationToken);
 		}
 
 		var surface = new UiSurface
@@ -80,9 +87,25 @@ public sealed class ScreenSaverUiSessionOpener : IScreenSaverUiSessionOpener
 
 		var ticket = _broker.Open(entry.ProviderId, surface, ownerPrincipal);
 
-		return ticket.Accepted
+		if (!ticket.Accepted)
+		{
+			return Rejected(selected, ticket.Code ?? UiSessionErrorCodes.ProviderUnavailable, ticket.Message);
+		}
+
+		return Settle(ticket.SessionId, unavailableSelection)
 			? Accepted(ticket.SessionId, selected, interactive)
-			: Rejected(selected, ticket.Code ?? UiSessionErrorCodes.ProviderUnavailable, ticket.Message);
+			: await OpenAsync(deviceId, cancellationToken);
+	}
+
+	private bool Settle(string sessionId, string? unavailableSelection)
+	{
+		if (unavailableSelection is null)
+		{
+			_recovery.Forget(sessionId);
+			return true;
+		}
+
+		return _recovery.Track(sessionId, unavailableSelection);
 	}
 
 	private async Task<DeviceEntity?> LoadDevice(Guid id)
