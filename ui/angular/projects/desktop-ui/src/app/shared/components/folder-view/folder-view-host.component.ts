@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, input, output,
-  signal, viewChild,
+  signal, untracked, viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { UiSessionHandle, UiSessionService } from '../../services/ui-session.service';
+import { PROVIDER_UNAVAILABLE, UiSessionHandle, UiSessionService } from '../../services/ui-session.service';
+import { ApiService } from '../../transport';
 import { UiNode, UiNodeEvent, type UiComponentBox } from '@macro-deck/runtime';
 import { TranslatePipe } from '../../localization';
 import { FolderViewService } from '../../services/folder-view.service';
@@ -42,6 +44,7 @@ export class FolderViewHostComponent {
   private readonly uiSessions = inject(UiSessionService);
   private readonly treeContext = inject(UiWidgetTreeContext);
   private readonly folderViews = inject(FolderViewService);
+  private readonly api = inject(ApiService);
 
   private readonly content = viewChild<ElementRef<HTMLElement>>('content');
 
@@ -61,12 +64,30 @@ export class FolderViewHostComponent {
   private readonly navigation = computed(() => this.folderViews.find(this.viewId())?.navigation ?? '');
 
   private openedFolderId: string | null = null;
+  private rechecked = false;
   private resizeObserver: ResizeObserver | null = null;
 
   constructor() {
     effect(() => {
       const folderId = this.folderId();
-      if (folderId !== this.openedFolderId) this.open(folderId);
+      if (folderId === this.openedFolderId) return;
+      this.rechecked = false;
+      this.open(folderId);
+    });
+
+    // The catalog event that brings the view back can overtake the refusal on the wire.
+    effect(() => {
+      const viewId = this.viewId();
+      if (!this.viewMissing() || this.rechecked || !viewId || !this.folderViews.find(viewId)) return;
+      this.rechecked = true;
+      untracked(() => this.reopen());
+    });
+
+    this.api.onFolderViewCatalogChanged().pipe(takeUntilDestroyed()).subscribe(event => {
+      this.rechecked = false;
+      const viewId = this.viewId();
+      if (!viewId || !untracked(() => this.viewMissing())) return;
+      if ((event.folderViews ?? []).some(view => view.id === viewId)) this.reopen();
     });
 
     effect(() => {
@@ -94,6 +115,14 @@ export class FolderViewHostComponent {
 
   protected onChangeView(): void {
     this.changeView.emit();
+  }
+
+  private viewMissing(): boolean {
+    return this.handle()?.rejection()?.code === PROVIDER_UNAVAILABLE;
+  }
+
+  private reopen(): void {
+    if (this.openedFolderId) this.open(this.openedFolderId);
   }
 
   private open(folderId: string): void {
