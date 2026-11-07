@@ -1,6 +1,8 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using MacroDeck.Localization;
 using MacroDeck.Plugin.Protocol.Assets;
+using MacroDeck.Plugin.Protocol.Serialization;
 
 namespace MacroDeck.Plugin.Protocol.Capabilities.Ui;
 
@@ -133,6 +135,7 @@ public sealed record UiSessionEventArguments
 
 	public required string Name { get; init; }
 
+	[JsonConverter(typeof(NullPreservingJsonElementConverter))]
 	public JsonElement? Data { get; init; }
 
 	public int? Revision { get; init; }

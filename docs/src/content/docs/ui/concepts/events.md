@@ -51,6 +51,10 @@ UiEventHandler.On(UiComponentEvents.Reveal, e =>
 unvalidated client data, so a getter for the wrong JSON kind returns `false` rather than throwing. Read state
 with `Peek()` inside a handler so the handler does not subscribe to it.
 
+An explicit JSON `null` and a missing payload are different: `null` arrives as a `Raw` element of kind
+`Null`, a missing payload as a `null` `Raw`. A `change` carrying `null` clears an input whose value type can
+be null, such as a `UiStringInput` or a `UiIconReferenceInput`; a `change` without a payload is refused.
+
 ## Declining an event
 
 ```csharp
