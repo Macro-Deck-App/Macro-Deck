@@ -144,6 +144,24 @@ public class HostStatePushTests
 		});
 	}
 
+	[Test]
+	public async Task A_device_session_is_pushed_to_plugins_as_one()
+	{
+		var clients = _host.Services.GetRequiredService<DeckClientTracker>();
+		var deviceId = Guid.NewGuid();
+
+		clients.Publish(clients.Report("push-tab", null, "p1", "f1"));
+		clients.Publish(clients.Report(DeviceOrigin.For(deviceId), deviceId, "p1", "f1"));
+		var state = await LatestDeckStateAsync(pushed => pushed.Clients.Count == 2);
+
+		var pushed = state.Clients.ToDictionary(client => client.ClientId, StringComparer.Ordinal);
+		Assert.Multiple(() =>
+		{
+			Assert.That(pushed["push-tab"].IsDeviceSession, Is.False);
+			Assert.That(pushed[DeviceOrigin.For(deviceId)].IsDeviceSession, Is.True);
+		});
+	}
+
 	private static string? FolderOf(DeckStateDto state)
 	{
 		return state.Clients.SingleOrDefault(client => client.ClientId == "push-tab")?.FolderId;

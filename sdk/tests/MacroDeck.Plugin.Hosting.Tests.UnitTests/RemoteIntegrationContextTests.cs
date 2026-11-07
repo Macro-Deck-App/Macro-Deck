@@ -1010,6 +1010,23 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public void A_device_session_in_a_deck_push_is_told_apart_from_a_web_client()
+	{
+		var world = NewClientWorld();
+
+		world.Push(1,
+			Client("tab-1", "f1"),
+			Client("device:4f5b", "f1") with { DeviceId = "4f5b", IsDeviceSession = true });
+
+		var clients = world.Deck.GetClients().ToDictionary(client => client.ClientId, StringComparer.Ordinal);
+		Assert.Multiple(() =>
+		{
+			Assert.That(clients["tab-1"].IsDeviceSession, Is.False);
+			Assert.That(clients["device:4f5b"].IsDeviceSession, Is.True);
+		});
+	}
+
+	[Test]
 	public void No_clients_are_listed_before_the_first_deck_push()
 	{
 		Assert.That(NewClientWorld().Deck.GetClients(), Is.Empty);

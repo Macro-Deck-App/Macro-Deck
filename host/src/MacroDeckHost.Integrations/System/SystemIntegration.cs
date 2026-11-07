@@ -94,6 +94,7 @@ public sealed class SystemIntegration
 	private readonly Func<IFocusedApplicationWatcher> _createFocusWatcher;
 	private readonly VariableApiAccessor _variableAccessor = new();
 	private readonly NotificationServiceAccessor _notificationServiceAccessor = new();
+	private readonly DeckNavigatorAccessor _deckNavigatorAccessor = new();
 	private readonly DesktopNotifierAccessor _desktopNotifierAccessor = new();
 	private readonly SystemBatteryProvider _batteries;
 
@@ -166,6 +167,7 @@ public sealed class SystemIntegration
 			new SetVolumeActionDefinition(_volume, KnownAudioDeviceName),
 			new SendNotificationActionDefinition(_desktopNotifierAccessor),
 			new ShowNotificationActionDefinition(_notificationServiceAccessor),
+			new AskQuestionActionDefinition(_notificationServiceAccessor, _deckNavigatorAccessor, _variableAccessor),
 			new RunCommandActionDefinition(_variableAccessor),
 			new LockComputerActionDefinition(_power),
 			new SleepActionDefinition(_power),
@@ -362,6 +364,7 @@ public sealed class SystemIntegration
 		_variableAccessor.Current = context.Variables;
 		_variableAccessor.UserVariables = context.UserVariables;
 		_notificationServiceAccessor.Current = context.NotificationService;
+		_deckNavigatorAccessor.Current = context.Deck;
 		_desktopNotifierAccessor.Current = context.DesktopNotifications;
 
 		_volume.Changed -= OnVolumeChanged;

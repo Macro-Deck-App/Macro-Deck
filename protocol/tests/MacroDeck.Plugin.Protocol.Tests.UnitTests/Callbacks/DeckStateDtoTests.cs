@@ -21,6 +21,26 @@ public class DeckStateDtoTests
 	}
 
 	[Test]
+	public void A_client_from_a_host_that_predates_device_sessions_reads_as_not_a_device_session()
+	{
+		var state = JsonSerializer.Deserialize<DeckStateDto>(
+			"""{"clients":[{"clientId":"device:d1","deviceId":"d1","profileId":"p1","folderId":"f1"}]}""",
+			PluginProtocolJson.Options)!;
+
+		Assert.That(state.Clients.Single().IsDeviceSession, Is.False);
+	}
+
+	[Test]
+	public void A_device_session_travels_under_its_wire_name()
+	{
+		var json = JsonSerializer.SerializeToElement(
+			new DeckClientDto { ClientId = "device:d1", IsDeviceSession = true },
+			PluginProtocolJson.Options);
+
+		Assert.That(json.GetProperty("isDeviceSession").GetBoolean(), Is.True);
+	}
+
+	[Test]
 	public void Client_positions_and_the_revision_travel_under_their_frozen_wire_names()
 	{
 		var json = JsonSerializer.SerializeToElement(new DeckStateDto

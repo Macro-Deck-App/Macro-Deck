@@ -864,6 +864,50 @@ button, automation or flow runs it.
 This is different from **Send Notification**, which shows a notification of your operating system instead
 of one inside Macro Deck.
 
+### Ask a question in a flow
+
+The action **Ask a question** (System integration) pauses the flow, shows a dialog and goes on with the
+answer, for example to confirm before shutting down, to pick an OBS scene or to type a stream title.
+
+| Setting | What it does |
+| --- | --- |
+| **Question type** | **Yes or no**, **Choose from a list** or **Enter text**. |
+| **Question** and **Message** | The dialog's text. Both accept [template variables](#template-variables). |
+| **Choices** | For a list: one choice per line, or a JSON array. Insert a variable, for example `{{ vars.scenes }}`, to take the list from it. At most 50 choices of up to 100 characters each. |
+| **Placeholder** and **Default text** | For text: what the empty field shows, and the text it starts with. An answer can be up to 1000 characters long. |
+| **Ask on** | **The device that pressed the widget**, **A chosen device** or **Every connected client**. |
+| **Timeout** | How long the question waits, at most 9 minutes. The dialog says when it closes. |
+| **Answer variable** | Gets `true` or `false`, the chosen item or the text. |
+| **Index variable** | For a list: the position of the chosen item, starting at `0`. |
+| **Outcome variable** | How the question ended, see below. |
+
+The first screen that answers wins, and the dialog closes everywhere else. The outcome variable gets one of
+these values, so an **If / Else** after the question can react to it:
+
+| Value | When |
+| --- | --- |
+| `answered` | Somebody answered. |
+| `cancelled` | Somebody pressed **Cancel** or closed the dialog. |
+| `timedOut` | Nobody answered in time. |
+| `noClient` | No screen could show the question, so it was not asked. |
+
+Without an answer the answer variable gets `false` for a yes or no question and an empty text otherwise, and
+the index variable gets `-1`, so an earlier answer is never used by mistake.
+
+- **No screen to ask:** a hardware deck cannot show dialogs, and an automation or a flow started by an AI
+  client has no pressing device. With **The device that pressed the widget**, both end as `noClient` right
+  away. Choose **A chosen device** or **Every connected client** for those.
+- **The desktop app:** a question asked from a widget pressed in the desktop app appears in the desktop app
+  and in every web client signed in as administrator.
+- **Stopping the flow:** every flow stops after 10 minutes in total, counting the steps before the question
+  too, and a flow you stop yourself stops right away. Either way the dialog closes and the steps after the
+  question do not run.
+- **Trying it out:** running the flow from the flow editor stops it after 2 minutes, and running the action
+  on its own, also from an AI client, after 30 seconds. Keep the timeout below that while you test, or press
+  the widget, which gets the full 10 minutes.
+- **The answer is typed by a person:** Macro Deck stores it exactly as entered and never runs it as a
+  template. Check it before you pass it on, for example to **Run Command**.
+
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,

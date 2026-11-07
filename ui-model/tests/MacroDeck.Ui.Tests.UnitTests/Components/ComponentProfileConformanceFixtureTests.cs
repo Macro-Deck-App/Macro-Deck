@@ -59,6 +59,7 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-video-stream-tree.json";
 		yield return "conformance-text-fit-tree.json";
 		yield return "conformance-todo-header-tree.json";
+		yield return "conformance-segmented-vertical-tree.json";
 	}
 
 	private static readonly string[] _firstFitLayouts = ["conformance.group.inline", "conformance.group.stacked"];
@@ -662,6 +663,32 @@ public class ComponentProfileConformanceFixtureTests
 			Assert.That(nodes["conformance.sideways"].Properties["direction"].GetString(),
 				Is.EqualTo(UiComponentDirections.Horizontal),
 				"a horizontal list is the case a reader has to leave alone even with anchor end");
+		});
+	}
+
+	[Test]
+	public void The_vertical_segmented_fixture_asks_for_version_two_and_falls_back_to_the_same_choices_in_one_row()
+	{
+		var tree = JsonSerializer.Deserialize<UiTree>(ReadTree("conformance-segmented-vertical-tree.json"),
+			UiCanonicalJson.Options)!;
+		var nodes = Walk(tree.Root).ToDictionary(node => node.Id, StringComparer.Ordinal);
+
+		var choices = nodes["conformance.choices"];
+		var drawn = choices.Children.Select(child => child.Properties["text"].GetString()).ToList();
+		var fallback = choices.Fallback!.Children.Select(child => child.Properties["text"].GetString()).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(choices.Type, Is.EqualTo(UiComponents.Segmented));
+			Assert.That(choices.Properties["direction"].GetString(), Is.EqualTo(UiComponentDirections.Vertical));
+			Assert.That(choices.RequiredComponentVersion,
+				Is.EqualTo(2),
+				"a version 1 reader ignores direction, so the vertical segmented has to ask for version 2");
+			Assert.That(choices.Fallback.Type, Is.EqualTo(UiComponents.Segmented));
+			Assert.That(choices.Fallback.Properties.ContainsKey("direction"), Is.False);
+			Assert.That(fallback, Is.EqualTo(drawn).AsCollection, "the fallback offers the same choices");
+			Assert.That(choices.Fallback.Properties["selected"].GetInt32(),
+				Is.EqualTo(choices.Properties["selected"].GetInt32()));
 		});
 	}
 

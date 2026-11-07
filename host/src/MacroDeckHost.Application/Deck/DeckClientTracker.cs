@@ -48,7 +48,8 @@ public sealed class DeckClientTracker
 				ClientId = clientId,
 				DeviceId = device,
 				ProfileId = profileId,
-				FolderId = folderId
+				FolderId = folderId,
+				IsDeviceSession = DeviceOrigin.TryParse(clientId, out _)
 			};
 			_clients[clientId] = client;
 

@@ -11627,6 +11627,118 @@
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>تعذّر عرض الإشعار.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>طرح سؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>يوقف التدفق مؤقتًا ويطرح سؤالًا على اللوحة ويحفظ الإجابة في متغير.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>نوع السؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>نعم أو لا</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>الاختيار من قائمة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>إدخال نص</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>السؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>الرسالة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>الخيارات</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>خيار واحد في كل سطر أو مصفوفة JSON. أدرج متغيرًا لأخذ القائمة منه. 50 خيارًا على الأكثر، بحد أقصى 100 حرف لكل منها.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>نص توضيحي</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>النص الافتراضي</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>مكان السؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>الجهاز الذي ضغط على الأداة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>جهاز مختار</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>كل العملاء المتصلين</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>الجهاز</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>المهلة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>المدة التي ينتظر فيها السؤال إجابة، 9 دقائق على الأكثر.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>متغير الإجابة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>يتلقى true أو false أو العنصر المختار أو النص المدخل. دون إجابة يتلقى false أو نصًا فارغًا.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>متغير الموضع</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>يتلقى موضع العنصر المختار بدءًا من 0، أو -1 دون إجابة.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>متغير النتيجة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>يتلقى answered أو cancelled أو timedOut أو noClient.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>يُغلق بعد ثانية واحدة ({count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>يُغلق بعد انتهاء المهلة (بالثواني: {count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>يُغلق بعد دقيقة واحدة ({count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>يُغلق بعد انتهاء المهلة (بالدقائق: {count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>الأسئلة غير متاحة بعد.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>تعذر عرض السؤال.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>قائمة الخيارات فارغة.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>تتجاوز القائمة الحد المسموح من الخيارات (الحد الأقصى: {max}).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>يتجاوز أحد الخيارات الطول المسموح (الحد الأقصى بالأحرف: {max}).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>قائمة الخيارات أكبر من أن تُعرض.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>تعذر حفظ الإجابة في {variable}. تحقق من نوع المتغير.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>يضبط مستوى صوت جهاز الصوت المحدد على مستوى معين.</value>
   </data>

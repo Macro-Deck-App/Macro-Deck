@@ -11627,6 +11627,118 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>Не удалось показать уведомление.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>Задать вопрос</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>Приостанавливает поток, задаёт вопрос на деке и сохраняет ответ в переменной.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>Тип вопроса</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>Да или нет</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>Выбор из списка</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>Ввод текста</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>Вопрос</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>Варианты</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>Один вариант на строку или массив JSON. Вставьте переменную, чтобы взять список из неё. Не более 50 вариантов длиной до 100 символов.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>Подсказка в поле</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>Текст по умолчанию</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>Где спрашивать</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>Устройство, нажавшее виджет</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>Выбранное устройство</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>Все подключённые клиенты</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>Устройство</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>Тайм-аут</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>Сколько вопрос ждёт ответа, не более 9 минут.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>Переменная для ответа</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>Получает true или false, выбранный вариант или введённый текст. Без ответа получает false или пустой текст.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>Переменная для позиции</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>Получает позицию выбранного варианта начиная с 0 или -1 без ответа.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>Переменная для результата</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>Получает answered, cancelled, timedOut или noClient.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>Закроется через {count} секунду.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>Закроется через {count} с.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>Закроется через {count} минуту.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>Закроется через {count} мин.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>Вопросы пока недоступны.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>Не удалось показать вопрос.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>Список вариантов пуст.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>В списке больше вариантов, чем допустимо (не более {max}).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>Вариант длиннее, чем допустимо (не более {max} символов).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>Список вариантов слишком большой для показа.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>Не удалось сохранить ответ в переменной {variable}. Проверьте тип переменной.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Задаёт громкость выбранного аудиоустройства на указанном уровне.</value>
   </data>

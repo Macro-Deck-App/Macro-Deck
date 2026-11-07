@@ -11626,6 +11626,118 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>Impossibile mostrare la notifica.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>Fai una domanda</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>Mette in pausa il flusso, fa una domanda sul deck e salva la risposta in una variabile.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>Tipo di domanda</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>Sì o no</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>Scegli da un elenco</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>Inserisci testo</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>Domanda</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>Messaggio</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>Scelte</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>Una scelta per riga oppure un array JSON. Inserisci una variabile per prendere l'elenco da essa. Al massimo 50 scelte di massimo 100 caratteri ciascuna.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>Segnaposto</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>Testo predefinito</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>Chiedi su</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>Il dispositivo che ha premuto il widget</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>Un dispositivo scelto</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>Tutti i client connessi</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>Timeout</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>Per quanto tempo la domanda attende una risposta, al massimo 9 minuti.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>Variabile della risposta</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>Riceve true o false, l'elemento scelto o il testo inserito. Senza risposta riceve false o un testo vuoto.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>Variabile della posizione</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>Riceve la posizione dell'elemento scelto a partire da 0, oppure -1 senza risposta.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>Variabile dell'esito</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>Riceve answered, cancelled, timedOut o noClient.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>Si chiude dopo {count} secondo.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>Si chiude dopo {count} secondi.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>Si chiude dopo {count} minuto.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>Si chiude dopo {count} minuti.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>Le domande non sono ancora disponibili.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>Impossibile mostrare la domanda.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>L'elenco delle scelte è vuoto.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>L'elenco ha più di {max} scelte.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>Una scelta supera i {max} caratteri.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>L'elenco delle scelte è troppo grande per essere mostrato.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>Impossibile salvare la risposta in {variable}. Controlla il tipo della variabile.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Imposta il volume del dispositivo audio selezionato a un livello specifico.</value>
   </data>

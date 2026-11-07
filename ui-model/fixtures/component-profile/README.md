@@ -39,6 +39,8 @@ lays out from it:
 | `conformance-chat-layout.json` | the clipping stack's box, its children at their own size, the runs a reader draws for the spans, the shrinking stacks beside it, and what a reader without `ui.stack` version 2 draws instead |
 | `conformance-anchored-list-tree.json` | the wire form of a feed that follows its end - a `ui.list` whose `anchor` is `end`, asking for component version 3 with a newest-first fallback, beside lists whose anchor a reader has to ignore |
 | `conformance-anchored-list-layout.json` | each list's box, which of them follow their end, and what a reader without `ui.list` version 3 draws instead |
+| `conformance-segmented-vertical-tree.json` | the wire form of a vertical `ui.segmented` in a `ui.list` - `direction` `vertical`, asking for component version 2 with a one-row fallback |
+| `conformance-segmented-vertical-layout.json` | the vertical segmented's natural height, its track radius and its face geometry at a wide and a narrow tile, and what a reader without `ui.segmented` version 2 draws instead |
 | `conformance-video-stream-tree.json` | the wire form of `macrodeck.video-stream` - the stream reference on its own key with a provider id and a stream id holding a space, `fit`, a `size` that is a main-axis extent, a view with no stream, and the fallback an older reader draws |
 | `conformance-video-stream-layout.json` | each view's box, drawn with no session: the placeholder fills the box the stack gave it |
 | `conformance-text-fit-tree.json` | the wire form of the text a browser has to squeeze, cut off or clamp - see below; it has no layout table, only a measured file |
