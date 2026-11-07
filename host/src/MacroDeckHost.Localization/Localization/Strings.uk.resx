@@ -7454,6 +7454,84 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Вхід у Google для {account} втратив чинність</value>
   </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>Додає елемент у кінець масиву за шляхом у JSON і зберігає результат у змінну. Відсутній масив створюється.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>Додати до масиву JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>Зберігає у змінну кількість елементів масиву або властивостей об'єкта за шляхом у JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>Порахувати елементи JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>Властивості та індекси масиву, наприклад data.items[0].name, або просто "$" для всього документа.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>JSON для обробки. Вставте змінну, щоб використати збережений у ній JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>Значення</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>Істина або хиба</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>Фрагмент JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>Тип значення</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>Число</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>Видаляє властивість або елемент масиву за шляхом у JSON і зберігає результат у змінну.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>Видалити значення JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>Записує значення за шляхом у JSON і зберігає результат у змінну. Відсутні об'єкти на шляху створюються.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>Задати значення JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON недійсний.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>Шлях JSON недійсний.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>Значення не відповідає вибраному типу значення.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>Шлях не відповідає JSON: імені властивості там потрібен об'єкт, а індексу потрібен масив.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>Не можна видалити весь документ. Виберіть шлях усередині нього.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>Значення за цим шляхом не є масивом.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>Значення за цим шляхом не є масивом або об'єктом.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>У JSON немає значення за цим шляхом.</value>
+  </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Вхід у Microsoft скасовано або не завершено. Продовжте, щоб відкрити його знову.</value>
   </data>

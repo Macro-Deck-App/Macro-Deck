@@ -7454,6 +7454,84 @@
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>انتهت جلسة تسجيل الدخول إلى Google لـ {account}</value>
   </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>يضيف عنصرًا إلى نهاية مصفوفة في مسار داخل JSON ويحفظ النتيجة في متغير. تُنشأ المصفوفة إذا كانت مفقودة.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>إضافة إلى مصفوفة JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>يحفظ في متغير عدد عناصر المصفوفة أو خصائص الكائن في مسار داخل JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>عدّ عناصر JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>الخصائص وفهارس المصفوفات، مثل data.items[0].name، أو "$" وحدها للمستند بأكمله.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>بيانات JSON المراد العمل عليها. أدرج متغيرًا لاستخدام JSON المخزّن فيه.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>القيمة</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>صواب أو خطأ</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>جزء JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>نوع القيمة</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>رقم</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>نص</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>يزيل الخاصية أو عنصر المصفوفة في مسار داخل JSON ويحفظ النتيجة في متغير.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>إزالة قيمة JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>يكتب قيمة في مسار داخل JSON ويحفظ النتيجة في متغير. تُنشأ الكائنات المفقودة على المسار.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>تعيين قيمة JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>بيانات JSON غير صالحة.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>مسار JSON غير صالح.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>القيمة لا تطابق نوع القيمة المختار.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>المسار لا يطابق JSON: يتطلب اسم الخاصية كائنًا في ذلك الموضع، ويتطلب الفهرس مصفوفة.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>لا يمكن إزالة المستند بأكمله. اختر مسارًا بداخله.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>القيمة في هذا المسار ليست مصفوفة.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>القيمة في هذا المسار ليست مصفوفة ولا كائنًا.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>لا توجد قيمة في هذا المسار داخل JSON.</value>
+  </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>أُلغي تسجيل الدخول إلى Microsoft أو لم يكتمل. تابع لفتحه مجدداً.</value>
   </data>

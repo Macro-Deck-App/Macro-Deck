@@ -7453,6 +7453,84 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Logowanie Google dla {account} wygasło</value>
   </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>Dodaje element na końcu tablicy pod ścieżką w JSON i zapisuje wynik do zmiennej. Brakująca tablica jest tworzona.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>Dodaj do tablicy JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>Zapisuje do zmiennej liczbę elementów tablicy lub właściwości obiektu pod ścieżką w JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>Policz elementy JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>Właściwości i indeksy tablicy, np. data.items[0].name, albo samo "$" dla całego dokumentu.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>JSON, na którym wykonywana jest operacja. Wstaw zmienną, aby użyć zapisanego w niej JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>Wartość</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>Prawda lub fałsz</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>Fragment JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>Typ wartości</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>Liczba</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>Usuwa właściwość lub element tablicy pod ścieżką w JSON i zapisuje wynik do zmiennej.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>Usuń wartość JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>Zapisuje wartość pod ścieżką w JSON i zapisuje wynik do zmiennej. Brakujące obiekty po drodze są tworzone.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>Ustaw wartość JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON jest nieprawidłowy.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>Ścieżka JSON jest nieprawidłowa.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>Wartość nie pasuje do wybranego typu wartości.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>Ścieżka nie pasuje do JSON: nazwa właściwości wymaga w tym miejscu obiektu, a indeks tablicy.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>Nie można usunąć całego dokumentu. Wybierz ścieżkę wewnątrz niego.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>Wartość pod tą ścieżką nie jest tablicą.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>Wartość pod tą ścieżką nie jest tablicą ani obiektem.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON nie zawiera wartości pod tą ścieżką.</value>
+  </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Logowanie Microsoft zostało anulowane lub nie zostało ukończone. Naciśnięcie Kontynuuj otworzy je ponownie.</value>
   </data>

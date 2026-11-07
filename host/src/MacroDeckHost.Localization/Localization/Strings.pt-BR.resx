@@ -7454,6 +7454,84 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>O login no Google expirou para {account}</value>
   </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>Adiciona um item ao final de um array em um caminho do JSON e salva o resultado em uma variável. Um array ausente é criado.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>Adicionar ao array JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>Salva em uma variável a quantidade de itens de um array, ou de propriedades de um objeto, em um caminho do JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>Contar itens JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>Propriedades e índices de array, por exemplo data.items[0].name, ou apenas "$" para o documento inteiro.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>O JSON a ser usado. Insira uma variável para usar o JSON armazenado nela.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>Verdadeiro ou falso</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>Fragmento JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>Tipo de valor</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Nulo</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>Número</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>Remove a propriedade ou o item do array em um caminho do JSON e salva o resultado em uma variável.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>Remover valor JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>Grava um valor em um caminho do JSON e salva o resultado em uma variável. Objetos ausentes no caminho são criados.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>Definir valor JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>O JSON não é válido.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>O caminho JSON não é válido.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>O valor não corresponde ao tipo de valor escolhido.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>O caminho não corresponde ao JSON: um nome de propriedade exige ali um objeto, e um índice, um array.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>Não é possível remover o documento inteiro. Selecione um caminho dentro dele.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>O valor nesse caminho não é um array.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>O valor nesse caminho não é um array nem um objeto.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>O JSON não tem valor nesse caminho.</value>
+  </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>O login da Microsoft foi cancelado ou não foi concluído. Continue para abri-lo novamente.</value>
   </data>

@@ -7454,6 +7454,84 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} Google 로그인이 만료됨</value>
   </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>JSON의 경로에 있는 배열 끝에 항목을 추가하고 결과를 변수에 저장합니다. 배열이 없으면 생성됩니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>JSON 배열에 추가</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>JSON의 경로에 있는 배열의 항목 수 또는 객체의 속성 수를 변수에 저장합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>JSON 항목 수 세기</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>속성과 배열 인덱스. 예: data.items[0].name 또는 문서 전체를 뜻하는 "$"만 입력합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>처리할 JSON입니다. 변수를 삽입하면 그 변수에 저장된 JSON을 사용합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>값</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>참 또는 거짓</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>JSON 조각</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>값 유형</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>숫자</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>텍스트</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>JSON의 경로에 있는 속성이나 배열 항목을 제거하고 결과를 변수에 저장합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>JSON 값 제거</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>JSON의 경로에 값을 쓰고 결과를 변수에 저장합니다. 경로 중간에 없는 객체는 생성됩니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>JSON 값 설정</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON이 올바르지 않습니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>JSON 경로가 올바르지 않습니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>값이 선택한 값 유형과 맞지 않습니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>경로가 JSON과 맞지 않습니다. 그 위치에서 속성 이름에는 객체가, 인덱스에는 배열이 필요합니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>문서 전체는 제거할 수 없습니다. 문서 안의 경로를 선택하세요.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>해당 경로의 값이 배열이 아닙니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>해당 경로의 값이 배열이나 객체가 아닙니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON의 해당 경로에 값이 없습니다.</value>
+  </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Microsoft 로그인이 취소되었거나 완료되지 않았습니다. 계속을 눌러 다시 여세요.</value>
   </data>

@@ -7454,6 +7454,84 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} के लिए Google साइन-इन समाप्त हो गया</value>
   </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर ऐरे के अंत में आइटम जोड़ता है और परिणाम को वेरिएबल में सहेजता है। गायब ऐरे बनाया जाता है।</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>JSON ऐरे में जोड़ें</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर ऐरे के आइटम या ऑब्जेक्ट की प्रॉपर्टी की संख्या को वेरिएबल में सहेजता है।</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>JSON आइटम गिनें</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>प्रॉपर्टी और ऐरे इंडेक्स, जैसे data.items[0].name, या पूरे दस्तावेज़ के लिए केवल "$"।</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>जिस JSON पर काम करना है। उसमें सहेजे गए JSON का उपयोग करने के लिए एक वेरिएबल डालें।</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>मान</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>सही या गलत</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>JSON अंश</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>मान का प्रकार</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>संख्या</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>टेक्स्ट</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर प्रॉपर्टी या ऐरे आइटम हटाता है और परिणाम को वेरिएबल में सहेजता है।</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>JSON मान हटाएं</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर मान लिखता है और परिणाम को वेरिएबल में सहेजता है। रास्ते में गायब ऑब्जेक्ट बनाए जाते हैं।</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>JSON मान सेट करें</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON मान्य नहीं है।</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>JSON पथ मान्य नहीं है।</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>मान चुने गए मान के प्रकार से मेल नहीं खाता।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>पथ JSON से मेल नहीं खाता: वहां प्रॉपर्टी नाम के लिए ऑब्जेक्ट और इंडेक्स के लिए ऐरे चाहिए।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>पूरा दस्तावेज़ हटाया नहीं जा सकता। उसके अंदर का कोई पथ चुनें।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>उस पथ पर मान ऐरे नहीं है।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>उस पथ पर मान न तो ऐरे है और न ही ऑब्जेक्ट।</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON में उस पथ पर कोई मान नहीं है।</value>
+  </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Microsoft साइन-इन रद्द हो गया या पूरा नहीं हुआ। इसे फिर से खोलने के लिए जारी रखें।</value>
   </data>
