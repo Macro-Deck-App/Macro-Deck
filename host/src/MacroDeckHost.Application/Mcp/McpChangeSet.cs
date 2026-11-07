@@ -58,6 +58,7 @@ public sealed class McpChangeSet : IMcpChangeSet
 	private readonly SecretWriteAuthority _authority;
 	private readonly SecretScrubDeferral _deferral;
 	private readonly ILocalizationResolver _localization;
+	private readonly TimeProvider _timeProvider;
 
 	public McpChangeSet(
 		IServiceProvider services,
@@ -78,7 +79,8 @@ public sealed class McpChangeSet : IMcpChangeSet
 		IMcpJournal journal,
 		SecretWriteAuthority authority,
 		SecretScrubDeferral deferral,
-		ILocalizationResolver localization)
+		ILocalizationResolver localization,
+		TimeProvider timeProvider)
 	{
 		_services = services;
 		_folders = folders;
@@ -99,6 +101,7 @@ public sealed class McpChangeSet : IMcpChangeSet
 		_authority = authority;
 		_deferral = deferral;
 		_localization = localization;
+		_timeProvider = timeProvider;
 	}
 
 	public async Task<McpChangeValidation> Validate(Guid tokenId, IReadOnlyList<McpChange> changes)
@@ -163,7 +166,7 @@ public sealed class McpChangeSet : IMcpChangeSet
 		var batch = new McpJournalBatch
 		{
 			BatchId = Guid.NewGuid(),
-			At = DateTime.UtcNow,
+			At = _timeProvider.GetUtcNow().UtcDateTime,
 			TokenId = tokenId,
 			Summary = summary
 		};

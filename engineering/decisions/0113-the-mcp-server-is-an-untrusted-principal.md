@@ -35,8 +35,9 @@ revisions still need a session.
   changes through the MCP only with the user's consent. Writes during a run are attributed to the
   provider whose action runs for the MCP, for the run and a fixed grace period, at the host's single
   variable write sinks; the plugin protocol carries no execution id, so attribution is by provider.
-- Every applied batch is journaled with before-images for undo (last 20 batches, outside every backup
-  group). Undo restores deleted objects with their original ids and secrets and puts back exactly the
+- Every applied batch is journaled with before-images for undo (retention in the
+  [MCP reference](../../docs/src/content/docs/reference/mcp.md#undo), outside every backup group).
+  Undo restores deleted objects with their original ids and secrets and puts back exactly the
   approvals recorded with them.
 - Elicitation is written as a multi round-trip request. The transport runs in the hybrid session mode:
   `2026-07-28` clients are served statelessly, earlier clients get a session and the SDK resolves the
