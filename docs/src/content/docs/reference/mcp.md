@@ -246,7 +246,10 @@ and reported as `ENTITY_CHANGED_SINCE`. A restored folder becomes the start fold
 profile still has the start folder the batch left; a start folder picked after the batch stays and is reported
 the same way. Result: `{ undone, batchId, problems[] }`.
 
-The host keeps the last 20 batches of all clients. Restoring a backup clears them.
+The host keeps the last 20 batches of all clients that delete nothing. Batches that delete something
+are kept apart and are not pushed out by those: the last 100 of them, each for up to 30 days, so an
+`undo` with its `batchId`, or the default `undo` once newer batches are undone, can still bring back a
+deletion from weeks ago. Restoring a backup clears both.
 
 ### run_action
 
