@@ -515,6 +515,13 @@ A user variable is **Text**, **Numeric**, **Boolean** or **Color**. A Color vari
 `#3366ff` that widgets, folder backgrounds and the accent color can follow, see
 [Colors from a variable](/guide/tips/#colors-from-a-variable).
 
+An action field that stores its result in a user variable, such as the **Answer variable** of
+**Ask a question** or **Save output to variable** of **Run Command**, lists your variables and also takes a
+new name, which the action creates the first time it writes to it. To pick the new variable's type and
+initial value instead, click **+** next to the field: **New variable** opens with what you typed as the
+name, and after **Create** the field holds the new variable. In a widget, script or automation it starts
+as that item's own variable; choose **Global** under **Scope** for one every flow can use.
+
 Every speaker and microphone gets its own volume and mute variable, named after the device, for
 example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
 read as unavailable until it is back. Macro Deck remembers up to 64 devices; after that, the oldest
@@ -932,6 +939,8 @@ answer, for example to confirm before shutting down, to pick an OBS scene or to 
 | **Answer variable** | Gets `true` or `false`, the chosen item or the text. |
 | **Index variable** | For a list: the position of the chosen item, starting at `0`. |
 | **Outcome variable** | How the question ended, see below. |
+
+Each of the three variable fields has a **+** button that creates the variable right there, see [Variables](#variables).
 
 The first screen that answers wins, and the dialog closes everywhere else. The outcome variable gets one of
 these values, so an **If / Else** after the question can react to it:

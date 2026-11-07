@@ -1,0 +1,178 @@
+<shared-modal
+  [heading]="strings.NewVariable | translate"
+  size="small"
+  [showFooter]="false"
+  [zIndex]="zIndex"
+  (close)="close()">
+  <form class="create-form" (ngSubmit)="submitCreate()">
+    <label class="form-group">
+      <span class="form-label">{{ strings.NameField | translate }}</span>
+      <shared-input
+        class="vars-input"
+        [placeholder]="strings.NamePlaceholder | translate"
+        [ngModel]="createForm().rawName"
+        (ngModelChange)="onNameInput($event)"
+        name="name"
+        required />
+      <span class="form-preview">
+        @if (nameSanitized().sanitized) {
+          <span [class.invalid]="!nameSanitized().isValid">
+            vars.{{ nameSanitized().sanitized }}
+          </span>
+        } @else {
+          <span class="hint">{{ strings.NameHint | translate }}</span>
+        }
+      </span>
+    </label>
+
+    @if (canChooseScope()) {
+      <label class="form-group">
+        <span class="form-label">{{ strings.ScopeField | translate }}</span>
+        <shared-select
+          class="vars-input"
+          [options]="scopeOptions()"
+          [ngModel]="createForm().scope"
+          (ngModelChange)="setFormScope($event)"
+          name="scope" />
+        <span class="form-preview">
+          <span class="hint">
+            @if (createForm().scope !== 'global') {
+              {{ scopeHintLocal() }}
+            } @else {
+              {{ strings.ScopeHintGlobal | translate }}
+            }
+          </span>
+        </span>
+      </label>
+    }
+
+    <label class="form-group">
+      <span class="form-label">{{ strings.SourceField | translate }}</span>
+      <shared-select
+        class="vars-input"
+        [options]="sourceOptions()"
+        [ngModel]="createForm().source"
+        (ngModelChange)="setFormSource($event)"
+        name="source" />
+      <span class="form-preview">
+        <span class="hint">
+          @if (createForm().source === 'file') {
+            {{ strings.SourceHintFile | translate }}
+          } @else if (createForm().source === 'template') {
+            {{ strings.SourceHintTemplate | translate }}
+          } @else {
+            {{ strings.SourceHintOwnValue | translate }}
+          }
+        </span>
+      </span>
+    </label>
+
+    @if (createForm().source === 'file') {
+      <div class="form-group">
+        <span class="form-label">{{ strings.FileField | translate }}</span>
+        <shared-file-path-input
+          class="vars-input"
+          kind="file"
+          [value]="createForm().filePath"
+          (valueChange)="setFormFilePath($event)" />
+      </div>
+
+      <div class="form-group">
+        <shared-toggle-switch
+          [label]="strings.AllowWriteBack | translate"
+          [checked]="createForm().allowWriteBack"
+          (changed)="setFormAllowWriteBack($event)" />
+        <span class="form-preview">
+          <span class="hint">{{ strings.AllowWriteBackHint | translate }}</span>
+        </span>
+      </div>
+    }
+
+    <label class="form-group">
+      <span class="form-label">{{ strings.TypeField | translate }}</span>
+      <shared-select
+        class="vars-input"
+        [options]="typeOptions()"
+        [ngModel]="createForm().type"
+        (ngModelChange)="setFormType($event)"
+        name="type" />
+    </label>
+
+    @if (createForm().type === 'numeric') {
+      <label class="form-group">
+        <span class="form-label">{{ strings.DecimalPlaces | translate }}</span>
+        <shared-input
+          class="vars-input"
+          type="number"
+          [min]="0"
+          [max]="10"
+          [ngModel]="createForm().decimalPlaces"
+          (ngModelChange)="setFormDecimalPlaces($event)"
+          name="decimalPlaces" />
+      </label>
+    }
+
+    @if (createForm().source === 'template') {
+      <div class="form-group">
+        <span class="form-label">{{ strings.TemplateField | translate }}</span>
+        <shared-template-variable-field
+          class="vars-input"
+          [ariaLabel]="strings.TemplateField | translate"
+          [variables]="createTemplateVariables()"
+          [scope]="createScoped() ? localScopeState() : 'global'"
+          [scopeRefId]="createScopeRefId()"
+          [resultType]="createForm().type"
+          [resultOptions]="createTemplateOptions()"
+          [value]="createForm().template"
+          (valueChange)="setFormTemplate($event)" />
+        @if (templateResult(); as result) {
+          <span class="form-preview">
+            @if (result.error) {
+              <span class="vars-template-error" role="alert">{{ result.error }}</span>
+            } @else {
+              <span class="hint">{{ strings.TemplateResult | translate }}: <span class="vars-template-value">{{ result.value }}</span></span>
+            }
+          </span>
+        }
+      </div>
+    }
+
+    @if (createForm().source === 'value' && createForm().type === 'color') {
+      <shared-color-picker
+        class="form-group"
+        [label]="strings.InitialValue | translate"
+        [allowAlpha]="true"
+        [ngModel]="createForm().initialValue"
+        (ngModelChange)="setFormInitialValue($event)"
+        name="initialValue" />
+    } @else if (createForm().source === 'value') {
+      <label class="form-group">
+        <span class="form-label">{{ strings.InitialValue | translate }}</span>
+        @if (createForm().type === 'boolean') {
+          <shared-select
+            class="vars-input"
+            [options]="booleanOptions()"
+            [ngModel]="createForm().initialValue || 'false'"
+            (ngModelChange)="setFormInitialValue($event)"
+            name="initialValue" />
+        } @else {
+          <shared-input
+            class="vars-input"
+            [type]="createForm().type === 'numeric' ? 'number' : 'text'"
+            [ngModel]="createForm().initialValue"
+            (ngModelChange)="setFormInitialValue($event)"
+            name="initialValue" />
+        }
+      </label>
+    }
+
+    @if (createError(); as error) {
+      <shared-error-banner [message]="error" [dismissible]="false" />
+    }
+
+    <shared-button-group class="form-actions" align="end">
+      <shared-button type="button" variant="secondary" (click)="close()">{{ 'macrodeck:Common.Cancel' | translate }}</shared-button>
+      <shared-button type="submit" variant="primary" [disabled]="!canSubmitCreate()">{{ 'macrodeck:Common.Create' | translate }}</shared-button>
+    </shared-button-group>
+  </form>
+</shared-modal>
