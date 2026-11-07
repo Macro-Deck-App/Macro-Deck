@@ -5620,6 +5620,27 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Zmień profil na</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Foldery do przejścia, w kolejności, w jakiej zostały wybrane.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Foldery</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabetycznie</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Niestandardowa</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Kolejność folderów i Alfabetycznie przechodzą przez wszystkie foldery otwartego profilu. Niestandardowa przechodzi przez wybrane foldery.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Kolejność folderów</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Kolejność</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Opcjonalne. Nawiguje tylko to urządzenie. Puste pole oznacza urządzenie, które uruchomiło akcję, a gdy żadne jej nie uruchomiło, wszystkie urządzenia.</value>
   </data>
@@ -5647,11 +5668,29 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Przejdź do folderu nadrzędnego</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Przełącza na następny folder w wybranej kolejności.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Następny folder</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Przełącza na poprzedni folder w wybranej kolejności.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Poprzedni folder</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Profil, na który ma nastąpić przełączenie.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Po ostatnim folderze następuje pierwszy, a przed pierwszym ostatni. Po wyłączeniu na obu końcach nic się nie dzieje.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Zapętlaj</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Urządzenie „{deviceId}” nie jest połączone.</value>
@@ -5667,6 +5706,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Nie wybrano żadnego profilu.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Nie znaleziono otwartego folderu.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Profil „{profileId}” nie istnieje.</value>
@@ -11996,6 +12038,66 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Identyfikator pakietu aktywnej aplikacji</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Monitorowana aplikacja</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck informuje, czy ta aplikacja działa, ile ma procesów i okien oraz jak są wyświetlane jej okna.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Gra</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplikacja</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Uruchomiony proces, na przykład chrome, lub ścieżka do programu.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Wprowadź nazwę tej aplikacji.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Wybierz uruchomioną aplikację lub wprowadź ścieżkę do programu.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Maksymalna liczba monitorowanych aplikacji: {count}. Usuń jedną, aby dodać kolejną.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Nie można utworzyć unikalnej nazwy zmiennej. Zmień nazwę aplikacji i spróbuj ponownie.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Nieznany krok konfiguracji.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Działa</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Uruchomione procesy</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Otwarte okna</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Stan okna</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Stan okna aktywnej aplikacji</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Procesy aktywnej aplikacji</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Stany okien są niedostępne</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland nie pozwala Macro Deck odczytywać okien innych aplikacji. Monitorowane aplikacje nadal informują, czy działają i ile mają procesów, ale stan i liczba ich okien pozostają niedostępne.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Do odczytu stanów okien Macro Deck potrzebuje uprawnienia Ułatwienia dostępu. Zezwól na Macro Deck w Ustawieniach systemowych &gt; Prywatność i bezpieczeństwo &gt; Ułatwienia dostępu. Do tego czasu stan i liczba okien monitorowanych aplikacji pozostają niedostępne.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Udziel dostępu</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Które połączone konto Twitch ma zostać użyte.</value>
   </data>
@@ -16566,6 +16668,15 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Klucz odzyskiwania</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Utworzyć nowy klucz odzyskiwania?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Wcześniejsze kopie zapasowe nadal wymagają wcześniej zapisanego klucza odzyskiwania, dlatego należy go również zachować. Nowy klucz zostanie wyświetlony w następnym kroku.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Utwórz nowy klucz odzyskiwania</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Zdalna</value>

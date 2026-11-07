@@ -5621,6 +5621,27 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>プロファイルを次に変更</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>巡回するフォルダーです。選択した順に切り替わります。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>フォルダー</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>アルファベット順</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>「フォルダーの順序」と「アルファベット順」は、開いているプロファイルのすべてのフォルダーを巡回します。「カスタム」は選択したフォルダーだけを巡回します。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>フォルダーの順序</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>順序</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>任意。このデバイスのみがナビゲートします。空欄の場合は、アクションを実行したデバイスがナビゲートします。アクションを実行したデバイスがない場合は、すべてのデバイスがナビゲートします。</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>親フォルダーへ移動</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>選択した順序で次のフォルダーに切り替えます。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>次のフォルダー</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>選択した順序で前のフォルダーに切り替えます。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>前のフォルダー</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>切り替え先のプロファイルです。</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>プロファイル</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>最後のフォルダーの次は最初に、最初のフォルダーの前は最後に戻ります。オフの場合、両端では何も起こりません。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>ループ</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>デバイス「{deviceId}」は接続されていません。</value>
@@ -5668,6 +5707,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>プロファイルが選択されていません。</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>開いているフォルダーが見つかりません。</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>プロファイル「{profileId}」は存在しません。</value>
@@ -11997,6 +12039,66 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>フォーカス中のアプリケーションのバンドル ID</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>監視対象のアプリケーション</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck は、このアプリケーションが実行中かどうか、プロセスとウィンドウの数、ウィンドウの表示状態を報告します。</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>ゲーム</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>アプリケーション</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>chrome などの実行中のプロセス、またはプログラムのパスです。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>このアプリケーションの名前を入力してください。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>実行中のアプリケーションを選択するか、プログラムのパスを入力してください。</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck で監視できるアプリケーションは最大 {count} 個です。追加するには、いずれかを削除してください。</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>一意の変数名を作成できませんでした。アプリケーションの名前を変更してもう一度お試しください。</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定ステップです。</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>実行中</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>実行中のプロセス</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>開いているウィンドウ</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>ウィンドウの状態</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>フォーカス中のアプリケーションのウィンドウの状態</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>フォーカス中のアプリケーションのプロセス</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>ウィンドウの状態を取得できません</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland では、Macro Deck が他のアプリのウィンドウを読み取ることはできません。監視対象のアプリケーションは引き続き実行中かどうかとプロセス数を報告しますが、ウィンドウの状態とウィンドウ数は取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>ウィンドウの状態を読み取るには、Macro Deck にアクセシビリティへのアクセスが必要です。システム設定 &gt; プライバシーとセキュリティ &gt; アクセシビリティ で Macro Deck を許可してください。許可されるまで、監視対象のアプリケーションのウィンドウの状態とウィンドウ数は取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>アクセスを許可</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>操作に使う、接続済みの Twitch アカウントです。</value>
   </data>
@@ -16567,6 +16669,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>回復キー</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>新しい回復キーを作成しますか？</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>以前に作成したバックアップには、以前に保存した回復キーが引き続き必要です。そのキーも保管してください。次に新しいキーが表示されます。</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>新しい回復キーを作成</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>リモート</value>

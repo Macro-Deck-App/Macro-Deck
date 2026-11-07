@@ -5621,6 +5621,27 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Profiel wijzigen naar</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>De mappen om doorheen te gaan, in de volgorde waarin je ze kiest.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Mappen</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabetisch</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Aangepast</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Mapvolgorde en Alfabetisch gaan door alle mappen van het geopende profiel. Aangepast gaat door de mappen die je kiest.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Mapvolgorde</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Volgorde</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Optioneel. Alleen dit apparaat navigeert. Laat leeg om het apparaat dat de actie uitvoerde te laten navigeren, of alle apparaten als er geen enkel apparaat was dat de actie uitvoerde.</value>
   </data>
@@ -5648,11 +5669,29 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Naar bovenliggende map</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Gaat naar de volgende map in de gekozen volgorde.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Volgende map</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Gaat naar de vorige map in de gekozen volgorde.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Vorige map</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Het profiel waarnaar je wilt schakelen.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profiel</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Na de laatste map volgt de eerste en vóór de eerste de laatste. Als dit uit staat, gebeurt er aan beide uiteinden niets.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Doorlopen</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Het apparaat '{deviceId}' is niet verbonden.</value>
@@ -5668,6 +5707,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Er is geen profiel geselecteerd.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>De geopende map is niet gevonden.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Het profiel '{profileId}' bestaat niet.</value>
@@ -11997,6 +12039,66 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Bundel-ID van toepassing op de voorgrond</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Bewaakte toepassing</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck meldt of deze toepassing draait, hoeveel processen en vensters ze heeft en hoe haar vensters worden weergegeven.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Toepassing</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Een actief proces, zoals chrome, of het pad naar het programma.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Voer een naam voor deze toepassing in.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Kies een actieve toepassing of voer het pad naar een programma in.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck bewaakt maximaal {count} toepassingen. Verwijder er een om een andere toe te voegen.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Er kon geen unieke variabelenaam worden gemaakt. Geef de toepassing een andere naam en probeer het opnieuw.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Onbekende instellingsstap.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Actief</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Actieve processen</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Geopende vensters</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Vensterstatus</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Vensterstatus van toepassing op de voorgrond</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Processen van toepassing op de voorgrond</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Vensterstatussen zijn niet beschikbaar</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland laat Macro Deck de vensters van andere apps niet lezen. Bewaakte toepassingen melden nog steeds of ze draaien en hoeveel processen ze hebben, maar hun vensterstatus en aantal vensters blijven niet beschikbaar.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck heeft toegang via Toegankelijkheid nodig om vensterstatussen te lezen. Sta Macro Deck toe onder Systeeminstellingen &gt; Privacy en beveiliging &gt; Toegankelijkheid. Tot die tijd blijven de vensterstatus en het aantal vensters van bewaakte toepassingen niet beschikbaar.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Toegang verlenen</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Met welk verbonden Twitch-account er wordt gehandeld.</value>
   </data>
@@ -16567,6 +16669,15 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Herstelsleutel</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Nieuwe herstelsleutel maken?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Eerder gemaakte back-ups hebben nog steeds de herstelsleutel nodig die je eerder hebt opgeslagen, dus bewaar die ook. De nieuwe sleutel wordt hierna getoond.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Nieuwe herstelsleutel maken</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Extern</value>

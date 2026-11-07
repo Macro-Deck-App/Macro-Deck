@@ -33,6 +33,19 @@ listed on the right. A button with **Change Folder to** opens a subfolder, **Go 
 behind it, so with **Device** empty it moves every connected device. Pick a device there to move only
 that one. If it is not connected at that moment, the action reports an error instead of moving the others.
 
+**Next Folder** and **Previous Folder** step through folders without one action per folder, so adding,
+removing or moving a folder needs no changes to them. **Order** decides the sequence:
+
+- **Folder order**: every folder of the profile that is open, as the folder list shows them, each folder
+  followed by its subfolders.
+- **Alphabetical**: every folder of the profile that is open, sorted by name.
+- **Custom**: only the folders ticked under **Folders**, in the order you ticked them. They can belong to
+  different profiles. From a folder that is not in the list, Next goes to the first and Previous to the last.
+
+**Wrap around**, on by default, continues from the last folder to the first and the other way round. With it
+off, nothing happens at either end. They have the same **Device** setting. With **Device** empty, an
+automation moves every connected device one step on from the folder that device has open.
+
 ## Widgets
 
 The tiles in a folder:
@@ -579,6 +592,45 @@ Only your own variables can read from a file. To keep a file up to date with any
 example the current OBS scene or `system_cpu_usage_percent`, create an automation: the event
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
+
+### Application variables
+
+The System integration tells you whether an application runs and how its windows are shown, for
+example to show other buttons while a game is in fullscreen or only while an app is minimized.
+
+The application in front gets two variables of its own: `system_focused_app_window_state` and
+`system_focused_app_instances`, next to `system_focused_app`.
+
+To watch an application whether it is in front or not, open **Integrations**, choose **System** and
+add a configuration: give it a **Configuration name**, for example `Game`, and pick the **Application**
+from the running processes, or enter its process name or the path to the program. You can watch up to 16
+applications. Each one gets four variables, named after the configuration:
+
+| Variable | Shows |
+| --- | --- |
+| `system_app_game_running` | Whether the application runs. |
+| `system_app_game_instances` | How many of its processes run. Browsers and many other apps start several processes for a single window, so use the window count to know how many are open. |
+| `system_app_game_windows` | How many windows it has open, minimized ones included. |
+| `system_app_game_window_state` | `fullscreen`, `maximized`, `normal` or `minimized`; `no_window` while it runs without a window, and `not_running`. |
+
+With several windows, the most visible one counts: one fullscreen window makes the application
+`fullscreen`, and it is `minimized` only when all of its windows are. A process name such as `chrome`
+counts every process with that name; a program path counts only that program.
+
+Some limits apply:
+
+- **macOS** needs Accessibility access to read windows. Until you allow Macro Deck under System Settings,
+  Privacy & Security, Accessibility, the window state and window count are unavailable, and the
+  focused application's window state stays empty. A hidden app counts as `minimized`, and a window that
+  fills the screen apart from the menu bar and the Dock counts as `maximized`. Windows on another Space,
+  including a fullscreen app's own Space, may not be counted while you are on a different one.
+- **Linux** reads windows on X11 only. On Wayland the window state and window count are unavailable.
+  Windows of programs that do not report their process are not counted.
+- **Windows** shows apps from the Microsoft Store as `no_window`, because their windows belong to a
+  separate system process.
+
+Watched applications are settings of this computer: a profile or deck you import on another computer
+shows these variables only once you add the same configuration there.
 
 ### Variables of a widget, script or automation
 

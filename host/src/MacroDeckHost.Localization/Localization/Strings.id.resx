@@ -5621,6 +5621,27 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Ganti profil ke</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Folder yang dilalui, sesuai urutan saat dipilih.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabetis</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Kustom</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Urutan folder dan Alfabetis melewati semua folder di profil yang terbuka. Kustom hanya melewati folder yang dipilih.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Urutan folder</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Urutan</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Opsional. Hanya perangkat ini yang berpindah. Kosongkan untuk berpindah pada perangkat yang menjalankan aksi, atau pada semua perangkat jika tidak ada.</value>
   </data>
@@ -5648,11 +5669,29 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Ke folder induk</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Beralih ke folder berikutnya dalam urutan yang dipilih.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Folder berikutnya</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Beralih ke folder sebelumnya dalam urutan yang dipilih.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Folder sebelumnya</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Profil yang akan dituju.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Setelah folder terakhir, lanjut ke folder pertama, dan sebelum yang pertama ke yang terakhir. Jika nonaktif, tidak terjadi apa pun di kedua ujung.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Putar ulang</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Perangkat '{deviceId}' tidak terhubung.</value>
@@ -5668,6 +5707,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Tidak ada profil yang dipilih.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Folder yang terbuka tidak ditemukan.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Profil '{profileId}' tidak ada.</value>
@@ -11997,6 +12039,66 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>ID bundle aplikasi yang difokuskan</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Aplikasi yang dipantau</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck melaporkan apakah aplikasi ini berjalan, berapa banyak proses dan jendela yang dimilikinya, serta bagaimana jendelanya ditampilkan.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Game</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplikasi</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Proses yang sedang berjalan, seperti chrome, atau jalur ke program.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Masukkan nama untuk aplikasi ini.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Pilih aplikasi yang sedang berjalan atau masukkan jalur ke program.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck memantau hingga {count} aplikasi. Hapus satu untuk menambahkan yang lain.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Nama variabel yang unik tidak dapat dibuat. Ganti nama aplikasi lalu coba lagi.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Langkah penyiapan tidak dikenal.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Berjalan</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Proses yang berjalan</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Jendela yang terbuka</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Status jendela</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Status jendela aplikasi yang difokuskan</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Proses aplikasi yang difokuskan</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Status jendela tidak tersedia</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland tidak mengizinkan Macro Deck membaca jendela aplikasi lain. Aplikasi yang dipantau tetap melaporkan apakah aplikasi tersebut berjalan dan berapa banyak prosesnya, tetapi status dan jumlah jendelanya tetap tidak tersedia.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck memerlukan akses Aksesibilitas untuk membaca status jendela. Izinkan Macro Deck di Pengaturan Sistem &gt; Privasi &amp; Keamanan &gt; Aksesibilitas. Sampai saat itu, status dan jumlah jendela aplikasi yang dipantau tetap tidak tersedia.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Berikan akses</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Akun Twitch yang terhubung mana yang akan bertindak.</value>
   </data>
@@ -16567,6 +16669,15 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Kunci pemulihan</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Buat kunci pemulihan baru?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Cadangan yang dibuat sebelumnya tetap memerlukan kunci pemulihan yang disimpan sebelumnya, jadi simpan juga kunci tersebut. Kunci baru ditampilkan berikutnya.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Buat kunci pemulihan baru</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Jarak jauh</value>

@@ -5621,6 +5621,27 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>इस पर प्रोफ़ाइल बदलें</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>जिन फ़ोल्डरों से होकर जाना है, उसी क्रम में जिसमें आप उन्हें चुनते हैं।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>वर्णानुक्रम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>कस्टम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>फ़ोल्डर क्रम और वर्णानुक्रम खुली प्रोफ़ाइल के सभी फ़ोल्डरों से होकर जाते हैं। कस्टम केवल आपके चुने फ़ोल्डरों से होकर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>फ़ोल्डर क्रम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>क्रम</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>वैकल्पिक। केवल यह डिवाइस नेविगेट करेगा। जिस डिवाइस ने क्रिया चलाई, उसी को नेविगेट करने के लिए खाली छोड़ें, या कोई न चलाए तो सभी डिवाइस।</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>पैरेंट फ़ोल्डर पर जाएं</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>चुने गए क्रम में अगले फ़ोल्डर पर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>अगला फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>चुने गए क्रम में पिछले फ़ोल्डर पर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>पिछला फ़ोल्डर</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>जिस प्रोफ़ाइल पर स्विच करना है।</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>प्रोफ़ाइल</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>आखिरी फ़ोल्डर के बाद पहला और पहले से पहले आखिरी फ़ोल्डर आता है। बंद होने पर दोनों सिरों पर कुछ नहीं होता।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>चक्र में दोहराएँ</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>डिवाइस '{deviceId}' कनेक्ट नहीं है।</value>
@@ -5668,6 +5707,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>कोई प्रोफ़ाइल चुनी नहीं गई थी।</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>खुला फ़ोल्डर नहीं मिला।</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>प्रोफ़ाइल '{profileId}' मौजूद नहीं है।</value>
@@ -11997,6 +12039,66 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>फ़ोकस वाले एप्लिकेशन का bundle ID</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>निगरानी वाला एप्लिकेशन</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck बताता है कि यह एप्लिकेशन चल रहा है या नहीं, इसकी कितनी प्रक्रियाएँ और विंडो हैं, और इसकी विंडो कैसे दिखाई जाती हैं।</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>गेम</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>एप्लिकेशन</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>चल रही कोई प्रक्रिया, जैसे chrome, या प्रोग्राम का पथ।</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>इस एप्लिकेशन के लिए एक नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>चल रहा कोई एप्लिकेशन चुनें या किसी प्रोग्राम का पथ दर्ज करें।</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>निगरानी वाले एप्लिकेशन की अधिकतम संख्या: {count}। दूसरा जोड़ने के लिए एक हटाएँ।</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>एक अद्वितीय वेरिएबल नाम नहीं बनाया जा सका। एप्लिकेशन का नाम बदलें और फिर से प्रयास करें।</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>अज्ञात सेटअप चरण।</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>चल रहा है</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>चल रही प्रक्रियाएँ</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>खुली विंडो</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>विंडो स्थिति</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>फ़ोकस वाले एप्लिकेशन की विंडो स्थिति</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>फ़ोकस वाले एप्लिकेशन की प्रक्रियाएँ</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>विंडो स्थितियाँ उपलब्ध नहीं हैं</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland, Macro Deck को अन्य ऐप्स की विंडो पढ़ने नहीं देता। निगरानी वाले एप्लिकेशन अब भी बताते हैं कि वे चल रहे हैं या नहीं और उनकी कितनी प्रक्रियाएँ हैं, लेकिन उनकी विंडो स्थिति और विंडो संख्या उपलब्ध नहीं रहती।</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>विंडो स्थितियाँ पढ़ने के लिए Macro Deck को Accessibility एक्सेस चाहिए। System Settings &gt; Privacy &amp; Security &gt; Accessibility में Macro Deck को अनुमति दें। तब तक निगरानी वाले एप्लिकेशन की विंडो स्थिति और विंडो संख्या उपलब्ध नहीं रहेगी।</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>एक्सेस दें</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>किस जुड़े हुए Twitch खाते की ओर से क्रिया करनी है।</value>
   </data>
@@ -16567,6 +16669,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>रिकवरी कुंजी</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>नई रिकवरी कुंजी बनाएं?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>पहले बने बैकअप के लिए अब भी वही रिकवरी कुंजी चाहिए जो आपने पहले सहेजी थी, इसलिए उसे भी संभालकर रखें। इसके बाद नई कुंजी दिखाई जाएगी।</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>नई रिकवरी कुंजी बनाएं</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>रिमोट</value>
