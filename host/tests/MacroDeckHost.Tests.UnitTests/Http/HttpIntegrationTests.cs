@@ -9,7 +9,17 @@ namespace MacroDeckHost.Tests.UnitTests.Http;
 [TestFixture]
 internal sealed class HttpIntegrationTests
 {
-	private static readonly string[] _actionIds = ["send-request", "get-json-value"];
+	private static readonly string[] _actionIds =
+	[
+		"send-request",
+		"get-json-value",
+		"set-json-value",
+		"remove-json-value",
+		"count-json-items",
+		"append-json-array-item"
+	];
+
+	private static readonly string[] _networkActionIds = ["send-request", "get-json-value"];
 
 	private static readonly string[] _methods =
 		["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "QUERY"];
@@ -23,10 +33,20 @@ internal sealed class HttpIntegrationTests
 	}
 
 	[Test]
-	public void Every_action_declares_the_network_risk_category()
+	public void Only_the_actions_that_send_requests_declare_the_network_risk_category()
 	{
-		Assert.That(_integration.Actions.Select(action => action.RiskCategory),
-			Is.All.EqualTo(ActionRiskCategory.Network));
+		var network = _integration.Actions
+			.Where(action => action.RiskCategory == ActionRiskCategory.Network)
+			.Select(action => action.Id);
+		var others = _integration.Actions
+			.Where(action => !_networkActionIds.Contains(action.Id))
+			.Select(action => action.RiskCategory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(network, Is.EquivalentTo(_networkActionIds));
+			Assert.That(others, Is.All.EqualTo(ActionRiskCategory.None));
+		});
 	}
 
 	[Test]
