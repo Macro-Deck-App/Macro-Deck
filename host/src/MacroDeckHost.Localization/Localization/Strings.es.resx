@@ -5620,6 +5620,27 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Cambiar a perfil</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Las carpetas que se recorren, en el orden en que las selecciones.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Carpetas</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabético</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Personalizado</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Orden de carpetas y Alfabético recorren todas las carpetas del perfil abierto. Personalizado recorre las carpetas que elijas.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Orden de carpetas</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Orden</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Opcional. Solo navega este dispositivo. Déjalo vacío para usar el dispositivo que ejecutó la acción, o todos los dispositivos si ninguno la ejecutó.</value>
   </data>
@@ -5647,11 +5668,29 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Ir a la carpeta superior</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Cambia a la siguiente carpeta en el orden elegido.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Carpeta siguiente</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Cambia a la carpeta anterior en el orden elegido.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Carpeta anterior</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>El perfil al que cambiar.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Perfil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Después de la última carpeta sigue la primera y, antes de la primera, la última. Si está desactivado, no pasa nada en ninguno de los extremos.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Volver al principio</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>El dispositivo '{deviceId}' no está conectado.</value>
@@ -5667,6 +5706,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>No se seleccionó ningún perfil.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>No se encontró la carpeta abierta.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>El perfil '{profileId}' no existe.</value>
@@ -12030,6 +12072,66 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>ID de paquete de la aplicación en primer plano</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Aplicación supervisada</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck indica si esta aplicación se está ejecutando, cuántos procesos y ventanas tiene y cómo se muestran sus ventanas.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Juego</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplicación</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Un proceso en ejecución, como chrome, o la ruta del programa.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Escribe un nombre para esta aplicación.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Elige una aplicación en ejecución o escribe la ruta de un programa.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck supervisa hasta {count} aplicaciones. Quita una para añadir otra.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>No se pudo crear un nombre de variable único. Cambia el nombre de la aplicación y vuelve a intentarlo.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Paso de configuración desconocido.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>En ejecución</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Procesos en ejecución</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Ventanas abiertas</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Estado de la ventana</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Estado de la ventana de la aplicación en primer plano</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Procesos de la aplicación en primer plano</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Los estados de las ventanas no están disponibles</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland no permite que Macro Deck lea las ventanas de otras apps. Las aplicaciones supervisadas siguen indicando si se están ejecutando y cuántos procesos tienen, pero el estado y el número de sus ventanas siguen sin estar disponibles.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck necesita acceso de Accesibilidad para leer el estado de las ventanas. Autoriza Macro Deck en Ajustes del Sistema &gt; Privacidad y seguridad &gt; Accesibilidad. Hasta entonces, el estado y el número de ventanas de las aplicaciones supervisadas no estarán disponibles.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Conceder acceso</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Qué cuenta de Twitch conectada actuará.</value>
   </data>
@@ -16600,6 +16702,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Clave de recuperación</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>¿Crear una nueva clave de recuperación?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Las copias de seguridad anteriores siguen necesitando la clave de recuperación que guardaste antes, así que consérvala también. A continuación se muestra la nueva clave.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Crear nueva clave de recuperación</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Remoto</value>

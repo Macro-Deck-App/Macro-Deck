@@ -493,7 +493,7 @@ describe('OnboardingWizardComponent', () => {
       expect(backupService.acknowledgeRecoveryKey).not.toHaveBeenCalled();
     });
 
-    it('leaves the step locked but reachable when the key modal is dismissed without confirming', async () => {
+    it('keeps the new key on screen and the step locked until the key is confirmed as stored', async () => {
       const created = recoveryKeyState({ exportedAt: '2026-09-01T00:00:00Z' });
       await create(true, LAN_ENDPOINT, recoveryKeyState({ availability: 'None', exportedAt: undefined, createdAt: undefined }));
       backupService.createRecoveryKey.and.callFake(async () => {
@@ -507,13 +507,14 @@ describe('OnboardingWizardComponent', () => {
       await click(buttonNamed(step, 'Create recovery key'));
       step = (await settle())!;
 
-      await dismissClick(closeButtonOf(step.querySelector('shared-recovery-key-modal')!));
+      const keyModal = step.querySelector('shared-recovery-key-modal')!;
+      expect(closeButtonOf(keyModal)).toBeNull();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       step = (await settle())!;
 
       expect(backupService.acknowledgeRecoveryKey).not.toHaveBeenCalled();
+      expect(step.querySelector('shared-recovery-key-modal')).not.toBeNull();
       expect(buttonNamed(step, 'Next')?.disabled).toBeTrue();
-      expect(step.querySelector('shared-recovery-key-modal')).toBeNull();
-      expect(buttonNamed(step, 'Show recovery key')).toBeTruthy();
     });
 
     it('offers no close button to get past the unsaved key with', async () => {
@@ -545,6 +546,25 @@ describe('OnboardingWizardComponent', () => {
       await click(buttonNamed(step, 'Get started'));
 
       expect(api.completeOnboarding).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows a key that already exists instead of reporting a failed create', async () => {
+      const existing = recoveryKeyState({ exportedAt: undefined });
+      await create(true, LAN_ENDPOINT, recoveryKeyState({ availability: 'None', exportedAt: undefined, createdAt: undefined }));
+      backupService.createRecoveryKey.and.callFake(async () => {
+        recoveryKeySignal.set(existing);
+        return { status: 'exists', state: existing };
+      });
+      authState.set('authenticated');
+      connectionState.set('connected');
+      let step = await openRecoveryKeyStep();
+
+      await click(buttonNamed(step, 'Create recovery key'));
+      step = (await settle())!;
+
+      expect(toast.show).not.toHaveBeenCalled();
+      expect(step.textContent).not.toContain('could not be created');
+      expect(buttonNamed(step, 'Show recovery key')).toBeTruthy();
     });
 
     it('is not a dead end when the recovery key is missing', async () => {

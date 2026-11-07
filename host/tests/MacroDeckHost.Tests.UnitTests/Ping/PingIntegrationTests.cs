@@ -222,13 +222,12 @@ internal sealed class PingIntegrationTests
 
 		_context.SetTarget(entryId, Nas, "nas", 2);
 		await ReloadAsync();
+		// The fake counts a probe when it starts, so the reload can return before its failure is applied.
+		await CalendarTree.WaitForAsync(() => Snapshot().Reachability == PingReachability.Offline,
+			"the lowered threshold never took the target offline");
 
-		Assert.Multiple(() =>
-		{
-			Assert.That(Snapshot().Reachability, Is.EqualTo(PingReachability.Offline));
-			Assert.That(_context.Published.Select(published => published.EventId),
-				Is.EqualTo(new[] { PingEventIds.TargetOffline }));
-		});
+		Assert.That(_context.Published.Select(published => published.EventId),
+			Is.EqualTo(new[] { PingEventIds.TargetOffline }));
 	}
 
 	[Test]

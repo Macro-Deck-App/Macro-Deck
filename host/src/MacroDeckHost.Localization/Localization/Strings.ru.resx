@@ -5621,6 +5621,27 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Перейти к профилю</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Папки для перехода, в том порядке, в котором они выбраны.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Папки</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>По алфавиту</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Пользовательский</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>«Порядок папок» и «По алфавиту» проходят все папки открытого профиля. «Пользовательский» проходит выбранные папки.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Порядок папок</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Порядок</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Необязательно. Переходить будет только это устройство. Оставьте пустым, чтобы переходило устройство, которое запустило действие, или все устройства, если такого не было.</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Перейти к родительской папке</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Переходит к следующей папке в выбранном порядке.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Следующая папка</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Переходит к предыдущей папке в выбранном порядке.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Предыдущая папка</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Профиль, на который нужно переключиться.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Профиль</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>После последней папки следует первая, а перед первой — последняя. Если выключено, на концах ничего не происходит.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Зациклить</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Устройство '{deviceId}' не подключено.</value>
@@ -5668,6 +5707,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Профиль не выбран.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Открытая папка не найдена.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Профиль '{profileId}' не существует.</value>
@@ -12031,6 +12073,66 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>ID пакета активного приложения</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Отслеживаемое приложение</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck сообщает, запущено ли это приложение, сколько у него процессов и окон и как отображаются его окна.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Игра</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Приложение</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Запущенный процесс, например chrome, или путь к программе.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Введите имя этого приложения.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Выберите запущенное приложение или введите путь к программе.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Максимальное число отслеживаемых приложений: {count}. Удалите одно, чтобы добавить другое.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Не удалось создать уникальное имя переменной. Переименуйте приложение и повторите попытку.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Неизвестный шаг настройки.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Запущено</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Запущенные процессы</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Открытые окна</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Состояние окна</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Состояние окна активного приложения</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Процессы активного приложения</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Состояния окон недоступны</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland не позволяет Macro Deck читать окна других приложений. Отслеживаемые приложения по-прежнему сообщают, запущены ли они и сколько у них процессов, но состояние и число их окон остаются недоступными.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Для чтения состояний окон Macro Deck требуется разрешение «Универсальный доступ». Разрешите Macro Deck в разделе «Системные настройки» &gt; «Конфиденциальность и безопасность» &gt; «Универсальный доступ». До тех пор состояние и число окон отслеживаемых приложений остаются недоступными.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Предоставить доступ</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Какой подключённый аккаунт Twitch использовать.</value>
   </data>
@@ -16601,6 +16703,15 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Ключ восстановления</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Создать новый ключ восстановления?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Для созданных ранее резервных копий по-прежнему нужен сохранённый ранее ключ восстановления, поэтому сохраните и его. Новый ключ будет показан далее.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Создать новый ключ восстановления</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Удалённые</value>

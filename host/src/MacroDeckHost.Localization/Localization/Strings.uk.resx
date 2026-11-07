@@ -5621,6 +5621,27 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Змінити профіль на</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Папки для переходу, у тому порядку, у якому їх вибрано.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Папки</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>За абеткою</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Власний</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>«Порядок папок» і «За абеткою» проходять усі папки відкритого профілю. «Власний» проходить вибрані папки.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Порядок папок</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Порядок</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Необов'язково. Навігацію виконуватиме лише цей пристрій. Залиште порожнім, щоб навігацію виконував пристрій, який запустив дію, або всі пристрої, якщо жоден не запустив.</value>
   </data>
@@ -5648,11 +5669,29 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Перейти до батьківської папки</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Переходить до наступної папки у вибраному порядку.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Наступна папка</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Переходить до попередньої папки у вибраному порядку.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Попередня папка</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Профіль, на який потрібно перейти.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Профіль</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Після останньої папки йде перша, а перед першою — остання. Якщо вимкнено, на кінцях нічого не відбувається.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Зациклити</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Пристрій '{deviceId}' не підключено.</value>
@@ -5668,6 +5707,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Профіль не вибрано.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Відкриту папку не знайдено.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Профілю '{profileId}' не існує.</value>
@@ -12031,6 +12073,66 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Ідентифікатор пакета застосунку у фокусі</value>
   </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Відстежуваний застосунок</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck повідомляє, чи запущено цей застосунок, скільки в нього процесів і вікон і як відображаються його вікна.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Гра</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Застосунок</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Запущений процес, наприклад chrome, або шлях до програми.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Введіть назву цього застосунку.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Виберіть запущений застосунок або введіть шлях до програми.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Максимальна кількість відстежуваних застосунків: {count}. Видаліть один, щоб додати інший.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Не вдалося створити унікальну назву змінної. Перейменуйте застосунок і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Невідомий крок налаштування.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Запущено</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Запущені процеси</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Відкриті вікна</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Стан вікна</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Стан вікна застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Процеси застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Стани вікон недоступні</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland не дозволяє Macro Deck читати вікна інших застосунків. Відстежувані застосунки й далі повідомляють, чи запущені вони та скільки в них процесів, але стан і кількість їхніх вікон залишаються недоступними.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Для зчитування станів вікон Macro Deck потрібен дозвіл «Універсальний доступ». Дозвольте Macro Deck у розділі «Системні параметри» &gt; «Конфіденційність і безпека» &gt; «Універсальний доступ». До того часу стан і кількість вікон відстежуваних застосунків залишаються недоступними.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Надати доступ</value>
+  </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Від імені якого підключеного облікового запису Twitch діяти.</value>
   </data>
@@ -16601,6 +16703,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Ключ відновлення</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Створити новий ключ відновлення?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Для створених раніше резервних копій і далі потрібен збережений раніше ключ відновлення, тому збережіть і його. Новий ключ буде показано далі.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Створити новий ключ відновлення</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Віддалена</value>

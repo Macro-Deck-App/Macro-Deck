@@ -746,6 +746,33 @@ public class RemoteIntegrationContextTests
 		});
 	}
 
+	[Test]
+	public void RemoteDeckNavigator_exposes_where_each_pushed_folder_sits_in_its_profiles_tree()
+	{
+		var stateCache = new HostStateCache(new PluginConnectionState());
+		var deck = new RemoteDeckNavigator(new RecordingHostInvoker(),
+			stateCache,
+			new PluginConnectionState(),
+			Serilog.Core.Logger.None);
+
+		stateCache.Apply(StatePush(HostApis.Deck,
+			new DeckStateDto
+			{
+				Folders =
+				[
+					new DeckFolder { Id = "f2", Label = "Scenes", ProfileId = "p1", ParentId = "f1", Order = 3 }
+				]
+			}));
+
+		var folder = deck.GetFolders().Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(folder.ProfileId, Is.EqualTo("p1"));
+			Assert.That(folder.ParentId, Is.EqualTo("f1"));
+			Assert.That(folder.Order, Is.EqualTo(3));
+		});
+	}
+
 	private static readonly WidgetAppearanceProperty[] _pushedAppearanceProperties =
 	[
 		WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.LabelColor,

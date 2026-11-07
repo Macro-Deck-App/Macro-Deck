@@ -665,7 +665,9 @@ public class SystemIntegrationTests
 			var written = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 			api.OnSetValue = (name, value) =>
 			{
-				if (name == "system_focused_app_bundle_id")
+				// The startup signal and the seed publish can both write the seed, so a bare bundle id
+				// write may still be the seed; wait for the cleared value itself.
+				if (name == "system_focused_app_bundle_id" && Equals(value, string.Empty))
 				{
 					written.TrySetResult(value);
 				}
