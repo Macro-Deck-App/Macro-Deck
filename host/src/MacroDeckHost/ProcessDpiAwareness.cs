@@ -44,7 +44,13 @@ public static class ProcessDpiAwareness
 		{
 		}
 
-		_ = SetProcessDpiAware();
+		try
+		{
+			_ = SetProcessDpiAware();
+		}
+		catch (EntryPointNotFoundException)
+		{
+		}
 	}
 
 	[DllImport("user32.dll", SetLastError = true)]
