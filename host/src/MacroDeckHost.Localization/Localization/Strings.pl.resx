@@ -2546,6 +2546,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Akcja nie odpowiedziała w wyznaczonym czasie</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Ten krok używa sekretu i został odrzucony, więc nie jest uruchamiany.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Ten krok używa sekretu i oczekuje na zatwierdzenie.</value>
   </data>
@@ -16115,6 +16118,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Zmieniono</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Odrzuć</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Nie udało się odrzucić kroku.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nic nie oczekuje na zatwierdzenie</value>
   </data>
@@ -16122,7 +16131,7 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Wszystkie kroki używające sekretu są zatwierdzone.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Kroki używające sekretu są uruchamiane dopiero po zatwierdzeniu. Sprawdź, co się zmieniło, a następnie zatwierdź.</value>
+    <value>Kroki używające sekretu są uruchamiane dopiero po zatwierdzeniu. Sprawdź, co się zmieniło, a następnie zatwierdź lub odrzuć.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać zatwierdzeń.</value>

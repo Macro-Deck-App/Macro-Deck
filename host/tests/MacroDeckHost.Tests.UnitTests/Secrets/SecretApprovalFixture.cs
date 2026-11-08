@@ -132,6 +132,12 @@ internal sealed class SecretApprovalFixture
 		return Ledger.Approve(owner, block, Ledger.Fingerprint(block.Content));
 	}
 
+	public bool Decline(FlowOwner owner, string flows, string blockId)
+	{
+		var block = FlowSecretBlocks.FromFlows(flows).Single(candidate => candidate.Id == blockId);
+		return Ledger.Decline(owner, block, Ledger.Fingerprint(block.Content));
+	}
+
 	private sealed class NullActionInteractions : IActionInteractions
 	{
 		public void RequestItemPicker(

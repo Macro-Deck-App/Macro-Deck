@@ -13,9 +13,13 @@ public interface ISecretApprovals
 
 	bool IsUnknown(FlowOwner owner, string blockId, FlowBlockContent block);
 
+	bool IsDeclined(FlowOwner owner, string blockId, FlowBlockContent block);
+
 	string Fingerprint(FlowBlockContent block);
 
 	bool Approve(FlowOwner owner, FlowBlockSnapshot current, string fingerprint);
+
+	bool Decline(FlowOwner owner, FlowBlockSnapshot current, string fingerprint);
 }
 
 public sealed class SecretApprovalLedger : ISecretApprovals
@@ -122,6 +126,7 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 				var isNewKey = key.Approved.Count == 0
 					&& key.Withheld.Count == 0
 					&& key.Unknown.Count == 0
+					&& key.Declined.Count == 0
 					&& key.Superseded is null;
 
 				if (block.Content.HasDuplicateParameterNames)
@@ -216,7 +221,9 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 					return true;
 				}
 
-				if (Matches(key.Withheld, normalized) || Matches(key.Unknown, normalized))
+				if (Matches(key.Withheld, normalized)
+					|| Matches(key.Unknown, normalized)
+					|| Matches(key.Declined, normalized))
 				{
 					return false;
 				}
@@ -237,6 +244,16 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 		}
 	}
 
+	public bool IsDeclined(FlowOwner owner, string blockId, FlowBlockContent block)
+	{
+		lock (_gate)
+		{
+			return _owners.TryGetValue(owner, out var keys)
+				&& keys.TryGetValue(blockId, out var key)
+				&& Matches(key.Declined, Normalize(block));
+		}
+	}
+
 	public string? ApprovedSnapshot(FlowOwner owner, string blockId)
 	{
 		lock (_gate)
@@ -252,7 +269,8 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 		lock (_gate)
 		{
 			return _owners.TryGetValue(owner, out var keys)
-				? keys.Values.Sum(key => key.Approved.Count + key.Withheld.Count + key.Unknown.Count)
+				? keys.Values.Sum(key
+					=> key.Approved.Count + key.Withheld.Count + key.Unknown.Count + key.Declined.Count)
 				: 0;
 		}
 	}
@@ -281,6 +299,7 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 			}
 
 			key.Approved.Add(current.Raw);
+			key.Declined.RemoveAll(snapshot => SnapshotNormalized(snapshot) == normalized);
 			var changed = new HashSet<FlowOwner> { owner };
 			foreach (var (other, otherKeys) in _owners)
 			{
@@ -302,6 +321,43 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 				.ToList())
 			{
 				SavePartitionLocked(group, partitionId);
+			}
+
+			return true;
+		}
+	}
+
+	public bool Decline(FlowOwner owner, FlowBlockSnapshot current, string fingerprint)
+	{
+		lock (_gate)
+		{
+			var normalized = Normalize(current.Content);
+			if (string.IsNullOrEmpty(current.Id)
+				|| current.Content.HasDuplicateParameterNames
+				|| !string.Equals(FlowBlockNormalizer.Fingerprint(normalized), fingerprint, StringComparison.Ordinal))
+			{
+				return false;
+			}
+
+			var keys = KeysFor(owner);
+			if (!keys.TryGetValue(current.Id, out var key))
+			{
+				key = keys[current.Id] = new SecretApprovalKey();
+			}
+
+			if (Matches(key.Approved, normalized))
+			{
+				return false;
+			}
+
+			if (!Matches(key.Declined, normalized))
+			{
+				key.Declined.Add(current.Raw);
+			}
+
+			if (_partitions.TryGetValue(owner, out var partition))
+			{
+				SavePartitionLocked(partition.Group, partition.PartitionId);
 			}
 
 			return true;
@@ -369,7 +425,8 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 
 			Retire(key.Withheld, stored);
 			Retire(key.Unknown, stored);
-			if (key is { Approved.Count: 0, Withheld.Count: 0, Unknown.Count: 0, Superseded: null })
+			key.Declined.RemoveAll(snapshot => !MatchesAny(snapshot, stored));
+			if (key is { Approved.Count: 0, Withheld.Count: 0, Unknown.Count: 0, Declined.Count: 0, Superseded: null })
 			{
 				keys.Remove(blockId);
 			}
@@ -409,7 +466,8 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 	{
 		return Matches(key.Approved, normalized)
 			|| Matches(key.Withheld, normalized)
-			|| Matches(key.Unknown, normalized);
+			|| Matches(key.Unknown, normalized)
+			|| Matches(key.Declined, normalized);
 	}
 
 	private bool RewritesApproved(SecretApprovalKey key, Func<string, string>? rewriter, string normalized)
@@ -434,7 +492,7 @@ public sealed class SecretApprovalLedger : ISecretApprovals
 				approved.Add(SnapshotNormalized(snapshot));
 			}
 
-			foreach (var snapshot in key.Withheld.Concat(key.Unknown))
+			foreach (var snapshot in key.Withheld.Concat(key.Unknown).Concat(key.Declined))
 			{
 				withheld.Add(SnapshotNormalized(snapshot));
 			}

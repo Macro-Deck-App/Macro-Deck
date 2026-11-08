@@ -2546,6 +2546,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>L'azione non ha risposto in tempo</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Questo passaggio usa un segreto ed è stato rifiutato, quindi non viene eseguito.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Questo passaggio usa un segreto ed è in attesa della tua approvazione.</value>
   </data>
@@ -16115,6 +16118,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Modificato</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Rifiuta</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Impossibile rifiutare il passaggio.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Niente in attesa di approvazione</value>
   </data>
@@ -16122,7 +16131,7 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
     <value>Tutti i passaggi che usano un segreto sono approvati.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>I passaggi che usano un segreto vengono eseguiti solo dopo che li hai approvati. Controlla cosa è cambiato, poi approvali.</value>
+    <value>I passaggi che usano un segreto vengono eseguiti solo dopo che li hai approvati. Controlla cosa è cambiato, poi approvali o rifiutali.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Impossibile caricare le approvazioni.</value>

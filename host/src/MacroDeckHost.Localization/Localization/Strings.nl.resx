@@ -2545,6 +2545,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>De actie heeft niet op tijd geantwoord</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Deze stap gebruikt een geheim en is afgewezen, daarom wordt hij niet uitgevoerd.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Deze stap gebruikt een geheim en wacht op je goedkeuring.</value>
   </data>
@@ -16116,6 +16119,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Gewijzigd</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Afwijzen</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>De stap kon niet worden afgewezen.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Niets wacht op goedkeuring</value>
   </data>
@@ -16123,7 +16132,7 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Alle stappen die een geheim gebruiken, zijn goedgekeurd.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Stappen die een geheim gebruiken, worden pas uitgevoerd nadat je ze hebt goedgekeurd. Bekijk wat er is gewijzigd en keur ze daarna goed.</value>
+    <value>Stappen die een geheim gebruiken, worden pas uitgevoerd nadat je ze hebt goedgekeurd. Bekijk wat er is gewijzigd en keur ze daarna goed of wijs ze af.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Goedkeuringen konden niet worden geladen.</value>
