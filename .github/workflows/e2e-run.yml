@@ -1,5 +1,5 @@
-# The E2E suite itself. Called by e2e.yml for a manual run, by ci.yml on every change, and by
-# build.yml before a release publishes - one definition so those three can never drift apart.
+# The E2E suite itself. Called by e2e.yml, ci.yml, build.yml and, per desktop OS, e2e-cross.yml:
+# one definition so its callers can never drift apart.
 name: E2E run
 
 on:
@@ -15,6 +15,11 @@ on:
         type: string
         required: false
         default: ''
+      os:
+        description: Runner OS - linux, windows or macos
+        type: string
+        required: false
+        default: linux
 
 permissions:
   contents: read
@@ -29,9 +34,12 @@ env:
 
 jobs:
   e2e:
-    name: Core E2E
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    name: ${{ inputs.os == 'linux' && 'Core E2E' || format('Core E2E ({0})', inputs.os) }}
+    runs-on: ${{ fromJSON('{"linux":"blacksmith-2vcpu-ubuntu-2404","windows":"blacksmith-2vcpu-windows-2025","macos":"blacksmith-6vcpu-macos-26"}')[inputs.os] }}
     timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -59,25 +67,36 @@ jobs:
           npm run build:web-client
 
       - name: Stage production host
-        run: ./ci/scripts/stage-host.sh linux-x64 "3.0.0-e2e.${{ github.run_number }}" "${{ env.BUILD_CHANNEL }}"
+        if: inputs.os != 'windows'
+        env:
+          RID: ${{ inputs.os == 'macos' && 'osx-arm64' || 'linux-x64' }}
+        run: ./ci/scripts/stage-host.sh "$RID" "3.0.0-e2e.${{ github.run_number }}" "${{ env.BUILD_CHANNEL }}"
 
+      - name: Stage production host (Windows)
+        if: inputs.os == 'windows'
+        shell: pwsh
+        run: ./ci/scripts/stage-host.ps1 win-x64 "3.0.0-e2e.${{ github.run_number }}" "${{ env.BUILD_CHANNEL }}"
+
+      # Only the Linux runner lacks the browser's system libraries.
       - name: Install Playwright
         working-directory: e2e
         run: |
           npm install --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install chromium
+          fi
 
       # Plays the bootstrapper's part for every spec file: each starts its own staged host with its own
-      # data directory, ports, temp directory and loopback secret (e2e/tests/support/host.js).
+      # data directory, ports, temp directory and loopback secret. host.js picks the staged binary per OS.
       - name: Run Playwright E2E tests
         working-directory: e2e
         env:
-          MACRO_DECK_HOST_BINARY: ${{ github.workspace }}/ui/bootstrapper/host-publish/Macro Deck Host
           E2E_RUN_DIR: ${{ runner.temp }}/e2e-run
           E2E_SECRETS_FILE: ${{ runner.temp }}/e2e-loopback-secrets.txt
           SUITE: ${{ inputs.suite }}
           FILTER: ${{ inputs.filter }}
-        shell: bash
         run: |
           args=()
           if [[ "$SUITE" == "smoke" ]]; then
@@ -93,7 +112,8 @@ jobs:
         if: always()
         run: |
           mkdir -p e2e/host-logs
-          for log in "${{ runner.temp }}"/e2e-run/*/macro-deck-host*.log; do
+          run_dir=$(cd "$RUNNER_TEMP/e2e-run" 2>/dev/null && pwd) || exit 0
+          for log in "$run_dir"/*/macro-deck-host*.log; do
             [[ -f "$log" ]] || continue
             cp "$log" "e2e/host-logs/$(basename "$(dirname "$log")")-$(basename "$log")"
           done
@@ -104,13 +124,19 @@ jobs:
         env:
           E2E_PASSWORD: macro-deck-e2e-password
           E2E_SECRETS_FILE: ${{ runner.temp }}/e2e-loopback-secrets.txt
-        run: python3 e2e/scripts/redact-playwright-artifacts.py e2e/test-results e2e/playwright-report e2e/host-logs
+        # Windows may only answer to python, or ship a python3 that is just a Store placeholder.
+        run: |
+          python=python3
+          if ! "$python" -c 'import sys' >/dev/null 2>&1; then
+            python=python
+          fi
+          "$python" e2e/scripts/redact-playwright-artifacts.py e2e/test-results e2e/playwright-report e2e/host-logs
 
       - name: Upload E2E diagnostics
         if: always() && steps.redact.outcome == 'success'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: e2e-diagnostics-${{ github.run_id }}
+          name: ${{ inputs.os == 'linux' && format('e2e-diagnostics-{0}', github.run_id) || format('e2e-diagnostics-{0}-{1}', inputs.os, github.run_id) }}
           if-no-files-found: warn
           retention-days: 14
           path: |
@@ -125,6 +151,7 @@ jobs:
             echo '## Macro Deck E2E'
             echo
             echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- OS: \`${{ inputs.os }}\`"
             echo "- Suite: \`${{ inputs.suite }}\`"
             echo "- Filter: \`${{ inputs.filter || 'none' }}\`"
             echo "- Data root: one isolated host per spec file under the runner temp directory"

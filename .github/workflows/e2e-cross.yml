@@ -1,0 +1,26 @@
+# The @smoke subset on the desktop OSes the Linux suite does not cover. Runs on main, nightly and,
+# called by build.yml, before a release may be signed.
+name: E2E cross-platform
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows, macos]
+    uses: ./.github/workflows/e2e-run.yml
+    with:
+      suite: smoke
+      os: ${{ matrix.os }}
