@@ -2545,6 +2545,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Eylem zamanında yanıt vermedi</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Bu adım bir gizli bilgi kullanıyor ve reddedildi, bu yüzden çalışmıyor.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Bu adım bir gizli bilgi kullanıyor ve onayınızı bekliyor.</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Değişti</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Adım reddedilemedi.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Onay bekleyen bir şey yok</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Gizli bilgi kullanan tüm adımlar onaylandı.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Gizli bilgi kullanan adımlar yalnızca onaylandıktan sonra çalışır. Nelerin değiştiğini inceleyin, ardından onaylayın.</value>
+    <value>Gizli bilgi kullanan adımlar yalnızca onaylandıktan sonra çalışır. Nelerin değiştiğini inceleyin, ardından onaylayın veya reddedin.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Onaylar yüklenemedi.</value>

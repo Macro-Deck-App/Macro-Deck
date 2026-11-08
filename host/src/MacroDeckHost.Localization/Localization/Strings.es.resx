@@ -2546,6 +2546,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>La acción no respondió a tiempo</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Este paso usa un secreto y fue rechazado, así que no se ejecuta.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Este paso usa un secreto y está esperando tu aprobación.</value>
   </data>
@@ -16115,6 +16118,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Cambiado</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Rechazar</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>No se pudo rechazar el paso.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nada pendiente de aprobación</value>
   </data>
@@ -16122,7 +16131,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Todos los pasos que usan un secreto están aprobados.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Los pasos que usan un secreto solo se ejecutan después de que los apruebes. Revisa qué ha cambiado y luego apruébalos.</value>
+    <value>Los pasos que usan un secreto solo se ejecutan después de que los apruebes. Revisa qué ha cambiado y luego apruébalos o recházalos.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>No se pudieron cargar las aprobaciones.</value>

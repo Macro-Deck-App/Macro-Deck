@@ -11,6 +11,8 @@ import { EmptyStateComponent } from '../../feedback/empty-state/empty-state.comp
 import { LoadingStateComponent } from '../../feedback/loading-state/loading-state.component';
 import { SecretApprovalService, secretApprovalKey } from '../../../services/secret-approval.service';
 
+type Decision = 'approve' | 'decline';
+
 interface ApprovalRow {
   name: string;
   label: string;
@@ -50,8 +52,8 @@ export class SecretApprovalsPageComponent implements OnInit {
   protected readonly approvals = inject(SecretApprovalService);
   private readonly localization = inject(LocalizationService);
 
-  protected readonly approveError = signal<string | null>(null);
-  private readonly approving = signal<ReadonlySet<string>>(new Set());
+  protected readonly decisionError = signal<string | null>(null);
+  private readonly deciding = signal<ReadonlyMap<string, Decision>>(new Map());
 
   protected readonly cards = computed<ApprovalCard[]>(() => {
     const text = (key: string, args?: Record<string, unknown>): string => this.localization.translateKey(key, args);
@@ -100,24 +102,34 @@ export class SecretApprovalsPageComponent implements OnInit {
     void this.approvals.load();
   }
 
-  protected isApproving(card: ApprovalCard): boolean {
-    return this.approving().has(card.key);
+  protected decidingWith(card: ApprovalCard): Decision | null {
+    return this.deciding().get(card.key) ?? null;
   }
 
-  protected async approve(card: ApprovalCard): Promise<void> {
-    if (this.isApproving(card)) {
+  protected approve(card: ApprovalCard): Promise<void> {
+    return this.decide(card, 'approve');
+  }
+
+  protected decline(card: ApprovalCard): Promise<void> {
+    return this.decide(card, 'decline');
+  }
+
+  private async decide(card: ApprovalCard, decision: Decision): Promise<void> {
+    if (this.decidingWith(card)) {
       return;
     }
-    this.approveError.set(null);
-    this.approving.update(keys => new Set(keys).add(card.key));
+    this.decisionError.set(null);
+    this.deciding.update(keys => new Map(keys).set(card.key, decision));
     try {
-      const result = await this.approvals.approve(card.item);
+      const result = decision === 'approve'
+        ? await this.approvals.approve(card.item)
+        : await this.approvals.decline(card.item);
       if (!result.ok) {
-        this.approveError.set(result.message);
+        this.decisionError.set(result.message);
       }
     } finally {
-      this.approving.update(keys => {
-        const next = new Set(keys);
+      this.deciding.update(keys => {
+        const next = new Map(keys);
         next.delete(card.key);
         return next;
       });

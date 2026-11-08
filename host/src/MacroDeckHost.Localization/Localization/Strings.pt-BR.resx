@@ -2545,6 +2545,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>A ação não respondeu a tempo</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Esta etapa usa um segredo e foi recusada, por isso não é executada.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Esta etapa usa um segredo e está aguardando aprovação.</value>
   </data>
@@ -16116,6 +16119,12 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Alterado</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Recusar</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Não foi possível recusar a etapa.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nada aguardando aprovação</value>
   </data>
@@ -16123,7 +16132,7 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
     <value>Todas as etapas que usam um segredo estão aprovadas.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Etapas que usam um segredo só são executadas depois de aprovadas. Confira o que mudou e depois aprove.</value>
+    <value>Etapas que usam um segredo só são executadas depois de aprovadas. Confira o que mudou e depois aprove ou recuse.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Não foi possível carregar as aprovações.</value>

@@ -2545,6 +2545,9 @@
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>لم يُجب الإجراء في الوقت المحدد</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>تستخدم هذه الخطوة سرًا وقد رُفضت، لذا لا تُشغَّل.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>تستخدم هذه الخطوة سرًا وتنتظر الموافقة.</value>
   </data>
@@ -16116,6 +16119,12 @@
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>تغيّر</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>تعذّر رفض الخطوة.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>لا يوجد ما ينتظر الموافقة</value>
   </data>
@@ -16123,7 +16132,7 @@
     <value>تمت الموافقة على جميع الخطوات التي تستخدم سرًا.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>لا تُشغَّل الخطوات التي تستخدم سرًا إلا بعد الموافقة عليها. راجِع ما تغيّر، ثم وافِق عليها.</value>
+    <value>لا تُشغَّل الخطوات التي تستخدم سرًا إلا بعد الموافقة عليها. راجِع ما تغيّر، ثم وافِق عليها أو ارفضها.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>تعذّر تحميل الموافقات.</value>

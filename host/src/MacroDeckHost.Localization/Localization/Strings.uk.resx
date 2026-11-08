@@ -2545,6 +2545,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Дія не відповіла вчасно</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Цей крок використовує секрет і був відхилений, тому не виконується.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Цей крок використовує секрет і очікує на схвалення.</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Змінено</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Відхилити</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Не вдалося відхилити крок.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Немає кроків, що очікують на схвалення</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Усі кроки, що використовують секрет, схвалено.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Кроки, що використовують секрет, виконуються лише після схвалення. Перевірте, що змінилося, і схваліть їх.</value>
+    <value>Кроки, що використовують секрет, виконуються лише після схвалення. Перевірте, що змінилося, і схваліть або відхиліть їх.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Не вдалося завантажити схвалення.</value>

@@ -2035,6 +2035,10 @@ export class ApiService {
     return this.http('POST', '/api/secret-approvals/approve', request);
   }
 
+  declineSecretBlock(request: ApproveSecretBlockRequest): Promise<ApproveSecretBlockResponse> {
+    return this.http('POST', '/api/secret-approvals/decline', request);
+  }
+
   renderLabelPreview(request: LabelImagePreviewRequest): Promise<string | null> {
     return this.invokeResult<string | null>('RenderLabelPreview', request);
   }
