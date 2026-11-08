@@ -1,11 +1,13 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Platform.Notifications;
+using MacroDeckHost.Tests.Support;
 using Serilog.Core;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.Notifications;
 
 [Platform("Win")]
+[Category("Interactive")]
 [SupportedOSPlatform("windows")]
 public class WindowsNotificationServiceTests
 {
@@ -17,7 +19,7 @@ public class WindowsNotificationServiceTests
 		var window = await service.ShowCoreAsync("Macro Deck test", "Notification window lifetime");
 		if (window == IntPtr.Zero)
 		{
-			Assert.Inconclusive("No notification area is available to show a notification");
+			Interactive.Require("No notification area is available to show a notification");
 		}
 
 		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(3);
