@@ -1053,6 +1053,10 @@ jobs:
     name: E2E
     uses: ./.github/workflows/e2e-run.yml
 
+  bootstrapper-smoke:
+    name: Bootstrapper smoke
+    uses: ./.github/workflows/bootstrapper-smoke-run.yml
+
   # This gate is intentionally stricter than the ordinary package dependencies:
   # it protects the quota-limited Windows signing step. Linux/macOS packaging and
   # every test can run in parallel, but eSigner is not touched unless all pass.
@@ -1065,6 +1069,7 @@ jobs:
       - test-host-windows
       - test-host-macos
       - e2e
+      - bootstrapper-smoke
       - package-linux
       - package-macos
     steps:

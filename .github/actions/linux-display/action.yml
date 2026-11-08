@@ -1,0 +1,25 @@
+name: Linux display
+description: >
+  Starts Xvfb with an EWMH window manager (openbox) and exports DISPLAY for the following steps.
+
+inputs:
+  mode:
+    description: x11 (the only mode this setup offers)
+    required: false
+    default: x11
+
+runs:
+  using: composite
+  steps:
+    - name: Install display packages
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+          xvfb openbox x11-utils x11-xkb-utils
+
+    - name: Start the display
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+      run: bash "$GITHUB_WORKSPACE/ci/scripts/linux-display.sh" start "$MODE"

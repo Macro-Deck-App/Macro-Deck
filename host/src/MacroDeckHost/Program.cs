@@ -85,6 +85,7 @@ public static class Program
 		{
 			var loopbackPort = HostEndpoints.ResolveLoopbackPort();
 			var loopbackSecret = LoopbackSecretSource.Resolve();
+			var shellParent = ShellParent.Take();
 			LoopbackSecret.Set(loopbackSecret.Secret);
 
 			if (await SingleInstanceGuard.IsAnotherInstanceRunning())
@@ -279,6 +280,8 @@ public static class Program
 					services.AddSingleton(KeyRingStartupState.KekHolder);
 					services.AddSingleton(KeyRingStartupState.Store);
 					services.AddSingleton(KeyRingStartupState.Identity);
+					services.AddSingleton(shellParent);
+					services.AddHostedService<ShellProcessWatchdog>();
 				})
 				.ConfigureWebHostDefaults(hostBuilder =>
 				{

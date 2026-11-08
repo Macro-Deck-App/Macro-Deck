@@ -69,6 +69,8 @@ cargo test
 
 Use `npm run dev` for the development bootstrapper and `npm run build` for a local package when the required host payload has been staged.
 
+[`ui/bootstrapper/smoke/`](../../ui/bootstrapper/smoke/) is the smoke test (BOOT-01) for the real app: a release bootstrapper with a staged production host, a window, the desktop UI and a fixture plugin. It starts, restarts, quits with `--quit`, replaces an older running host, and on Unix kills the app and checks that the host stops on its own and releases held keys. A debug bootstrapper never starts a host, so it needs a release build with the host staged first; [`.github/workflows/bootstrapper-smoke-run.yml`](../../.github/workflows/bootstrapper-smoke-run.yml) has the exact steps and the environment it reads. On Linux it needs an X display and one D-Bus session bus around the whole run.
+
 ## NuGet packages
 
 Package projects are built and packed through the normal .NET solution and release workflows. For a local package check:
@@ -98,6 +100,8 @@ Pull-request CI is defined by [`.github/workflows/ci.yml`](../../.github/workflo
 A pull request runs only the jobs whose inputs it changed: [`ci/scripts/ci-scope.mjs`](../../ci/scripts/ci-scope.mjs) maps every changed path to the jobs that read it, so a documentation-only change runs nothing and a desktop UI change skips the .NET and bootstrapper jobs. A path it does not know runs everything, and `main` always runs everything. When a test starts reading a file from another area's tree (a .NET drift test comparing against a TypeScript mirror, a UI script reading a C# constant), add that file to the script's cross-area rules, otherwise a pull request touching only that file skips the test and `main` is the first run to see it fail.
 
 The end-to-end suite lives in [`.github/workflows/e2e-run.yml`](../../.github/workflows/e2e-run.yml) and is called from three places: pull-request CI, a release, and [`.github/workflows/e2e.yml`](../../.github/workflows/e2e.yml) for a manual run against a chosen suite or filter. It stages its own production host, so it checks the shipped artefact rather than the workflow that assembled it.
+
+The bootstrapper smoke test lives in [`.github/workflows/bootstrapper-smoke-run.yml`](../../.github/workflows/bootstrapper-smoke-run.yml) and runs on Linux (under Xvfb) and Windows: on every push to `main`, nightly and on demand through [`.github/workflows/bootstrapper-smoke.yml`](../../.github/workflows/bootstrapper-smoke.yml), and before a release, which waits for it. Pull requests do not run it.
 
 The root [`Makefile`](../../Makefile) runs the same suites locally: `make test` for the build and test jobs, `make ci` adding packaging, third-party notices and E2E, and one target per job (`make help`). Windows-only and Arch-only jobs are not covered.
 
