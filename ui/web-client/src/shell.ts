@@ -182,7 +182,6 @@ export class Shell {
     this.deviceSetup = new DeviceSetupService(client.http);
     this.settings = createClientSettings({
       client,
-      localization: client.localization,
       appearance: services.appearance,
       renderingMode: services.rendering,
       iconResolution: services.iconResolution && iconResolutionSurface(services.iconResolution,
@@ -294,6 +293,7 @@ export class Shell {
     this.modals.repaint();
     this.notificationToasts.repaint();
     this.notificationDialogs.repaint();
+    if (this.settings !== null) this.settings.repaint();
   }
 
   private onConnectedChanged(connected: boolean): void {

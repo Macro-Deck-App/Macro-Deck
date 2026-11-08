@@ -97,13 +97,8 @@ const REAL_TIMER: HintTimer = {
   clear: (handle: unknown) => clearTimeout(handle as ReturnType<typeof setTimeout>),
 };
 
-export interface LocalizationSurface {
-  onChange(listener: () => void): () => void;
-}
-
 export interface ClientSettingsOptions {
   client: SettingsTranslator;
-  localization: LocalizationSurface;
   appearance: AppearanceSurface;
   renderingMode: RenderingModeSurface;
   iconResolution?: IconResolutionSurface;
@@ -124,6 +119,7 @@ export interface ClientSettingsHandle {
   close(): void;
   isOpen(): boolean;
   setButtonHidden(hidden: boolean): void;
+  repaint(): void;
   destroy(): void;
 }
 
@@ -791,7 +787,6 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
   trigger.addEventListener('click', () => openModal());
 
-  const unsubscribeLocalization = options.localization.onChange(() => paintTrigger());
   const unsubscribeAppearance = options.appearance.onChange(() => render());
   const unsubscribeRendering = options.renderingMode.onChange(() => render());
   const unsubscribeWakeLock = options.wakeLock.onChange(() => render());
@@ -810,11 +805,11 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     close: () => close(),
     isOpen: () => open !== null,
     setButtonHidden: (hidden: boolean) => show(trigger, !hidden),
+    repaint: () => paintTrigger(),
     destroy: () => {
       destroyed = true;
       close();
       timer.clear(dismissedHintTimer);
-      unsubscribeLocalization();
       unsubscribeAppearance();
       unsubscribeRendering();
       unsubscribeWakeLock();
