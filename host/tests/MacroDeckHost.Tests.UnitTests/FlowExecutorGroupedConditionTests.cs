@@ -36,6 +36,8 @@ public class FlowExecutorGroupedConditionTests
 		variables.Upsert(Var("streaming", VariableType.Boolean, "true"));
 		variables.Upsert(Var("recording", VariableType.Boolean, "false"));
 		variables.Upsert(Var("viewers", VariableType.Numeric, "12"));
+		variables.Upsert(Var("ratio", VariableType.Numeric, "1.5"));
+		variables.Upsert(Var("track", VariableType.Text, "007"));
 
 		var renderer = new VariableTemplateRenderer(variables);
 
@@ -176,6 +178,28 @@ public class FlowExecutorGroupedConditionTests
 							     { "kind": "compare", "id": "c2", "left": { "$var": "viewers" }, "operator": ">", "right": 10 }
 							   ]
 							 }
+							 """));
+
+		AssertThenBranchRan();
+	}
+
+	[Test]
+	[SetCulture("de-DE")]
+	public async Task Contains_on_a_decimal_number_variable_matches_its_invariant_text_on_a_comma_culture_host()
+	{
+		await Run(IfElseFlow("""
+							 { "kind": "compare", "id": "c1", "left": { "$var": "ratio" }, "operator": "contains", "right": "1.5" }
+							 """));
+
+		AssertThenBranchRan();
+	}
+
+	[Test]
+	[SetCulture("de-DE")]
+	public async Task Contains_on_a_zero_padded_text_variable_keeps_its_leading_zeros_on_a_comma_culture_host()
+	{
+		await Run(IfElseFlow("""
+							 { "kind": "compare", "id": "c1", "left": { "$var": "track" }, "operator": "contains", "right": "007" }
 							 """));
 
 		AssertThenBranchRan();

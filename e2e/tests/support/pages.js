@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { sessionCode } from '../loopback.js';
 import { PASSWORD, USERNAME } from './seed.js';
 
@@ -137,6 +137,10 @@ export function recordSocketFrames(page) {
     return frames.requests('SendUiEvent')
       .filter(request => sessions.has(request.payload?.[0]?.sessionId) && request.payload?.[0]?.name === 'press');
   };
+  frames.lockRefusalsFor = widgetId => frames.received.filter(message =>
+    message.type === 'ActionExecutionStatusEvent'
+    && message.payload?.widgetId === widgetId
+    && message.payload?.error?.code === 'HOST_LOCKED');
   return frames;
 }
 
@@ -153,6 +157,26 @@ export async function pressWebTile(client, widgetId) {
   await tile.click();
   await expect.poll(() => client.frames.pressesFor(widgetId).length, { message: 'the press reaches the socket' })
     .toBe(before + 1);
+}
+
+// A locked host computer refuses every client press, and CI runners without an attended console report
+// locked, so the lock state read before the press decides which outcome is asserted.
+export async function pressWebTileAndExpect(client, api, widgetId, variable, { before, after }) {
+  const { locked } = await api.get('/api/system/lock-state');
+  const refusalsBefore = client.frames.lockRefusalsFor(widgetId).length;
+  await pressWebTile(client, widgetId);
+  if (!locked) {
+    await expect.poll(() => api.variableValue(variable)).toBe(after);
+    return;
+  }
+  test.info().annotations.push({
+    type: 'host-locked',
+    description: `The host reported its computer locked, so the press on ${widgetId} was checked for refusal.`,
+  });
+  await expect.poll(() => client.frames.lockRefusalsFor(widgetId).length, {
+    message: 'the locked host refuses the press with HOST_LOCKED',
+  }).toBeGreaterThan(refusalsBefore);
+  expect(await api.variableValue(variable)).toBe(before);
 }
 
 // Counts full page loads, so a test can prove a change arrived over the live socket and not
