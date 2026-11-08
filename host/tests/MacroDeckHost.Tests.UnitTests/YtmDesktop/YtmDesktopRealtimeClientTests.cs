@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using MacroDeckHost.Integrations.YtmDesktop.Protocol;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.YtmDesktop;
 
