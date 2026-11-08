@@ -225,7 +225,7 @@ export class LogCursor {
 
 export class SmokeApp {
   constructor(name) {
-    const base = process.env.SMOKE_RUN_DIR ?? tmpdir();
+    const base = resolve(process.env.SMOKE_RUN_DIR ?? tmpdir());
     mkdirSync(base, { recursive: true });
     this.runDir = mkdtempSync(join(base, `bs-${name}-`));
     this.dataDir = join(this.runDir, 'data');

@@ -173,7 +173,7 @@ test('an older host still running is replaced, not adopted', async () => {
   const cursor = app.cursor();
   app.launch();
   await cursor.waitFor(/\[host\] replacing the running host \S+ on port \d+ with \S+/, startTimeout);
-  await cursor.waitFor(/Shutdown requested via API, reason: "?replaced/);
+  await cursor.waitFor(/Shutdown requested via API, reason: ['"]*replaced/);
   await waitForExit(older.child);
   current = await waitForRunningApp(cursor, { exceptHost: [older.child.pid] });
   current.loopbackPort = app.loopbackPort;
@@ -203,7 +203,7 @@ test('a killed app does not orphan its host, and held keys are released', { skip
   await stopCursor.waitFor(/is no longer running; stopping the host/, 30_000);
   await assertGone(running, 'after the app was killed');
   if (checkKeys) {
-    assert.match(stopCursor.text(), /Integration ['"]?app\.macro-deck\.keyboard['"]? shut down cleanly/);
+    assert.match(stopCursor.text(), /Integration ['"]*app\.macro-deck\.keyboard['"]* shut down cleanly/);
     assert.equal(await keyHeld(), false, 'Shift is still held');
   }
   assert.deepEqual(await leftovers(app), []);

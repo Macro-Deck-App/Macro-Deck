@@ -126,16 +126,16 @@ jobs:
       - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: smoke-payload-${{ github.run_id }}
-          path: ${{ runner.temp }}/payload
+          path: smoke-payload
 
       - name: Unpack host and fixture plugin
         run: |
           set -euo pipefail
-          payload="${{ runner.temp }}/payload"
-          rm -rf ui/bootstrapper/host-publish ui/bootstrapper/target/release/host
-          mkdir -p ui/bootstrapper/host-publish "${{ runner.temp }}/fixture-plugin"
-          tar xzf "$payload/host-${{ matrix.rid }}.tar.gz" -C ui/bootstrapper/host-publish
-          tar xzf "$payload/fixture-plugin.tar.gz" -C "${{ runner.temp }}/fixture-plugin"
+          # Relative paths: Git Bash's tar reads C:\... as a remote host.
+          rm -rf ui/bootstrapper/host-publish ui/bootstrapper/target/release/host smoke-fixture-plugin
+          mkdir -p ui/bootstrapper/host-publish smoke-fixture-plugin
+          tar xzf "smoke-payload/host-${{ matrix.rid }}.tar.gz" -C ui/bootstrapper/host-publish
+          tar xzf smoke-payload/fixture-plugin.tar.gz -C smoke-fixture-plugin
 
       # cargo copies host-publish next to the binary (bundle.resources), where a release build looks first.
       - name: Build release bootstrapper
@@ -150,8 +150,8 @@ jobs:
 
       - name: Run the smoke test
         env:
-          SMOKE_RUN_DIR: ${{ runner.temp }}/smoke
-          SMOKE_PLUGIN_BUILD_DIR: ${{ runner.temp }}/fixture-plugin
+          SMOKE_RUN_DIR: smoke-run
+          SMOKE_PLUGIN_BUILD_DIR: ${{ github.workspace }}/smoke-fixture-plugin
           WEBKIT_DISABLE_DMABUF_RENDERER: '1'
         run: |
           set -euo pipefail
@@ -168,7 +168,7 @@ jobs:
         if: always()
         run: |
           mkdir -p smoke-logs
-          for run in "${{ runner.temp }}"/smoke/bs-*; do
+          for run in smoke-run/bs-*; do
             [[ -d "$run" ]] || continue
             name=$(basename "$run")
             cp "$run"/*.log smoke-logs/ 2>/dev/null || true
