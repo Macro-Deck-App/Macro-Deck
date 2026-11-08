@@ -90,8 +90,10 @@ jobs:
           - os: linux
             runner: blacksmith-2vcpu-ubuntu-2204
             rid: linux-x64
+          # GitHub-hosted: it runs in an interactive desktop session with a shell, which the app's tray
+          # and window need to exit; on a runner without one the app never ends after app.exit.
           - os: windows
-            runner: blacksmith-2vcpu-windows-2025
+            runner: windows-2025
             rid: win-x64
     defaults:
       run:
