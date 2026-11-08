@@ -100,6 +100,11 @@ internal sealed class HostInstance : IAsyncDisposable
 			response.EnsureSuccessStatusCode();
 		}
 
+		await WaitForRestartAsync(startsBefore);
+	}
+
+	public async Task WaitForRestartAsync(int startsBefore)
+	{
 		await Poll.UntilAsync(() => Task.FromResult(Starts > startsBefore), _readyTimeout, "the host relaunched");
 		await WaitUntilReadyAsync();
 	}
@@ -201,7 +206,7 @@ internal sealed class HostInstance : IAsyncDisposable
 	// free and passed by number; a lost race shows as an early exit and is retried on new ports.
 	private async Task StartWithFreshPortsAsync()
 	{
-		for (var attempt = 1; ; attempt++)
+		for (var attempt = 1;; attempt++)
 		{
 			LoopbackPort = FreePort();
 			PublicPort = FreePort();
@@ -243,7 +248,43 @@ internal sealed class HostInstance : IAsyncDisposable
 		}
 	}
 
-	private Process Launch()
+	public async Task<(int ExitCode, IReadOnlyList<string> Output)> RunAnotherInstanceAsync(TimeSpan timeout)
+	{
+		var output = new ConcurrentQueue<string>();
+		using var process = new Process
+		{
+			StartInfo = StartInfo(FreePort(), FreePort(), Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)))
+		};
+		process.OutputDataReceived += (_, line) => Collect(output, line.Data);
+		process.ErrorDataReceived += (_, line) => Collect(output, line.Data);
+		process.Start();
+		process.BeginOutputReadLine();
+		process.BeginErrorReadLine();
+
+		using var deadline = new CancellationTokenSource(timeout);
+		try
+		{
+			await process.WaitForExitAsync(deadline.Token);
+		}
+		catch (OperationCanceledException)
+		{
+			process.Kill(true);
+			await process.WaitForExitAsync();
+			throw new TimeoutException($"The second host did not exit within {timeout}.");
+		}
+
+		return (process.ExitCode, output.ToArray());
+	}
+
+	private static void Collect(ConcurrentQueue<string> output, string? line)
+	{
+		if (line is not null)
+		{
+			output.Enqueue(line);
+		}
+	}
+
+	private ProcessStartInfo StartInfo(int loopbackPort, int publicPort, string loopbackSecret)
 	{
 		var executable = BuildOutputs.HostExecutable();
 		var start = new ProcessStartInfo(executable)
@@ -256,9 +297,9 @@ internal sealed class HostInstance : IAsyncDisposable
 		};
 
 		start.Environment["MACRO_DECK_DATA_DIRECTORY"] = DataDirectory;
-		start.Environment["MACRODECK_HOST_PORT"] = LoopbackPort.ToString(CultureInfo.InvariantCulture);
-		start.Environment["MACRO_DECK_PORT"] = PublicPort.ToString(CultureInfo.InvariantCulture);
-		start.Environment["MACRODECK_LOOPBACK_SECRET"] = _loopbackSecret;
+		start.Environment["MACRODECK_HOST_PORT"] = loopbackPort.ToString(CultureInfo.InvariantCulture);
+		start.Environment["MACRO_DECK_PORT"] = publicPort.ToString(CultureInfo.InvariantCulture);
+		start.Environment["MACRODECK_LOOPBACK_SECRET"] = loopbackSecret;
 		start.Environment["MACRODECK_SHELL_EXECUTABLE"] = executable;
 		start.Environment["TMP"] = TempDirectory;
 		start.Environment["TEMP"] = TempDirectory;
@@ -268,6 +309,12 @@ internal sealed class HostInstance : IAsyncDisposable
 			start.Environment[name] = value;
 		}
 
+		return start;
+	}
+
+	private Process Launch()
+	{
+		var start = StartInfo(LoopbackPort, PublicPort, _loopbackSecret);
 		var process = new Process { StartInfo = start };
 		process.OutputDataReceived += (_, line) => Record(line.Data);
 		process.ErrorDataReceived += (_, line) => Record(line.Data);

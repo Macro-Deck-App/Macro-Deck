@@ -22,6 +22,7 @@
     <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.Windows/MacroDeckHost.Tests.UnitTests.Windows.csproj" />
   </Folder>
   <Folder Name="/host/tests/fixtures/">
+    <Project Path="host/tests/fixtures/MacroDeckHost.Tests.OldestSdkPlugin/MacroDeckHost.Tests.OldestSdkPlugin.csproj" />
     <Project Path="host/tests/fixtures/MacroDeckHost.Tests.PluginStub/MacroDeckHost.Tests.PluginStub.csproj" />
   </Folder>
   <Folder Name="/protocol/" />
