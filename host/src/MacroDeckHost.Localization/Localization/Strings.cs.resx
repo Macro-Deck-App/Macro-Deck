@@ -2546,6 +2546,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Akce neodpověděla včas</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Tento krok používá tajný údaj a byl odmítnut, proto se nespustí.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Tento krok používá tajný údaj a čeká na schválení.</value>
   </data>
@@ -16115,6 +16118,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Změněno</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Odmítnout</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Krok se nepodařilo odmítnout.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nic nečeká na schválení</value>
   </data>
@@ -16122,7 +16131,7 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Všechny kroky, které používají tajný údaj, jsou schválené.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Kroky, které používají tajný údaj, se spustí až po schválení. Zkontrolujte, co se změnilo, a poté je schvalte.</value>
+    <value>Kroky, které používají tajný údaj, se spustí až po schválení. Zkontrolujte, co se změnilo, a poté je schvalte, nebo odmítněte.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Schválení se nepodařilo načíst.</value>

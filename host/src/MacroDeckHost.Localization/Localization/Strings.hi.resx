@@ -2545,6 +2545,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>क्रिया ने समय पर जवाब नहीं दिया</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>यह चरण एक सीक्रेट का उपयोग करता है और अस्वीकार कर दिया गया है, इसलिए यह नहीं चलता।</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>यह चरण एक सीक्रेट का उपयोग करता है और आपकी स्वीकृति की प्रतीक्षा कर रहा है।</value>
   </data>
@@ -16116,6 +16119,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>बदला गया</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>अस्वीकार करें</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>चरण अस्वीकार नहीं हो सका।</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>स्वीकृति के लिए कुछ भी प्रतीक्षा में नहीं है</value>
   </data>
@@ -16123,7 +16132,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>सीक्रेट का उपयोग करने वाले सभी चरण स्वीकृत हैं।</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>सीक्रेट का उपयोग करने वाले चरण आपकी स्वीकृति के बाद ही चलते हैं। देखें कि क्या बदला है, फिर उन्हें स्वीकृत करें।</value>
+    <value>सीक्रेट का उपयोग करने वाले चरण आपकी स्वीकृति के बाद ही चलते हैं। देखें कि क्या बदला है, फिर उन्हें स्वीकृत या अस्वीकार करें।</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>स्वीकृतियाँ लोड नहीं हो सकीं।</value>

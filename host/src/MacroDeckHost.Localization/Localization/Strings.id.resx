@@ -2545,6 +2545,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Aksi tidak merespons tepat waktu</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Langkah ini menggunakan rahasia dan telah ditolak, sehingga tidak berjalan.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Langkah ini menggunakan rahasia dan menunggu persetujuan.</value>
   </data>
@@ -16116,6 +16119,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Berubah</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Tolak</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Langkah tidak dapat ditolak.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Tidak ada yang menunggu persetujuan</value>
   </data>
@@ -16123,7 +16132,7 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Semua langkah yang menggunakan rahasia sudah disetujui.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Langkah yang menggunakan rahasia hanya berjalan setelah disetujui. Periksa apa yang berubah, lalu setujui.</value>
+    <value>Langkah yang menggunakan rahasia hanya berjalan setelah disetujui. Periksa apa yang berubah, lalu setujui atau tolak.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Persetujuan tidak dapat dimuat.</value>

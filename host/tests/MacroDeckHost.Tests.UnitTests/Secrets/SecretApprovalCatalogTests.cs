@@ -89,6 +89,122 @@ public class SecretApprovalCatalogTests
 	}
 
 	[Test]
+	public async Task Declining_the_listed_version_unlists_it_and_the_step_stays_skipped_without_a_new_notification()
+	{
+		var automation = await SaveAutomation("https://home.example", SecretApprovalWrite.Approve);
+		await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold, automation);
+
+		var declined = _catalog.Decline(Request(_catalog.Pending().Items.Single()));
+		var result = await _fixture.Run(FlowOwner.Automation(automation.Id), automation.Flows);
+
+		var step = result.Actions.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(declined.Success, Is.True);
+			Assert.That(_catalog.Pending().Count, Is.Zero);
+			Assert.That(step.Status, Is.EqualTo(ActionOutcomeStatus.Skipped));
+			Assert.That(step.ErrorCode, Is.EqualTo(ActionExecutionErrorCodes.SecretApprovalDeclined));
+			Assert.That(_fixture.Action.CapturedParameters, Is.Null);
+			Assert.That(_fixture.Notifications.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_trusted_draft_run_of_a_declined_version_is_skipped_without_a_notification()
+	{
+		var automation = await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold);
+		_catalog.Decline(Request(_catalog.Pending().Items.Single()));
+
+		var result = await _fixture.Run(FlowOwner.Automation(automation.Id), automation.Flows, true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Actions.Single().ErrorCode,
+				Is.EqualTo(ActionExecutionErrorCodes.SecretApprovalDeclined));
+			Assert.That(_fixture.Notifications.Snapshot(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_stale_unknown_or_already_approved_version_cannot_be_declined()
+	{
+		var automation = await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold);
+		var listed = _catalog.Pending().Items.Single();
+		await SaveAutomation("https://other.example", SecretApprovalWrite.Withhold, automation);
+		var current = _catalog.Pending().Items.Single();
+
+		var stale = _catalog.Decline(Request(listed));
+		var unknown = _catalog.Decline(new ApproveSecretBlockRequest
+		{
+			OwnerKind = current.OwnerKind,
+			OwnerId = current.OwnerId,
+			BlockId = "missing",
+			Fingerprint = current.Fingerprint
+		});
+		_catalog.Approve(Request(current));
+		var approved = _catalog.Decline(Request(current));
+		var result = await _fixture.Run(FlowOwner.Automation(automation.Id), automation.Flows);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stale.Error!.Code, Is.EqualTo(ApproveSecretBlockResponse.ChangedCode));
+			Assert.That(unknown.Error!.Code, Is.EqualTo(ApproveSecretBlockResponse.NotFoundCode));
+			Assert.That(approved.Error!.Code, Is.EqualTo(ApproveSecretBlockResponse.ChangedCode));
+			Assert.That(result.Actions.Single().Status, Is.EqualTo(ActionOutcomeStatus.Succeeded));
+		});
+	}
+
+	[Test]
+	public async Task Saving_the_flow_in_the_app_with_the_declined_step_untouched_keeps_it_declined()
+	{
+		var automation = await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold);
+		_catalog.Decline(Request(_catalog.Pending().Items.Single()));
+
+		await SaveAutomation("https://attacker.example", SecretApprovalWrite.Approve, automation);
+		var result = await _fixture.Run(FlowOwner.Automation(automation.Id), automation.Flows);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_catalog.Pending().Count, Is.Zero);
+			Assert.That(result.Actions.Single().ErrorCode,
+				Is.EqualTo(ActionExecutionErrorCodes.SecretApprovalDeclined));
+		});
+	}
+
+	[Test]
+	public async Task Another_change_outside_the_app_after_a_decline_is_listed_again()
+	{
+		var automation = await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold);
+		_catalog.Decline(Request(_catalog.Pending().Items.Single()));
+
+		await SaveAutomation("https://other.example", SecretApprovalWrite.Withhold, automation);
+
+		var item = _catalog.Pending().Items.Single();
+		Assert.That(item.Parameters.Single(parameter => parameter.Name == "url").Current,
+			Is.EqualTo("https://other.example"));
+	}
+
+	[Test]
+	public async Task A_declined_version_that_comes_back_after_an_edit_in_the_app_is_listed_again()
+	{
+		var automation = await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold);
+		_catalog.Decline(Request(_catalog.Pending().Items.Single()));
+		await SaveAutomation("https://home.example", SecretApprovalWrite.Approve, automation);
+
+		await SaveAutomation("https://attacker.example", SecretApprovalWrite.Withhold, automation);
+		var result = await _fixture.Run(FlowOwner.Automation(automation.Id), automation.Flows);
+
+		var item = _catalog.Pending().Items.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(item.Parameters.Single(parameter => parameter.Name == "url").Current,
+				Is.EqualTo("https://attacker.example"));
+			Assert.That(result.Actions.Single().ErrorCode,
+				Is.EqualTo(ActionExecutionErrorCodes.SecretApprovalPending));
+		});
+	}
+
+	[Test]
 	public void Only_an_admin_principal_writes_with_approval()
 	{
 		var admin = new SecretWriteAuthority();

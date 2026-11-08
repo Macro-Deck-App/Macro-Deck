@@ -88,7 +88,7 @@ A step that uses a stored secret stops running when something changes it, until 
 computer. The rest of the flow still runs, and the app shows no message for it: a widget looks as if it worked,
 and a script reports that it ran, for example in Shortcuts or on a tile. Open
 **Approvals** in Macro Deck on your computer, see [Approvals](/guide/tips/#approvals). You cannot approve a step
-from the app.
+from the app. A step you declined there is no longer listed and stays skipped until you edit it in Macro Deck.
 
 ## Can I use the app on a device without Google Play services?
 
