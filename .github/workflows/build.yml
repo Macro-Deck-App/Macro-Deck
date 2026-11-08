@@ -1053,6 +1053,10 @@ jobs:
     name: E2E
     uses: ./.github/workflows/e2e-run.yml
 
+  e2e-cross:
+    name: E2E cross-platform
+    uses: ./.github/workflows/e2e-cross.yml
+
   bootstrapper-smoke:
     name: Bootstrapper smoke
     uses: ./.github/workflows/bootstrapper-smoke-run.yml
@@ -1069,6 +1073,7 @@ jobs:
       - test-host-windows
       - test-host-macos
       - e2e
+      - e2e-cross
       - bootstrapper-smoke
       - package-linux
       - package-macos
