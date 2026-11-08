@@ -97,8 +97,13 @@ const REAL_TIMER: HintTimer = {
   clear: (handle: unknown) => clearTimeout(handle as ReturnType<typeof setTimeout>),
 };
 
+export interface LocalizationSurface {
+  onChange(listener: () => void): () => void;
+}
+
 export interface ClientSettingsOptions {
   client: SettingsTranslator;
+  localization: LocalizationSurface;
   appearance: AppearanceSurface;
   renderingMode: RenderingModeSurface;
   iconResolution?: IconResolutionSurface;
@@ -230,7 +235,10 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
   const trigger = element('button', 'wc-client-settings-trigger');
   trigger.type = 'button';
-  trigger.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.OpenSettings));
+  const paintTrigger = (): void => {
+    trigger.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.OpenSettings));
+  };
+  paintTrigger();
   trigger.appendChild(gearIcon());
 
   let open: OpenModal | null = null;
@@ -783,6 +791,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
   trigger.addEventListener('click', () => openModal());
 
+  const unsubscribeLocalization = options.localization.onChange(() => paintTrigger());
   const unsubscribeAppearance = options.appearance.onChange(() => render());
   const unsubscribeRendering = options.renderingMode.onChange(() => render());
   const unsubscribeWakeLock = options.wakeLock.onChange(() => render());
@@ -805,6 +814,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       destroyed = true;
       close();
       timer.clear(dismissedHintTimer);
+      unsubscribeLocalization();
       unsubscribeAppearance();
       unsubscribeRendering();
       unsubscribeWakeLock();

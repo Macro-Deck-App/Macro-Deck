@@ -182,6 +182,7 @@ export class Shell {
     this.deviceSetup = new DeviceSetupService(client.http);
     this.settings = createClientSettings({
       client,
+      localization: client.localization,
       appearance: services.appearance,
       renderingMode: services.rendering,
       iconResolution: services.iconResolution && iconResolutionSurface(services.iconResolution,

@@ -206,6 +206,7 @@ async function flush(): Promise<void> {
 function create(overrides?: Partial<ClientSettingsOptions>): Fixture {
   const parts = {
     client: translator(),
+    localization: { onChange: () => () => undefined },
     appearance: appearance(),
     renderingMode: renderingMode(),
     wakeLock: wakeLock(),
@@ -214,8 +215,9 @@ function create(overrides?: Partial<ClientSettingsOptions>): Fixture {
     timer: manualTimer(),
     loadNotices: jasmine.createSpy<() => Promise<string>>('loadNotices').and.resolveTo('NOTICES'),
   };
-  const handle = createClientSettings({
+  const options = {
     client: parts.client,
+    localization: parts.localization,
     appearance: parts.appearance,
     renderingMode: parts.renderingMode,
     wakeLock: parts.wakeLock,
@@ -225,7 +227,8 @@ function create(overrides?: Partial<ClientSettingsOptions>): Fixture {
     timer: parts.timer,
     loadNotices: () => parts.loadNotices(),
     ...(overrides === undefined ? {} : overrides),
-  });
+  };
+  const handle = createClientSettings(options);
   if (handle === null) throw new Error('the surface was gated off');
   live.push(handle);
   return { handle: handle, ...parts };
@@ -280,10 +283,32 @@ describe('client settings', () => {
     expect(dialog().textContent).toContain(english(Strings.Settings.Title));
   });
 
+  it('relabels the gear when the UI language changes, without a reload', () => {
+    let language = 'en';
+    const listeners: Array<() => void> = [];
+    const switchable = {
+      translate: (key: string) => (language === 'en' ? key : `${key}@${language}`),
+      signOut: jasmine.createSpy('signOut').and.resolveTo(undefined),
+    };
+    const overrides = {
+      client: switchable,
+      localization: { onChange: (listener: () => void) => { listeners.push(listener); return () => undefined; } },
+    };
+    const fixture = create(overrides);
+    const key = ClientAppStrings.WebClient.Settings.OpenSettings;
+    expect(fixture.handle.element.getAttribute('aria-label')).toBe(key);
+
+    language = 'de';
+    listeners.forEach(listener => listener());
+
+    expect(fixture.handle.element.getAttribute('aria-label')).toBe(`${key}@de`);
+  });
+
   // The whole surface, not only the modal: a gear that opens nothing is worse than no gear.
   it('is absent on a target that carries no client settings', () => {
-    const handle = createClientSettings({
+    const options = {
       client: translator(),
+      localization: { onChange: () => () => undefined },
       appearance: appearance(),
       renderingMode: renderingMode(),
       wakeLock: wakeLock(),
@@ -291,7 +316,8 @@ describe('client settings', () => {
       install: pwaInstall(),
       capabilities: capabilities({ clientSettings: false }),
       loadNotices: () => Promise.resolve(''),
-    });
+    };
+    const handle = createClientSettings(options);
 
     expect(handle).toBeNull();
   });
