@@ -30,6 +30,8 @@ cd ..
 ./ci/scripts/stage-host.sh linux-x64 3.0.0-e2e Production
 ```
 
+On Windows without Git Bash, [`ci/scripts/stage-host.ps1`](../ci/scripts/stage-host.ps1) takes the same arguments (`pwsh ci/scripts/stage-host.ps1 win-x64 3.0.0-e2e Production`) and stages the runtime through [`stage-dotnet-runtime.ps1`](../ci/scripts/stage-dotnet-runtime.ps1), the counterpart of `stage-dotnet-runtime.sh`. A change to one staging script belongs in its counterpart too.
+
 Then install Playwright and run the suite; it starts and stops its hosts itself:
 
 ```bash
@@ -42,6 +44,12 @@ npm test
 `MACRO_DECK_HOST_BINARY` points at another staged host, `E2E_RUN_DIR` chooses where the hosts' data and logs go (the system temp directory by default).
 
 The GitHub Actions workflow in `.github/workflows/e2e.yml` performs the same setup through `workflow_dispatch` and can run either all tests or the `@smoke` subset.
+
+## Windows and macOS
+
+The `@smoke` subset (setup, sign-in, a press and a host restart) also runs on Windows and macOS through [`.github/workflows/e2e-cross.yml`](../.github/workflows/e2e-cross.yml): on every push to `main`, nightly, on demand and before a release may be signed. It calls the same [`e2e-run.yml`](../.github/workflows/e2e-run.yml) job with its `os` input.
+
+A host whose computer is locked refuses every client press with `HOST_LOCKED`, and a CI runner without an attended console can report itself locked. Press checks therefore read `GET /api/system/lock-state` first (`pressWebTileAndExpect` in [`tests/support/pages.js`](tests/support/pages.js)): unlocked, the press must take effect; locked, it must be refused and change nothing, and the test carries a `host-locked` annotation in the Playwright report.
 
 ## Diagnostics
 
