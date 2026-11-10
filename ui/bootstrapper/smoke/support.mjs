@@ -73,7 +73,8 @@ export async function accepts(port) {
 
 export async function listProcesses() {
   if (isWindows) {
-    const script = 'Get-CimInstance Win32_Process | Select-Object ProcessId,ParentProcessId,ExecutablePath,CommandLine'
+    const script = 'Get-CimInstance Win32_Process'
+      + ' | Select-Object ProcessId,ParentProcessId,ExecutablePath,CommandLine,@{n="Started";e={$_.CreationDate.Ticks}}'
       + ' | ConvertTo-Json -Compress';
     const { stdout } = await run('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script],
       { maxBuffer: 64 * 1024 * 1024 });
@@ -82,18 +83,26 @@ export async function listProcesses() {
       ppid: entry.ParentProcessId,
       pgid: null,
       executable: entry.ExecutablePath ?? '',
-      command: entry.CommandLine ?? ''
+      command: entry.CommandLine ?? '',
+      started: String(entry.Started)
     }));
   }
-  const { stdout } = await run('ps', ['-A', '-ww', '-o', 'pid=,ppid=,pgid=,args='], { maxBuffer: 64 * 1024 * 1024 });
+  const { stdout } = await run('ps', ['-A', '-ww', '-o', 'pid=,ppid=,pgid=,lstart=,args='],
+    { maxBuffer: 64 * 1024 * 1024, env: { ...process.env, LC_ALL: 'C' } });
   return stdout.split('\n').filter(line => line.trim()).map(line => {
-    const [, pid, ppid, pgid, command] = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(.*)$/);
-    return { pid: Number(pid), ppid: Number(ppid), pgid: Number(pgid), executable: '', command };
+    const [, pid, ppid, pgid, started, command]
+      = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(\w{3} \w{3}\s+\d+ [\d:]+ \d{4})\s+(.*)$/);
+    return { pid: Number(pid), ppid: Number(ppid), pgid: Number(pgid), executable: '', command, started };
   });
 }
 
-export async function isRunning(pid) {
-  return (await listProcesses()).some(entry => entry.pid === pid);
+// Windows hands a freed pid to the next process at once, so a process is the same one only with its start time.
+export function sameProcess(a, b) {
+  return a.pid === b.pid && a.started === b.started;
+}
+
+export async function isRunning(target) {
+  return (await listProcesses()).some(entry => sameProcess(entry, target));
 }
 
 function startsWithPath(entry, path) {

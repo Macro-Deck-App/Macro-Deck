@@ -21,6 +21,7 @@ import {
   packFixturePlugin,
   pluginProcess,
   processesOf,
+  sameProcess,
   SmokeApp,
   until
 } from './support.mjs';
@@ -51,7 +52,7 @@ async function waitForExit(child, timeoutMs = 90_000) {
 
 async function onlyProcess(path, except = []) {
   return await until(`exactly one process of ${path}`, async () => {
-    const found = (await processesOf(path)).filter(entry => !except.includes(entry.pid));
+    const found = (await processesOf(path)).filter(entry => !except.some(other => sameProcess(entry, other)));
     return found.length === 1 ? found[0] : null;
   }, startTimeout);
 }
@@ -67,16 +68,16 @@ async function waitForRunningApp(cursor, { exceptBootstrapper = [], exceptHost =
   const pluginEntry = await until('the plugin process under the host', () => pluginProcess(app, host.pid));
   assert.equal(pluginEntry.pid, plugin.processId);
   const session = await api.request('GET', '/api/host/session');
-  return { bootstrapperPid: bootstrapper.pid, hostPid: host.pid, pluginPid: plugin.processId, api, session };
+  return { bootstrapper, host, plugin: pluginEntry, api, session };
 }
 
 async function assertGone(running, description) {
-  await until(`${description}: host ${running.hostPid} to exit`, async () => !(await isRunning(running.hostPid)),
+  await until(`${description}: host ${running.host.pid} to exit`, async () => !(await isRunning(running.host)),
     90_000);
   const processes = await listProcesses();
-  assert.ok(!processes.some(entry => entry.pid === running.pluginPid), `${description}: the plugin is still running`);
+  assert.ok(!processes.some(entry => sameProcess(entry, running.plugin)), `${description}: the plugin is still running`);
   if (!isWindows) {
-    const group = processes.filter(entry => entry.pgid === running.hostPid);
+    const group = processes.filter(entry => entry.pgid === running.host.pid);
     assert.deepEqual(group, [], `${description}: processes left in the host's process group`);
   }
   assert.equal(await accepts(running.loopbackPort), false, `${description}: loopback port still accepts`);
@@ -122,7 +123,7 @@ test('the app starts its host, opens the configuration UI and connects it', asyn
   const child = app.launch();
   current = await waitForRunningApp(cursor);
   current.loopbackPort = app.loopbackPort;
-  assert.equal(current.bootstrapperPid, child.pid);
+  assert.equal(current.bootstrapper.pid, child.pid);
 });
 
 test('a restart requested by the host relaunches the app and connects the UI again', async () => {
@@ -133,13 +134,13 @@ test('a restart requested by the host relaunches the app and connects the UI aga
   assert.deepEqual([result.supported, result.success], [true, true]);
   await cursor.waitFor(/\[host\] restart requested by the host; relaunching Macro Deck/);
   current = await waitForRunningApp(cursor, {
-    exceptBootstrapper: [before.bootstrapperPid],
-    exceptHost: [before.hostPid]
+    exceptBootstrapper: [before.bootstrapper],
+    exceptHost: [before.host]
   });
   current.loopbackPort = app.loopbackPort;
-  assert.equal(await isRunning(before.bootstrapperPid), false, 'the old app is still running');
-  assert.equal(await isRunning(before.hostPid), false, 'the old host is still running');
-  assert.equal(await isRunning(before.pluginPid), false, 'the old plugin is still running');
+  assert.equal(await isRunning(before.bootstrapper), false, 'the old app is still running');
+  assert.equal(await isRunning(before.host), false, 'the old host is still running');
+  assert.equal(await isRunning(before.plugin), false, 'the old plugin is still running');
   assert.notEqual(current.session.sessionId, before.session.sessionId);
 });
 
@@ -150,7 +151,7 @@ test('--quit quits the running app and leaves no host or plugin behind', async (
   const cursor = app.cursor();
   await waitForExit(app.launch(['--quit']), 30_000);
   await cursor.waitFor(/\[app\] another launch asked to quit/);
-  await until('the app to exit', async () => !(await isRunning(running.bootstrapperPid)), 90_000);
+  await until('the app to exit', async () => !(await isRunning(running.bootstrapper)), 90_000);
   await assertGone(running, 'after --quit');
   assert.deepEqual(await leftovers(app), []);
 });
@@ -175,13 +176,13 @@ test('an older host still running is replaced, not adopted', async () => {
   await cursor.waitFor(/\[host\] replacing the running host \S+ on port \d+ with \S+/, startTimeout);
   await cursor.waitFor(/Shutdown requested via API, reason: ['"]*replaced/);
   await waitForExit(older.child);
-  current = await waitForRunningApp(cursor, { exceptHost: [older.child.pid] });
+  current = await waitForRunningApp(cursor);
   current.loopbackPort = app.loopbackPort;
   assert.doesNotMatch(cursor.text(), /\[host\] adopting running host/);
   const running = current;
   current = null;
   await waitForExit(app.launch(['--quit']), 30_000);
-  await until('the app to exit', async () => !(await isRunning(running.bootstrapperPid)), 90_000);
+  await until('the app to exit', async () => !(await isRunning(running.bootstrapper)), 90_000);
   await assertGone(running, 'after replacing');
 });
 
@@ -199,7 +200,7 @@ test('a killed app does not orphan its host, and held keys are released', { skip
     await until('Shift to be held', () => keyHeld(), 10_000);
   }
   const stopCursor = app.cursor();
-  process.kill(running.bootstrapperPid, 'SIGKILL');
+  process.kill(running.bootstrapper.pid, 'SIGKILL');
   await stopCursor.waitFor(/is no longer running; stopping the host/, 30_000);
   await assertGone(running, 'after the app was killed');
   if (checkKeys) {
