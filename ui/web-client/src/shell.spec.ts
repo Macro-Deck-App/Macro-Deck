@@ -425,6 +425,21 @@ describe('Shell', () => {
     });
   });
 
+  it('relabels the settings gear when the UI language changes, without a reload', () => {
+    const shell = mount();
+    client.app.set({ probed: true, authenticated: true, deckRendered: true });
+    const trigger = root.querySelector('.wc-client-settings-trigger') as HTMLElement;
+    expect(trigger.getAttribute('aria-label')).toBe(text(ClientAppStrings.WebClient.Settings.OpenSettings));
+
+    client.localization.apply({
+      culture: 'de',
+      translations: { [ClientAppStrings.WebClient.Settings.OpenSettings]: 'Macro-Deck-Einstellungen öffnen' },
+    });
+    shell.repaint();
+
+    expect(trigger.getAttribute('aria-label')).toBe('Macro-Deck-Einstellungen öffnen');
+  });
+
   it('puts the settings entry on screen, which is the only way to sign out', () => {
     mount();
 

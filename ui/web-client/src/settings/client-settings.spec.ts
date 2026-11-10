@@ -280,23 +280,6 @@ describe('client settings', () => {
     expect(dialog().textContent).toContain(english(Strings.Settings.Title));
   });
 
-  it('relabels the gear when the UI language changes, without a reload', () => {
-    let language = 'en';
-    const fixture = create({
-      client: {
-        translate: (key: string) => (language === 'en' ? key : `${key}@${language}`),
-        signOut: jasmine.createSpy('signOut').and.resolveTo(undefined),
-      },
-    });
-    const key = ClientAppStrings.WebClient.Settings.OpenSettings;
-    expect(fixture.handle.element.getAttribute('aria-label')).toBe(key);
-
-    language = 'de';
-    fixture.handle.repaint();
-
-    expect(fixture.handle.element.getAttribute('aria-label')).toBe(`${key}@de`);
-  });
-
   // The whole surface, not only the modal: a gear that opens nothing is worse than no gear.
   it('is absent on a target that carries no client settings', () => {
     const handle = createClientSettings({
