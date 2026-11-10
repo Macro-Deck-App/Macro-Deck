@@ -3,12 +3,14 @@ using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 
-namespace MacroDeckHost.Tests.UnitTests.Streamerbot;
+namespace MacroDeckHost.Tests.UnitTests.TestSupport;
 
 internal sealed class WebSocketPair : IDisposable
 {
 	private readonly TcpClient _clientSocket;
 	private readonly TcpClient _serverSocket;
+	private readonly CancellationTokenSource _disposed = new();
+	private volatile bool _halfOpen;
 
 	private WebSocketPair(TcpClient clientSocket, TcpClient serverSocket)
 	{
@@ -52,6 +54,11 @@ internal sealed class WebSocketPair : IDisposable
 
 	public Task SendAsync(string json)
 	{
+		if (_halfOpen)
+		{
+			return Task.CompletedTask;
+		}
+
 		return Server.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(json)),
 			WebSocketMessageType.Text,
 			true,
@@ -60,6 +67,11 @@ internal sealed class WebSocketPair : IDisposable
 
 	public async Task<string> ReceiveAsync()
 	{
+		if (_halfOpen)
+		{
+			return await WaitUntilDisposedAsync();
+		}
+
 		var buffer = new byte[8192];
 		using var message = new MemoryStream();
 
@@ -85,11 +97,73 @@ internal sealed class WebSocketPair : IDisposable
 		_serverSocket.Dispose();
 	}
 
+	public void StallHandshake()
+	{
+		_ = Task.Run(async () =>
+		{
+			var buffer = new byte[8192];
+			try
+			{
+				while (!_disposed.IsCancellationRequested)
+				{
+					var result = await Server.ReceiveAsync(buffer, _disposed.Token);
+					if (result.MessageType == WebSocketMessageType.Close)
+					{
+						return;
+					}
+				}
+			}
+			catch (Exception ex) when (ex is OperationCanceledException
+				or WebSocketException
+				or ObjectDisposedException)
+			{
+			}
+		});
+	}
+
+	public void HalfOpen()
+	{
+		_halfOpen = true;
+	}
+
+	public async Task AbortMidMessageAsync(int announcedBytes = 64, int sentBytes = 8)
+	{
+		var header = announcedBytes < 126
+			? new byte[] { 0x81, (byte)announcedBytes }
+			: [0x81, 126, (byte)(announcedBytes >> 8), (byte)announcedBytes];
+		var payload = Encoding.ASCII.GetBytes(new string('x', sentBytes));
+
+		var stream = _serverSocket.GetStream();
+		await stream.WriteAsync(header);
+		await stream.WriteAsync(payload);
+		await stream.FlushAsync();
+
+		// A reset that overtakes the partial frame would only look like a plain drop to the client.
+		await Task.Delay(50);
+		_serverSocket.Client.LingerState = new LingerOption(true, 0);
+		_serverSocket.Client.Close();
+	}
+
 	public void Dispose()
 	{
+		_disposed.Cancel();
 		Client.Dispose();
 		Server.Dispose();
 		_clientSocket.Dispose();
 		_serverSocket.Dispose();
+		_disposed.Dispose();
+	}
+
+	private async Task<string> WaitUntilDisposedAsync()
+	{
+		try
+		{
+			await Task.Delay(Timeout.Infinite, _disposed.Token);
+		}
+		catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
+		{
+		}
+
+		return string.Empty;
 	}
 }

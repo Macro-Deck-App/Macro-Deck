@@ -1264,26 +1264,39 @@ public class Startup
 				endpoints.MapMacroDeckMcp();
 			}
 
-			endpoints.MapFallbackToFile("admin/{**path}", "admin/index.html").AllowAnonymous();
+			endpoints.MapFallback("admin/{**path:file}", RespondNotFound).AllowAnonymous();
+			endpoints.MapFallbackToFile("admin/{**path:nonfile}", "admin/index.html").AllowAnonymous();
 
 			// One route per packaged device target (issue #727). Registered from what is on disk rather
 			// than from a list in the host, so adding a target is a build change and nothing else.
 			foreach (var targetId in WebClientTargets.Discover(env.WebRootPath))
 			{
 				endpoints
-					.MapFallbackToFile($"{WebClientTargets.RootDirectoryName}/{targetId}/{{**path}}",
+					.MapFallback($"{WebClientTargets.RootDirectoryName}/{targetId}/{{**path:file}}", RespondNotFound)
+					.AllowAnonymous();
+				endpoints
+					.MapFallbackToFile($"{WebClientTargets.RootDirectoryName}/{targetId}/{{**path:nonfile}}",
 						$"{WebClientTargets.RootDirectoryName}/{targetId}/index.html")
 					.AllowAnonymous();
 			}
 
+			// A missing file must not fall through to a shell or, with no endpoint at all, to the
+			// fallback authorization policy, which answers an anonymous request with 401.
+			endpoints.MapFallback("{**path:file}", RespondNotFound).AllowAnonymous();
 			if (SpaPlaceholder.IsClientMissing(env.WebRootPath))
 			{
 				endpoints.MapFallback(SpaPlaceholder.Handle).AllowAnonymous();
 			}
 			else
 			{
-				endpoints.MapFallbackToFile("{**path}", "index.html").AllowAnonymous();
+				endpoints.MapFallbackToFile("{**path:nonfile}", "index.html").AllowAnonymous();
 			}
 		});
+	}
+
+	private static Task RespondNotFound(HttpContext context)
+	{
+		context.Response.StatusCode = StatusCodes.Status404NotFound;
+		return Task.CompletedTask;
 	}
 }
