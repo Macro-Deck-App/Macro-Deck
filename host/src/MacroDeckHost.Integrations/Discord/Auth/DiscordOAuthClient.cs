@@ -91,7 +91,7 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 			Content = new FormUrlEncodedContent(form)
 		};
 
-		using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+		using var response = await SendAsync(request, cancellationToken).ConfigureAwait(false);
 		if (!response.IsSuccessStatusCode)
 		{
 			var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -116,6 +116,23 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 			: (DateTimeOffset?)null;
 
 		return new DiscordTokens(payload.AccessToken, payload.RefreshToken, expiresAt, payload.Scope);
+	}
+
+	private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	{
+		try
+		{
+			return await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+		}
+		// HttpClient reports its own timeout as a cancellation; only the caller's token is a real cancel.
+		catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+		{
+			throw new DiscordOAuthException("The Discord token request timed out.", ex)
+			{
+				IsTransient = true,
+				IsTimeout = true
+			};
+		}
 	}
 
 	private static string DescribeFailure(string body)
@@ -175,4 +192,6 @@ internal sealed class DiscordOAuthException : Exception
 	}
 
 	public bool IsTransient { get; init; }
+
+	public bool IsTimeout { get; init; }
 }
