@@ -294,6 +294,7 @@ export class Shell {
     this.notificationToasts.repaint();
     this.notificationDialogs.repaint();
     if (this.settings !== null) this.settings.repaint();
+    if (this.sidebar !== null) this.sidebar.repaint();
   }
 
   private onConnectedChanged(connected: boolean): void {

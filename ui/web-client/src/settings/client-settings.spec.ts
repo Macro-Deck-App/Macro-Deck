@@ -870,6 +870,32 @@ describe('client settings', () => {
       expect(activeOptions()).toContain(english(ClientAppStrings.Settings.Appearance.Dark));
     });
 
+    it('keeps the notices showing when the language changes, in the new language', async () => {
+      const german: Record<string, string> = {};
+      const base = translator();
+      const fixture = create({
+        client: {
+          translate: (key: string, args?: Record<string, unknown>) =>
+            german[key] !== undefined ? german[key] : base.translate(key, args),
+          signOut: base.signOut,
+        },
+      });
+      fixture.loadNotices.and.resolveTo(notices);
+      fixture.handle.open();
+      openViewer();
+      await flush();
+
+      german[ClientAppStrings.WebClient.Settings.Licenses.Title] = 'Open-Source-Lizenzen';
+      german[Strings.Common.Back] = 'Zurück';
+      fixture.handle.repaint();
+
+      expect(title()).toBe('Open-Source-Lizenzen');
+      expect(viewer().hasAttribute('hidden')).toBeFalse();
+      expect(noticesText().textContent).toBe(notices);
+      expect(document.activeElement).toBe(buttonLabelled('Zurück'));
+      expect(fixture.loadNotices).toHaveBeenCalledTimes(1);
+    });
+
     it('closes the whole dialog on Escape while the notices are showing', async () => {
       const fixture = create();
       fixture.handle.open();
