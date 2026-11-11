@@ -293,6 +293,7 @@ export class Shell {
     this.modals.repaint();
     this.notificationToasts.repaint();
     this.notificationDialogs.repaint();
+    if (this.settings !== null) this.settings.repaint();
   }
 
   private onConnectedChanged(connected: boolean): void {

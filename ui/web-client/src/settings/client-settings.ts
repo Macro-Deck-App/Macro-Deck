@@ -119,6 +119,7 @@ export interface ClientSettingsHandle {
   close(): void;
   isOpen(): boolean;
   setButtonHidden(hidden: boolean): void;
+  repaint(): void;
   destroy(): void;
 }
 
@@ -230,7 +231,10 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
   const trigger = element('button', 'wc-client-settings-trigger');
   trigger.type = 'button';
-  trigger.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.OpenSettings));
+  const paintTrigger = (): void => {
+    trigger.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.OpenSettings));
+  };
+  paintTrigger();
   trigger.appendChild(gearIcon());
 
   let open: OpenModal | null = null;
@@ -801,6 +805,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     close: () => close(),
     isOpen: () => open !== null,
     setButtonHidden: (hidden: boolean) => show(trigger, !hidden),
+    repaint: () => paintTrigger(),
     destroy: () => {
       destroyed = true;
       close();

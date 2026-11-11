@@ -211,7 +211,6 @@ test('the Web Client deck and its settings switch to German and show only German
 });
 
 test('the Web Client settings button is relabelled in German without a reload', async ({ browser, api, host }) => {
-  test.fixme(true, '#1708: the settings trigger keeps the aria-label it was created with after the culture changes');
   const web = await webClientInGerman(browser, api, host);
   await expect(web.page.locator('.wc-client-settings-trigger'))
     .toHaveAccessibleName(de('WebClient.Settings.OpenSettings'));
