@@ -22,6 +22,14 @@ dotnet test MacroDeck.slnx -c Release --filter "FullyQualifiedName~FolderCache"
 
 Platform-specific test projects live beside the cross-platform host tests. Run the project for the operating system affected by a change when that platform is available.
 
+### Platform input tests
+
+`host/tests/MacroDeckHost.Tests.PlatformInput` drives the real keyboard, mouse and app-launch code at a probe window ([`host/tests/fixtures/MacroDeckHost.Tests.InputProbe`](../../host/tests/fixtures/MacroDeckHost.Tests.InputProbe)) and asserts what that window received and what the OS still holds down afterwards. It injects real input into the session, so the whole assembly is ignored unless `MACRODECK_PLATFORM_INPUT=1` is set; do not set it on a desktop you are using. Fixtures carry the category of the job that runs them: `Windows`, `X11`, `Wayland`, `MacOS`.
+
+`MACRODECK_REQUIRE_INTERACTIVE=1` turns a missing session (no input desktop, no X display, no compositor) into a failure instead of a skip, here and in the `Interactive` category of the Windows and Linux platform projects. [`.github/workflows/platform-input.yml`](../../.github/workflows/platform-input.yml) sets both, runs nightly and on pull requests touching input or platform code, and fails a job whose results skip a test without naming an issue ([`ci/scripts/check-trx-skips.mjs`](../../ci/scripts/check-trx-skips.mjs)). A case that is red today is marked `[Ignore("Red today: #<issue> ...")]` with its bug issue instead of being deleted or loosened.
+
+On Linux without a desktop, [`ci/scripts/linux-display.sh`](../../ci/scripts/linux-display.sh) starts Xvfb with openbox (`start x11`) or weston with XWayland nested in it (`start wayland`) and prints the variables to export. The [`linux-display`](../../.github/actions/linux-display/action.yml) action does the same in a workflow. A container works too: install the packages the action lists, start the display, then run the tests with the matching category filter and `-- NUnit.NumberOfTestWorkers=1`.
+
 `host/tests/MacroDeckHost.Tests.SystemTests` starts the built host and the SDK fixture plugins as real processes, each test with its own data directory, temp directory, ports and loopback secret, so it needs the solution built first. `MACRO_DECK_HOST_BINARY` points it at a staged host instead of the build output, as for the E2E suite.
 
 Database schema changes require a new EF Core migration: `dotnet tool restore`, then `dotnet ef migrations add <Name> --project host/src/MacroDeckHost.Infrastructure`. See [coding style](coding-style.md#persistence).

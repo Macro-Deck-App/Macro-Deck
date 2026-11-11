@@ -1,0 +1,133 @@
+name: Platform input
+
+# Real-effect input tests: see engineering/development/building-and-testing.md#platform-input-tests.
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  pull_request:
+    branches: [main, production]
+    paths:
+      - host/src/MacroDeckHost.Integrations/Keyboard/**
+      - host/src/MacroDeckHost.Integrations/Mouse/**
+      - host/src/MacroDeckHost.Platform/**
+      - host/tests/MacroDeckHost.Tests.PlatformInput/**
+      - host/tests/fixtures/MacroDeckHost.Tests.InputProbe/**
+      - .github/workflows/platform-input.yml
+      - .github/actions/linux-display/**
+      - ci/scripts/linux-display.sh
+      - ci/scripts/check-trx-skips.mjs
+
+concurrency:
+  group: platform-input-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
+  # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
+  DOTNET_VERSION: 10.0.402
+  BUILD_CHANNEL: Production
+  MACRODECK_PLATFORM_INPUT: '1'
+  MACRODECK_REQUIRE_INTERACTIVE: '1'
+  PLATFORM_INPUT_PROJECT: host/tests/MacroDeckHost.Tests.PlatformInput
+
+jobs:
+  input:
+    name: Platform input (${{ matrix.name }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # GitHub-hosted runners: the Blacksmith Windows and macOS runners have no attended input desktop.
+          - name: Windows
+            runner: windows-latest
+            category: Windows
+            platform-project: host/tests/MacroDeckHost.Tests.UnitTests.Windows
+            display: ''
+            skip-check: ''
+          - name: Linux X11
+            runner: ubuntu-24.04
+            category: X11
+            platform-project: host/tests/MacroDeckHost.Tests.UnitTests.Linux
+            display: x11
+            skip-check: ''
+          - name: Linux Wayland
+            runner: ubuntu-24.04
+            category: Wayland
+            platform-project: ''
+            display: wayland
+            skip-check: ''
+          - name: macOS
+            runner: macos-latest
+            category: MacOS
+            platform-project: ''
+            display: ''
+            skip-check: --allow-environment-skips
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Start the display
+        if: matrix.display != ''
+        uses: ./.github/actions/linux-display
+        with:
+          mode: ${{ matrix.display }}
+
+      - name: Build
+        shell: bash
+        env:
+          PLATFORM_PROJECT: ${{ matrix.platform-project }}
+        run: |
+          dotnet build "$PLATFORM_INPUT_PROJECT" -c Release -p:BuildChannel=$BUILD_CHANNEL
+          if [ -n "$PLATFORM_PROJECT" ]; then
+            dotnet build "$PLATFORM_PROJECT" -c Release -p:BuildChannel=$BUILD_CHANNEL
+          fi
+
+      # Serially, one worker: every case owns the real keyboard, pointer and focus while it runs.
+      - name: Test
+        shell: bash
+        env:
+          CATEGORY: ${{ matrix.category }}
+          PLATFORM_PROJECT: ${{ matrix.platform-project }}
+        run: |
+          status=0
+          dotnet test "$PLATFORM_INPUT_PROJECT" -c Release --no-build -p:BuildChannel=$BUILD_CHANNEL \
+            --filter "TestCategory=$CATEGORY" --logger "trx;LogFileName=platform-input.trx" \
+            --results-directory TestResults -- NUnit.NumberOfTestWorkers=1 || status=1
+          if [ -n "$PLATFORM_PROJECT" ]; then
+            dotnet test "$PLATFORM_PROJECT" -c Release --no-build -p:BuildChannel=$BUILD_CHANNEL \
+              --filter "TestCategory=Interactive" --logger "trx;LogFileName=interactive.trx" \
+              --results-directory TestResults -- NUnit.NumberOfTestWorkers=1 || status=1
+          fi
+          exit $status
+
+      - name: Fail on unexplained skips
+        if: always()
+        shell: bash
+        env:
+          SKIP_CHECK: ${{ matrix.skip-check }}
+        run: node ci/scripts/check-trx-skips.mjs $SKIP_CHECK TestResults/*.trx
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: platform-input-${{ matrix.category }}
+          path: TestResults/*.trx
+          if-no-files-found: ignore

@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);CA1707</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="NUnit" />
+        <PackageReference Include="NUnit.Analyzers" />
+        <PackageReference Include="NUnit3TestAdapter" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+        <ProjectReference Include="..\..\src\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
+        <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Sdk\MacroDeck.Sdk.csproj" />
+        <!-- Reference-only, to guarantee build ordering: the tests start the probe's own build output. -->
+        <ProjectReference Include="..\fixtures\MacroDeckHost.Tests.InputProbe\MacroDeckHost.Tests.InputProbe.csproj"
+                          ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\fixtures\MacroDeckHost.Tests.InputProbe\ProbeEvent.cs" Link="Support\ProbeEvent.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="NUnit.Framework" />
+        <Using Include="MacroDeck.Sdk.Input" />
+    </ItemGroup>
+
+</Project>
