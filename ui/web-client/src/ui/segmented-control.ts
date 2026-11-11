@@ -95,7 +95,6 @@ export function createSegmentedControl(options: SegmentedControlOptions): Segmen
     return true;
   }
 
-  // Only the wording changed, as on a language switch: the buttons stay, and so does focus on one.
   function relabel(next: SegmentedOption[]): void {
     for (let index = 0; index < next.length; index++) {
       const entry = buttons[index];

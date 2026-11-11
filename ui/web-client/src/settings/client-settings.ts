@@ -291,8 +291,6 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     return row.querySelector<HTMLElement>('.wc-settings-row-desc');
   }
 
-  // Every text the dialog paints once at build time registers how to paint it again, so a language
-  // change relabels the open dialog in place instead of rebuilding it and losing focus and scroll.
   function localizedParagraph(localized: Localize, className: string, key: string): HTMLElement {
     const node = paragraph(className, text(key));
     localized(() => {
