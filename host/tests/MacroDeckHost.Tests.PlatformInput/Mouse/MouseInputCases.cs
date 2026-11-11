@@ -158,6 +158,8 @@ public abstract class MouseInputCases
 
 	[TestCase("up", 3)]
 	[TestCase("down", -3)]
+	[TestCase("left", -3)]
+	[TestCase("right", 3)]
 	public async Task Every_scrolled_notch_arrives(string direction, int expected)
 	{
 		if (NotchesRedToday is { } reason)
