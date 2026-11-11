@@ -22,29 +22,27 @@ public static class ProcessDpiAwareness
 	[SupportedOSPlatform("windows")]
 	private static void ConfigureWindows()
 	{
-		try
+		Apply(() => SetProcessDpiAwarenessContext(_perMonitorAwareV2),
+			() => SetProcessDpiAwareness(ProcessPerMonitorDpiAware) == 0,
+			SetProcessDpiAware);
+	}
+
+	// Windows Server Core images export none of these, and the host must still start there.
+	internal static void Apply(Func<bool> perMonitorV2, Func<bool> perMonitor, Func<bool> systemAware)
+	{
+		foreach (var attempt in new[] { perMonitorV2, perMonitor, systemAware })
 		{
-			if (SetProcessDpiAwarenessContext(_perMonitorAwareV2))
+			try
 			{
-				return;
+				if (attempt())
+				{
+					return;
+				}
+			}
+			catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
+			{
 			}
 		}
-		catch (EntryPointNotFoundException)
-		{
-		}
-
-		try
-		{
-			if (SetProcessDpiAwareness(ProcessPerMonitorDpiAware) == 0)
-			{
-				return;
-			}
-		}
-		catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
-		{
-		}
-
-		_ = SetProcessDpiAware();
 	}
 
 	[DllImport("user32.dll", SetLastError = true)]
