@@ -12,6 +12,7 @@ internal sealed class SingleInstanceTests : SystemTestFixture
 	public async Task A_second_host_on_the_same_data_directory_exits_and_leaves_the_running_host_and_its_data_alone()
 	{
 		var host = await StartHostAsync();
+		await IncludedIconPackSyncedAsync(host);
 		var filesBefore = await SettledDataFilesAsync(host.DataDirectory);
 		var configBefore = ConfigHashes(host.DataDirectory);
 
@@ -25,6 +26,20 @@ internal sealed class SingleInstanceTests : SystemTestFixture
 			using var response = await host.Api.GetAsync("/api/plugin-runtime");
 			Assert.That(response.IsSuccessStatusCode, Is.True, "the first host still serves");
 		});
+	}
+
+	// The included icon pack is seeded in bursts that can pause longer than the settle window.
+	private static async Task IncludedIconPackSyncedAsync(HostInstance host)
+	{
+		await Poll.UntilAsync(() => Task.FromResult(host.Output.Any(EndsIncludedIconPackSync)),
+			TimeSpan.FromSeconds(120),
+			"the first host finished seeding the included icon pack");
+	}
+
+	private static bool EndsIncludedIconPackSync(string line)
+	{
+		return line.Contains("Synced the included icon pack", StringComparison.Ordinal)
+			|| line.Contains("Failed to sync the included icon pack", StringComparison.Ordinal);
 	}
 
 	// A freshly started host still writes its first store registry sync, which no second instance causes.
