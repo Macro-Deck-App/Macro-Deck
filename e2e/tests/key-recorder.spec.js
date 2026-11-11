@@ -114,6 +114,8 @@ test('the key combo recorder stores the key per layout and sided modifiers', asy
 
   for (const item of CASES) {
     await test.step(item.name, async () => {
+      // A card only opens once the editor knows its action, which can arrive after the card is shown.
+      await expect(actionCard(page, item.name)).toHaveAttribute('aria-expanded', 'false');
       await actionCard(page, item.name).click();
       const combo = page.getByRole('group', { name: 'Key Combination', exact: true });
       await expect(combo).toHaveCount(1);
