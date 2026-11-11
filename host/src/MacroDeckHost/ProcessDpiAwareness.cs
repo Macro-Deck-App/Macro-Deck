@@ -22,34 +22,26 @@ public static class ProcessDpiAwareness
 	[SupportedOSPlatform("windows")]
 	private static void ConfigureWindows()
 	{
-		try
-		{
-			if (SetProcessDpiAwarenessContext(_perMonitorAwareV2))
-			{
-				return;
-			}
-		}
-		catch (EntryPointNotFoundException)
-		{
-		}
+		Apply(() => SetProcessDpiAwarenessContext(_perMonitorAwareV2),
+			() => SetProcessDpiAwareness(ProcessPerMonitorDpiAware) == 0,
+			SetProcessDpiAware);
+	}
 
-		try
+	// Windows Server Core images export none of these, and the host must still start there.
+	internal static void Apply(Func<bool> perMonitorV2, Func<bool> perMonitor, Func<bool> systemAware)
+	{
+		foreach (var attempt in new[] { perMonitorV2, perMonitor, systemAware })
 		{
-			if (SetProcessDpiAwareness(ProcessPerMonitorDpiAware) == 0)
+			try
 			{
-				return;
+				if (attempt())
+				{
+					return;
+				}
 			}
-		}
-		catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
-		{
-		}
-
-		try
-		{
-			_ = SetProcessDpiAware();
-		}
-		catch (EntryPointNotFoundException)
-		{
+			catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
+			{
+			}
 		}
 	}
 

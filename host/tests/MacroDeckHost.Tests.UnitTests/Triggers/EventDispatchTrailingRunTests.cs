@@ -61,6 +61,19 @@ internal sealed class EventDispatchTrailingRunTests
 	}
 
 	[Test]
+	public async Task A_running_event_flow_is_cancelled_when_the_host_stops()
+	{
+		await using var world = await World.Start();
+		world.AddAutomation();
+		world.Publish(Scene("A"));
+		await world.Runner.WaitForRuns(1);
+
+		await world.Stop().WaitAsync(TimeSpan.FromSeconds(10));
+
+		await Until(() => !world.Runner.Active);
+	}
+
+	[Test]
 	public async Task Occurrences_during_a_run_leave_one_trailing_run_with_the_newest()
 	{
 		await using var world = await World.Start();
@@ -345,6 +358,11 @@ internal sealed class EventDispatchTrailingRunTests
 		{
 			await Task.Delay(50);
 			await Until(() => !Runner.Active);
+		}
+
+		public async Task Stop()
+		{
+			await _host.StopAsync();
 		}
 
 		public async ValueTask DisposeAsync()
