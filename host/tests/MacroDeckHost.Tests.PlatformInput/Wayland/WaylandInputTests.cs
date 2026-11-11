@@ -65,9 +65,16 @@ public sealed class WaylandInputTests
 				"survive"))
 			{
 				seat.WaitFor(e => e.Type == "ready", TimeSpan.FromSeconds(20), "the seat input sender");
-				seat.Send("press");
-				Assert.That(() => InputLines(output).Count,
-					Is.GreaterThan(0).After(10000, 100),
+				// The compositor focuses the new window asynchronously, so the seat keeps pressing until it lands.
+				var deadline = DateTime.UtcNow.AddSeconds(20);
+				while (InputLines(output).Count == 0 && DateTime.UtcNow < deadline)
+				{
+					seat.Send("press");
+					Thread.Sleep(1000);
+				}
+
+				Assert.That(InputLines(output),
+					Is.Not.Empty,
 					"input through the compositor's own seat reaches the native window");
 			}
 
