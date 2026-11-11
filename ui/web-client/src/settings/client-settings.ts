@@ -218,16 +218,19 @@ interface OpenModal {
   iconResolution: SegmentedControlHandle | null;
   iconResolutionDescription: HTMLElement | null;
   wakeLockControl: HTMLElement;
+  wakeLockToggle: ToggleHandle | null;
   wakeLockStatus: HTMLElement;
   settingsButtonToggle: ToggleHandle | null;
   settingsButtonStatus: HTMLElement;
   installDescription: HTMLElement | null;
   installControl: HTMLElement;
+  installAction: ButtonHandle | null;
   installNote: HTMLElement;
   updateRow: HTMLElement;
   updateSlot: HTMLElement;
   updateDescription: HTMLElement | null;
   updateControl: HTMLElement;
+  updateAction: ButtonHandle | null;
 }
 
 export function createClientSettings(options: ClientSettingsOptions): ClientSettingsHandle | null {
@@ -636,27 +639,32 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       iconResolution: iconResolution,
       iconResolutionDescription: iconResolutionRow === null ? null : description(iconResolutionRow),
       wakeLockControl: wakeLockControl,
+      wakeLockToggle: null,
       wakeLockStatus: wakeLockStatus,
       settingsButtonToggle: settingsButtonToggle,
       settingsButtonStatus: settingsButtonStatus,
       installDescription: description(installRow),
       installControl: installControl,
+      installAction: null,
       installNote: installNote,
       updateRow: updateRow,
       updateSlot: install.body,
       updateDescription: description(updateRow),
       updateControl: updateControl,
+      updateAction: null,
     };
   }
 
   function renderWakeLock(modal: OpenModal): void {
     const status = options.wakeLock.currentStatus();
-    clear(modal.wakeLockControl);
 
     // A switch that can never be flipped is worse than no switch: it invites a tap and answers with
     // nothing. Both of these states are properties of the browser or the address, not something the
     // user can change from here, so the row keeps only its explanation.
-    if (status !== 'unsupported' && status !== 'insecureOrigin') {
+    if (status === 'unsupported' || status === 'insecureOrigin') {
+      clear(modal.wakeLockControl);
+      modal.wakeLockToggle = null;
+    } else if (modal.wakeLockToggle === null) {
       const toggle = createToggle({
         ariaLabel: text(ClientAppStrings.WebClient.KeepAwake.Label),
         checked: options.wakeLock.enabled(),
@@ -666,6 +674,11 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
         onChange: on => options.wakeLock.setEnabled(on),
       });
       modal.wakeLockControl.appendChild(toggle.element);
+      modal.wakeLockToggle = toggle;
+    } else {
+      modal.wakeLockToggle.setAriaLabel(text(ClientAppStrings.WebClient.KeepAwake.Label));
+      modal.wakeLockToggle.setChecked(options.wakeLock.enabled());
+      modal.wakeLockToggle.setBusy(status === 'pending');
     }
 
     const key = wakeLockStatusKey(status);
@@ -713,8 +726,10 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       modal.installDescription.textContent = text(installStatusKey(availability));
     }
 
-    clear(modal.installControl);
-    if (availability === 'promptable' && !dismissedHintVisible) {
+    if (availability !== 'promptable' || dismissedHintVisible) {
+      clear(modal.installControl);
+      modal.installAction = null;
+    } else if (modal.installAction === null) {
       const action = createButton({
         label: text(ClientAppStrings.WebClient.Install.InstallAction),
         variant: 'secondary',
@@ -723,6 +738,9 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
         },
       });
       modal.installControl.appendChild(action.element);
+      modal.installAction = action;
+    } else {
+      modal.installAction.setLabel(text(ClientAppStrings.WebClient.Install.InstallAction));
     }
 
     // Explanatory text belongs under the row, not in its control slot: the slot is laid out beside
@@ -753,9 +771,16 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       modal.updateDescription.textContent = text(updateStatusKey(phase));
     }
 
-    clear(modal.updateControl);
     const actionKey = updateActionKey(phase);
-    if (actionKey === null) return;
+    if (actionKey === null) {
+      clear(modal.updateControl);
+      modal.updateAction = null;
+      return;
+    }
+    if (modal.updateAction !== null) {
+      modal.updateAction.setLabel(text(actionKey));
+      return;
+    }
 
     const action = createButton({
       label: text(actionKey),
@@ -763,6 +788,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       onClick: () => runUpdateAction(),
     });
     modal.updateControl.appendChild(action.element);
+    modal.updateAction = action;
   }
 
   function render(): void {

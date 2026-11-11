@@ -305,6 +305,60 @@ describe('client settings', () => {
     expect(fixture.client.signOut).toHaveBeenCalled();
   });
 
+  describe('a language change while the dialog is open', () => {
+    function relabelled(german: Record<string, string>): ClientSettingsOptions['client'] {
+      const base = translator();
+      return {
+        translate: (key: string, args?: Record<string, unknown>) =>
+          german[key] !== undefined ? german[key] : base.translate(key, args),
+        signOut: base.signOut,
+      };
+    }
+
+    it('keeps focus on the wake lock switch and renames it', () => {
+      const german: Record<string, string> = {};
+      const fixture = create({ client: relabelled(german) });
+      fixture.handle.open();
+      const toggle = wakeLockToggle()!;
+      toggle.focus();
+
+      german[ClientAppStrings.WebClient.KeepAwake.Label] = 'Bildschirm wach halten';
+      fixture.handle.repaint();
+
+      expect(wakeLockToggle()).toBe(toggle);
+      expect(document.activeElement).toBe(toggle);
+      expect(toggle.getAttribute('aria-label')).toBe('Bildschirm wach halten');
+    });
+
+    it('keeps focus on the install button and renames it', () => {
+      const german: Record<string, string> = {};
+      const fixture = create({ client: relabelled(german), install: pwaInstall('promptable') });
+      fixture.handle.open();
+      const install = buttonLabelled(english(ClientAppStrings.WebClient.Install.InstallAction))!;
+      install.focus();
+
+      german[ClientAppStrings.WebClient.Install.InstallAction] = 'Installieren';
+      fixture.handle.repaint();
+
+      expect(buttonLabelled('Installieren')).toBe(install);
+      expect(document.activeElement).toBe(install);
+    });
+
+    it('keeps focus on the update button and renames it', () => {
+      const german: Record<string, string> = {};
+      const fixture = create({ client: relabelled(german), install: pwaInstall('runningAsApp') });
+      fixture.handle.open();
+      const check = buttonLabelled(english(ClientAppStrings.WebClient.Update.CheckAction))!;
+      check.focus();
+
+      german[ClientAppStrings.WebClient.Update.CheckAction] = 'Nach Updates suchen';
+      fixture.handle.repaint();
+
+      expect(buttonLabelled('Nach Updates suchen')).toBe(check);
+      expect(document.activeElement).toBe(check);
+    });
+  });
+
   describe('device setup', () => {
     it('leads into the wizard, getting its own dialog out of the way first', () => {
       const openDeviceSetup = jasmine.createSpy('openDeviceSetup');
