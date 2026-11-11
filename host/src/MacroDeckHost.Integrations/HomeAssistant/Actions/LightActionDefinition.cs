@@ -1,5 +1,6 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Integrations.HomeAssistant.Connections;
 using MacroDeckHost.Localization;
 
@@ -52,7 +53,7 @@ internal sealed class LightActionDefinition : IDynamicOptionsActionDefinition
 			AppStrings.Integrations.HomeAssistant.Actions.Light.StateLabel(),
 			defaultValue: "on",
 			required: true),
-		ActionParameter.Number(BrightnessParameterName,
+		OptionalNumber(BrightnessParameterName,
 				AppStrings.Integrations.HomeAssistant.Actions.Light.BrightnessLabel(),
 				AppStrings.Integrations.HomeAssistant.Actions.Light.BrightnessDescription(),
 				0,
@@ -60,9 +61,11 @@ internal sealed class LightActionDefinition : IDynamicOptionsActionDefinition
 			.OnlyWhen(StateParameterName, "on", "toggle"),
 		ActionParameter.Color(ColorParameterName,
 				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorLabel(),
-				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorDescription())
+				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorDescription(),
+				WidgetAppearanceValues.Reset,
+				true)
 			.OnlyWhen(StateParameterName, "on", "toggle"),
-		ActionParameter.Number(ColorTemperatureParameterName,
+		OptionalNumber(ColorTemperatureParameterName,
 				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorTemperatureLabel(),
 				AppStrings.Integrations.HomeAssistant.Actions.Light.ColorTemperatureDescription(),
 				2000,
@@ -85,6 +88,25 @@ internal sealed class LightActionDefinition : IDynamicOptionsActionDefinition
 		CancellationToken cancellationToken)
 	{
 		return Task.FromResult(HomeAssistantOptions.Entities(_resolver(), context.Filter, LightDomain));
+	}
+
+	private static ActionParameter OptionalNumber(
+		string name,
+		LocalizedText label,
+		LocalizedText description,
+		double min,
+		double max)
+	{
+		return new ActionParameter
+		{
+			Name = name,
+			Type = ActionParameterType.Number,
+			Label = label,
+			Description = description,
+			Min = min,
+			Max = max,
+			DefaultValue = string.Empty
+		};
 	}
 
 	private sealed class Executor : IActionExecutor
@@ -142,22 +164,26 @@ internal sealed class LightActionDefinition : IDynamicOptionsActionDefinition
 
 		private static void AddValues(ActionExecutionContext context, Dictionary<string, object?> data)
 		{
+			// Blocks saved before the fields could stay empty hold a pre-filled 0, and Home Assistant
+			// switches a light off at brightness 0, which Off already expresses.
 			if (HomeAssistantActionValues.ReadNumber(context.Parameters, BrightnessParameterName, 0, 100) is
-				{ } brightness)
+				{ } brightness and > 0)
 			{
 				data["brightness_pct"] = brightness;
 			}
 
-			if (HomeAssistantActionValues.ReadRgb(
-					HomeAssistantActionValues.ReadText(context.Parameters, ColorParameterName)) is { } rgb)
-			{
-				data["rgb_color"] = rgb;
-			}
-
+			// Home Assistant accepts one colour descriptor per call.
 			if (HomeAssistantActionValues.ReadNumber(context.Parameters, ColorTemperatureParameterName, 1000, 10000) is
 				{ } kelvin)
 			{
 				data["color_temp_kelvin"] = (int)kelvin;
+				return;
+			}
+
+			var color = HomeAssistantActionValues.ReadText(context.Parameters, ColorParameterName);
+			if (!WidgetAppearanceValues.IsReset(color) && HomeAssistantActionValues.ReadRgb(color) is { } rgb)
+			{
+				data["rgb_color"] = rgb;
 			}
 		}
 	}
