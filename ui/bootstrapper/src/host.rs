@@ -204,6 +204,9 @@ pub fn parse_port(raw: &str) -> Option<u16> {
     }
 }
 
+#[cfg(unix)]
+const SHELL_PROCESS_ID_ENVIRONMENT_VARIABLE: &str = "MACRODECK_SHELL_PROCESS_ID";
+
 fn env_port_override() -> Option<u16> {
     std::env::var("MACRODECK_HOST_PORT")
         .ok()
@@ -920,6 +923,10 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
     {
         use std::os::unix::process::CommandExt;
         command.process_group(0);
+        command.env(
+            SHELL_PROCESS_ID_ENVIRONMENT_VARIABLE,
+            std::process::id().to_string(),
+        );
     }
 
     state.log_tail.clear();
