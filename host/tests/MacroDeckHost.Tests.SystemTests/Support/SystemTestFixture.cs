@@ -40,9 +40,11 @@ internal abstract class SystemTestFixture
 		State.Dispose();
 	}
 
-	protected async Task<HostInstance> StartHostAsync(IReadOnlyDictionary<string, string?>? environment = null)
+	protected async Task<HostInstance> StartHostAsync(
+		IReadOnlyDictionary<string, string?>? environment = null,
+		string? root = null)
 	{
-		var host = await HostInstance.StartAsync(State.Path, environment);
+		var host = await HostInstance.StartAsync(root ?? State.Path, environment);
 		_hosts.Add(host);
 		return host;
 	}
