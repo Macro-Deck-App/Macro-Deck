@@ -10,6 +10,7 @@ const NEW_COMMIT = 'feedbee';
 async function signedInClient(browser, host) {
   const context = await browser.newContext({ serviceWorkers: 'block' });
   const page = await context.newPage();
+  page.pendingRequests = trackRequests(page);
   await page.goto(host.publicUrl);
   await signInWebClient(page);
   return { context, page };
@@ -20,8 +21,30 @@ async function reportCommit(route, commit) {
   await route.fulfill({ response, json: { ...await response.json(), commit } });
 }
 
-// A socket drop and reconnect is what makes a running client ask the host for its build again.
+function trackRequests(page) {
+  const pending = new Set();
+  page.on('request', request => pending.add(request));
+  page.on('requestfinished', request => pending.delete(request));
+  page.on('requestfailed', request => pending.delete(request));
+  page.on('framenavigated', frame => {
+    if (frame === page.mainFrame()) {
+      pending.clear();
+    }
+  });
+  return pending;
+}
+
+// A socket drop and reconnect is what makes a running client ask the host for its build again. The
+// client must have finished its own version check first: cutting the network mid-check tests the cut.
 async function reconnect(context) {
+  const page = context.pages()[0];
+  let quietSince = Date.now();
+  await expect.poll(() => {
+    if (page.pendingRequests.size > 0) {
+      quietSince = Date.now();
+    }
+    return Date.now() - quietSince;
+  }, { intervals: [100], timeout: 30_000 }).toBeGreaterThanOrEqual(1_000);
   await context.setOffline(true);
   await new Promise(resolve => setTimeout(resolve, 3_000));
   await context.setOffline(false);

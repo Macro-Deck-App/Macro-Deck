@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Security.Claims;
+using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Weather;
 using MacroDeckHost.Tests.UnitTests.Auth;
@@ -16,6 +17,7 @@ namespace MacroDeckHost.Tests.UnitTests.Ui;
 public class UiWebSocketContractTests
 {
 	private const int RequestLimit = 256;
+	private const int OutboundQueueLimit = 256;
 
 	private readonly BlockingWeatherInstances _blocking = new();
 	private readonly ManualTimeProvider _time = new();
@@ -139,6 +141,96 @@ public class UiWebSocketContractTests
 		await running.WaitAsync(TimeSpan.FromSeconds(15));
 	}
 
+	[Test]
+	public async Task A_peer_that_stops_reading_is_aborted_once_a_push_misses_the_send_deadline()
+	{
+		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
+		var running = Run(pair.Host);
+		await AttachAndStopReadingAsync(pair.Plugin);
+
+		await PushPastTheSocketBuffersAsync();
+		await Task.Delay(500);
+		_time.Advance(TimeSpan.FromSeconds(30));
+
+		await Task.WhenAny(running, Task.Delay(TimeSpan.FromSeconds(15)));
+		Assert.Multiple(() =>
+		{
+			Assert.That(running.IsCompleted, Is.True, "the connection ended");
+			Assert.That(pair.Host.State, Is.EqualTo(WebSocketState.Aborted));
+		});
+	}
+
+	[Test]
+	public async Task A_peer_that_stops_reading_is_aborted_once_its_outbound_queue_overflows()
+	{
+		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
+		var running = Run(pair.Host);
+		await AttachAndStopReadingAsync(pair.Plugin);
+
+		await PushPastTheSocketBuffersAsync();
+		var transport = _host.Services.GetRequiredService<IUiTransport>();
+		for (var index = 0; index <= OutboundQueueLimit && !running.IsCompleted; index++)
+		{
+			await transport.Send(new StalledPeerPush("small"));
+		}
+
+		await Task.WhenAny(running, Task.Delay(TimeSpan.FromSeconds(15)));
+		Assert.Multiple(() =>
+		{
+			Assert.That(running.IsCompleted, Is.True, "the connection ended");
+			Assert.That(pair.Host.State, Is.EqualTo(WebSocketState.Aborted));
+		});
+	}
+
+	// A pong proves the session is registered for pushes; nothing is read from the socket after it.
+	private static async Task AttachAndStopReadingAsync(WebSocket peer)
+	{
+		var client = new UiWsTestClient(peer, false);
+		await client.SendRawAsync(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+			"hello",
+			null,
+			"hello-1",
+			null,
+			null,
+			null));
+		await client.SendRawAsync(new UiWebSocketEnvelope(UiWebSocketProtocol.Version,
+			"ping",
+			null,
+			"attached-1",
+			null,
+			null,
+			null));
+
+		var buffer = new byte[64 * 1024];
+		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+		while (true)
+		{
+			using var message = new MemoryStream();
+			WebSocketReceiveResult result;
+			do
+			{
+				result = await peer.ReceiveAsync(buffer, timeout.Token);
+				message.Write(buffer, 0, result.Count);
+			} while (!result.EndOfMessage);
+
+			var envelope = JsonNode.Parse(message.ToArray());
+			if ((string?)envelope?["kind"] == "pong" && (string?)envelope["correlationId"] == "attached-1")
+			{
+				return;
+			}
+		}
+	}
+
+	private async Task PushPastTheSocketBuffersAsync()
+	{
+		var transport = _host.Services.GetRequiredService<IUiTransport>();
+		var text = new string('a', 900_000);
+		for (var index = 0; index < 16; index++)
+		{
+			await transport.Send(new StalledPeerPush(text));
+		}
+	}
+
 	private Task Run(WebSocket socket)
 	{
 		return _host.Services.GetRequiredService<UiWebSocketEndpoint>()
@@ -180,4 +272,6 @@ public class UiWebSocketContractTests
 			return source;
 		}
 	}
+
+	private sealed record StalledPeerPush(string Text);
 }

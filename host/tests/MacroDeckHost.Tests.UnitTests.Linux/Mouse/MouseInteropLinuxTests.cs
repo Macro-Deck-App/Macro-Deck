@@ -1,9 +1,11 @@
 using MacroDeckHost.Integrations.Mouse.Models;
 using MacroDeckHost.Integrations.Mouse.Native;
+using MacroDeckHost.Tests.Support;
 
 namespace MacroDeckHost.Tests.UnitTests.Linux.Mouse;
 
 [Platform("Linux")]
+[Category("Interactive")]
 public class MouseInteropLinuxTests
 {
 	private static bool HasDisplay
@@ -25,16 +27,11 @@ public class MouseInteropLinuxTests
 	}
 
 	[Test]
-	public void An_unavailable_display_is_reported_rather_than_thrown()
+	public void Support_is_reported_exactly_when_a_display_is_reachable_and_never_thrown()
 	{
 		var provider = Provider();
-		if (HasDisplay)
-		{
-			Assert.Ignore("A display is reachable; this test covers the headless path.");
-			return;
-		}
 
-		Assert.That(provider.IsSupported, Is.False);
+		Assert.That(provider.IsSupported, Is.EqualTo(HasDisplay));
 		Assert.DoesNotThrow(() => provider.TryGetPosition(out _));
 		Assert.DoesNotThrow(() => provider.TryGetDesktopBounds(out _));
 	}
@@ -53,7 +50,7 @@ public class MouseInteropLinuxTests
 		var provider = Provider();
 		if (!provider.IsSupported)
 		{
-			Assert.Ignore("No X display; nothing to classify.");
+			Interactive.Require("No X display; nothing to classify.");
 			return;
 		}
 
@@ -80,7 +77,7 @@ public class MouseInteropLinuxTests
 		var provider = Provider();
 		if (!provider.IsSupported)
 		{
-			Assert.Ignore("No X display available.");
+			Interactive.Require("No X display available.");
 			return;
 		}
 

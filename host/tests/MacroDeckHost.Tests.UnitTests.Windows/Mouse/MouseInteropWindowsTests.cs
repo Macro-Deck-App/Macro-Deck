@@ -1,9 +1,11 @@
 using MacroDeckHost.Integrations.Mouse.Models;
 using MacroDeckHost.Integrations.Mouse.Native;
+using MacroDeckHost.Tests.Support;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.Mouse;
 
 [Platform("Win")]
+[Category("Interactive")]
 public class MouseInteropWindowsTests
 {
 	private static IMouseInputProvider Provider()
@@ -73,7 +75,7 @@ public class MouseInteropWindowsTests
 		var provider = Provider();
 		if (!provider.TryGetPosition(out var original) || !provider.TryGetDesktopBounds(out var bounds))
 		{
-			Assert.Ignore("No interactive session; skipping the cursor round trip.");
+			Interactive.Require("No interactive session; skipping the cursor round trip.");
 			return;
 		}
 

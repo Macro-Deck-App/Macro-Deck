@@ -12,6 +12,8 @@ internal static class FixtureArtifacts
 
 	public const string MisbehavingPluginId = "app.macro-deck.misbehaving-test-plugin";
 
+	public const string OldestSdkPluginId = "app.macro-deck.oldest-sdk-test-plugin";
+
 	public static string WellBehaved(string targetDirectory, string? version = null)
 	{
 		return Pack(BuildOutputs.WellBehavedBuildDirectory(),
@@ -26,6 +28,11 @@ internal static class FixtureArtifacts
 			BuildOutputs.MisbehavingAssemblyName,
 			targetDirectory,
 			version);
+	}
+
+	public static string OldestSdk(string targetDirectory)
+	{
+		return Pack(BuildOutputs.OldestSdkBuildDirectory(), BuildOutputs.OldestSdkAssemblyName, targetDirectory, null);
 	}
 
 	// The fixture's own manifest, with its apphost entrypoints replaced by the framework-dependent
