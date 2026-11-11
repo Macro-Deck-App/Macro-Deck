@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Testing;
 using MacroDeckHost.Tests.SystemTests.Support;
 
@@ -17,6 +18,8 @@ internal sealed class MisbehavingPluginTests : SystemTestFixture
 	private const int DocumentedRestartBudget = 5;
 
 	private static readonly TimeSpan _crashLoopTimeout = TimeSpan.FromMinutes(3);
+
+	private static readonly TimeSpan _severalReconcileTicks = TimeSpan.FromSeconds(6);
 
 	[Test]
 	public async Task A_plugin_that_keeps_crashing_fails_after_exactly_the_documented_restart_budget()
@@ -113,6 +116,58 @@ internal sealed class MisbehavingPluginTests : SystemTestFixture
 			Assert.That(host.ExitedOnItsOwn, Is.True, "the host exited without being killed by the test");
 			Assert.That(clock.Elapsed, Is.LessThan(TimeSpan.FromSeconds(40)), "the host gave up on the plugin in time");
 		});
+	}
+
+	[Test]
+	public async Task A_launch_that_fails_before_the_process_starts_is_tried_once_until_started_again_by_hand()
+	{
+		await InstallHealthyAndStopAsync();
+		foreach (var manifest in Directory.EnumerateFiles(Path.Combine(State.Path, "data", "plugins", PluginId),
+			"manifest.json",
+			SearchOption.AllDirectories))
+		{
+			await File.WriteAllTextAsync(manifest, "{ not a manifest");
+		}
+
+		var host = await StartHostAsync();
+		await Poll.UntilAsync(() => Task.FromResult(ManifestWarnings(host) >= 1),
+			HostPlugins.StartTimeout,
+			"the host tried to launch the plugin");
+		await Task.Delay(_severalReconcileTicks);
+		var afterStartup = await host.RuntimeAsync(PluginId);
+		var warningsAfterStartup = ManifestWarnings(host);
+
+		var manualStart = await PostRuntimeAsync(host, "start");
+		await Poll.UntilAsync(() => Task.FromResult(ManifestWarnings(host) >= 2),
+			TimeSpan.FromSeconds(30),
+			"a manual start tries again");
+		var warningsAfterManualStart = ManifestWarnings(host);
+		var stopped = await PostRuntimeAsync(host, "stop");
+		await host.RestartAsync();
+		await Task.Delay(_severalReconcileTicks);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(warningsAfterStartup, Is.EqualTo(1), "a failed launch is not retried on every tick");
+			Assert.That((string?)afterStartup!["state"], Is.Not.EqualTo("running"), afterStartup.ToJsonString());
+			Assert.That((bool?)manualStart["success"], Is.False, manualStart.ToJsonString());
+			Assert.That(warningsAfterManualStart, Is.EqualTo(2), "a manual start tries again");
+			Assert.That((bool?)stopped["success"], Is.True, stopped.ToJsonString());
+			Assert.That(ManifestWarnings(host), Is.EqualTo(2), "a stopped plugin is not launched on the next start");
+		});
+	}
+
+	private static int ManifestWarnings(HostInstance host)
+	{
+		return host.Output.Count(line => line.Contains($"The manifest of plugin '{PluginId}' could not be read",
+			StringComparison.Ordinal));
+	}
+
+	private static async Task<JsonNode> PostRuntimeAsync(HostInstance host, string operation)
+	{
+		using var response = await host.PostAsync($"/api/plugin-runtime/{PluginId}/{operation}");
+		response.EnsureSuccessStatusCode();
+		return JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
 	}
 
 	private static Dictionary<string, string?> Misbehave(string behaviour)
