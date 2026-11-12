@@ -6,7 +6,9 @@ public enum PluginInstallError
 	ArtifactNotFound,
 	ArtifactTooLarge,
 
-	/// <summary>Not a readable ZIP.</summary>
+	/// <summary>Not a readable ZIP: the archive could not be opened. For an archive that opens but holds an
+	/// entry found corrupt while it is read, <see cref="IPluginArtifactReader"/> throws
+	/// <see cref="System.IO.InvalidDataException"/> instead, and a caller maps that to this value.</summary>
 	InvalidArchive,
 
 	/// <summary>Traversal, absolute path, symlink, reserved name or duplicate entry.</summary>

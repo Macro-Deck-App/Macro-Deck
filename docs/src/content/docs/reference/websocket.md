@@ -30,7 +30,7 @@ sequenceDiagram
     P->>H: host.invoke (optional, while handling)
     H->>P: host.result
     P->>H: capability.result
-    P-->>H: event.publish / log.publish / state.update (fire-and-forget)
+    P-->>H: event.publish / log.publish / state.update (no reply unless refused)
     P->>H: session.ping (every 20s, either side)
     H->>P: session.pong
     P->>H: session.goodbye, then close
@@ -906,7 +906,8 @@ same rule as the `deck` push. A host without this api never pushes it and answer
  "payload":{"eventId":"light-toggled","parameters":{"on":true}}}
 ```
 
-All three are plugin → host and **fire-and-forget** - no reply message.
+All three are plugin → host and **fire-and-forget**: no reply message, unless the host refuses one with a
+`protocol.error` correlated to it (see the refusals below the table).
 
 | Type | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
@@ -917,6 +918,17 @@ All three are plugin → host and **fire-and-forget** - no reply message.
 | `state.update` | `kind` | string | yes | The kind whose snapshot is stale - re-describe it. Not data-carrying. |
 | | `localId` | string | no | The capability that changed. For `email-inbox`, the inbox whose content or status changed - see [`email-inbox`](#email-inbox). |
 | | `reason` | string | no | Diagnostic reason. |
+
+Refusals, each a `protocol.error` correlated to the refused message:
+
+- `event.publish` with a number anywhere in `parameters` (nested objects and arrays included) that
+  falls outside the range of a 64-bit float, such as `1e400`: `INVALID_PAYLOAD`, and the event is not
+  published. JSON has no `NaN` or `Infinity` literal, so this is how an infinite value would arrive. Every
+  protocol major gets this answer; a host before Macro Deck 3.1 published the value as infinity.
+- `log.publish` with more than 64 events: `PAYLOAD_TOO_LARGE`. The first batch over the log rate limit:
+  `RATE_LIMITED`.
+- `event.publish` or `state.update` the host failed to handle: `INTERNAL_ERROR`, see
+  [Errors](/reference/protocol/#errors).
 
 Built from the schema:
 

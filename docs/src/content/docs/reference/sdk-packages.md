@@ -128,6 +128,26 @@ var result = reader.Read("manifest.json", expectedPluginId: "com.example.hue-lig
 if (!result.Success) Console.WriteLine($"{result.Error}: {result.ErrorMessage}");
 ```
 
+`IPluginArtifactReader.Inspect` and `ExtractTo` report a file that cannot be opened as a ZIP as
+`InvalidArchive`. An archive that opens but holds an entry whose compressed data is corrupt is found
+only while that entry is read, and then they throw `InvalidDataException` instead of returning a
+result. Treat that exception as `InvalidArchive` too. After a throw from `ExtractTo`, the files it already
+extracted stay in the target directory, and cleaning them up is your job:
+
+```csharp
+IPluginArtifactReader artifacts = new PluginArtifactReader(new PluginManifestReader(), logger);
+try
+{
+    var extracted = await artifacts.ExtractTo("HueLights.macroDeckPlugin", targetDirectory);
+    if (!extracted.Success) Console.WriteLine($"{extracted.Error}: {extracted.ErrorMessage}");
+}
+catch (InvalidDataException exception)
+{
+    Directory.Delete(targetDirectory, recursive: true);
+    Console.WriteLine($"{PluginInstallError.InvalidArchive}: {exception.Message}");
+}
+```
+
 ### `MacroDeck.Plugin.Protocol`
 
 ```csharp
