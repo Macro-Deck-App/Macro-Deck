@@ -13,6 +13,7 @@ namespace MacroDeckHost.Tests.UnitTests.Migration;
 /// </summary>
 internal sealed class MacroDeck2Fixture : IDisposable
 {
+	private readonly List<JsonObject> _legacyProfiles = [];
 	private readonly List<JsonObject> _profiles = [];
 	private readonly List<(string Name, string Value, string Creator, string Type)> _variables = [];
 
@@ -32,18 +33,14 @@ internal sealed class MacroDeck2Fixture : IDisposable
 
 	public MacroDeck2Fixture WithProfile(string profileId, string name, int rows, int columns, JsonArray folders)
 	{
-		_profiles.Add(new JsonObject
-		{
-			["ProfileId"] = profileId,
-			["DisplayName"] = name,
-			["Rows"] = rows,
-			["Columns"] = columns,
-			["ButtonSpacing"] = 10,
-			["ButtonRadius"] = 40,
-			["ButtonBackground"] = true,
-			["Folders"] = folders
-		});
+		_profiles.Add(Profile(profileId, name, rows, columns, folders));
+		return this;
+	}
 
+	/// <summary>A profile in the SQLite database Macro Deck 2 used before 2.15 wrote one JSON file each.</summary>
+	public MacroDeck2Fixture WithLegacyProfile(string profileId, string name, int rows, int columns, JsonArray folders)
+	{
+		_legacyProfiles.Add(Profile(profileId, name, rows, columns, folders));
 		return this;
 	}
 
@@ -104,6 +101,11 @@ internal sealed class MacroDeck2Fixture : IDisposable
 		{
 			var id = profile["ProfileId"]!.GetValue<string>();
 			File.WriteAllText(Path.Combine(profiles, id + ".json"), profile.ToJsonString());
+		}
+
+		if (_legacyProfiles.Count > 0)
+		{
+			WriteLegacyProfiles();
 		}
 
 		if (_variables.Count > 0)
@@ -225,11 +227,49 @@ internal sealed class MacroDeck2Fixture : IDisposable
 		}
 	}
 
+	private static JsonObject Profile(string profileId, string name, int rows, int columns, JsonArray folders)
+	{
+		return new JsonObject
+		{
+			["ProfileId"] = profileId,
+			["DisplayName"] = name,
+			["Rows"] = rows,
+			["Columns"] = columns,
+			["ButtonSpacing"] = 10,
+			["ButtonRadius"] = 40,
+			["ButtonBackground"] = true,
+			["Folders"] = folders
+		};
+	}
+
+	private void WriteLegacyProfiles()
+	{
+		var path = Path.Combine(Root, "profiles.db");
+		using var connection = new Microsoft.Data.Sqlite.SqliteConnection(
+			new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder { DataSource = path, Pooling = false }.ToString());
+		connection.Open();
+
+		using (var create = connection.CreateCommand())
+		{
+			create.CommandText =
+				"CREATE TABLE ProfileJson (Id integer primary key autoincrement not null, JsonString varchar)";
+			create.ExecuteNonQuery();
+		}
+
+		foreach (var profile in _legacyProfiles)
+		{
+			using var insert = connection.CreateCommand();
+			insert.CommandText = "INSERT INTO ProfileJson (JsonString) VALUES ($json)";
+			insert.Parameters.AddWithValue("$json", profile.ToJsonString());
+			insert.ExecuteNonQuery();
+		}
+	}
+
 	private void WriteVariables()
 	{
 		var path = Path.Combine(Root, "variables.db");
 		using var connection = new Microsoft.Data.Sqlite.SqliteConnection(
-			new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder { DataSource = path }.ToString());
+			new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder { DataSource = path, Pooling = false }.ToString());
 		connection.Open();
 
 		using (var create = connection.CreateCommand())
