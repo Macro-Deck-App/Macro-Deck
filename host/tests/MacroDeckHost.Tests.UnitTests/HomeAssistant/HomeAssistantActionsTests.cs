@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
+using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Integrations.HomeAssistant;
 using MacroDeckHost.Integrations.HomeAssistant.Actions;
 using MacroDeckHost.Integrations.HomeAssistant.Connections;
@@ -314,34 +315,85 @@ internal sealed class HomeAssistantActionsTests
 
 
 	[Test]
-	public async Task LightSet_turning_on_sends_brightness_color_and_temperature()
+	public async Task LightSet_turning_on_sends_brightness_color_and_transition()
 	{
-		await ConnectAsync("""[{ "entity_id": "light.kitchen", "state": "off", "attributes": {} }]""");
+		var data = await RunLightAsync(("state", "on"),
+			("brightnessPercent", "50"),
+			("color", "#ff8800"),
+			("transition", "2"));
 
-		var definition = new LightActionDefinition(() => _connection);
-		var result = await definition.CreateExecutor()
-			.ExecuteAsync(new ActionExecutionContext
-			{
-				Parameters = new Dictionary<string, object>
-				{
-					["entity"] = "light.kitchen",
-					["state"] = "on",
-					["brightnessPercent"] = "50",
-					["color"] = "#ff8800",
-					["colorTempKelvin"] = "3000",
-					["transition"] = "2"
-				}
-			});
-
-		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
-		var data = _client!.PayloadOf("call_service")?["service_data"] as IReadOnlyDictionary<string, object?>;
 		Assert.Multiple(() =>
 		{
 			Assert.That(_client!.PayloadOf("call_service")?["service"], Is.EqualTo("turn_on"));
 			Assert.That(data?["brightness_pct"], Is.EqualTo(50d));
 			Assert.That(data?["rgb_color"], Is.EqualTo(new List<int> { 255, 136, 0 }));
-			Assert.That(data?["color_temp_kelvin"], Is.EqualTo(3000));
 			Assert.That(data?["transition"], Is.EqualTo(2d));
+			Assert.That(data?.ContainsKey("color_temp_kelvin"), Is.False);
+		});
+	}
+
+	[TestCase("#ff8800")]
+	[TestCase("$reset")]
+	[TestCase("")]
+	public async Task LightSet_with_a_colour_temperature_sends_it_as_the_only_colour_descriptor(string color)
+	{
+		var data = await RunLightAsync(("state", "on"), ("color", color), ("colorTempKelvin", "3000"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data?["color_temp_kelvin"], Is.EqualTo(3000));
+			Assert.That(data?.ContainsKey("rgb_color"), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task LightSet_with_a_reset_colour_and_no_temperature_sends_no_colour()
+	{
+		var data = await RunLightAsync(("state", "on"), ("color", "$reset"), ("brightnessPercent", "40"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data?["brightness_pct"], Is.EqualTo(40d));
+			Assert.That(data?.ContainsKey("rgb_color"), Is.False);
+			Assert.That(data?.ContainsKey("color_temp_kelvin"), Is.False);
+		});
+	}
+
+	[TestCase("on")]
+	[TestCase("toggle")]
+	public async Task LightSet_with_brightness_zero_leaves_the_brightness_alone(string state)
+	{
+		var data = await RunLightAsync(("state", state), ("brightnessPercent", "0"), ("colorTempKelvin", "3000"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data?.ContainsKey("brightness_pct"), Is.False);
+			Assert.That(data?["color_temp_kelvin"], Is.EqualTo(3000));
+		});
+	}
+
+	[Test]
+	public async Task LightSet_left_at_its_defaults_changes_only_the_power_state()
+	{
+		await ConnectAsync("""[{ "entity_id": "light.kitchen", "state": "off", "attributes": {} }]""");
+
+		var definition = new LightActionDefinition(() => _connection);
+		var parameters = ActionParameterLiteralCoercion.Build(definition.Parameters,
+			new Dictionary<string, JsonElement>
+			{
+				["entity"] = JsonSerializer.SerializeToElement("light.kitchen"),
+				["state"] = JsonSerializer.SerializeToElement("on")
+			});
+		var result = await definition.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+
+		var data = _client!.PayloadOf("call_service")?["service_data"] as IReadOnlyDictionary<string, object?>;
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(data?.ContainsKey("brightness_pct") ?? false, Is.False);
+			Assert.That(data?.ContainsKey("rgb_color") ?? false, Is.False);
+			Assert.That(data?.ContainsKey("color_temp_kelvin") ?? false, Is.False);
 		});
 	}
 
@@ -813,6 +865,20 @@ internal sealed class HomeAssistantActionsTests
 		}
 
 		Assert.That(condition(), Is.True, $"Timed out waiting for {because}.");
+	}
+
+	private async Task<IReadOnlyDictionary<string, object?>?> RunLightAsync(
+		params (string Name, object Value)[] values)
+	{
+		await ConnectAsync("""[{ "entity_id": "light.kitchen", "state": "off", "attributes": {} }]""");
+
+		var parameters = Parameters(values);
+		parameters["entity"] = "light.kitchen";
+		var result = await new LightActionDefinition(() => _connection).CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext { Parameters = parameters });
+
+		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+		return _client!.PayloadOf("call_service")?["service_data"] as IReadOnlyDictionary<string, object?>;
 	}
 
 	private static Dictionary<string, object> Parameters(params (string Name, object Value)[] values)
