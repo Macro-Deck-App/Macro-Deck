@@ -205,6 +205,69 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			"the press flow must see the state this press just switched to, not the one it started on");
 	}
 
+	[Test]
+	public async Task A_press_answers_while_its_on_state_change_flow_is_still_running()
+	{
+		var folders = new FakeFolderCache(ActionButtonWidget());
+		folders.SetWidgetData(_widgetId, ThreeStatesOnFirst);
+		var onStateChange = new BlockingFlowExecutor();
+		var stateService = CreateRealStateService(folders, out var widgets, out _, onStateChange);
+		Assert.That((await stateService.SetAsync(_widgetId, "a")).Success, Is.True);
+		var handler = CreateHandler(folders, _coordinator, stateService);
+
+		try
+		{
+			var response = await handler.Handle(Request(WidgetTriggerTypes.ShortPress), CancellationToken.None)
+				.AsTask()
+				.WaitAsync(TimeSpan.FromSeconds(30));
+			var started = await onStateChange.Started.WaitAsync(TimeSpan.FromSeconds(30));
+
+			await Assert.MultipleAsync(() =>
+			{
+				Assert.That(response.Success, Is.True);
+				Assert.That(widgets.Updated?.Data, Does.Contain("\"activeStateId\":\"b\""));
+				Assert.That(_coordinator.Runs, Is.EqualTo(1));
+				Assert.That(started.EventParameters!["state"], Is.EqualTo("b"));
+				Assert.That(started.EventParameters!["previousState"], Is.EqualTo("a"));
+				Assert.That(onStateChange.Runs, Is.EqualTo(1));
+				Assert.That(onStateChange.Finished, Is.False);
+				return Task.CompletedTask;
+			});
+		}
+		finally
+		{
+			onStateChange.Release();
+		}
+	}
+
+	[Test]
+	public async Task Cycling_a_button_state_through_the_widget_api_returns_after_its_on_state_change_flow_ran()
+	{
+		var folders = new FakeFolderCache(ActionButtonWidget());
+		folders.SetWidgetData(_widgetId, ThreeStatesOnFirst);
+		var onStateChange = new BlockingFlowExecutor();
+		var stateService = CreateRealStateService(folders, out _, out _, onStateChange);
+		Assert.That((await stateService.SetAsync(_widgetId, "a")).Success, Is.True);
+		var services = new ServiceCollection();
+		services.AddScoped<IActionButtonStateService>(_ => stateService);
+		var api = new WidgetApi(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>());
+
+		var advance = api.AdvanceStateAsync(_widgetId.ToString());
+		await onStateChange.Started.WaitAsync(TimeSpan.FromSeconds(30));
+		var completedWhileFlowRan = advance.IsCompleted;
+		onStateChange.Release();
+		var result = await advance.WaitAsync(TimeSpan.FromSeconds(30));
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(completedWhileFlowRan, Is.False);
+			Assert.That(result.Success, Is.True);
+			Assert.That(result.StateId, Is.EqualTo("b"));
+			Assert.That(onStateChange.Finished, Is.True);
+			return Task.CompletedTask;
+		});
+	}
+
 	private ExecuteActionButtonTriggerRequestMessageHandler CreateHandler(
 		FakeFolderCache folders,
 		FakeActionExecutionCoordinator coordinator,
@@ -272,8 +335,10 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 	private static ActionButtonStateService CreateRealStateService(
 		FakeFolderCache folders,
 		out RecordingWidgetService widgets,
-		out RecordingVariableService vars)
+		out RecordingVariableService vars,
+		IFlowExecutor? onStateChange = null)
 	{
+		onStateChange ??= new NoOpFlowExecutor();
 		widgets = new RecordingWidgetService();
 		vars = new RecordingVariableService();
 		var writeLock = new WidgetDataWriteLock();
@@ -296,7 +361,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 		var reconciler = new WidgetStateReconciler(stateService,
 			derivedStateStore,
 			vars,
-			new NoOpFlowExecutor(),
+			onStateChange,
 			new NoOpWidgetStatePublisher(),
 			folders,
 			widgets,
@@ -304,7 +369,7 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			TestLocalization.Preferences,
 			TestLocalization.Resolver,
 			Serilog.Log.Logger,
-			TestStateChangeFlowRunner.Create());
+			TestStateChangeFlowRunner.Create(onStateChange));
 
 		return new ActionButtonStateService(folders, writeLock, widgets, reconciler);
 	}
@@ -953,7 +1018,10 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
 		}
 
-		public Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default)
+		public Task<WidgetStateWriteResult> AdvanceAsync(
+			Guid widgetId,
+			StateChangeFlowDispatch dispatch,
+			CancellationToken cancellationToken = default)
 		{
 			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
 		}
@@ -1178,6 +1246,43 @@ public class ExecuteActionButtonTriggerRequestMessageHandlerTests
 				Status = FlowExecutionStatus.Succeeded,
 				MatchedFlows = 0
 			});
+		}
+	}
+
+	private sealed class BlockingFlowExecutor : IFlowExecutor
+	{
+		private readonly TaskCompletionSource<FlowExecutionRequest> _started =
+			new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		private readonly TaskCompletionSource _release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+		private int _runs;
+		private volatile bool _finished;
+
+		public Task<FlowExecutionRequest> Started => _started.Task;
+
+		public int Runs => Volatile.Read(ref _runs);
+
+		public bool Finished => _finished;
+
+		public void Release()
+		{
+			_release.TrySetResult();
+		}
+
+		public async Task<FlowExecutionResult> ExecuteAsync(
+			FlowExecutionRequest request,
+			CancellationToken cancellationToken)
+		{
+			Interlocked.Increment(ref _runs);
+			_started.TrySetResult(request);
+			await _release.Task.WaitAsync(cancellationToken);
+			_finished = true;
+			return new FlowExecutionResult
+			{
+				ExecutionId = request.ExecutionId,
+				Status = FlowExecutionStatus.Succeeded,
+				MatchedFlows = 1
+			};
 		}
 	}
 }

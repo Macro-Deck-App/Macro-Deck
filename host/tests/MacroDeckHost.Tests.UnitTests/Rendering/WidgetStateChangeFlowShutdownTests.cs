@@ -6,8 +6,8 @@ using Serilog;
 
 namespace MacroDeckHost.Tests.UnitTests.Rendering;
 
-// An onStateChange flow a press runs inline has no deadline from the press itself (#1552), so a flow that
-// never ends must at least end with the host instead of keeping shutdown waiting.
+// An onStateChange flow run inline has no deadline of its own, so one that never ends must at least end with
+// the host instead of keeping shutdown waiting.
 public class WidgetStateChangeFlowShutdownTests
 {
 	[Test]

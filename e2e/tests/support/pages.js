@@ -146,8 +146,8 @@ export function recordSocketFrames(page) {
 
 // A tile's press is an event on the widget's UI session, and a press before that session is open
 // waits for it. Waits for a live session, presses once and proves exactly one press left the page.
-export async function pressWebTile(client, widgetId) {
-  const tile = webTile(client.page, widgetId);
+export async function pressWebTile(client, widgetId, tileOf = webTile) {
+  const tile = tileOf(client.page, widgetId);
   await expect(tile).toBeVisible();
   await expect.poll(() => {
     const sessions = client.frames.sessionsFor(widgetId);
@@ -157,6 +157,10 @@ export async function pressWebTile(client, widgetId) {
   await tile.click();
   await expect.poll(() => client.frames.pressesFor(widgetId).length, { message: 'the press reaches the socket' })
     .toBe(before + 1);
+}
+
+export async function pressDesktopTile(page, frames, widgetId) {
+  await pressWebTile({ page, frames }, widgetId, desktopTile);
 }
 
 // A locked host computer refuses every client press, and CI runners without an attended console report
@@ -227,4 +231,96 @@ export function watchForUnexpectedFailures(page) {
   };
 
   return assertNone;
+}
+
+export function desktopFolderRow(page, name) {
+  return page.locator('.folder-item').filter({
+    has: page.locator('.folder-name').getByText(name, { exact: true }),
+  });
+}
+
+async function nameFolderInDialog(page, heading, name, confirm) {
+  const dialog = page.getByRole('dialog', { name: heading });
+  await expect(dialog).toBeVisible();
+  await dialog.locator('input').fill(name);
+  await dialog.getByRole('button', { name: confirm, exact: true }).click();
+  await expect(dialog).toBeHidden();
+}
+
+export async function clickFolderAction(page, folderName, action) {
+  await desktopFolderRow(page, folderName).click({ button: 'right' });
+  await page.locator('.menu-item').filter({ hasText: new RegExp(`^\\s*${action}\\s*$`) }).click();
+}
+
+export async function createDesktopFolder(page, name, parentName) {
+  if (parentName) {
+    await clickFolderAction(page, parentName, 'New Folder Inside');
+  } else {
+    await page.getByRole('button', { name: 'New Folder', exact: true }).click();
+  }
+  await nameFolderInDialog(page, 'New Folder', name, 'Create');
+  await expect(desktopFolderRow(page, name)).toBeVisible();
+}
+
+export async function renameDesktopFolder(page, name, newName) {
+  await clickFolderAction(page, name, 'Rename');
+  await nameFolderInDialog(page, 'Rename Folder', newName, 'Rename');
+  await expect(desktopFolderRow(page, newName)).toBeVisible();
+}
+
+export async function deleteDesktopFolder(page, name) {
+  await clickFolderAction(page, name, 'Delete');
+  await page.getByRole('dialog', { name: 'Delete Folder' }).getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect(desktopFolderRow(page, name)).toHaveCount(0);
+}
+
+export async function deleteDesktopProfile(page, profileName) {
+  await clickProfileAction(page, profileName, 'Delete');
+  await page.getByRole('dialog', { name: 'Delete Profile' }).getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Delete Profile' })).toBeHidden();
+}
+
+export async function openDesktopBackups(page) {
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.locator('button.settings-nav__item').filter({ hasText: /^\s*Backups\s*$/ }).click();
+  await expect(page.getByRole('button', { name: 'Create backup' })).toBeVisible();
+}
+
+// The toast arrives before the list reloads, so the helper waits for the new row and returns its id.
+export async function createDesktopBackup(page, api) {
+  const before = new Set((await api.get('/api/backups')).backups.map(backup => backup.id));
+  await page.getByRole('button', { name: 'Create backup' }).click();
+  await expect(page.getByText('Backup completed')).toBeVisible({ timeout: 60_000 });
+  let created = [];
+  await expect.poll(async () => {
+    created = (await api.get('/api/backups')).backups.filter(backup => !before.has(backup.id));
+    return created.length;
+  }).toBe(1);
+  await expect(page.locator('li.bl-row')).toHaveCount(before.size + 1);
+  return created[0].id;
+}
+
+// The dialog adds every group a chosen one depends on, so the prepare request is returned for checking.
+export async function restoreDesktopBackup(page, host, backupId, components = 'all') {
+  await page.locator('li.bl-row').first().locator('.bl-dots-btn').click();
+  await page.locator('button.bl-menu-item').filter({ hasText: /^\s*Restore…\s*$/ }).click();
+  const choose = page.getByRole('dialog', { name: 'Choose what to restore' });
+  await expect(choose).toBeVisible();
+  if (components !== 'all') {
+    await choose.getByRole('button', { name: 'Clear all', exact: true }).click();
+    for (const group of components) {
+      await choose.locator(`li.brm-item[data-group="${group}"] shared-checkbox`).click();
+    }
+  }
+  await choose.getByRole('button', { name: 'Continue', exact: true }).click();
+  const prepare = page.waitForRequest(request => request.url().endsWith('/api/backups/restore/prepare'));
+  await page.getByRole('dialog', { name: 'Restore this backup?' }).getByRole('button', { name: 'Restore', exact: true }).click();
+  const prepared = (await prepare).postDataJSON();
+  expect(prepared.backupId, 'the newest row is the backup to restore').toBe(backupId);
+  const restart = page.locator('.bl-pending-restart');
+  await expect(restart).toBeVisible({ timeout: 30_000 });
+  const starts = host.starts;
+  await restart.click();
+  await host.waitForRestart(starts);
+  return prepared;
 }
