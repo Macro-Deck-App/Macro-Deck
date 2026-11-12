@@ -120,8 +120,7 @@ internal sealed class NetworkChaosTests
 		}
 	}
 
-	[TestCase(ObsServerFault.NoHello,
-		IgnoreReason = "#1704: an OBS server that never sends Hello leaves the connection waiting forever")]
+	[TestCase(ObsServerFault.NoHello)]
 	[TestCase(ObsServerFault.SilentAfterIdentified,
 		IgnoreReason = "#1705: an OBS session that goes silent after Identified is never dropped or retried")]
 	[TestCase(ObsServerFault.AbortMidMessage)]
@@ -139,7 +138,8 @@ internal sealed class NetworkChaosTests
 					second.TrySetResult((observed!.Status, observed.IsConnected));
 				}
 			});
-		await using var connection = new ObsConnection(new ObsClient(null, TimeSpan.FromSeconds(2)),
+		await using var connection = new ObsConnection(
+			new ObsClient(null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2)),
 			server.Url,
 			null,
 			_reconnectDelay);
