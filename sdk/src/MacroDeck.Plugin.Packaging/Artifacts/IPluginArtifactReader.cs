@@ -78,12 +78,22 @@ public interface IPluginArtifactReader
 {
 	/// <summary>Opens the archive, enforces the structural limits and parses the manifest. Writes nothing.
 	/// </summary>
+	/// <remarks>A file that cannot be opened as a ZIP is reported as <see cref="PluginInstallError.InvalidArchive"/>.
+	/// An archive that opens but holds an entry whose compressed data turns out to be corrupt while it is read
+	/// is not reported: the <see cref="InvalidDataException"/> propagates, and the caller treats it as an
+	/// invalid archive.</remarks>
+	/// <exception cref="InvalidDataException">An entry's compressed data is corrupt.</exception>
 	Task<PluginArtifactInspectionResult> Inspect(
 		string artifactPath,
 		CancellationToken cancellationToken = default);
 
 	/// <summary>Extracts every entry into <paramref name="targetDirectory"/>, applying
 	/// <see cref="PluginArtifactEntryPolicy"/> and the byte caps to each one.</summary>
+	/// <remarks>A file that cannot be opened as a ZIP is reported as <see cref="PluginInstallError.InvalidArchive"/>.
+	/// An entry whose compressed data turns out to be corrupt while it is read is not reported: the
+	/// <see cref="InvalidDataException"/> propagates, and the caller treats it as an invalid archive. The files
+	/// extracted before it stay in <paramref name="targetDirectory"/>; removing them is the caller's job.</remarks>
+	/// <exception cref="InvalidDataException">An entry's compressed data is corrupt.</exception>
 	Task<PluginArtifactExtractResult> ExtractTo(
 		string artifactPath,
 		string targetDirectory,

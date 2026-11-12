@@ -239,6 +239,28 @@ test('an open Web Client settings dialog switches to German without closing', as
   await web.context.close();
 });
 
+test('an open Web Client device setup wizard switches to German without closing', async ({ browser, api, host }) => {
+  await api.useEnglish();
+  const web = await connectWebClient(browser, host, api);
+  await web.page.locator('.wc-client-settings-trigger').click();
+  await web.page.getByRole('button', { name: en('WebClient.DeviceSetup.OpenAction'), exact: true }).click();
+  const wizard = web.page.locator('.wc-setup-dialog');
+  await expect(wizard.locator('.wc-setup-title')).toHaveText(en('WebClient.DeviceSetup.Title'));
+  await wizard.evaluate(node => node.setAttribute('data-e2e-opened', 'before'));
+
+  const catalogReloaded = web.page.waitForResponse(response =>
+    new URL(response.url()).pathname === '/api/localization' && response.ok());
+  await useGerman(api);
+  await catalogReloaded;
+
+  await expect(wizard.locator('.wc-setup-title')).toHaveText(de('WebClient.DeviceSetup.Title'));
+  await expect(wizard).toHaveAttribute('data-e2e-opened', 'before');
+  await expect(wizard.getByText(de('WebClient.DeviceSetup.StepCertificate'), { exact: true })).toBeVisible();
+  await expect(wizard.locator('.wc-setup-close')).toHaveAccessibleName(de('Common.Close'));
+  await expectGermanPage(web.page, 'the device setup wizard left open across the switch');
+  await web.context.close();
+});
+
 test('a host notification is raised in German and shown in German in the notifications panel', async ({ page, api, host, playwright }) => {
   await useGerman(api);
   await api.call('DELETE', '/api/notifications', undefined, { expectOk: false });

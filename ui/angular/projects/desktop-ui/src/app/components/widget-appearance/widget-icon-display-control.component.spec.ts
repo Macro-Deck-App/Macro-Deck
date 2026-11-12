@@ -56,6 +56,39 @@ function drag(fixture: ComponentFixture<WidgetIconDisplayControlComponent>, dx: 
   element.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true }));
 }
 
+function numberBox(fixture: ComponentFixture<WidgetIconDisplayControlComponent>, label: string): HTMLInputElement {
+  return fixture.nativeElement.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement;
+}
+
+async function settle(fixture: ComponentFixture<WidgetIconDisplayControlComponent>): Promise<void> {
+  fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
+  await fixture.whenStable();
+}
+
+async function typeKeys(
+  fixture: ComponentFixture<WidgetIconDisplayControlComponent>,
+  box: HTMLInputElement,
+  keys: string,
+): Promise<string[]> {
+  await settle(fixture);
+  box.focus();
+  const shown: string[] = [];
+  for (const [index, key] of [...keys].entries()) {
+    box.value = index === 0 ? key : box.value + key;
+    box.dispatchEvent(new Event('input'));
+    await settle(fixture);
+    shown.push(box.value);
+  }
+  return shown;
+}
+
+async function leave(fixture: ComponentFixture<WidgetIconDisplayControlComponent>, box: HTMLInputElement): Promise<void> {
+  box.dispatchEvent(new Event('blur'));
+  await settle(fixture);
+}
+
 describe('WidgetIconDisplayControlComponent editor mode', () => {
   it('previews the icon in the icon colour on the image itself, with the same framing', () => {
     const { fixture } = createFixture({ previewTint: '#ef4444', display: { opacity: 50, fit: 'cover' } });
@@ -129,6 +162,53 @@ describe('WidgetIconDisplayControlComponent editor mode', () => {
     fixture.componentInstance['onNumberChange']('opacity', '');
 
     expect(changes).toEqual([{ opacity: 100 }]);
+  });
+
+  it('keeps a zoom typed digit by digit even while it is still below the minimum', async () => {
+    const { fixture, changes } = createFixture({ display: { zoom: 100 } });
+    const box = numberBox(fixture, 'Zoom (%)');
+
+    const shown = await typeKeys(fixture, box, '150');
+    await leave(fixture, box);
+
+    expect(shown).toEqual(['1', '15', '150']);
+    expect(box.value).toBe('150');
+    expect(changes[changes.length - 1]).toEqual({ zoom: 150 });
+  });
+
+  it('limits a typed number to the allowed range once the box is left', async () => {
+    const { fixture, changes } = createFixture({ display: { zoom: 100 } });
+    const box = numberBox(fixture, 'Zoom (%)');
+
+    await typeKeys(fixture, box, '1050');
+    expect(box.value).toBe('1050');
+    await leave(fixture, box);
+
+    expect(box.value).toBe('400');
+    expect(changes[changes.length - 1]).toEqual({ zoom: 400 });
+  });
+
+  it('raises a zoom left below the minimum to the minimum', async () => {
+    const { fixture, changes } = createFixture({ display: { zoom: 100 } });
+    const box = numberBox(fixture, 'Zoom (%)');
+
+    await typeKeys(fixture, box, '5');
+    await leave(fixture, box);
+
+    expect(box.value).toBe('10');
+    expect(changes).toEqual([{ zoom: 10 }]);
+  });
+
+  it('keeps a wheel zoom made after typing an out-of-range number', async () => {
+    const { fixture, changes } = createFixture({ display: { zoom: 100 } });
+    const box = numberBox(fixture, 'Zoom (%)');
+
+    await typeKeys(fixture, box, '1050');
+    frame(fixture).dispatchEvent(new WheelEvent('wheel', { deltaY: -1, bubbles: true, cancelable: true }));
+    await leave(fixture, box);
+
+    expect(box.value).toBe('115');
+    expect(changes[changes.length - 1]).toEqual({ zoom: 115 });
   });
 
   it('translates a drag into both offsets at once, as a share of the frame', () => {
@@ -213,6 +293,19 @@ describe('WidgetIconDisplayControlComponent action mode', () => {
     const { fixture, changes } = createFixture({ actionMode: true, display: { zoom: 200 } });
     fixture.componentInstance['onNumberChange']('zoom', '');
 
+    expect(changes).toEqual([{ zoom: undefined }]);
+  });
+
+  it('leaves a number box cleared while typing unchanged at once', async () => {
+    const { fixture, changes } = createFixture({ actionMode: true, display: { zoom: 200 } });
+    const box = numberBox(fixture, 'Zoom (%)');
+    await settle(fixture);
+
+    box.value = '';
+    box.dispatchEvent(new Event('input'));
+    await settle(fixture);
+
+    expect(box.value).toBe('');
     expect(changes).toEqual([{ zoom: undefined }]);
   });
 

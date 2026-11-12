@@ -49,6 +49,30 @@ internal sealed class ProtocolMajorCompatibilityTests : SystemTestFixture
 		});
 	}
 
+	[TestCase(1)]
+	[TestCase(2)]
+	public async Task An_older_major_plugin_publishing_a_number_beyond_double_range_is_refused_and_keeps_its_session(
+		int major)
+	{
+		var host = await StartHostAsync();
+		var credential = await RawProtocolPlugin.EnrollAsync(host, PluginId);
+		var (status, session) = await RawProtocolPlugin.RequestSessionAsync(host, credential, 1, major);
+		Assert.That(status, Is.EqualTo(201), session.ToJsonString());
+
+		await using var plugin = await RawProtocolPlugin.ConnectAsync(host, session);
+		await plugin.HelloAsync();
+		var rejection = await plugin.PublishEventAnsweredAsync("probe-fired", """{"reading":1e400}""");
+		var pong = await plugin.PingAsync();
+		await plugin.GoodbyeAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That((string?)rejection["type"], Is.EqualTo("protocol.error"));
+			Assert.That((string?)rejection["error"]!["code"], Is.EqualTo("INVALID_PAYLOAD"));
+			Assert.That((string?)pong["type"], Is.EqualTo("session.pong"));
+		});
+	}
+
 	[Test]
 	public async Task A_plugin_that_needs_a_major_this_host_does_not_serve_is_refused_explicitly()
 	{
