@@ -43,6 +43,7 @@ import {
   DeviceSetupService,
   DismissibleHints,
   type DeviceSetupWizardHandle,
+  type SetupBannerHandle,
 } from './setup';
 import { dismissAllToasts, mountToastHost, showToast } from './ui';
 import type { Pwa } from './pwa';
@@ -83,6 +84,7 @@ export class Shell {
   private readonly sidebar: EdgeSidebarHandle | null;
   private edgeSwipe: EdgeSwipeHandle | null = null;
   private wizard: DeviceSetupWizardHandle | null = null;
+  private setupBanner: SetupBannerHandle | null = null;
   private lockScreen: HTMLElement | null = null;
   private reconnectingPanel: HTMLElement | null = null;
   private reconnectingTimer: ReturnType<typeof setTimeout> | null = null;
@@ -224,12 +226,13 @@ export class Shell {
     this.client.deviceClientSettings.subscribe(() => this.paintSettingsEntry());
 
     if (services.target.capabilities.deviceSetupPrompts) {
-      this.root.appendChild(createSetupBanner({
+      this.setupBanner = createSetupBanner({
         deviceSetup: this.deviceSetup,
         localization: client.localization,
         hints: new DismissibleHints(),
         onOpen: () => this.openDeviceSetup(),
-      }).element);
+      });
+      this.root.appendChild(this.setupBanner.element);
       // Asked for once the client is signed in, which is the first moment the answer is meaningful.
       this.client.app.screen.subscribe(screen => {
         if (screen === 'deck') void this.deviceSetup.load();
@@ -294,6 +297,8 @@ export class Shell {
     this.notificationToasts.repaint();
     this.notificationDialogs.repaint();
     if (this.settings !== null) this.settings.repaint();
+    if (this.setupBanner !== null) this.setupBanner.repaint();
+    if (this.wizard !== null) this.wizard.repaint();
   }
 
   private onConnectedChanged(connected: boolean): void {
