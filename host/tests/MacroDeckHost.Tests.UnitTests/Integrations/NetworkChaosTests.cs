@@ -121,8 +121,7 @@ internal sealed class NetworkChaosTests
 	}
 
 	[TestCase(ObsServerFault.NoHello)]
-	[TestCase(ObsServerFault.SilentAfterIdentified,
-		IgnoreReason = "#1705: an OBS session that goes silent after Identified is never dropped or retried")]
+	[TestCase(ObsServerFault.SilentAfterIdentified)]
 	[TestCase(ObsServerFault.AbortMidMessage)]
 	public async Task Obs_retries_a_network_fault(ObsServerFault fault)
 	{
@@ -139,7 +138,7 @@ internal sealed class NetworkChaosTests
 				}
 			});
 		await using var connection = new ObsConnection(
-			new ObsClient(null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2)),
+			new ObsClient(null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(1)),
 			server.Url,
 			null,
 			_reconnectDelay);
