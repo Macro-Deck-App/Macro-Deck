@@ -15,6 +15,7 @@ export interface SetupBannerOptions {
 
 export interface SetupBannerHandle {
   readonly element: HTMLElement;
+  repaint(): void;
   destroy(): void;
 }
 
@@ -36,23 +37,20 @@ export function createSetupBanner(options: SetupBannerOptions): SetupBannerHandl
 
   const message = document.createElement('span');
   message.className = 'wc-setup-banner-message';
-  message.textContent = text(ClientAppStrings.WebClient.DeviceSetup.BannerMessage);
   banner.appendChild(message);
 
   const actions = document.createElement('div');
   actions.className = 'wc-setup-banner-actions';
 
   const open = createButton({
-    label: text(ClientAppStrings.WebClient.DeviceSetup.BannerAction),
+    label: '',
     variant: 'secondary',
     onClick: () => options.onOpen(),
   });
   actions.appendChild(open.element);
 
-  const dismissLabel = text(ClientAppStrings.WebClient.DeviceSetup.BannerDismiss);
   const dismiss = createButton({
-    label: dismissLabel,
-    ariaLabel: dismissLabel,
+    label: '',
     variant: 'ghost',
     onClick: () => {
       options.hints.dismiss(SETUP_BANNER_HINT);
@@ -61,6 +59,14 @@ export function createSetupBanner(options: SetupBannerOptions): SetupBannerHandl
   });
   actions.appendChild(dismiss.element);
   banner.appendChild(actions);
+
+  function paint(): void {
+    message.textContent = text(ClientAppStrings.WebClient.DeviceSetup.BannerMessage);
+    open.setLabel(text(ClientAppStrings.WebClient.DeviceSetup.BannerAction));
+    const dismissLabel = text(ClientAppStrings.WebClient.DeviceSetup.BannerDismiss);
+    dismiss.setLabel(dismissLabel);
+    dismiss.element.setAttribute('aria-label', dismissLabel);
+  }
 
   function render(): void {
     const visible = httpsPage()
@@ -71,10 +77,12 @@ export function createSetupBanner(options: SetupBannerOptions): SetupBannerHandl
   }
 
   const unsubscribe = options.deviceSetup.certificateTrust.subscribe(() => render());
+  paint();
   render();
 
   return {
     element: banner,
+    repaint: () => paint(),
     destroy: () => {
       unsubscribe();
       if (banner.parentNode !== null) banner.parentNode.removeChild(banner);
