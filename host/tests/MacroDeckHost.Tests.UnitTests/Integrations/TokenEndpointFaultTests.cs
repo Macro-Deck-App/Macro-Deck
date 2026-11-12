@@ -63,14 +63,6 @@ internal sealed class TokenEndpointFaultTests
 		yield return Fault("503", _unavailable);
 	}
 
-	private static IEnumerable<TestCaseData> DiscordFlowFaults()
-	{
-		yield return Fault("hang", _hang)
-			.Ignore("#1706: a timed-out Discord token exchange escapes the config flow as TaskCanceledException");
-		yield return Fault("429 with Retry-After", _rateLimited);
-		yield return Fault("503", _unavailable);
-	}
-
 	[TestCaseSource(nameof(TransientFaults))]
 	public void A_twitch_refresh_fault_is_transient_and_keeps_the_account(Action<FakeTokenEndpoint> fault)
 	{
@@ -239,27 +231,71 @@ internal sealed class TokenEndpointFaultTests
 		Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
 	}
 
-	[TestCaseSource(nameof(DiscordFlowFaults))]
+	[TestCaseSource(nameof(FlowFaults))]
 	public async Task A_discord_authorization_answers_a_token_endpoint_fault_with_an_error(
 		Action<FakeTokenEndpoint> fault)
 	{
 		using var endpoint = Endpoint(fault);
 		using var http = new HttpClient(endpoint, false);
-		using var rpc = new FakeDiscordRpcClient()
-			.Responds("AUTHORIZE", """{"code":"auth-code"}""")
-			.Responds("AUTHENTICATE", """{"user":{"id":"me","global_name":"Tester"}}""");
-		var flow = new DiscordConfigFlow(() => rpc, new DiscordOAuthClient(http));
-		await flow.SubmitAsync("credentials",
-			new Dictionary<string, object?> { ["clientId"] = "123456", ["clientSecret"] = "shh" },
-			NoOAuthConfigFlowContext.Instance,
-			CancellationToken.None);
+		using var rpc = DiscordRpc();
+		var flow = await DiscordFlowAtAuthorizeAsync(rpc, http);
 
 		var result = await flow.SubmitAsync("authorize",
 			new Dictionary<string, object?>(),
 			NoOAuthConfigFlowContext.Instance,
 			CancellationToken.None);
 
-		Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(result.NextStep?.StepId, Is.EqualTo("authorize"), "the user can try again");
+		});
+	}
+
+	[Test]
+	public async Task A_cancelled_discord_authorization_is_not_reported_as_a_token_endpoint_fault()
+	{
+		using var endpoint = new FakeTokenEndpoint().Hangs();
+		using var http = new HttpClient(endpoint, false);
+		using var rpc = DiscordRpc();
+		var flow = await DiscordFlowAtAuthorizeAsync(rpc, http);
+		using var cancellation = new CancellationTokenSource();
+
+		var submit = flow.SubmitAsync("authorize",
+			new Dictionary<string, object?>(),
+			NoOAuthConfigFlowContext.Instance,
+			cancellation.Token);
+		await WaitForTokenRequestAsync(endpoint);
+		await cancellation.CancelAsync();
+
+		await Assert.ThatAsync(() => submit, Throws.InstanceOf<OperationCanceledException>());
+	}
+
+	private static async Task WaitForTokenRequestAsync(FakeTokenEndpoint endpoint)
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(5);
+		while (endpoint.RequestCount == 0)
+		{
+			Assert.That(DateTime.UtcNow, Is.LessThan(deadline), "the token request was never sent");
+			await Task.Delay(10);
+		}
+	}
+
+	private static FakeDiscordRpcClient DiscordRpc()
+	{
+		return new FakeDiscordRpcClient()
+			.Responds("AUTHORIZE", """{"code":"auth-code"}""")
+			.Responds("AUTHENTICATE", """{"user":{"id":"me","global_name":"Tester"}}""");
+	}
+
+	private static async Task<DiscordConfigFlow> DiscordFlowAtAuthorizeAsync(FakeDiscordRpcClient rpc, HttpClient http)
+	{
+		var flow = new DiscordConfigFlow(() => rpc, new DiscordOAuthClient(http));
+		await flow.SubmitAsync("credentials",
+			new Dictionary<string, object?> { ["clientId"] = "123456", ["clientSecret"] = "shh" },
+			NoOAuthConfigFlowContext.Instance,
+			CancellationToken.None);
+		return flow;
 	}
 
 	private static TestCaseData Fault(string name, Action<FakeTokenEndpoint> fault)
