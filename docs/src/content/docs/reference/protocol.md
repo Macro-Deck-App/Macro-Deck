@@ -386,6 +386,10 @@ the values are in
 [`ProtocolErrorReasons.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Errors/ProtocolErrorReasons.cs).
 A client that does not recognise a reason handles the code alone.
 
+When the host fails while handling a `host.invoke`, `host.cancel`, `event.publish`, `capability.declare`,
+`state.update` or `asset.*` message, it answers `INTERNAL_ERROR` correlated to that message and goes on
+with the next one; the session stays open. A failed `log.publish` gets no such answer.
+
 Closing the socket is reserved for seven conditions; everything else is a `protocol.error` on an open
 socket:
 
