@@ -187,8 +187,7 @@ test('resetting the icon display of the second state restores the default and st
   expect({ ...DEFAULT_ICON_DISPLAY, ...second.appearance?.iconDisplay }).toEqual(DEFAULT_ICON_DISPLAY);
 });
 
-// #1707: on a multi-state button typing 150 into Zoom (%) ends as 400.
-test.fixme('typing an icon zoom digit by digit on a second state keeps the typed number', async ({ page, api, host }) => {
+test('typing an icon zoom digit by digit on a second state keeps the typed number', async ({ page, api, host }) => {
   const profile = await api.profile('E2E Icon Zoom Typing', { columns: 3, rows: 2 });
   await importIcon(page, api, host);
   const button = await api.actionButton(profile.rootFolder.id, {
@@ -206,7 +205,11 @@ test.fixme('typing an icon zoom digit by digit on a second state keeps the typed
   await picker.getByRole('button', { name: 'Use icon' }).click();
 
   const zoom = page.getByRole('spinbutton', { name: 'Zoom (%)' });
-  await typeInto(zoom, '150');
+  await zoom.click();
+  await zoom.press('ControlOrMeta+a');
+  // Keys sent without a pause land before the box is written back, which hides a rewrite per keystroke.
+  await zoom.pressSequentially('150', { delay: 300 });
+  await expect(zoom).toHaveValue('150');
   await blur(page);
   await expect(zoom).toHaveValue('150');
   await save(page);
