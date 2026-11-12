@@ -50,11 +50,21 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	public void TypeUnicode(string text)
 	{
 		var inputs = new List<Input>(text.Length * 2);
-		foreach (var unit in text)
-		{
-			inputs.Add(UnicodeInput(unit, false));
-			inputs.Add(UnicodeInput(unit, true));
-		}
+		var layout = LayoutOf(Win32Windows.GetForegroundWindow());
+		TypedLineBreaks.Walk(text,
+			run =>
+			{
+				foreach (var unit in run)
+				{
+					inputs.Add(UnicodeInput(unit, false));
+					inputs.Add(UnicodeInput(unit, true));
+				}
+			},
+			() =>
+			{
+				AddKeyInput(inputs, KeyCode.Enter, layout, false);
+				AddKeyInput(inputs, KeyCode.Enter, layout, true);
+			});
 
 		Send(inputs);
 	}
@@ -112,6 +122,14 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 		}
 
 		Send([new Input { type = InputKeyboard, union = new InputUnion { keyboard = keyboard } }]);
+	}
+
+	private static void AddKeyInput(List<Input> inputs, KeyCode key, IntPtr layout, bool isUp)
+	{
+		if (TryBuildKeyInput(key, layout, isUp, out var keyboard))
+		{
+			inputs.Add(new Input { type = InputKeyboard, union = new InputUnion { keyboard = keyboard } });
+		}
 	}
 
 	internal static bool TryBuildKeyInput(KeyCode key, IntPtr layout, bool isUp, out Keybdinput input)
@@ -377,6 +395,17 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 		public void TypeUnicode(string text)
 		{
+			// A posted VK_RETURN would be translated behind the characters already queued after it,
+			// so a line break goes as the character a real Enter produces.
+			TypedLineBreaks.Walk(text, PostChars, () => PostChars("\r"));
+		}
+
+		public void Dispose()
+		{
+		}
+
+		private void PostChars(string text)
+		{
 			foreach (var unit in text)
 			{
 				foreach (var window in _windows)
@@ -384,10 +413,6 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 					_ = PostMessage(window, WmChar, unit, 0);
 				}
 			}
-		}
-
-		public void Dispose()
-		{
 		}
 
 		private void Post(KeyCode key, bool isUp)
