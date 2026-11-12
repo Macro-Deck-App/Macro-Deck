@@ -59,14 +59,7 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 	{
 		await _cts.CancelAsync();
 		_listener.Close();
-		try
-		{
-			await _serving;
-		}
-		catch (Exception ex) when (ex is HttpListenerException or ObjectDisposedException or OperationCanceledException)
-		{
-		}
-
+		await _serving;
 		_cts.Dispose();
 	}
 
@@ -83,18 +76,31 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 	{
 		while (!_cts.IsCancellationRequested)
 		{
-			var context = await _listener.GetContextAsync();
-			if (!context.Request.IsWebSocketRequest)
+			try
 			{
-				context.Response.StatusCode = 400;
-				context.Response.Close();
-				continue;
+				await AcceptAsync();
 			}
-
-			_onSession?.Invoke(Interlocked.Increment(ref _sessions));
-			var socket = (await context.AcceptWebSocketAsync(null)).WebSocket;
-			_ = Task.Run(() => SessionAsync(context, socket));
+			catch when (_cts.IsCancellationRequested)
+			{
+				// A client accepted while the listener closes can fail anywhere in HttpListener, NRE included.
+				return;
+			}
 		}
+	}
+
+	private async Task AcceptAsync()
+	{
+		var context = await _listener.GetContextAsync();
+		if (!context.Request.IsWebSocketRequest)
+		{
+			context.Response.StatusCode = 400;
+			context.Response.Close();
+			return;
+		}
+
+		_onSession?.Invoke(Interlocked.Increment(ref _sessions));
+		var socket = (await context.AcceptWebSocketAsync(null)).WebSocket;
+		_ = Task.Run(() => SessionAsync(context, socket));
 	}
 
 	private async Task SessionAsync(HttpListenerContext context, WebSocket socket)
