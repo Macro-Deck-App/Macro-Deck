@@ -17,8 +17,8 @@ internal sealed class MacroDeck2Paths
 	public string ProfilesDirectory => Path.Combine(Root, "profiles");
 
 	/// <summary>
-	/// The pre-2.9 database. Macro Deck 2 renames it to <c>profiles.db.migrated</c> once it has written the
-	/// JSON files, so an unsuffixed file here means the JSON directory was never produced.
+	/// The pre-2.15 database. Macro Deck 2 renames it to <c>profiles.db.migrated</c> once it has written the
+	/// JSON files, so an unsuffixed file here was never migrated.
 	/// </summary>
 	public string LegacyProfilesDatabase => Path.Combine(Root, "profiles.db");
 

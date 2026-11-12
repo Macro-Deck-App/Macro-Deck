@@ -26,7 +26,8 @@ internal static class MacroDeck2VariableReader
 			var connectionString = new SqliteConnectionStringBuilder
 			{
 				DataSource = paths.VariablesDatabase,
-				Mode = SqliteOpenMode.ReadOnly
+				Mode = SqliteOpenMode.ReadOnly,
+				Pooling = false
 			}.ToString();
 
 			using var connection = new SqliteConnection(connectionString);
