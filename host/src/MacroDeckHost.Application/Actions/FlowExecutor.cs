@@ -454,15 +454,24 @@ public sealed class FlowExecutor : IFlowExecutor
 
 			if (!SecretsApproved(block.Id, content, run))
 			{
+				var declined = run.Owner is { } owner && _approvals?.IsDeclined(owner, block.Id, content) == true;
 				run.Record(block.Id,
 					block.Label,
 					integrationId,
 					actionId,
 					ActionOutcomeStatus.Skipped,
-					ActionExecutionErrorCodes.SecretApprovalPending,
-					AppStrings.Errors.Actions.SecretApprovalPending(),
+					declined
+						? ActionExecutionErrorCodes.SecretApprovalDeclined
+						: ActionExecutionErrorCodes.SecretApprovalPending,
+					declined
+						? AppStrings.Errors.Actions.SecretApprovalDeclined()
+						: AppStrings.Errors.Actions.SecretApprovalPending(),
 					0);
-				await RaiseApprovalPendingAsync();
+				if (!declined)
+				{
+					await RaiseApprovalPendingAsync();
+				}
+
 				return;
 			}
 

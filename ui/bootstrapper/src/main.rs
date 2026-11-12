@@ -34,6 +34,7 @@ mod notifications;
 mod opened_files;
 mod post_update_changelog;
 mod quit_after_update;
+mod quit_request;
 mod redact;
 mod release_notes;
 mod tray_badge;
@@ -243,6 +244,12 @@ fn main() {
         // Must stay registered before single_instance: a second instance exits inside its setup.
         .plugin(launch_handoff::plugin())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            if quit_request::requested(&argv) {
+                launch_handoff::clear(app);
+                logging::info("[app] another launch asked to quit");
+                request_quit(app);
+                return;
+            }
             if let Some(executable) = launch_handoff::take_target(app) {
                 launch_handoff::hand_over(app, executable, argv, cwd);
                 return;
@@ -333,6 +340,12 @@ fn main() {
             }
             if quit_after_update::take_for_launch(&handle) {
                 logging::info("[app] relaunched by the installer after an install on quit; exiting");
+                mark_quitting(&handle);
+                handle.exit(0);
+                return Ok(());
+            }
+            if quit_request::requested(&deep_links::launch_arguments()) {
+                logging::info("[app] --quit with no running instance; exiting");
                 mark_quitting(&handle);
                 handle.exit(0);
                 return Ok(());

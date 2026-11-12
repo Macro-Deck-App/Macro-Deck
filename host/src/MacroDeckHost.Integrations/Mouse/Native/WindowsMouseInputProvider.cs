@@ -34,6 +34,10 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 
 	private const int WheelDelta = 120;
 
+	// The wheel delta reaches the window as a signed 16-bit value in WM_MOUSEWHEEL.
+	private const int MaxNotchesPerEvent = short.MaxValue / WheelDelta;
+	private const int WheelChunkPauseMs = 20;
+
 	private const int SmXVirtualScreen = 76;
 	private const int SmYVirtualScreen = 77;
 	private const int SmCxVirtualScreen = 78;
@@ -139,8 +143,22 @@ public sealed class WindowsMouseInputProvider : IMouseInputProvider
 	public void Scroll(ScrollAxis axis, int notches)
 	{
 		var flags = axis == ScrollAxis.Horizontal ? MouseEventFhWheel : MouseEventFWheel;
+		var direction = Math.Sign(notches);
+		var remaining = Math.Abs(notches);
 
-		Send([MouseEvent(flags, mouseData: unchecked((uint)(notches * WheelDelta)))]);
+		while (remaining > 0)
+		{
+			var chunk = Math.Min(remaining, MaxNotchesPerEvent);
+			Send([MouseEvent(flags, mouseData: unchecked((uint)(direction * chunk * WheelDelta)))]);
+			remaining -= chunk;
+
+			// Windows drops or merges a wheel input queued right behind another one, so every notch goes
+			// into as few inputs as possible and further chunks follow only after a pause.
+			if (remaining > 0)
+			{
+				Thread.Sleep(WheelChunkPauseMs);
+			}
+		}
 	}
 
 	private static bool TryMoveEvent(MousePoint position, uint extraFlags, out Input input)

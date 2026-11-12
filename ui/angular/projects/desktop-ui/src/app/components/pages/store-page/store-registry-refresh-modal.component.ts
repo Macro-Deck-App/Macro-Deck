@@ -5,15 +5,18 @@ import {
   StoreRegistryRefreshRunBody,
   StoreRegistryRefreshRunState,
   StoreRegistryRefreshStep,
+  Strings,
 } from '@macro-deck/runtime';
-import { LocalizationService, ModalComponent } from '@shared';
+import { ButtonComponent, LocalizationService, ModalComponent } from '@shared';
+
+type RefreshStepState = 'done' | 'current' | 'failed';
 
 interface RefreshLogLine {
   key: string;
   time: string;
   text: string;
   detail: string | null;
-  failed: boolean;
+  state: RefreshStepState;
 }
 
 const STATE_KEYS: Record<StoreRegistryRefreshRunState, string> = {
@@ -54,7 +57,7 @@ const ERROR_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-store-registry-refresh-modal',
   standalone: true,
-  imports: [ModalComponent],
+  imports: [ButtonComponent, ModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './store-registry-refresh-modal.component.html',
   styleUrls: ['./store-registry-refresh-modal.component.scss'],
@@ -66,12 +69,24 @@ export class StoreRegistryRefreshModalComponent {
 
   readonly closed = output<void>();
 
+  readonly forceRefresh = output<void>();
+
   protected readonly state = computed<StoreRegistryRefreshRunState>(() => this.run()?.state ?? 'Running');
 
   protected readonly heading = computed(() =>
     this.localization.translateKey(AppStrings.Store.RegistryRefresh.Heading));
 
   protected readonly stateText = computed(() => this.localization.translateKey(STATE_KEYS[this.state()]));
+
+  protected readonly upToDate = computed(() => {
+    const run = this.run();
+    return run?.state === 'Succeeded' && run.entries.at(-1)?.step === 'UpToDate';
+  });
+
+  protected readonly forceRefreshLabel = computed(() =>
+    this.localization.translateKey(AppStrings.Store.RegistryRefresh.ForceRefresh));
+
+  protected readonly doneLabel = computed(() => this.localization.translateKey(Strings.Common.Done));
 
   protected readonly logLabel = computed(() =>
     this.localization.translateKey(AppStrings.Store.RegistryRefresh.LogLabel));
@@ -89,23 +104,42 @@ export class StoreRegistryRefreshModalComponent {
     };
   });
 
-  protected readonly lines = computed<RefreshLogLine[]>(() => {
+  private readonly allLines = computed<RefreshLogLine[]>(() => {
     const run = this.run();
     if (!run) {
       return [];
     }
 
+    const last = run.entries.length - 1;
     return run.entries.map((entry, index) => ({
       key: `${run.id}:${index}`,
       time: this.time(entry.at),
       text: this.describe(entry, run),
       detail: entry.step === 'Failed' ? entry.detail ?? null : null,
-      failed: entry.step === 'Failed',
+      state: this.stepState(entry, index === last && run.state === 'Running'),
     }));
   });
 
+  protected readonly outcome = computed<RefreshLogLine | null>(() =>
+    this.state() === 'Running' ? null : this.allLines().at(-1) ?? null);
+
+  protected readonly lines = computed<RefreshLogLine[]>(() =>
+    this.outcome() ? this.allLines().slice(0, -1) : this.allLines());
+
   protected onClose(): void {
     this.closed.emit();
+  }
+
+  protected onForceRefresh(): void {
+    this.forceRefresh.emit();
+  }
+
+  private stepState(entry: StoreRegistryRefreshLogEntryBody, current: boolean): RefreshStepState {
+    if (entry.step === 'Failed' || entry.step === 'Cancelled') {
+      return 'failed';
+    }
+
+    return current ? 'current' : 'done';
   }
 
   private describe(entry: StoreRegistryRefreshLogEntryBody, run: StoreRegistryRefreshRunBody): string {

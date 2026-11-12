@@ -214,13 +214,13 @@ export class OnboardingWizardComponent {
       const outcome = await this.backupService.createRecoveryKey();
       if (outcome.status === 'success') {
         this.recoveryKeyModal.set({ kind: 'keyModal', mode: 'created', key: outcome.key });
-      } else {
+      } else if (outcome.status === 'error') {
         // No skip and no close button, so a step the host will not let the user finish has to let
         // them past rather than hold them there for good.
         this.recoveryKeyActionFailed.set('create');
         this.toastService.show(outcome.message, { variant: 'error' });
-        // A key that raced in answers success with key: null, which lands here as an error. Reload so
-        // the step re-renders into the show branch instead of a stale None branch.
+        // The host may have stored a key before failing to export it. Reload so the step re-renders
+        // into the show branch instead of a stale None branch.
         await this.backupService.loadRecoveryKeyState();
         if (this.recoveryKeyState()?.availability !== 'None') {
           this.recoveryKeyActionFailed.set('none');
@@ -265,10 +265,6 @@ export class OnboardingWizardComponent {
     } else {
       this.toastService.show(result.error, { variant: 'error' });
     }
-  }
-
-  protected closeRecoveryKeyModal(): void {
-    this.recoveryKeyModal.set({ kind: 'none' });
   }
 
   private async checkAndPresent(): Promise<void> {

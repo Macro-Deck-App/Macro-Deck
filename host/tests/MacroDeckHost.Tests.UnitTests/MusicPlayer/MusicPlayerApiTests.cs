@@ -224,13 +224,7 @@ internal sealed class MusicPlayerApiTests
 
 	private static List<MusicPlayersStateDto> Pushes(FakePluginConnection connection)
 	{
-		ProtocolEnvelope[] sent;
-		lock (connection.Sent)
-		{
-			sent = [.. connection.Sent];
-		}
-
-		return sent
+		return connection.Sent
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.MusicPlayers)

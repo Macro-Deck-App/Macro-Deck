@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
@@ -85,7 +86,8 @@ public sealed class WidgetTriggerService : IWidgetTriggerService
 					using var scope = _scopeFactory.CreateScope();
 					var stateService = scope.ServiceProvider.GetRequiredService<IActionButtonStateService>();
 
-					var advance = await stateService.AdvanceAsync(widget.Id, CancellationToken.None)
+					var advance = await stateService
+						.AdvanceAsync(widget.Id, StateChangeFlowDispatch.Detached, CancellationToken.None)
 						.ConfigureAwait(false);
 
 					if (!advance.Success)

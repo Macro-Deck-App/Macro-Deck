@@ -21,4 +21,12 @@ public class ProcessDpiAwarenessTests
 			ProcessDpiAwareness.Configure();
 		});
 	}
+
+	[Test]
+	public void A_windows_without_any_dpi_api_still_starts()
+	{
+		Assert.DoesNotThrow(() => ProcessDpiAwareness.Apply(() => throw new EntryPointNotFoundException(),
+			() => throw new DllNotFoundException(),
+			() => throw new EntryPointNotFoundException()));
+	}
 }

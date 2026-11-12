@@ -2546,6 +2546,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>La acción no respondió a tiempo</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Este paso usa un secreto y fue rechazado, así que no se ejecuta.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Este paso usa un secreto y está esperando tu aprobación.</value>
   </data>
@@ -5620,6 +5623,27 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Cambiar a perfil</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Las carpetas que se recorren, en el orden en que las selecciones.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Carpetas</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabético</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Personalizado</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Orden de carpetas y Alfabético recorren todas las carpetas del perfil abierto. Personalizado recorre las carpetas que elijas.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Orden de carpetas</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Orden</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Opcional. Solo navega este dispositivo. Déjalo vacío para usar el dispositivo que ejecutó la acción, o todos los dispositivos si ninguno la ejecutó.</value>
   </data>
@@ -5647,11 +5671,29 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Ir a la carpeta superior</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Cambia a la siguiente carpeta en el orden elegido.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Carpeta siguiente</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Cambia a la carpeta anterior en el orden elegido.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Carpeta anterior</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>El perfil al que cambiar.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Perfil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Después de la última carpeta sigue la primera y, antes de la primera, la última. Si está desactivado, no pasa nada en ninguno de los extremos.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Volver al principio</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>El dispositivo '{deviceId}' no está conectado.</value>
@@ -5667,6 +5709,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>No se seleccionó ningún perfil.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>No se encontró la carpeta abierta.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>El perfil '{profileId}' no existe.</value>
@@ -7452,6 +7497,84 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>El inicio de sesión de Google ha caducado para {account}</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>Añade un elemento al final de un array en una ruta del JSON y guarda el resultado en una variable. Si el array no existe, se crea.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>Añadir a array JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>Guarda en una variable el número de elementos de un array, o de propiedades de un objeto, en una ruta del JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>Contar elementos JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>Propiedades e índices de array, p. ej. data.items[0].name, o solo "$" para todo el documento.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>El JSON con el que trabajar. Inserta una variable para usar el JSON guardado en ella.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>Verdadero o falso</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>Fragmento JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>Tipo de valor</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Nulo</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>Número</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>Elimina la propiedad o el elemento del array en una ruta del JSON y guarda el resultado en una variable.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>Eliminar valor JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>Escribe un valor en una ruta del JSON y guarda el resultado en una variable. Los objetos que faltan en el camino se crean.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>Establecer valor JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>El JSON no es válido.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>La ruta JSON no es válida.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>El valor no coincide con el tipo de valor elegido.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>La ruta no encaja con el JSON: un nombre de propiedad necesita ahí un objeto y un índice, un array.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>No se puede eliminar todo el documento. Elige una ruta dentro de él.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>El valor en esa ruta no es un array.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>El valor en esa ruta no es un array ni un objeto.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>El JSON no tiene ningún valor en esa ruta.</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>El inicio de sesión de Microsoft se canceló o no se terminó. Pulsa Continuar para abrirlo de nuevo.</value>
@@ -11626,6 +11749,118 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>No se pudo mostrar la notificación.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>Hacer una pregunta</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>Pausa el flujo, hace una pregunta en el deck y guarda la respuesta en una variable.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>Tipo de pregunta</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>Sí o no</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>Elegir de una lista</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>Escribir texto</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>Pregunta</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>Mensaje</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>Opciones</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>Una opción por línea o un array JSON. Inserta una variable para tomar la lista de ella. Como máximo 50 opciones de hasta 100 caracteres cada una.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>Marcador de posición</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>Texto predeterminado</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>Preguntar en</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>El dispositivo que pulsó el widget</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>Un dispositivo elegido</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>Todos los clientes conectados</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>Tiempo de espera</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>Cuánto espera la pregunta una respuesta, como máximo 9 minutos.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>Variable de la respuesta</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>Recibe true o false, el elemento elegido o el texto escrito. Sin respuesta recibe false o un texto vacío.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>Variable de la posición</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>Recibe la posición del elemento elegido empezando en 0, o -1 sin respuesta.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>Variable del resultado</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>Recibe answered, cancelled, timedOut o noClient.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>Se cierra tras {count} segundo.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>Se cierra tras {count} segundos.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>Se cierra tras {count} minuto.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>Se cierra tras {count} minutos.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>Las preguntas aún no están disponibles.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>No se pudo mostrar la pregunta.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>La lista de opciones está vacía.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>La lista tiene más de {max} opciones.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>Una opción tiene más de {max} caracteres.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>La lista de opciones es demasiado grande para mostrarse.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>No se pudo guardar la respuesta en {variable}. Comprueba el tipo de la variable.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Establece el volumen del dispositivo de audio seleccionado a un nivel específico.</value>
   </data>
@@ -11917,6 +12152,66 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>ID de paquete de la aplicación en primer plano</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Aplicación supervisada</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck indica si esta aplicación se está ejecutando, cuántos procesos y ventanas tiene y cómo se muestran sus ventanas.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Juego</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Aplicación</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Un proceso en ejecución, como chrome, o la ruta del programa.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Escribe un nombre para esta aplicación.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Elige una aplicación en ejecución o escribe la ruta de un programa.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck supervisa hasta {count} aplicaciones. Quita una para añadir otra.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>No se pudo crear un nombre de variable único. Cambia el nombre de la aplicación y vuelve a intentarlo.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Paso de configuración desconocido.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>En ejecución</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Procesos en ejecución</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Ventanas abiertas</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Estado de la ventana</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Estado de la ventana de la aplicación en primer plano</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Procesos de la aplicación en primer plano</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Los estados de las ventanas no están disponibles</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland no permite que Macro Deck lea las ventanas de otras apps. Las aplicaciones supervisadas siguen indicando si se están ejecutando y cuántos procesos tienen, pero el estado y el número de sus ventanas siguen sin estar disponibles.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck necesita acceso de Accesibilidad para leer el estado de las ventanas. Autoriza Macro Deck en Ajustes del Sistema &gt; Privacidad y seguridad &gt; Accesibilidad. Hasta entonces, el estado y el número de ventanas de las aplicaciones supervisadas no estarán disponibles.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Conceder acceso</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Qué cuenta de Twitch conectada actuará.</value>
@@ -15823,6 +16118,12 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Cambiado</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Rechazar</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>No se pudo rechazar el paso.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Nada pendiente de aprobación</value>
   </data>
@@ -15830,7 +16131,7 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
     <value>Todos los pasos que usan un secreto están aprobados.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Los pasos que usan un secreto solo se ejecutan después de que los apruebes. Revisa qué ha cambiado y luego apruébalos.</value>
+    <value>Los pasos que usan un secreto solo se ejecutan después de que los apruebes. Revisa qué ha cambiado y luego apruébalos o recházalos.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>No se pudieron cargar las aprobaciones.</value>
@@ -16488,6 +16789,15 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Clave de recuperación</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>¿Crear una nueva clave de recuperación?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Las copias de seguridad anteriores siguen necesitando la clave de recuperación que guardaste antes, así que consérvala también. A continuación se muestra la nueva clave.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Crear nueva clave de recuperación</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Remoto</value>
@@ -19185,6 +19495,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Algo salió mal inesperadamente.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Forzar actualización</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Actualización del registro de la Store</value>
   </data>
@@ -20287,6 +20600,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>La pantalla se mantiene activa.</value>
+  </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Toca en cualquier lugar para mantener la pantalla activa.</value>
   </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>El navegador o el sistema operativo se negó a mantener la pantalla activa (p. ej. ahorro de batería).</value>
@@ -25564,5 +25880,264 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Secreto</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>En línea</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>Latencia</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>Pérdida de paquetes</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>Última respuesta</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>Destino en línea</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Cuando un destino de ping vuelve a responder tras estar desconectado.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>Destino desconectado</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Cuando un destino de ping deja de responder tantos pings seguidos como indica su umbral de fallos.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>Latencia (ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>Paso de configuración desconocido.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>Escribe un nombre para este destino.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>Escribe un nombre de host, una dirección IPv4 o una dirección IPv6.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>Escribe un número entero de segundos entre {minimum} y {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>Escribe un número entero de milisegundos entre {minimum} y {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>El tiempo de espera debe ser menor que el intervalo.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>Escribe un número entero entre {minimum} y {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>El nombre de host o la dirección IPv4 o IPv6 del dispositivo al que hacer ping.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>Intervalo (segundos)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>Con qué frecuencia se hace ping al destino.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>Tiempo de espera (milisegundos)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>Cuánto se espera cada respuesta.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>Fallos antes de desconectado</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>Cuántos pings seguidos deben fallar antes de que el destino cuente como desconectado, así se ignora un único paquete perdido.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Destino de ping</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck hace ping a este dispositivo con regularidad e indica si responde y con qué rapidez.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>No se pudo crear un nombre de variable único. Cambia el nombre del destino y vuelve a intentarlo.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>El ping no está permitido</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>Este sistema no permite que Macro Deck envíe solicitudes de ping, así que no se pueden comprobar los destinos de ping. En Linux, permite el ping sin privilegios con el ajuste net.ipv4.ping_group_range.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Estado de ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Muestra si un destino de ping es accesible y con qué rapidez responde.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Ningún destino de ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>En línea</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>Desconectado</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>Esperando respuesta</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping no permitido</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>Sin respuesta</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>Inaccesible</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>Nombre no encontrado</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping fallido</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>{loss} % de pérdida de paquetes</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>Destino</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>El destino de ping que muestra este widget.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>Primer destino</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>Nombre visible</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>Nombre del destino</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>Mostrar latencia</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>Mostrar pérdida de paquetes</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>Mostrar historial de latencia</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Activar dispositivo</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Envía un paquete mágico de Wake on LAN a un dispositivo guardado. Un paquete enviado no confirma que el dispositivo se haya activado.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Dispositivo</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>El dispositivo guardado que se activará</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Elige un dispositivo</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Añadir un dispositivo</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Guarda un dispositivo para activarlo desde Macro Deck. Wake on LAN tiene que estar activado en el firmware y en la configuración del adaptador de red del dispositivo.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Este paso de configuración no se conoce. Empieza de nuevo.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>Dirección MAC</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>La dirección física del adaptador de red del dispositivo</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Introduce una dirección MAC de 12 dígitos hexadecimales, por ejemplo AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Dirección de difusión</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Deja 255.255.255.255 para esta red o introduce la dirección de difusión de la subred del dispositivo, por ejemplo 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Introduce una dirección IPv4, por ejemplo 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Puerto</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>El puerto UDP al que se envía el paquete. La mayoría de los dispositivos escuchan en el puerto 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Introduce un puerto del 1 al 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Paquetes</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Cuántos paquetes se envían. Envía más de uno a un dispositivo que no siempre se activa.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Introduce un número del 1 al 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Pausa entre paquetes (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Cuánto esperar entre dos paquetes, en milisegundos</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Introduce una pausa de 0 a 10000 milisegundos.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Elige un dispositivo para activar.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>El dispositivo seleccionado ya no existe. Elige otro dispositivo.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>La configuración guardada de {device} no es válida. Edita el dispositivo y guárdalo de nuevo.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>No se permitió enviar el paquete a {address}. Comprueba que se permiten las difusiones y, en macOS, que Macro Deck tiene acceso a la red local.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>No hay ninguna ruta a {address}. Comprueba la dirección de difusión y, en macOS, que Macro Deck tiene acceso a la red local.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>No se pudo enviar el paquete a {address}.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

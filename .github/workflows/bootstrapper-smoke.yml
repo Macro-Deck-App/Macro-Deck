@@ -1,0 +1,39 @@
+name: Bootstrapper smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - ui/bootstrapper/**
+      - .github/workflows/bootstrapper-smoke.yml
+      - .github/workflows/bootstrapper-smoke-run.yml
+      - .github/actions/linux-display/**
+      - ci/scripts/linux-display.sh
+      - ci/scripts/stage-host.sh
+      - ci/scripts/stage-dotnet-runtime.sh
+      - host/src/MacroDeckHost/Program.cs
+      - host/src/MacroDeckHost/HostRunner.cs
+      - host/src/MacroDeckHost/HostEndpoints.cs
+      - host/src/MacroDeckHost/SingleInstanceGuard.cs
+      - host/src/MacroDeckHost/ShellParent.cs
+      - host/src/MacroDeckHost/ShellProcessWatchdog.cs
+      - host/src/MacroDeckHost/Api/Controllers/HostController.cs
+      - host/src/MacroDeckHost/Ui/LoopbackPortFileService.cs
+      - host/src/MacroDeckHost/Ui/UiWebSocketEndpoint.cs
+  push:
+    branches: [main]
+  schedule:
+    - cron: '30 2 * * *'
+
+concurrency:
+  group: bootstrapper-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Bootstrapper smoke
+    uses: ./.github/workflows/bootstrapper-smoke-run.yml

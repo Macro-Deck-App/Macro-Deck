@@ -8,6 +8,12 @@ internal static class DeckClientMapper
 	public static DeckClient ToSdk(DeckClientDto dto)
 	{
 		return new DeckClient
-			{ ClientId = dto.ClientId, DeviceId = dto.DeviceId, ProfileId = dto.ProfileId, FolderId = dto.FolderId };
+		{
+			ClientId = dto.ClientId,
+			DeviceId = dto.DeviceId,
+			ProfileId = dto.ProfileId,
+			FolderId = dto.FolderId,
+			IsDeviceSession = dto.IsDeviceSession
+		};
 	}
 }

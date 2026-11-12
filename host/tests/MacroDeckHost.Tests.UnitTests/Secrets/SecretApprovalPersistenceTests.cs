@@ -77,6 +77,23 @@ public class SecretApprovalPersistenceTests
 	}
 
 	[Test]
+	public async Task A_declined_step_stays_declined_after_a_restart()
+	{
+		var widget = await SeedProfileWithoutApprovals(TokenBlock("https://home.example"));
+		var cache = await Restart();
+		var owner = FlowOwner.Widget(widget.Id);
+		var edited = FolderWidget(cache, widget.Id);
+		edited.Data = WidgetData(TokenBlock("https://attacker.example"));
+		cache.UpdateWidget(edited.FolderId, edited, SecretApprovalWrite.Withhold);
+		_fixture.Decline(owner, WidgetFlows(cache, widget.Id), "b1");
+
+		var restarted = await Restart();
+		var result = await _fixture.Run(owner, WidgetFlows(restarted, widget.Id));
+
+		Assert.That(result.Actions.Single().ErrorCode, Is.EqualTo(ActionExecutionErrorCodes.SecretApprovalDeclined));
+	}
+
+	[Test]
 	public async Task An_unreadable_approval_file_approves_nothing_and_does_not_backfill()
 	{
 		var widget = await SeedProfileWithoutApprovals(TokenBlock("https://home.example"));

@@ -837,6 +837,42 @@ public class UiComponentVocabularyTests
 	}
 
 	[Test]
+	public void A_segmented_emits_its_direction_only_when_one_is_declared()
+	{
+		var tree = UiViewBuilder.Build(WidgetSurface(),
+			new UiStack
+			{
+				Key = "root",
+				Children =
+				[
+					new UiSegmented { Key = "row", Children = [new UiTextRun { Key = "a", Text = "a" }] },
+					new UiSegmented
+					{
+						Key = "column",
+						Direction = UiComponentDirections.Vertical,
+						RequiredComponentVersion = 2,
+						Children = [new UiTextRun { Key = "b", Text = "b" }],
+						Fallback = new UiSegmented
+						{
+							Key = "columnFallback", Children = [new UiTextRun { Key = "c", Text = "c" }]
+						}
+					}
+				]
+			});
+
+		var segmented = Walk(tree.Root)
+			.Where(node => node.Type == "ui.segmented")
+			.ToDictionary(node => node.Id.Split('.')[^1], StringComparer.Ordinal);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(segmented["row"].Properties.ContainsKey("direction"), Is.False);
+			Assert.That(segmented["column"].Properties["direction"].GetString(), Is.EqualTo("vertical"));
+			Assert.That(segmented["column"].RequiredComponentVersion, Is.EqualTo(2));
+		});
+	}
+
+	[Test]
 	public void A_gauge_emits_its_track_colour_only_when_one_is_declared()
 	{
 		var tree = UiViewBuilder.Build(WidgetSurface(),

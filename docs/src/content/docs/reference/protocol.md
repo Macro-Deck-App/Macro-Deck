@@ -284,9 +284,12 @@ plugin's current culture with a 24-hour clock; a host that predates `http` pushe
 its default User-Agent. Integration storage is not a host API: the SDK keeps it in the plugin's own data
 directory.
 
-The `deck` snapshot carries `folders`, `profiles`, `clients` and `revision`. Each entry in `clients` is one
-connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`
-and `folderId`. `revision` increases with every `deck` push within one host run and starts again when the
+The `deck` snapshot carries `folders`, `profiles`, `clients` and `revision`. Each entry in `folders` has
+`id` and `label`, plus `profileId`, `parentId` (absent for a top-level folder) and `order`, its sort key among
+the folders that share its parent; hosts that predate the tree position omit those three. Each entry in `clients` is one
+connected client with `clientId`, `deviceId` (absent for a client that is not a paired device), `profileId`,
+`folderId` and `isDeviceSession` (`true` for a device connected through a device provider; hosts that predate
+it omit it, which reads as `false`). `revision` increases with every `deck` push within one host run and starts again when the
 host restarts; hosts that predate it omit both fields, which read as an empty list and 0. `deck` pushes can
 arrive out of order, so apply one only when its revision is higher than the last one applied in this
 session, always apply revision 0, and reset the last applied revision when a session is not resumed.
@@ -382,6 +385,10 @@ one of the `video_stream_` reasons of `CAPABILITY_UNAVAILABLE` (see
 the values are in
 [`ProtocolErrorReasons.cs`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/protocol/src/MacroDeck.Plugin.Protocol/Errors/ProtocolErrorReasons.cs).
 A client that does not recognise a reason handles the code alone.
+
+When the host fails while handling a `host.invoke`, `host.cancel`, `event.publish`, `capability.declare`,
+`state.update` or `asset.*` message, it answers `INTERNAL_ERROR` correlated to that message and goes on
+with the next one; the session stays open. A failed `log.publish` gets no such answer.
 
 Closing the socket is reserved for seven conditions; everything else is a `protocol.error` on an open
 socket:

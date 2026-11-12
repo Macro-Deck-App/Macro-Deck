@@ -2545,6 +2545,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Дія не відповіла вчасно</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Цей крок використовує секрет і був відхилений, тому не виконується.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Цей крок використовує секрет і очікує на схвалення.</value>
   </data>
@@ -5621,6 +5624,27 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Змінити профіль на</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Папки для переходу, у тому порядку, у якому їх вибрано.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Папки</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>За абеткою</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Власний</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>«Порядок папок» і «За абеткою» проходять усі папки відкритого профілю. «Власний» проходить вибрані папки.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Порядок папок</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Порядок</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>Необов'язково. Навігацію виконуватиме лише цей пристрій. Залиште порожнім, щоб навігацію виконував пристрій, який запустив дію, або всі пристрої, якщо жоден не запустив.</value>
   </data>
@@ -5648,11 +5672,29 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Перейти до батьківської папки</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Переходить до наступної папки у вибраному порядку.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Наступна папка</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Переходить до попередньої папки у вибраному порядку.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Попередня папка</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Профіль, на який потрібно перейти.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Профіль</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Після останньої папки йде перша, а перед першою — остання. Якщо вимкнено, на кінцях нічого не відбувається.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Зациклити</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>Пристрій '{deviceId}' не підключено.</value>
@@ -5668,6 +5710,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Профіль не вибрано.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Відкриту папку не знайдено.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>Профілю '{profileId}' не існує.</value>
@@ -7453,6 +7498,84 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>Вхід у Google для {account} втратив чинність</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>Додає елемент у кінець масиву за шляхом у JSON і зберігає результат у змінну. Відсутній масив створюється.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>Додати до масиву JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>Зберігає у змінну кількість елементів масиву або властивостей об'єкта за шляхом у JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>Порахувати елементи JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>Властивості та індекси масиву, наприклад data.items[0].name, або просто "$" для всього документа.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>JSON для обробки. Вставте змінну, щоб використати збережений у ній JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>Значення</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>Істина або хиба</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>Фрагмент JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>Тип значення</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>Число</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>Видаляє властивість або елемент масиву за шляхом у JSON і зберігає результат у змінну.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>Видалити значення JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>Записує значення за шляхом у JSON і зберігає результат у змінну. Відсутні об'єкти на шляху створюються.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>Задати значення JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON недійсний.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>Шлях JSON недійсний.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>Значення не відповідає вибраному типу значення.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>Шлях не відповідає JSON: імені властивості там потрібен об'єкт, а індексу потрібен масив.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>Не можна видалити весь документ. Виберіть шлях усередині нього.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>Значення за цим шляхом не є масивом.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>Значення за цим шляхом не є масивом або об'єктом.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>У JSON немає значення за цим шляхом.</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Вхід у Microsoft скасовано або не завершено. Продовжте, щоб відкрити його знову.</value>
@@ -11627,6 +11750,118 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>Не вдалося показати сповіщення.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>Поставити запитання</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>Призупиняє потік, ставить запитання на деку й зберігає відповідь у змінній.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>Тип запитання</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>Так або ні</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>Вибір зі списку</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>Введення тексту</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>Запитання</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>Повідомлення</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>Варіанти</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>Один варіант на рядок або масив JSON. Вставте змінну, щоб узяти список із неї. Не більше 50 варіантів завдовжки до 100 символів.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>Підказка в полі</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>Типовий текст</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>Де питати</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>Пристрій, що натиснув віджет</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>Вибраний пристрій</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>Усі підключені клієнти</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>Пристрій</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>Тайм-аут</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>Скільки запитання чекає на відповідь, не більше 9 хвилин.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>Змінна для відповіді</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>Отримує true або false, вибраний варіант або введений текст. Без відповіді отримує false або порожній текст.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>Змінна для позиції</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>Отримує позицію вибраного варіанта починаючи з 0 або -1 без відповіді.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>Змінна для результату</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>Отримує answered, cancelled, timedOut або noClient.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>Закриється через {count} секунду.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>Закриється через {count} с.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>Закриється через {count} хвилину.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>Закриється через {count} хв.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>Запитання поки недоступні.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>Не вдалося показати запитання.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>Список варіантів порожній.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>У списку більше варіантів, ніж дозволено (не більше {max}).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>Варіант довший, ніж дозволено (не більше {max} символів).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>Список варіантів завеликий для показу.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>Не вдалося зберегти відповідь у змінній {variable}. Перевірте тип змінної.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Встановлює гучність вибраного аудіопристрою на певний рівень.</value>
   </data>
@@ -11918,6 +12153,66 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Ідентифікатор пакета застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>Відстежуваний застосунок</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck повідомляє, чи запущено цей застосунок, скільки в нього процесів і вікон і як відображаються його вікна.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Гра</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Застосунок</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>Запущений процес, наприклад chrome, або шлях до програми.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Введіть назву цього застосунку.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Виберіть запущений застосунок або введіть шлях до програми.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Максимальна кількість відстежуваних застосунків: {count}. Видаліть один, щоб додати інший.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Не вдалося створити унікальну назву змінної. Перейменуйте застосунок і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Невідомий крок налаштування.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Запущено</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Запущені процеси</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Відкриті вікна</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Стан вікна</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Стан вікна застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Процеси застосунку у фокусі</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Стани вікон недоступні</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland не дозволяє Macro Deck читати вікна інших застосунків. Відстежувані застосунки й далі повідомляють, чи запущені вони та скільки в них процесів, але стан і кількість їхніх вікон залишаються недоступними.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Для зчитування станів вікон Macro Deck потрібен дозвіл «Універсальний доступ». Дозвольте Macro Deck у розділі «Системні параметри» &gt; «Конфіденційність і безпека» &gt; «Універсальний доступ». До того часу стан і кількість вікон відстежуваних застосунків залишаються недоступними.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Надати доступ</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Від імені якого підключеного облікового запису Twitch діяти.</value>
@@ -15824,6 +16119,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Змінено</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Відхилити</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Не вдалося відхилити крок.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Немає кроків, що очікують на схвалення</value>
   </data>
@@ -15831,7 +16132,7 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Усі кроки, що використовують секрет, схвалено.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Кроки, що використовують секрет, виконуються лише після схвалення. Перевірте, що змінилося, і схваліть їх.</value>
+    <value>Кроки, що використовують секрет, виконуються лише після схвалення. Перевірте, що змінилося, і схваліть або відхиліть їх.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Не вдалося завантажити схвалення.</value>
@@ -16489,6 +16790,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Ключ відновлення</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Створити новий ключ відновлення?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Для створених раніше резервних копій і далі потрібен збережений раніше ключ відновлення, тому збережіть і його. Новий ключ буде показано далі.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Створити новий ключ відновлення</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Віддалена</value>
@@ -19186,6 +19496,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Сталася непередбачена помилка.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Оновити примусово</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Оновлення реєстру магазину</value>
   </data>
@@ -20288,6 +20601,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Дисплей утримується в активному стані.</value>
+  </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Торкніться будь-де, щоб дисплей не вимикався.</value>
   </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Браузер або операційна система відмовили в утриманні дисплея в активному стані (наприклад, через режим енергозбереження).</value>
@@ -25586,5 +25902,264 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Секрет</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>У мережі</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>Затримка</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>Втрата пакетів</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>Остання відповідь</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>Ціль у мережі</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Коли ціль ping знову відповідає після того, як була поза мережею.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>Ціль поза мережею</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Коли ціль ping не відповідає стільки разів поспіль, скільки задано її порогом помилок.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>Ціль</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>Затримка (мс)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>Невідомий крок налаштування.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>Введіть назву цієї цілі.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>Введіть ім'я хоста, адресу IPv4 або адресу IPv6.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>Введіть ціле число секунд від {minimum} до {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>Введіть ціле число мілісекунд від {minimum} до {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>Тайм-аут має бути коротшим за інтервал.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>Введіть ціле число від {minimum} до {maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>Ім'я хоста або адреса IPv4 чи IPv6 пристрою для перевірки ping.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>Інтервал (секунди)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>Як часто ціль перевіряється за допомогою ping.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>Тайм-аут (мілісекунди)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>Скільки чекати на кожну відповідь.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>Помилок до статусу «поза мережею»</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>Скільки запитів ping поспіль має завершитися помилкою, перш ніж ціль вважатиметься поза мережею. Так один втрачений пакет ігнорується.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ціль ping</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck регулярно надсилає ping на цей пристрій і показує, чи відповідає він і як швидко.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Не вдалося створити унікальну назву змінної. Перейменуйте ціль і спробуйте ще раз.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping заборонено</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>Ця система не дозволяє Macro Deck надсилати запити ping, тому перевірити цілі ping неможливо. У Linux дозвольте ping без привілеїв за допомогою параметра net.ipv4.ping_group_range.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Стан ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Показує, чи доступна ціль ping і як швидко вона відповідає.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Немає цілі ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>У мережі</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>Поза мережею</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>Очікування відповіді</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping заборонено</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>Немає відповіді</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>Недоступно</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>Ім'я не знайдено</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Помилка ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} мс</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>Втрата пакетів: {loss} %</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>Ціль</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>Ціль ping, яку показує цей віджет.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>Перша ціль</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>Відображувана назва</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>Назва цілі</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>Показувати затримку</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>Показувати втрату пакетів</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>Показувати історію затримки</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Розбудити пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Надсилає магічний пакет Wake on LAN на збережений пристрій. Надсилання пакета не підтверджує, що пристрій прокинувся.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Збережений пристрій, який потрібно розбудити</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Виберіть пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Додати пристрій</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Збережіть пристрій, який потрібно будити з Macro Deck. Wake on LAN має бути увімкнено в мікропрограмі та в налаштуваннях мережевого адаптера пристрою.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Цей крок налаштування невідомий. Почніть спочатку.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC-адреса</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Апаратна адреса мережевого адаптера пристрою</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>Введіть MAC-адресу з 12 шістнадцяткових цифр, наприклад AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Широкомовна адреса</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Залиште 255.255.255.255 для цієї мережі або введіть широкомовну адресу підмережі пристрою, наприклад 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Введіть адресу IPv4, наприклад 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>UDP-порт, на який надсилається пакет. Більшість пристроїв слухають порт 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>Введіть порт від 1 до 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Кількість пакетів</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Скільки пакетів надіслати. Для пристрою, який прокидається не завжди, вкажіть більше одного.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>Введіть число від 1 до 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Пауза між пакетами (мс)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>Час очікування між двома пакетами в мілісекундах</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>Введіть паузу від 0 до 10000 мілісекунд.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Виберіть пристрій, який потрібно розбудити.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Вибраний пристрій більше не існує. Виберіть інший пристрій.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>Збережені налаштування {device} недійсні. Змініть пристрій і збережіть його знову.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Надсилання пакета на {address} не дозволено. Перевірте, чи дозволено широкомовне розсилання і чи має Macro Deck у macOS доступ до локальної мережі.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>Немає маршруту до {address}. Перевірте широкомовну адресу і чи має Macro Deck у macOS доступ до локальної мережі.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Не вдалося надіслати пакет на {address}.</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

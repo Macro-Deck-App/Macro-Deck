@@ -125,7 +125,7 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 					{
 						await client.RequestAsync("GetInfo", cancellationToken: timeout.Token);
 					}
-					catch (StreamerbotRequestException)
+					catch (StreamerbotRequestException ex) when (ex.Rejected)
 					{
 						return (null, AppStrings.Integrations.Streamerbot.Config.PasswordRequiredError());
 					}
@@ -140,7 +140,7 @@ public sealed class StreamerbotConfigFlow : IConfigFlow
 							new Dictionary<string, object?>(StringComparer.Ordinal) { ["authentication"] = response },
 							timeout.Token);
 					}
-					catch (StreamerbotRequestException)
+					catch (StreamerbotRequestException ex) when (ex.Rejected)
 					{
 						return (null, AppStrings.Integrations.Streamerbot.Config.PasswordRejectedError());
 					}

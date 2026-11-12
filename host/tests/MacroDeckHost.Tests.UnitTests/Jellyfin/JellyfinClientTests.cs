@@ -3,7 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using MacroDeckHost.Integrations.Jellyfin.Protocol;
-using MacroDeckHost.Tests.UnitTests.HomeAssistant;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Jellyfin;
 

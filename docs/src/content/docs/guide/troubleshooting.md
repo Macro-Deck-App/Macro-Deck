@@ -219,8 +219,18 @@ does not open a second copy. Look for the running Macro Deck in the system tray 
 If you quit from the menu bar or system tray while Macro Deck is still restoring a backup or preparing its
 data at startup, it finishes that first, for up to 15 minutes. Until then, starting it again shows nothing.
 
+If you start Macro Deck again right after quitting it, it can take up to about a minute to open: it waits
+for the previous Macro Deck to finish shutting down. One that does not finish in that time is ended.
+
 If Macro Deck says another host is already running under this account, a host is still running without
-its window. Close it or restart the computer, then start Macro Deck again.
+its window. Close it or restart the computer, then start Macro Deck again. On Linux and macOS, a host
+stops on its own within a few seconds once the Macro Deck that started it has ended, even when Macro Deck
+crashed or was killed; a host left over by an older version does not.
+
+To quit Macro Deck from a terminal or a script, start the Macro Deck program with `--quit` as its only
+argument. That quits the running Macro Deck the same way **Quit** in the tray menu does, and starts
+nothing when Macro Deck is not running. On macOS, run the program inside the app bundle directly: `open`
+only brings the running Macro Deck to the front.
 
 On Linux, two users on one computer can each run their own Macro Deck at the same time. The first one
 keeps the default public port, so the second one starts without it: its devices connect once you

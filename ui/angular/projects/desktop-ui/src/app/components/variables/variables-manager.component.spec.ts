@@ -14,6 +14,7 @@ import type {
 import { VariableCatalogService } from '../../services/variable-catalog.service';
 import { TEMPLATE_PREVIEW_SERVICE, TemplatePreviewService } from '../../domain/template-preview.interface';
 import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
+import { VariableCreateDialogComponent } from './variable-create-dialog.component';
 import { VariablesManagerComponent } from './variables-manager.component';
 
 function variable(
@@ -146,6 +147,13 @@ describe('VariablesManagerComponent', () => {
     await flushViewport();
   });
 
+  async function openDialog(): Promise<VariableCreateDialogComponent> {
+    component.openCreate();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture.debugElement.query(By.directive(VariableCreateDialogComponent)).componentInstance;
+  }
+
   async function flushViewport(): Promise<void> {
     const viewportDebug = fixture.debugElement.query(By.directive(CdkVirtualScrollViewport));
     if (!viewportDebug) return;
@@ -213,10 +221,10 @@ describe('VariablesManagerComponent', () => {
   it('creates a scope-local variable while the scope source is selected', async () => {
     fixture.componentRef.setInput('source', { kind: 'scope' });
     fixture.componentRef.setInput('scopeRefId', 'w1');
-    component.openCreate();
-    await component.onNameInput('my_var');
+    const dialog = await openDialog();
+    await dialog.onNameInput('my_var');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       name: 'my_var',
@@ -229,10 +237,10 @@ describe('VariablesManagerComponent', () => {
     // The browser opens on the "all" source, so keying this off the selected source would default
     // to global for everyone arriving from a widget editor - which is the whole reason to be here.
     fixture.componentRef.setInput('scopeRefId', 'w1');
-    component.openCreate();
-    await component.onNameInput('my_var');
+    const dialog = await openDialog();
+    await dialog.onNameInput('my_var');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       name: 'my_var',
@@ -244,10 +252,10 @@ describe('VariablesManagerComponent', () => {
   it('creates a script variable when opened from the script editor', async () => {
     fixture.componentRef.setInput('scope', 'script');
     fixture.componentRef.setInput('scopeRefId', 'script-1');
-    component.openCreate();
-    await component.onNameInput('my_var');
+    const dialog = await openDialog();
+    await dialog.onNameInput('my_var');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       name: 'my_var',
@@ -259,10 +267,10 @@ describe('VariablesManagerComponent', () => {
   it('creates an automation variable when opened from the automation editor', async () => {
     fixture.componentRef.setInput('scope', 'automation');
     fixture.componentRef.setInput('scopeRefId', 'automation-1');
-    component.openCreate();
-    await component.onNameInput('my_var');
+    const dialog = await openDialog();
+    await dialog.onNameInput('my_var');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       scope: 'automation',
@@ -271,10 +279,10 @@ describe('VariablesManagerComponent', () => {
   });
 
   it('defaults to global with no widget to scope to', async () => {
-    component.openCreate();
-    await component.onNameInput('my_var');
+    const dialog = await openDialog();
+    await dialog.onNameInput('my_var');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       name: 'my_var',
@@ -289,11 +297,11 @@ describe('VariablesManagerComponent', () => {
     // has to produce a widget-scoped one.
     fixture.componentRef.setInput('source', { kind: 'scope' });
     fixture.componentRef.setInput('scopeRefId', 'w1');
-    component.openCreate();
-    await component.onNameInput('my_var');
-    component.setFormScope('global');
+    let dialog = await openDialog();
+    await dialog.onNameInput('my_var');
+    dialog.setFormScope('global');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       scope: 'global',
@@ -302,11 +310,11 @@ describe('VariablesManagerComponent', () => {
 
     createVariableSpy.calls.reset();
     fixture.componentRef.setInput('source', { kind: 'all' });
-    component.openCreate();
-    await component.onNameInput('my_var');
-    component.setFormScope('widget');
+    dialog = await openDialog();
+    await dialog.onNameInput('my_var');
+    dialog.setFormScope('widget');
 
-    await component.submitCreate();
+    await dialog.submitCreate();
 
     expect(createVariableSpy).toHaveBeenCalledWith(jasmine.objectContaining({
       scope: 'widget',
@@ -314,11 +322,14 @@ describe('VariablesManagerComponent', () => {
     }));
   });
 
-  it('offers the scope choice only where there is a widget to scope to', () => {
-    expect(component.canChooseScope()).toBeFalse();
+  it('offers the scope choice only where there is a widget to scope to', async () => {
+    let dialog = await openDialog();
+    expect(dialog.canChooseScope()).toBeFalse();
 
     fixture.componentRef.setInput('scopeRefId', 'w1');
-    expect(component.canChooseScope()).toBeTrue();
+    fixture.detectChanges();
+    dialog = await openDialog();
+    expect(dialog.canChooseScope()).toBeTrue();
   });
 
   it('clears the source back to all when set to null', () => {
@@ -1323,14 +1334,14 @@ describe('VariablesManagerComponent', () => {
     };
 
     it('creates with the template and the chosen type instead of an initial value', async () => {
-      component.openCreate();
-      await component.onNameInput('cpu_text');
-      component.setFormSource('template');
-      component.setFormInitialValue('ignored');
-      expect(component.canSubmitCreate()).toBeFalse();
+      const dialog = await openDialog();
+      await dialog.onNameInput('cpu_text');
+      dialog.setFormSource('template');
+      dialog.setFormInitialValue('ignored');
+      expect(dialog.canSubmitCreate()).toBeFalse();
 
-      component.setFormTemplate('CPU: {{ vars.cpu }}%');
-      await component.submitCreate();
+      dialog.setFormTemplate('CPU: {{ vars.cpu }}%');
+      await dialog.submitCreate();
 
       const request = createVariableSpy.calls.mostRecent().args[0];
       expect(request.templateSource).toEqual({ template: 'CPU: {{ vars.cpu }}%' });
@@ -1347,15 +1358,15 @@ describe('VariablesManagerComponent', () => {
           message: { $localized: { scope: 'macrodeck.app', key: 'Errors.Variables.CircularTemplate' } },
         },
       });
-      component.openCreate();
-      await component.onNameInput('loop');
-      component.setFormSource('template');
-      component.setFormTemplate('{{ vars.loop }}');
+      const dialog = await openDialog();
+      await dialog.onNameInput('loop');
+      dialog.setFormSource('template');
+      dialog.setFormTemplate('{{ vars.loop }}');
 
-      await component.submitCreate();
+      await dialog.submitCreate();
 
       expect(component.showCreateModal()).toBeTrue();
-      expect(component.createError()).toBe(
+      expect(dialog.createError()).toBe(
         'The template reads this variable back through other template variables');
     });
 
@@ -1375,12 +1386,12 @@ describe('VariablesManagerComponent', () => {
 
     it('previews the value the new variable would get for its type', async () => {
       previewTemplateVariable.and.resolveTo({ rendered: '42', value: '42.00', error: null });
-      component.openCreate();
-      await component.onNameInput('cpu_value');
-      component.setFormSource('template');
-      component.setFormType('numeric');
-      component.setFormDecimalPlaces(2);
-      component.setFormTemplate('{{ vars.cpu }}');
+      const dialog = await openDialog();
+      await dialog.onNameInput('cpu_value');
+      dialog.setFormSource('template');
+      dialog.setFormType('numeric');
+      dialog.setFormDecimalPlaces(2);
+      dialog.setFormTemplate('{{ vars.cpu }}');
 
       expect(await previewLine()).toBe('42.00');
       const [template, scope, , options] = previewTemplateVariable.calls.mostRecent().args;
@@ -1441,15 +1452,15 @@ describe('VariablesManagerComponent', () => {
     };
 
     it('creates with the chosen file and write-back instead of an initial value', async () => {
-      component.openCreate();
-      await component.onNameInput('now_playing');
-      component.setFormSource('file');
-      component.setFormInitialValue('ignored');
-      expect(component.canSubmitCreate()).toBeFalse();
+      const dialog = await openDialog();
+      await dialog.onNameInput('now_playing');
+      dialog.setFormSource('file');
+      dialog.setFormInitialValue('ignored');
+      expect(dialog.canSubmitCreate()).toBeFalse();
 
-      component.setFormFilePath(' /home/me/now-playing.txt ');
-      component.setFormAllowWriteBack(true);
-      await component.submitCreate();
+      dialog.setFormFilePath(' /home/me/now-playing.txt ');
+      dialog.setFormAllowWriteBack(true);
+      await dialog.submitCreate();
 
       const request = createVariableSpy.calls.mostRecent().args[0];
       expect(request.fileSource).toEqual({ path: '/home/me/now-playing.txt', allowWriteBack: true });
@@ -1458,15 +1469,15 @@ describe('VariablesManagerComponent', () => {
 
     it('keeps the form open and says why when the host refuses the path', async () => {
       createVariableSpy.and.resolveTo({ success: false, error: { code: 'InvalidFilePath', message: '' } });
-      component.openCreate();
-      await component.onNameInput('now_playing');
-      component.setFormSource('file');
-      component.setFormFilePath('now-playing.txt');
+      const dialog = await openDialog();
+      await dialog.onNameInput('now_playing');
+      dialog.setFormSource('file');
+      dialog.setFormFilePath('now-playing.txt');
 
-      await component.submitCreate();
+      await dialog.submitCreate();
 
       expect(component.showCreateModal()).toBeTrue();
-      expect(component.createError()).toBeTruthy();
+      expect(dialog.createError()).toBeTruthy();
     });
 
     it('marks the row as reading from a file, locks its value and explains a missing value', async () => {

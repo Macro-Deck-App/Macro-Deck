@@ -27,7 +27,7 @@ public sealed class CoreEventProvider : IHostEventProvider
 				ActionParameter.Autocomplete("variable",
 					AppStrings.Events.Common.VariableLabel(),
 					AppStrings.Events.Core.VariableChangedWatchDescription(),
-					optionsSourceId: VariableOptionsSourceIds.Variables,
+					optionsSourceId: VariableOptionsSourceIds.EventVariables,
 					required: true),
 				ActionParameter.Text("value",
 					AppStrings.Events.Core.ChangedToLabel(),
@@ -195,7 +195,7 @@ public sealed class CoreEventProvider : IHostEventProvider
 	{
 		return ActionParameter.Autocomplete("variable",
 			AppStrings.Events.Common.VariableLabel(),
-			optionsSourceId: VariableOptionsSourceIds.Variables);
+			optionsSourceId: VariableOptionsSourceIds.EventVariables);
 	}
 
 	private static ActionParameter DeviceFilter()
@@ -212,7 +212,7 @@ public sealed class CoreEventProvider : IHostEventProvider
 		return ActionParameter.Autocomplete("variable",
 			AppStrings.Events.Common.VariableLabel(),
 			AppStrings.Events.Common.VariableFilterDescription(),
-			optionsSourceId: VariableOptionsSourceIds.Variables);
+			optionsSourceId: VariableOptionsSourceIds.EventVariables);
 	}
 
 	// These all filter on an *id* with a friendly-name pick list rather than on a name typed by hand:

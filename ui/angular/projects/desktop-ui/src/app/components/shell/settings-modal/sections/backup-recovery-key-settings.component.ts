@@ -9,6 +9,7 @@ import { BackupService } from '../../../../services/backup.service';
 type RecoveryKeyModalState =
   | { kind: 'none' }
   | { kind: 'revealConfirm' }
+  | { kind: 'regenerateConfirm' }
   | { kind: 'keyModal'; mode: 'created' | 'revealed'; key: string };
 
 @Component({
@@ -52,7 +53,7 @@ export class BackupRecoveryKeySettingsComponent {
       const outcome = await this.backupService.createRecoveryKey();
       if (outcome.status === 'success') {
         this.modal.set({ kind: 'keyModal', mode: 'created', key: outcome.key });
-      } else {
+      } else if (outcome.status === 'error') {
         this.toastService.show(outcome.message, { variant: 'error' });
       }
     } finally {
@@ -81,6 +82,19 @@ export class BackupRecoveryKeySettingsComponent {
     } finally {
       this.working.set(false);
     }
+  }
+
+  requestRegenerate(): void {
+    this.modal.set({ kind: 'regenerateConfirm' });
+  }
+
+  async confirmRegenerate(): Promise<void> {
+    this.modal.set({ kind: 'none' });
+    await this.createKey();
+  }
+
+  closeModal(): void {
+    this.modal.set({ kind: 'none' });
   }
 
   async onAcknowledged(): Promise<void> {

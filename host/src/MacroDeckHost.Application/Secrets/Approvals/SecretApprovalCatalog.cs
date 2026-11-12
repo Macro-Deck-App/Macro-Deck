@@ -124,7 +124,8 @@ public sealed class SecretApprovalCatalog
 					|| _registry.FindAction(integrationId, actionId) is not { } action
 					|| !HasDeclaredSecret(action, block.Content)
 					|| block.Content.HasDuplicateParameterNames
-					|| _approvals.IsApproved(owner.Owner, block.Id, block.Content))
+					|| _approvals.IsApproved(owner.Owner, block.Id, block.Content)
+					|| _approvals.IsDeclined(owner.Owner, block.Id, block.Content))
 				{
 					continue;
 				}
@@ -155,6 +156,18 @@ public sealed class SecretApprovalCatalog
 
 	public ApproveSecretBlockResponse Approve(ApproveSecretBlockRequest request)
 	{
+		return Decide(request, _approvals.Approve);
+	}
+
+	public ApproveSecretBlockResponse Decline(ApproveSecretBlockRequest request)
+	{
+		return Decide(request, _approvals.Decline);
+	}
+
+	private ApproveSecretBlockResponse Decide(
+		ApproveSecretBlockRequest request,
+		Func<FlowOwner, FlowBlockSnapshot, string, bool> decide)
+	{
 		var target = Owners()
 			.FirstOrDefault(owner
 				=> string.Equals(KindName(owner.Owner.Kind), request.OwnerKind, StringComparison.Ordinal)
@@ -170,7 +183,7 @@ public sealed class SecretApprovalCatalog
 			return Fail(ApproveSecretBlockResponse.NotFoundCode, AppStrings.Errors.Secrets.ApprovalNotFound());
 		}
 
-		return candidates.Any(block => _approvals.Approve(target.Owner, block, request.Fingerprint))
+		return candidates.Any(block => decide(target.Owner, block, request.Fingerprint))
 			? new ApproveSecretBlockResponse { Success = true }
 			: Fail(ApproveSecretBlockResponse.ChangedCode, AppStrings.Errors.Secrets.ApprovalChanged());
 	}

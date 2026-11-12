@@ -26,7 +26,7 @@ public class SystemIntegrationTests
 	[
 		"launch-application", "open-website", "open-file", "open-folder", "kill-application",
 		"increase-volume", "decrease-volume", "mute-volume", "set-volume",
-		"send-notification", "show-notification", "run-command",
+		"send-notification", "show-notification", "ask-question", "run-command",
 		"lock-computer", "sleep", "hibernate", "restart", "shut-down"
 	];
 
@@ -665,7 +665,9 @@ public class SystemIntegrationTests
 			var written = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 			api.OnSetValue = (name, value) =>
 			{
-				if (name == "system_focused_app_bundle_id")
+				// The startup signal and the seed publish can both write the seed, so a bare bundle id
+				// write may still be the seed; wait for the cleared value itself.
+				if (name == "system_focused_app_bundle_id" && Equals(value, string.Empty))
 				{
 					written.TrySetResult(value);
 				}
@@ -817,7 +819,7 @@ public class SystemIntegrationTests
 
 		public IIntegrationConfig Config => throw new NotSupportedException();
 
-		public IDeckNavigator Deck => throw new NotSupportedException();
+		public IDeckNavigator Deck { get; } = new RecordingDeckNavigator();
 
 		public IScriptApi Scripts => throw new NotSupportedException();
 

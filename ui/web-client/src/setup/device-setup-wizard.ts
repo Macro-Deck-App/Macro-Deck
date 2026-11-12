@@ -4,7 +4,7 @@ import {
   type GetDeviceSetupResponse,
   type LocalizationCatalog,
 } from '@macro-deck/runtime';
-import { createButton, createSettingsRow } from '../ui';
+import { createButton, createSettingsRow, type ButtonHandle } from '../ui';
 import { DeviceSetupService, type CertificateTrust } from './device-setup';
 import { detectPlatform, type Platform, type PlatformNavigator } from '../pwa/platform';
 
@@ -32,6 +32,7 @@ export interface DeviceSetupWizardOptions {
 export interface DeviceSetupWizardHandle {
   readonly element: HTMLElement;
   close(): void;
+  repaint(): void;
 }
 
 function element<K extends keyof HTMLElementTagNameMap>(
@@ -93,6 +94,19 @@ export function createDeviceSetupWizard(
     ? (typeof location === 'undefined' ? '' : location.hostname)
     : options.hostname;
 
+  const paints: Array<() => void> = [];
+  const localized = (paint: () => void): void => {
+    paint();
+    paints.push(paint);
+  };
+  const localizedParagraph = (className: string, key: string): HTMLElement => {
+    const node = paragraph(className, '');
+    localized(() => {
+      node.textContent = text(key);
+    });
+    return node;
+  };
+
   const backdrop = element('div', 'wc-setup-backdrop');
   const dialog = element('div', 'wc-setup-dialog');
   dialog.setAttribute('role', 'dialog');
@@ -101,12 +115,14 @@ export function createDeviceSetupWizard(
 
   const header = element('div', 'wc-setup-header');
   const heading = element('h2', 'wc-setup-title');
-  heading.textContent = text(ClientAppStrings.WebClient.DeviceSetup.Title);
+  localized(() => {
+    heading.textContent = text(ClientAppStrings.WebClient.DeviceSetup.Title);
+  });
   header.appendChild(heading);
 
   const closeButton = element('button', 'wc-setup-close');
   closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', text(Strings.Common.Close));
+  localized(() => closeButton.setAttribute('aria-label', text(Strings.Common.Close)));
   closeButton.textContent = '×';
   header.appendChild(closeButton);
   dialog.appendChild(header);
@@ -118,15 +134,17 @@ export function createDeviceSetupWizard(
   const certificateDescription = element('span', 'wc-settings-row-desc');
   const appDescription = element('span', 'wc-settings-row-desc');
 
-  body.appendChild(step(text(ClientAppStrings.WebClient.DeviceSetup.StepConnection), connectionDescription));
-  body.appendChild(step(text(ClientAppStrings.WebClient.DeviceSetup.StepCertificate), certificateDescription));
+  body.appendChild(step(ClientAppStrings.WebClient.DeviceSetup.StepConnection, connectionDescription));
+  body.appendChild(step(ClientAppStrings.WebClient.DeviceSetup.StepCertificate, certificateDescription));
 
   const installControl = element('div', 'wc-setup-install');
-  body.appendChild(step(text(ClientAppStrings.WebClient.DeviceSetup.StepApp), appDescription, installControl));
+  body.appendChild(step(ClientAppStrings.WebClient.DeviceSetup.StepApp, appDescription, installControl));
 
   const actions = element('div', 'wc-setup-actions');
   const download = element('a', 'wc-setup-download');
-  download.textContent = text(ClientAppStrings.WebClient.DeviceSetup.DownloadAction);
+  localized(() => {
+    download.textContent = text(ClientAppStrings.WebClient.DeviceSetup.DownloadAction);
+  });
   download.setAttribute('download', '');
   actions.appendChild(download);
 
@@ -137,24 +155,26 @@ export function createDeviceSetupWizard(
       void deviceSetup.recheck();
     },
   });
+  paints.push(() => recheck.setLabel(text(ClientAppStrings.WebClient.DeviceSetup.RecheckAction)));
   actions.appendChild(recheck.element);
   body.appendChild(actions);
 
-  const downloadedHint = paragraph(
-    'wc-setup-hint wc-setup-downloaded', text(ClientAppStrings.WebClient.DeviceSetup.DownloadedHint));
+  const downloadedHint = localizedParagraph(
+    'wc-setup-hint wc-setup-downloaded',
+    ClientAppStrings.WebClient.DeviceSetup.DownloadedHint);
   body.appendChild(downloadedHint);
 
   const fingerprintBlock = element('div', 'wc-setup-fingerprint-block');
   fingerprintBlock.appendChild(
-    paragraph('wc-setup-hint', text(ClientAppStrings.Settings.Network.Tls.FingerprintLabel)));
+    localizedParagraph('wc-setup-hint', ClientAppStrings.Settings.Network.Tls.FingerprintLabel));
   const fingerprint = paragraph('wc-setup-fingerprint', '');
   fingerprintBlock.appendChild(fingerprint);
   fingerprintBlock.appendChild(
-    paragraph('wc-setup-hint', text(ClientAppStrings.WebClient.DeviceSetup.FingerprintHint)));
+    localizedParagraph('wc-setup-hint', ClientAppStrings.WebClient.DeviceSetup.FingerprintHint));
   body.appendChild(fingerprintBlock);
 
-  body.appendChild(paragraph('wc-setup-notice', text(ClientAppStrings.WebClient.DeviceSetup.OsStepWarning)));
-  body.appendChild(paragraph('wc-setup-notice', text(ClientAppStrings.WebClient.DeviceSetup.PrivateKeyNote)));
+  body.appendChild(localizedParagraph('wc-setup-notice', ClientAppStrings.WebClient.DeviceSetup.OsStepWarning));
+  body.appendChild(localizedParagraph('wc-setup-notice', ClientAppStrings.WebClient.DeviceSetup.PrivateKeyNote));
 
   body.appendChild(platformSteps());
 
@@ -164,26 +184,38 @@ export function createDeviceSetupWizard(
     variant: 'secondary',
     onClick: () => deviceSetup.openSecureAddress(),
   });
+  paints.push(() => openSecureButton.setLabel(text(ClientAppStrings.WebClient.DeviceSetup.OpenSecureAction)));
   openSecure.appendChild(openSecureButton.element);
   openSecure.appendChild(
-    paragraph('wc-setup-notice', text(ClientAppStrings.WebClient.DeviceSetup.SignInAgainWarning)));
+    localizedParagraph('wc-setup-notice', ClientAppStrings.WebClient.DeviceSetup.SignInAgainWarning));
   body.appendChild(openSecure);
 
   const why = element('details', 'wc-setup-why');
   const summary = element('summary');
-  summary.textContent = text(ClientAppStrings.WebClient.DeviceSetup.WhyHeading);
+  localized(() => {
+    summary.textContent = text(ClientAppStrings.WebClient.DeviceSetup.WhyHeading);
+  });
   why.appendChild(summary);
-  why.appendChild(paragraph('wc-setup-why-body', text(ClientAppStrings.WebClient.DeviceSetup.WhyBody)));
+  why.appendChild(localizedParagraph('wc-setup-why-body', ClientAppStrings.WebClient.DeviceSetup.WhyBody));
   body.appendChild(why);
 
   let downloaded = false;
   let closed = false;
+  let installKind: 'button' | 'hint' | null = null;
+  let installButton: ButtonHandle | null = null;
+  let installHint: HTMLElement | null = null;
 
-  function step(label: string, description: HTMLElement, control?: HTMLElement): HTMLElement {
+  function step(labelKey: string, description: HTMLElement, control?: HTMLElement): HTMLElement {
     const row = createSettingsRow({
-      label: label,
+      label: text(labelKey),
       control: control === undefined ? element('span', 'wc-setup-step-spacer') : control,
     });
+    const label = row.querySelector<HTMLElement>('.wc-settings-row-label');
+    if (label !== null) {
+      paints.push(() => {
+        label.textContent = text(labelKey);
+      });
+    }
     const info = row.querySelector('.wc-settings-row-info');
     if (info !== null) info.appendChild(description);
     return row;
@@ -193,27 +225,34 @@ export function createDeviceSetupWizard(
     const section = element('section', 'wc-setup-platform-steps');
     const title = element('h3');
     if (platform === 'desktop') {
-      title.textContent = text(ClientAppStrings.WebClient.DeviceSetup.DesktopHeading);
+      localized(() => {
+        title.textContent = text(ClientAppStrings.WebClient.DeviceSetup.DesktopHeading);
+      });
       section.appendChild(title);
-      section.appendChild(paragraph('wc-setup-platform-body',
-        text(ClientAppStrings.WebClient.DeviceSetup.DesktopBody)));
+      section.appendChild(
+        localizedParagraph('wc-setup-platform-body', ClientAppStrings.WebClient.DeviceSetup.DesktopBody));
       return section;
     }
 
     const isIos = platform === 'ios';
-    title.textContent = text(isIos
-      ? ClientAppStrings.WebClient.DeviceSetup.IosHeading
-      : ClientAppStrings.WebClient.DeviceSetup.AndroidHeading);
+    localized(() => {
+      title.textContent = text(isIos
+        ? ClientAppStrings.WebClient.DeviceSetup.IosHeading
+        : ClientAppStrings.WebClient.DeviceSetup.AndroidHeading);
+    });
     section.appendChild(title);
 
     const list = element('ol');
     const keys = isIos ? IOS_STEPS : ANDROID_STEPS;
     for (let index = 0; index < keys.length; index++) {
       const item = element('li');
-      // Only the iOS profile step names the authority, and it is the certificate's own subject.
-      item.textContent = keys[index] === ClientAppStrings.WebClient.DeviceSetup.IosStep5
-        ? text(keys[index], { authority: authoritySubject() })
-        : text(keys[index]);
+      const key = keys[index];
+      localized(() => {
+        // Only the iOS profile step names the authority, and it is the certificate's own subject.
+        item.textContent = key === ClientAppStrings.WebClient.DeviceSetup.IosStep5
+          ? text(key, { authority: authoritySubject() })
+          : text(key);
+      });
       list.appendChild(item);
     }
     section.appendChild(list);
@@ -264,29 +303,32 @@ export function createDeviceSetupWizard(
   }
 
   function renderInstallControl(): void {
-    while (installControl.firstChild !== null) {
-      installControl.removeChild(installControl.firstChild);
-    }
     const install = options.pwaInstall;
-    if (install === undefined) return;
-
-    const availability = install.availability();
-    if (availability === 'promptable') {
-      const button = createButton({
-        label: text(ClientAppStrings.WebClient.Install.InstallAction),
-        variant: 'secondary',
-        onClick: () => {
-          void install.promptInstall();
-        },
-      });
-      installControl.appendChild(button.element);
-      return;
+    const availability = install === undefined ? null : install.availability();
+    const kind = availability === 'promptable' ? 'button' : availability === 'manualOnly' ? 'hint' : null;
+    if (kind !== installKind) {
+      while (installControl.firstChild !== null) {
+        installControl.removeChild(installControl.firstChild);
+      }
+      installKind = kind;
+      installButton = null;
+      installHint = null;
+      if (kind === 'button' && install !== undefined) {
+        installButton = createButton({
+          label: '',
+          variant: 'secondary',
+          onClick: () => {
+            void install.promptInstall();
+          },
+        });
+        installControl.appendChild(installButton.element);
+      } else if (kind === 'hint') {
+        installHint = element('span', 'wc-setup-hint');
+        installControl.appendChild(installHint);
+      }
     }
-    if (availability === 'manualOnly') {
-      const hint = element('span', 'wc-setup-hint');
-      hint.textContent = text(ClientAppStrings.WebClient.Install.InstallManualIos);
-      installControl.appendChild(hint);
-    }
+    if (installButton !== null) installButton.setLabel(text(ClientAppStrings.WebClient.Install.InstallAction));
+    if (installHint !== null) installHint.textContent = text(ClientAppStrings.WebClient.Install.InstallManualIos);
   }
 
   function render(): void {
@@ -345,5 +387,11 @@ export function createDeviceSetupWizard(
   // rather than the state of the last check.
   void deviceSetup.recheck();
 
-  return { element: backdrop, close: close };
+  function repaint(): void {
+    if (closed) return;
+    for (let index = 0; index < paints.length; index++) paints[index]();
+    render();
+  }
+
+  return { element: backdrop, close: close, repaint: repaint };
 }

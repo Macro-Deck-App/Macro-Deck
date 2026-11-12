@@ -38,6 +38,7 @@ export function bindValuePress<TState>(
   state: ValuePressState,
   commit: (event: PointerEvent) => void,
   capture = false,
+  pans: () => boolean = () => false,
 ): void {
   const element = ctx.element as HTMLElement;
   state.feedback = new PressFeedback(pressed => {
@@ -49,7 +50,8 @@ export function bindValuePress<TState>(
   element.addEventListener('pointerdown', (event: Event) => {
     const pointer = event as PointerEvent;
     if (!claimsChange(ctx.current()) || ctx.isDisabled() || state.pointerId !== null || pointer.button > 0) return;
-    event.preventDefault();
+    // A control inside a scrolling list leaves the touch to the browser, which cancels the press on a pan.
+    if (!pans()) event.preventDefault();
     event.stopPropagation();
     state.pointerId = pointer.pointerId;
     state.feedback!.press();

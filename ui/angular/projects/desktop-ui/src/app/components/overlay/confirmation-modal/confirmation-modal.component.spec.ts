@@ -74,6 +74,16 @@ describe('ConfirmationModalComponent', () => {
     expect(altSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps the compact width unless a caller asks for room for longer labels', () => {
+    const dialog = () => fixture.nativeElement.querySelector('.modal-dialog') as HTMLElement;
+    expect(dialog().style.maxWidth).toBe('450px');
+
+    fixture.componentRef.setInput('maxWidth', '36rem');
+    fixture.detectChanges();
+
+    expect(dialog().style.maxWidth).toBe('36rem');
+  });
+
   it('emits cancel when the inner modal closes (Escape/backdrop path)', () => {
     const cancelSpy = jasmine.createSpy('cancel');
     component.cancel.subscribe(cancelSpy);

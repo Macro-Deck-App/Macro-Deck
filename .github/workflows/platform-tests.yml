@@ -1,9 +1,7 @@
 name: Platform tests
 
-# Runs the per-platform host test projects on demand, one runner each, for the platforms selected at
-# dispatch. The nightly CI always runs all of them alongside everything else; this exists to iterate on
-# a single platform's fixtures - a Windows-only COM interop failure, say - without waiting on the rest
-# of the pipeline. Only the platform projects run here: the cross-platform and SDK suites belong to CI.
+# Runs the per-platform host test projects on demand, to iterate on one platform's fixtures without the
+# rest of CI. ci.yml runs them on every .NET change, platform-input.yml their interactive fixtures nightly.
 
 on:
   workflow_dispatch:
@@ -38,7 +36,7 @@ permissions:
 env:
   # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
   # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
-  DOTNET_VERSION: 10.0.401
+  DOTNET_VERSION: 10.0.402
   # Matches CI: the platform fixtures exercise the installed product configuration.
   BUILD_CHANNEL: Production
 

@@ -15,6 +15,7 @@ export interface ToggleHandle {
   setChecked(checked: boolean): void;
   setDisabled(disabled: boolean): void;
   setBusy(busy: boolean): void;
+  setAriaLabel(label: string): void;
 }
 
 export function createToggle(options: ToggleOptions): ToggleHandle {
@@ -86,5 +87,6 @@ export function createToggle(options: ToggleOptions): ToggleHandle {
       busy = next;
       apply();
     },
+    setAriaLabel: (label: string) => input.setAttribute('aria-label', label),
   };
 }

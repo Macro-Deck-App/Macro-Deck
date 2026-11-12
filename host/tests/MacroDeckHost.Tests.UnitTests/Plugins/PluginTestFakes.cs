@@ -206,9 +206,21 @@ internal sealed class FakePluginSessionTokenIssuer : IPluginSessionTokenIssuer
 
 internal sealed class FakePluginConnection : IPluginConnection
 {
+	private readonly List<ProtocolEnvelope> _sent = [];
+
 	public string ConnectionId { get; }
 
-	public List<ProtocolEnvelope> Sent { get; } = [];
+	// A copy taken under the lock: host pushes keep arriving on pool threads while a test reads.
+	public IReadOnlyList<ProtocolEnvelope> Sent
+	{
+		get
+		{
+			lock (_sent)
+			{
+				return [.. _sent];
+			}
+		}
+	}
 
 	public List<(int CloseCode, string Reason)> Closes { get; } = [];
 
@@ -222,14 +234,22 @@ internal sealed class FakePluginConnection : IPluginConnection
 	public async Task Send(ProtocolEnvelope envelope, CancellationToken cancellationToken = default)
 	{
 		// Off-loop host results, such as artwork lookups, complete on several pool threads at once.
-		lock (Sent)
+		lock (_sent)
 		{
-			Sent.Add(envelope);
+			_sent.Add(envelope);
 		}
 
 		if (SendGate is { } gate)
 		{
 			await gate.Task.WaitAsync(cancellationToken);
+		}
+	}
+
+	public void ClearSent()
+	{
+		lock (_sent)
+		{
+			_sent.Clear();
 		}
 	}
 

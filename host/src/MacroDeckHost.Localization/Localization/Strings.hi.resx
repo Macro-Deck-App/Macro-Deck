@@ -2545,6 +2545,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>क्रिया ने समय पर जवाब नहीं दिया</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>यह चरण एक सीक्रेट का उपयोग करता है और अस्वीकार कर दिया गया है, इसलिए यह नहीं चलता।</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>यह चरण एक सीक्रेट का उपयोग करता है और आपकी स्वीकृति की प्रतीक्षा कर रहा है।</value>
   </data>
@@ -5621,6 +5624,27 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>इस पर प्रोफ़ाइल बदलें</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>जिन फ़ोल्डरों से होकर जाना है, उसी क्रम में जिसमें आप उन्हें चुनते हैं।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>वर्णानुक्रम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>कस्टम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>फ़ोल्डर क्रम और वर्णानुक्रम खुली प्रोफ़ाइल के सभी फ़ोल्डरों से होकर जाते हैं। कस्टम केवल आपके चुने फ़ोल्डरों से होकर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>फ़ोल्डर क्रम</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>क्रम</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>वैकल्पिक। केवल यह डिवाइस नेविगेट करेगा। जिस डिवाइस ने क्रिया चलाई, उसी को नेविगेट करने के लिए खाली छोड़ें, या कोई न चलाए तो सभी डिवाइस।</value>
   </data>
@@ -5648,11 +5672,29 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>पैरेंट फ़ोल्डर पर जाएं</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>चुने गए क्रम में अगले फ़ोल्डर पर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>अगला फ़ोल्डर</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>चुने गए क्रम में पिछले फ़ोल्डर पर जाता है।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>पिछला फ़ोल्डर</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>जिस प्रोफ़ाइल पर स्विच करना है।</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>प्रोफ़ाइल</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>आखिरी फ़ोल्डर के बाद पहला और पहले से पहले आखिरी फ़ोल्डर आता है। बंद होने पर दोनों सिरों पर कुछ नहीं होता।</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>चक्र में दोहराएँ</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>डिवाइस '{deviceId}' कनेक्ट नहीं है।</value>
@@ -5668,6 +5710,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>कोई प्रोफ़ाइल चुनी नहीं गई थी।</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>खुला फ़ोल्डर नहीं मिला।</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>प्रोफ़ाइल '{profileId}' मौजूद नहीं है।</value>
@@ -7453,6 +7498,84 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} के लिए Google साइन-इन समाप्त हो गया</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर ऐरे के अंत में आइटम जोड़ता है और परिणाम को वेरिएबल में सहेजता है। गायब ऐरे बनाया जाता है।</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>JSON ऐरे में जोड़ें</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर ऐरे के आइटम या ऑब्जेक्ट की प्रॉपर्टी की संख्या को वेरिएबल में सहेजता है।</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>JSON आइटम गिनें</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>प्रॉपर्टी और ऐरे इंडेक्स, जैसे data.items[0].name, या पूरे दस्तावेज़ के लिए केवल "$"।</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>जिस JSON पर काम करना है। उसमें सहेजे गए JSON का उपयोग करने के लिए एक वेरिएबल डालें।</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>मान</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>सही या गलत</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>JSON अंश</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>मान का प्रकार</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>संख्या</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>टेक्स्ट</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर प्रॉपर्टी या ऐरे आइटम हटाता है और परिणाम को वेरिएबल में सहेजता है।</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>JSON मान हटाएं</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>JSON में किसी पथ पर मान लिखता है और परिणाम को वेरिएबल में सहेजता है। रास्ते में गायब ऑब्जेक्ट बनाए जाते हैं।</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>JSON मान सेट करें</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON मान्य नहीं है।</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>JSON पथ मान्य नहीं है।</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>मान चुने गए मान के प्रकार से मेल नहीं खाता।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>पथ JSON से मेल नहीं खाता: वहां प्रॉपर्टी नाम के लिए ऑब्जेक्ट और इंडेक्स के लिए ऐरे चाहिए।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>पूरा दस्तावेज़ हटाया नहीं जा सकता। उसके अंदर का कोई पथ चुनें।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>उस पथ पर मान ऐरे नहीं है।</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>उस पथ पर मान न तो ऐरे है और न ही ऑब्जेक्ट।</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON में उस पथ पर कोई मान नहीं है।</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Microsoft साइन-इन रद्द हो गया या पूरा नहीं हुआ। इसे फिर से खोलने के लिए जारी रखें।</value>
@@ -11627,6 +11750,118 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>सूचना दिखाई नहीं जा सकी।</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>सवाल पूछें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>फ़्लो को रोकता है, डेक पर एक सवाल पूछता है और जवाब को एक वेरिएबल में सहेजता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>सवाल का प्रकार</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>हाँ या नहीं</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>सूची से चुनें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>टेक्स्ट दर्ज करें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>सवाल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>संदेश</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>विकल्प</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>हर पंक्ति में एक विकल्प, या एक JSON ऐरे। सूची किसी वेरिएबल से लेने के लिए वेरिएबल डालें। अधिकतम 50 विकल्प, हर एक में अधिकतम 100 अक्षर।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>प्लेसहोल्डर</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>डिफ़ॉल्ट टेक्स्ट</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>कहाँ पूछें</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>वह डिवाइस जिसने विजेट दबाया</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>चुना गया डिवाइस</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>सभी कनेक्टेड क्लाइंट</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>डिवाइस</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>टाइमआउट</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>सवाल जवाब का कितनी देर इंतज़ार करे, अधिकतम 9 मिनट।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>जवाब का वेरिएबल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>इसमें true या false, चुना गया आइटम या दर्ज किया गया टेक्स्ट आता है। जवाब न मिलने पर false या खाली टेक्स्ट आता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>स्थान का वेरिएबल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>इसमें चुने गए आइटम का स्थान 0 से शुरू होकर आता है, या जवाब न मिलने पर -1।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>परिणाम का वेरिएबल</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>इसमें answered, cancelled, timedOut या noClient आता है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>{count} सेकंड बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>{count} सेकंड बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>{count} मिनट बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>{count} मिनट बाद बंद हो जाएगा।</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>सवाल अभी उपलब्ध नहीं हैं।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>सवाल नहीं दिखाया जा सका।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>विकल्पों की सूची खाली है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>सूची में अनुमत संख्या से अधिक विकल्प हैं (अधिकतम {max})।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>कोई विकल्प अनुमत लंबाई से अधिक है (अधिकतम {max} अक्षर)।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>विकल्पों की सूची दिखाने के लिए बहुत बड़ी है।</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>जवाब {variable} में सहेजा नहीं जा सका। वेरिएबल का प्रकार जाँचें।</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>चुने गए ऑडियो डिवाइस का वॉल्यूम एक निश्चित स्तर पर सेट करता है।</value>
   </data>
@@ -11918,6 +12153,66 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>फ़ोकस वाले एप्लिकेशन का bundle ID</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>निगरानी वाला एप्लिकेशन</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck बताता है कि यह एप्लिकेशन चल रहा है या नहीं, इसकी कितनी प्रक्रियाएँ और विंडो हैं, और इसकी विंडो कैसे दिखाई जाती हैं।</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>गेम</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>एप्लिकेशन</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>चल रही कोई प्रक्रिया, जैसे chrome, या प्रोग्राम का पथ।</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>इस एप्लिकेशन के लिए एक नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>चल रहा कोई एप्लिकेशन चुनें या किसी प्रोग्राम का पथ दर्ज करें।</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>निगरानी वाले एप्लिकेशन की अधिकतम संख्या: {count}। दूसरा जोड़ने के लिए एक हटाएँ।</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>एक अद्वितीय वेरिएबल नाम नहीं बनाया जा सका। एप्लिकेशन का नाम बदलें और फिर से प्रयास करें।</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>अज्ञात सेटअप चरण।</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>चल रहा है</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>चल रही प्रक्रियाएँ</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>खुली विंडो</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>विंडो स्थिति</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>फ़ोकस वाले एप्लिकेशन की विंडो स्थिति</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>फ़ोकस वाले एप्लिकेशन की प्रक्रियाएँ</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>विंडो स्थितियाँ उपलब्ध नहीं हैं</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland, Macro Deck को अन्य ऐप्स की विंडो पढ़ने नहीं देता। निगरानी वाले एप्लिकेशन अब भी बताते हैं कि वे चल रहे हैं या नहीं और उनकी कितनी प्रक्रियाएँ हैं, लेकिन उनकी विंडो स्थिति और विंडो संख्या उपलब्ध नहीं रहती।</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>विंडो स्थितियाँ पढ़ने के लिए Macro Deck को Accessibility एक्सेस चाहिए। System Settings &gt; Privacy &amp; Security &gt; Accessibility में Macro Deck को अनुमति दें। तब तक निगरानी वाले एप्लिकेशन की विंडो स्थिति और विंडो संख्या उपलब्ध नहीं रहेगी।</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>एक्सेस दें</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>किस जुड़े हुए Twitch खाते की ओर से क्रिया करनी है।</value>
@@ -15824,6 +16119,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>बदला गया</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>अस्वीकार करें</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>चरण अस्वीकार नहीं हो सका।</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>स्वीकृति के लिए कुछ भी प्रतीक्षा में नहीं है</value>
   </data>
@@ -15831,7 +16132,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>सीक्रेट का उपयोग करने वाले सभी चरण स्वीकृत हैं।</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>सीक्रेट का उपयोग करने वाले चरण आपकी स्वीकृति के बाद ही चलते हैं। देखें कि क्या बदला है, फिर उन्हें स्वीकृत करें।</value>
+    <value>सीक्रेट का उपयोग करने वाले चरण आपकी स्वीकृति के बाद ही चलते हैं। देखें कि क्या बदला है, फिर उन्हें स्वीकृत या अस्वीकार करें।</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>स्वीकृतियाँ लोड नहीं हो सकीं।</value>
@@ -16489,6 +16790,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>रिकवरी कुंजी</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>नई रिकवरी कुंजी बनाएं?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>पहले बने बैकअप के लिए अब भी वही रिकवरी कुंजी चाहिए जो आपने पहले सहेजी थी, इसलिए उसे भी संभालकर रखें। इसके बाद नई कुंजी दिखाई जाएगी।</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>नई रिकवरी कुंजी बनाएं</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>रिमोट</value>
@@ -19186,6 +19496,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>कुछ अप्रत्याशित गड़बड़ी हुई।</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>बलपूर्वक ताज़ा करें</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>स्टोर रजिस्ट्री ताज़ा करना</value>
   </data>
@@ -20288,6 +20601,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>डिस्प्ले को चालू रखा जा रहा है।</value>
+  </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>डिस्प्ले चालू रखने के लिए कहीं भी टैप करें।</value>
   </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>ब्राउज़र या ऑपरेटिंग सिस्टम ने डिस्प्ले को चालू रखने से इनकार किया (जैसे बैटरी सेवर के कारण)।</value>
@@ -25586,5 +25902,264 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>सीक्रेट</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>ऑनलाइन</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>लेटेंसी</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>पैकेट लॉस</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>अंतिम जवाब</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>लक्ष्य ऑनलाइन</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>जब कोई Ping लक्ष्य ऑफ़लाइन होने के बाद फिर से जवाब देता है।</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>लक्ष्य ऑफ़लाइन</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>जब कोई Ping लक्ष्य अपनी विफलता सीमा जितनी बार लगातार जवाब नहीं देता।</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>होस्ट</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>लेटेंसी (ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>अज्ञात सेटअप चरण।</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>इस लक्ष्य के लिए एक नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>होस्ट नाम, IPv4 पता या IPv6 पता दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum} से {maximum} तक सेकंड की पूर्ण संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum} से {maximum} तक मिलीसेकंड की पूर्ण संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>टाइमआउट अंतराल से छोटा होना चाहिए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum} से {maximum} तक एक पूर्ण संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>होस्ट</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>जिस डिवाइस को Ping करना है उसका होस्ट नाम, IPv4 या IPv6 पता।</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>अंतराल (सेकंड)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>लक्ष्य को कितनी बार Ping किया जाए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>टाइमआउट (मिलीसेकंड)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>हर जवाब के लिए कितनी देर प्रतीक्षा की जाए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>ऑफ़लाइन से पहले विफलताएँ</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>लक्ष्य को ऑफ़लाइन मानने से पहले लगातार कितने Ping विफल होने चाहिए, ताकि एक अकेला खोया पैकेट अनदेखा हो जाए।</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck इस डिवाइस को नियमित रूप से Ping करता है और दिखाता है कि यह जवाब देता है या नहीं और कितनी तेज़ी से।</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>एक अद्वितीय वेरिएबल नाम नहीं बनाया जा सका। लक्ष्य का नाम बदलें और फिर से प्रयास करें।</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping की अनुमति नहीं है</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>यह सिस्टम Macro Deck को Ping अनुरोध भेजने की अनुमति नहीं देता, इसलिए Ping लक्ष्यों की जाँच नहीं की जा सकती। Linux पर net.ipv4.ping_group_range सेटिंग से बिना विशेषाधिकार वाले Ping की अनुमति दें।</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping स्थिति</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>दिखाता है कि Ping लक्ष्य पहुँच योग्य है या नहीं और यह कितनी तेज़ी से जवाब देता है।</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>कोई Ping लक्ष्य नहीं</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>ऑनलाइन</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>ऑफ़लाइन</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>जवाब की प्रतीक्षा</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping की अनुमति नहीं</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>कोई जवाब नहीं</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>पहुँच से बाहर</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>नाम नहीं मिला</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping विफल</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>पैकेट लॉस: {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>वह Ping लक्ष्य जिसे यह विजेट दिखाता है।</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>पहला लक्ष्य</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>प्रदर्शन नाम</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>लक्ष्य का नाम</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>लेटेंसी दिखाएँ</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>पैकेट लॉस दिखाएँ</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>लेटेंसी इतिहास दिखाएँ</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>डिवाइस जगाएँ</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>सहेजे गए डिवाइस पर Wake on LAN मैजिक पैकेट भेजता है। पैकेट भेजे जाने से यह पुष्टि नहीं होती कि डिवाइस जाग गया है।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>डिवाइस</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>जगाने के लिए सहेजा गया डिवाइस</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>डिवाइस चुनें</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>डिवाइस जोड़ें</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck से जगाने के लिए डिवाइस सहेजें। डिवाइस के फ़र्मवेयर और नेटवर्क एडेप्टर सेटिंग्स में Wake on LAN चालू होना चाहिए।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>यह सेटअप चरण ज्ञात नहीं है। फिर से शुरू करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC पता</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>डिवाइस के नेटवर्क एडेप्टर का हार्डवेयर पता</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>12 हेक्साडेसिमल अंकों वाला MAC पता दर्ज करें, उदाहरण के लिए AA:BB:CC:DD:EE:FF।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>ब्रॉडकास्ट पता</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>इस नेटवर्क के लिए 255.255.255.255 रहने दें, या डिवाइस के सबनेट का ब्रॉडकास्ट पता दर्ज करें, उदाहरण के लिए 192.168.2.255।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>IPv4 पता दर्ज करें, उदाहरण के लिए 192.168.1.255।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>पोर्ट</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>वह UDP पोर्ट जिस पर पैकेट भेजा जाता है। अधिकांश डिवाइस पोर्ट 9 पर सुनते हैं।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1 से 65535 तक का पोर्ट दर्ज करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>पैकेट की संख्या</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>कितने पैकेट भेजने हैं। जो डिवाइस हमेशा नहीं जागता, उसे एक से अधिक भेजें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1 से 10 तक की संख्या दर्ज करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>पैकेट के बीच देरी (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>दो पैकेट के बीच प्रतीक्षा का समय, मिलीसेकंड में</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0 से 10000 मिलीसेकंड तक की देरी दर्ज करें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>जगाने के लिए डिवाइस चुनें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>चुना गया डिवाइस अब मौजूद नहीं है। कोई दूसरा डिवाइस चुनें।</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} की सहेजी गई सेटिंग्स मान्य नहीं हैं। डिवाइस संपादित करें और उसे फिर से सहेजें।</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>{address} पर पैकेट भेजने की अनुमति नहीं मिली। जाँचें कि ब्रॉडकास्ट की अनुमति है और macOS पर Macro Deck के पास लोकल नेटवर्क की पहुँच है।</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address} तक कोई रूट नहीं है। ब्रॉडकास्ट पता जाँचें और देखें कि macOS पर Macro Deck के पास लोकल नेटवर्क की पहुँच है।</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>{address} पर पैकेट नहीं भेजा जा सका।</value>
+    <comment>[address:string]</comment>
   </data>
 </root>

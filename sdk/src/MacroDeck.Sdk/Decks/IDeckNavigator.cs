@@ -21,7 +21,10 @@ public interface IDeckNavigator
 	/// <summary>Moves to the previously shown folder.</summary>
 	Task GoBackAsync(string? originClientId = null, CancellationToken cancellationToken = default);
 
-	/// <summary>Returns folders available for pickers.</summary>
+	/// <summary>
+	/// Returns every folder of every stored profile, sorted by label for pickers. <see cref="DeckFolder.ParentId" />
+	/// and <see cref="DeckFolder.Order" /> describe how the folder tree arranges them.
+	/// </summary>
 	IReadOnlyList<DeckFolder> GetFolders();
 
 	/// <summary>Returns profiles available for pickers.</summary>
