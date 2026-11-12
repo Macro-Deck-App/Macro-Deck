@@ -66,9 +66,7 @@ internal sealed class NetworkChaosTests
 
 	[TestCase(NetworkFault.HandshakeStall)]
 	[TestCase(NetworkFault.HalfOpen)]
-	[TestCase(NetworkFault.AbortMidMessage,
-		IgnoreReason
-			= "#1703: a connection that drops during Authenticate sets NeedsAuthentication and stops retrying")]
+	[TestCase(NetworkFault.AbortMidMessage)]
 	public async Task Streamerbot_retries_a_network_fault_without_asking_for_the_password(NetworkFault fault)
 	{
 		using var server = new ScriptedServer(StreamerbotScript(fault));

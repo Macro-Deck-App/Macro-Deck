@@ -134,7 +134,11 @@ internal sealed class StreamerbotClientTests
 		await _pair.SendAsync($$"""{ "status": "error", "id": "{{id}}", "error": "Authentication failed" }""");
 
 		var exception = Assert.ThrowsAsync<StreamerbotRequestException>(async () => await pending);
-		Assert.That(exception!.Message, Does.Contain("Authentication failed"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(exception!.Message, Does.Contain("Authentication failed"));
+			Assert.That(exception.Rejected, Is.True);
+		});
 	}
 
 	[Test]
@@ -192,10 +196,14 @@ internal sealed class StreamerbotClientTests
 		await _pair.ReceiveAsync();
 		_pair.Break();
 
-		Assert.ThrowsAsync<StreamerbotRequestException>(async () => await pending);
+		var exception = Assert.ThrowsAsync<StreamerbotRequestException>(async () => await pending);
 
 		_client.Dispose();
-		Assert.That(disconnects, Is.EqualTo(1));
+		Assert.Multiple(() =>
+		{
+			Assert.That(exception!.Rejected, Is.False);
+			Assert.That(disconnects, Is.EqualTo(1));
+		});
 	}
 
 	[Test]
@@ -204,7 +212,11 @@ internal sealed class StreamerbotClientTests
 		var exception
 			= Assert.ThrowsAsync<StreamerbotRequestException>(async () => await _client.RequestAsync("GetInfo"));
 
-		Assert.That(exception!.Message, Does.Contain("not connected"));
+		Assert.Multiple(() =>
+		{
+			Assert.That(exception!.Message, Does.Contain("not connected"));
+			Assert.That(exception.Rejected, Is.False);
+		});
 		await Task.CompletedTask;
 	}
 }
