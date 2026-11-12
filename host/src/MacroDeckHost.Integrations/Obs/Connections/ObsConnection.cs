@@ -1115,6 +1115,11 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			_logger.Debug("OBS is not ready yet; keeping the last published state");
 			return StateRefresh.NotReady;
 		}
+		catch (ObsRequestException ex) when (ex.Code == ObsRequestException.TimedOut)
+		{
+			_logger.Debug("OBS did not answer a state read in time");
+			return StateRefresh.Failed;
+		}
 		catch (Exception ex)
 		{
 			_logger.Warning(ex, "Failed to read OBS state");

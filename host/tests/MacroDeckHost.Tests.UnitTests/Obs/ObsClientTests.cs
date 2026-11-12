@@ -65,6 +65,79 @@ internal sealed class ObsClientTests
 	}
 
 	[Test]
+	public async Task A_session_that_stops_answering_a_status_read_is_dropped_with_exactly_one_disconnect()
+	{
+		await using var server = new FakeObsWebSocketServer(_ => null);
+		var (client, disconnects, first) = await SilentSessionClientAsync(server);
+		try
+		{
+			var error = Assert.Throws<ObsRequestException>(() => client.QueryStatus());
+			await first.WaitAsync(TimeSpan.FromSeconds(10));
+			await Task.Delay(TimeSpan.FromSeconds(1));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(error!.Code, Is.EqualTo(ObsRequestException.TimedOut));
+				Assert.That(disconnects(), Is.EqualTo(1));
+				Assert.That(client.IsConnected, Is.False);
+			});
+		}
+		finally
+		{
+			client.Disconnect();
+		}
+	}
+
+	[Test]
+	public async Task A_command_that_obs_answers_late_times_out_without_dropping_the_session()
+	{
+		await using var server = new FakeObsWebSocketServer(_ => null);
+		var (client, disconnects, _) = await SilentSessionClientAsync(server);
+		try
+		{
+			var error = Assert.Throws<ObsRequestException>(() => client.SetCurrentSceneCollection("Large"));
+			await Task.Delay(TimeSpan.FromSeconds(1));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(error!.Code, Is.EqualTo(ObsRequestException.TimedOut));
+				Assert.That(disconnects(), Is.Zero);
+				Assert.That(client.IsConnected, Is.True);
+			});
+		}
+		finally
+		{
+			client.Disconnect();
+		}
+	}
+
+	[Test]
+	public async Task A_silent_session_that_obs_then_closes_is_reported_once()
+	{
+		var server = new FakeObsWebSocketServer(_ => null);
+		var (client, disconnects, first) = await SilentSessionClientAsync(server);
+		try
+		{
+			var read = Task.Run(client.QueryStatus);
+			await Task.Delay(TimeSpan.FromMilliseconds(100));
+			await server.DisposeAsync();
+			await first.WaitAsync(TimeSpan.FromSeconds(10));
+			Assert.ThrowsAsync<ObsRequestException>(async () => await read);
+			await Task.Delay(TimeSpan.FromSeconds(1));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(disconnects(), Is.EqualTo(1));
+				Assert.That(client.IsConnected, Is.False);
+			});
+		}
+		finally
+		{
+			client.Disconnect();
+		}
+	}
+
+	[Test]
 	public async Task Connect_WhenObsIsUnreachable_DoesNotLogEachRetry()
 	{
 		var listener = new TcpListener(IPAddress.Loopback, 0);
@@ -197,6 +270,25 @@ internal sealed class ObsClientTests
 			Assert.That(error!.Code, Is.EqualTo(ObsRequestException.ResourceNotFound));
 			Assert.That(server.Requests, Does.Contain("SetCurrentSceneCollection"));
 		});
+	}
+
+	private static async Task<(ObsClient Client, Func<int> Disconnects, Task FirstDisconnect)>
+		SilentSessionClientAsync(FakeObsWebSocketServer server)
+	{
+		var client = new ObsClient(null, null, null, TimeSpan.FromMilliseconds(500));
+		var disconnects = 0;
+		var first = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var connected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		client.Connected += (_, _) => connected.TrySetResult();
+		client.Disconnected += (_, _) =>
+		{
+			Interlocked.Increment(ref disconnects);
+			first.TrySetResult();
+		};
+
+		client.Connect(server.Url, null);
+		await connected.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		return (client, () => Volatile.Read(ref disconnects), first.Task);
 	}
 
 	private static async Task<ObsClient> ConnectedClientAsync(FakeObsWebSocketServer server)
