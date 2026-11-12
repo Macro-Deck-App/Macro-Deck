@@ -66,12 +66,21 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 	public void TypeUnicode(string text)
 	{
-		foreach (var rune in text.EnumerateRunes())
-		{
-			var units = rune.ToString().ToCharArray();
-			PostUnicode(units, true);
-			PostUnicode([], false);
-		}
+		TypedLineBreaks.Walk(text,
+			run =>
+			{
+				foreach (var rune in run.EnumerateRunes())
+				{
+					var units = rune.ToString().ToCharArray();
+					PostUnicode(units, true);
+					PostUnicode([], false);
+				}
+			},
+			() =>
+			{
+				PostKey(KeyCode.Enter, true);
+				PostKey(KeyCode.Enter, false);
+			});
 	}
 
 	public bool SupportsWindowTargeting => OperatingSystem.IsMacOS();
@@ -320,12 +329,21 @@ public sealed class MacOsKeyboardInputProvider : IKeyboardInputProvider
 
 		public void TypeUnicode(string text)
 		{
-			foreach (var rune in text.EnumerateRunes())
-			{
-				var units = rune.ToString().ToCharArray();
-				PostUnicodeToPid(units, true);
-				PostUnicodeToPid([], false);
-			}
+			TypedLineBreaks.Walk(text,
+				run =>
+				{
+					foreach (var rune in run.EnumerateRunes())
+					{
+						var units = rune.ToString().ToCharArray();
+						PostUnicodeToPid(units, true);
+						PostUnicodeToPid([], false);
+					}
+				},
+				() =>
+				{
+					PostToPid(KeyCode.Enter, true);
+					PostToPid(KeyCode.Enter, false);
+				});
 		}
 
 		public void Dispose()

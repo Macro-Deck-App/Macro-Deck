@@ -10,6 +10,7 @@ describe('folder view', () => {
   let canGoBack: boolean;
   let host: UiRenderHost;
   let view: FolderView | null;
+  let catalogIds: string[];
 
   const catalog = new LocalizationCatalog();
   const english = (qualified: string) => {
@@ -38,6 +39,7 @@ describe('folder view', () => {
       emit: () => undefined,
     };
     view = null;
+    catalogIds = [];
   });
 
   afterEach(() => {
@@ -54,6 +56,7 @@ describe('folder view', () => {
       sessions,
       localization: catalog,
       host,
+      folderViewIds: () => catalogIds,
       canGoBack: () => canGoBack,
       onBack: () => { backs++; },
     });
@@ -305,5 +308,81 @@ describe('folder view', () => {
     // A dropped session is gone on the host too, so there is nothing to resync to.
     expect(requests.filter(entry => entry.type === 'CloseUiSession').length).toBe(1);
     expect(requests.filter(entry => entry.type === 'OpenFolderUiSession').length).toBe(2);
+  });
+
+  describe('when its view comes back', () => {
+    const missing = { accepted: false, viewId: 'acme.x', code: 'PROVIDER_UNAVAILABLE' };
+
+    const unavailable = async (): Promise<FolderView> => {
+      const mounted = mount();
+      mounted.open('f1');
+      opens()[0].resolve(missing);
+      await settle();
+      return mounted;
+    };
+
+    it('opens the folder again and draws the provider tree', async () => {
+      const mounted = await unavailable();
+
+      mounted.catalogChanged(['acme.other', 'acme.x']);
+      expect(opens().length).toBe(2);
+      expect(opens()[1].payload).toEqual([{ folderId: 'f1' }]);
+
+      await accept(1, 's1');
+      sessions.treeUpdated('s1', 1, buttonTree);
+      mounted.paint();
+
+      expect(mounted.element.querySelector('[data-node-id="play"]')).not.toBeNull();
+      expect(mounted.element.textContent).not.toContain(english(ClientAppStrings.Deck.FolderView.UnavailableHeading));
+    });
+
+    it('stays on its placeholder while the catalog still lacks the view', async () => {
+      const mounted = await unavailable();
+
+      mounted.catalogChanged(['acme.other']);
+
+      expect(opens().length).toBe(1);
+      expect(mounted.element.textContent).toContain(english(ClientAppStrings.Deck.FolderView.UnavailableHeading));
+    });
+
+    it('leaves a folder alone that is showing its view', async () => {
+      const mounted = mount();
+      mounted.open('f1');
+      await accept(0, 's1');
+
+      mounted.catalogChanged(['acme.x']);
+
+      expect(opens().length).toBe(1);
+    });
+
+    it('does not restart a view that kept losing its session without a tree', async () => {
+      const mounted = mount();
+      mounted.open('f1');
+      await accept(0, 's0');
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        mounted.sessionLost(`s${attempt - 1}`);
+        await accept(attempt, `s${attempt}`);
+      }
+      mounted.sessionLost('s3');
+
+      mounted.catalogChanged(['acme.x']);
+
+      expect(opens().length).toBe(4);
+    });
+
+    it('asks once more when the view was listed before the refusal arrived', async () => {
+      const mounted = mount();
+      mounted.open('f1');
+      catalogIds = ['acme.x'];
+      opens()[0].resolve(missing);
+      await settle();
+
+      expect(opens().length).toBe(2);
+      opens()[1].resolve(missing);
+      await settle();
+
+      expect(opens().length).toBe(2);
+      expect(mounted.element.textContent).toContain(english(ClientAppStrings.Deck.FolderView.UnavailableHeading));
+    });
   });
 });

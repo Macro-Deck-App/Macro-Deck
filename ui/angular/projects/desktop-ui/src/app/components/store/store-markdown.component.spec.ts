@@ -131,4 +131,56 @@ describe('StoreMarkdownComponent', () => {
       expect(element.getBoundingClientRect().width).toBe(360);
     });
   });
+
+  describe('the Open in the Macro Deck Store badge', () => {
+    const store = 'https://macro-deck.app/store/com.example.plugin';
+    const light = 'https://badges.example.invalid/light.png';
+    const dark = 'https://badges.example.invalid/dark.png';
+    const readme = [
+      `<a href="${store}">`,
+      '  <picture>',
+      `    <source media="(prefers-color-scheme: dark)" srcset="${dark}">`,
+      `    <img src="${light}" alt="Open in the Macro Deck Store">`,
+      '  </picture>',
+      '</a>',
+    ].join('\n');
+    const root = document.documentElement;
+    let previousTheme: string[];
+
+    beforeEach(() => {
+      previousTheme = ['light', 'dark'].filter(theme => root.classList.contains(theme));
+    });
+
+    afterEach(() => {
+      root.classList.remove('light', 'dark');
+      root.classList.add(...previousTheme);
+    });
+
+    function visibleBadges(theme: 'light' | 'dark'): { element: HTMLElement; sources: (string | null)[] } {
+      root.classList.remove('light', 'dark');
+      root.classList.add(theme);
+      const fixture = TestBed.createComponent(StoreMarkdownComponent);
+      fixture.componentRef.setInput('text', readme);
+      fixture.detectChanges();
+      document.body.appendChild(fixture.nativeElement);
+      const element = fixture.nativeElement as HTMLElement;
+      const sources = Array.from(element.querySelectorAll('img'))
+        .filter(image => image.getClientRects().length > 0)
+        .map(image => image.getAttribute('src'));
+      element.remove();
+      return { element, sources };
+    }
+
+    it('links to the store without showing any tag, with the badge matching the theme', () => {
+      const { element, sources } = visibleBadges('dark');
+
+      expect(element.textContent).not.toContain('<');
+      const links = element.querySelectorAll('a');
+      expect(links.length).toBe(1);
+      expect(links[0].getAttribute('href')).toBe(store);
+      expect(links[0].querySelectorAll('img').length).toBe(2);
+      expect(sources).toEqual([dark]);
+      expect(visibleBadges('light').sources).toEqual([light]);
+    });
+  });
 });

@@ -93,7 +93,7 @@ Do not add tests solely for coverage. Tests should protect a requirement, regres
 
 ## CI
 
-Pull-request CI is defined by [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) and runs on every pull request against `main`, on every push to `main`, and on demand. Release verification and packaging are defined by [`.github/workflows/build.yml`](../../.github/workflows/build.yml).
+Pull-request CI is defined by [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) and runs on every pull request, whatever its base branch, on every push to `main` and `production`, and on demand. Release verification and packaging are defined by [`.github/workflows/build.yml`](../../.github/workflows/build.yml).
 
 A pull request runs only the jobs whose inputs it changed: [`ci/scripts/ci-scope.mjs`](../../ci/scripts/ci-scope.mjs) maps every changed path to the jobs that read it, so a documentation-only change runs nothing and a desktop UI change skips the .NET and bootstrapper jobs. A path it does not know runs everything, and `main` always runs everything. When a test starts reading a file from another area's tree (a .NET drift test comparing against a TypeScript mirror, a UI script reading a C# constant), add that file to the script's cross-area rules, otherwise a pull request touching only that file skips the test and `main` is the first run to see it fail.
 

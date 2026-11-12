@@ -3,13 +3,34 @@ using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
+using ModelContextProtocol.Client;
 
 namespace MacroDeckHost.Tests.UnitTests.Mcp;
 
 public partial class McpEndpointTests
 {
 	[Test]
-	public async Task A_secret_kept_for_undo_survives_a_scrub_and_is_scrubbed_once_its_batch_leaves_the_history()
+	public async Task A_deleted_widget_can_be_undone_after_more_batches_than_the_history_keeps()
+	{
+		await using var client = await ConnectWithToken();
+		var folderId = await CreateFolder(client);
+		var widgetId = await CreateWidget(client, folderId, null);
+		var delete = await Apply(client, [Change("delete", "widget", widgetId.ToString())]);
+		await ApplyFillers(client, McpJournal.Capacity + 5);
+
+		var undo = await client.CallToolAsync("undo",
+			new Dictionary<string, object?> { ["batchId"] = delete.GetProperty("batchId").GetString() });
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(undo.IsError, Is.Not.True, JsonSerializer.Serialize(undo));
+			Assert.That(FindWidget(widgetId)?.FolderId, Is.EqualTo(folderId));
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_secret_kept_for_undo_survives_later_batches_and_is_scrubbed_once_its_batch_leaves_the_history()
 	{
 		await using var client = await ConnectWithToken();
 		var folderId = await CreateFolder(client);
@@ -19,20 +40,61 @@ public partial class McpEndpointTests
 		await Apply(client, [Change("delete", "widget", widgetId.ToString())]);
 
 		await ScrubDeferred();
-		var afterStartupScrub = await Resolve(ownSecret);
+		await ApplyFillers(client, McpJournal.Capacity);
+		var afterFillers = await Resolve(ownSecret);
 
-		for (var batch = 0; batch < McpJournal.Capacity; batch++)
+		var variables = await Apply(client,
+			Enumerable.Range(0, McpJournal.DeleteCapacity)
+				.Select(index => Change("create",
+					"variable",
+					reference: $"v{index}",
+					data: new { name = $"doomed_{Guid.NewGuid():N}", value = "x" }))
+				.ToArray());
+		foreach (var variable in variables.GetProperty("createdIds").EnumerateObject())
 		{
-			await Apply(client,
-				[Change("create", "variable", data: new { name = $"filler_{Guid.NewGuid():N}", value = "x" })]);
+			await Apply(client, [Change("delete", "variable", variable.Value.GetString())]);
 		}
 
 		var afterEviction = await Resolve(ownSecret);
 
 		await Assert.MultipleAsync(() =>
 		{
-			Assert.That(afterStartupScrub, Is.EqualTo(SecretValue));
+			Assert.That(afterFillers, Is.EqualTo(SecretValue));
 			Assert.That(afterEviction, Is.Null);
+			return Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task The_secret_of_an_expired_delete_batch_is_scrubbed_without_a_later_batch()
+	{
+		await using var client = await ConnectWithToken();
+		var folderId = await CreateFolder(client);
+		var secretId = await SetSecret(client);
+		var widgetId = await CreateWidget(client, folderId, Flow(secretId));
+		var ownSecret = Application.Secrets.SecretReferences.Extract(FindWidget(widgetId)!.Data).Single();
+		var delete = await Apply(client, [Change("delete", "widget", widgetId.ToString())]);
+		var batchId = Guid.Parse(delete.GetProperty("batchId").GetString()!);
+
+		McpJournalBatch? afterExpiry;
+		string? secretAfterExpiry;
+		_clock.Offset = McpJournal.DeleteRetention + TimeSpan.FromDays(1);
+		try
+		{
+			await ScrubDeferred();
+			secretAfterExpiry = await Resolve(ownSecret);
+			using var scope = _host.Services.CreateScope();
+			afterExpiry = scope.ServiceProvider.GetRequiredService<IMcpJournal>().Find(batchId);
+		}
+		finally
+		{
+			_clock.Offset = TimeSpan.Zero;
+		}
+
+		await Assert.MultipleAsync(() =>
+		{
+			Assert.That(afterExpiry, Is.Null);
+			Assert.That(secretAfterExpiry, Is.Null);
 			return Task.CompletedTask;
 		});
 	}
@@ -190,9 +252,28 @@ public partial class McpEndpointTests
 		return Folders().GetFoldersByProfileId(profileId).ToDictionary(folder => folder.Id, folder => folder.IsDefault);
 	}
 
+	private static async Task ApplyFillers(McpClient client, int count)
+	{
+		for (var batch = 0; batch < count; batch++)
+		{
+			await Apply(client,
+				[Change("create", "variable", data: new { name = $"filler_{Guid.NewGuid():N}", value = "x" })]);
+		}
+	}
+
 	private async Task ScrubDeferred()
 	{
 		using var scope = _host.Services.CreateScope();
 		await scope.ServiceProvider.GetRequiredService<IMcpSecretLedger>().ScrubDeferred();
+	}
+
+	private sealed class ShiftedClock : TimeProvider
+	{
+		public TimeSpan Offset { get; set; }
+
+		public override DateTimeOffset GetUtcNow()
+		{
+			return System.GetUtcNow() + Offset;
+		}
 	}
 }

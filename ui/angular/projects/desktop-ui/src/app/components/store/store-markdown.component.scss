@@ -103,6 +103,20 @@ h4.md-heading {
   vertical-align: middle;
 }
 
+.md-variant--dark {
+  display: none;
+}
+
+:host-context(.dark) {
+  .md-variant--light {
+    display: none;
+  }
+
+  .md-variant--dark {
+    display: inline;
+  }
+}
+
 .md-rule {
   margin: 0;
   border: none;

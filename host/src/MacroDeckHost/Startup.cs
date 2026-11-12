@@ -495,6 +495,7 @@ public class Startup
 			provider.GetRequiredService<IEnumerable<IScreenSaverProvider>>(),
 			provider.GetRequiredService<IIntegrationRegistry>()));
 		services.AddSingleton<ScreenSaverProviderHost>();
+		services.AddSingleton<ScreenSaverFallbackRecovery>();
 		services.AddSingleton<IScreenSaverUiSessionOpener, ScreenSaverUiSessionOpener>();
 		services.AddSingleton<VideoStreamProviderRegistry>();
 		services.AddSingleton<IVideoStreamRelay, VideoStreamRelay>();
