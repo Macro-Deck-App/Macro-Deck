@@ -198,18 +198,12 @@ public sealed class DiscordConfigFlow : IConfigFlow
 				.ConfigureAwait(false);
 			return await CompleteAsync(client, tokens, cancellationToken).ConfigureAwait(false);
 		}
-		catch (DiscordOAuthException ex) when (ex.IsTimeout)
-		{
-			_logger.Warning("Discord token exchange timed out");
-			return ConfigFlowResult.Error(AuthorizeStep(),
-				AppStrings.Integrations.Discord.Config.CouldNotReachDiscord());
-		}
 		catch (DiscordOAuthException ex)
 		{
 			return ConfigFlowResult.Error(AuthorizeStep(),
 				AppStrings.Integrations.Discord.Config.OAuthFailed(ex.Message));
 		}
-		catch (HttpRequestException ex)
+		catch (Exception ex) when (ex is HttpRequestException or TimeoutException)
 		{
 			_logger.Warning(ex, "Discord token exchange could not reach discord.com");
 			return ConfigFlowResult.Error(AuthorizeStep(),

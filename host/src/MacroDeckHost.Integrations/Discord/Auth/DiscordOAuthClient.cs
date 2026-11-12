@@ -124,14 +124,9 @@ internal sealed class DiscordOAuthClient : IDiscordOAuthClient
 		{
 			return await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
 		}
-		// HttpClient reports its own timeout as a cancellation; only the caller's token is a real cancel.
 		catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
 		{
-			throw new DiscordOAuthException("The Discord token request timed out.", ex)
-			{
-				IsTransient = true,
-				IsTimeout = true
-			};
+			throw new TimeoutException("The Discord token request timed out.", ex);
 		}
 	}
 
@@ -192,6 +187,4 @@ internal sealed class DiscordOAuthException : Exception
 	}
 
 	public bool IsTransient { get; init; }
-
-	public bool IsTimeout { get; init; }
 }

@@ -259,12 +259,26 @@ internal sealed class TokenEndpointFaultTests
 		using var http = new HttpClient(endpoint, false);
 		using var rpc = DiscordRpc();
 		var flow = await DiscordFlowAtAuthorizeAsync(rpc, http);
-		using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+		using var cancellation = new CancellationTokenSource();
 
-		Assert.CatchAsync<OperationCanceledException>(() => flow.SubmitAsync("authorize",
+		var submit = flow.SubmitAsync("authorize",
 			new Dictionary<string, object?>(),
 			NoOAuthConfigFlowContext.Instance,
-			cancellation.Token));
+			cancellation.Token);
+		await WaitForTokenRequestAsync(endpoint);
+		await cancellation.CancelAsync();
+
+		await Assert.ThatAsync(() => submit, Throws.InstanceOf<OperationCanceledException>());
+	}
+
+	private static async Task WaitForTokenRequestAsync(FakeTokenEndpoint endpoint)
+	{
+		var deadline = DateTime.UtcNow.AddSeconds(5);
+		while (endpoint.RequestCount == 0)
+		{
+			Assert.That(DateTime.UtcNow, Is.LessThan(deadline), "the token request was never sent");
+			await Task.Delay(10);
+		}
 	}
 
 	private static FakeDiscordRpcClient DiscordRpc()
