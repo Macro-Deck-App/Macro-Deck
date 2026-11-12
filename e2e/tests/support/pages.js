@@ -286,11 +286,13 @@ export async function openDesktopBackups(page) {
   await expect(page.getByRole('button', { name: 'Create backup' })).toBeVisible();
 }
 
-// The toast arrives before the list reloads, so the helper waits for the new row and returns its id.
+// The toast arrives before the list reloads, so the helper waits for the new row and returns its id. The
+// notification inbox repeats the toast text, so only the toast counts.
 export async function createDesktopBackup(page, api) {
   const before = new Set((await api.get('/api/backups')).backups.map(backup => backup.id));
   await page.getByRole('button', { name: 'Create backup' }).click();
-  await expect(page.getByText('Backup completed')).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator('.th-message').filter({ hasText: /^\s*Backup completed\s*$/ }))
+    .toBeVisible({ timeout: 60_000 });
   let created = [];
   await expect.poll(async () => {
     created = (await api.get('/api/backups')).backups.filter(backup => !before.has(backup.id));
