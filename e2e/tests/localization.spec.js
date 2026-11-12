@@ -217,6 +217,28 @@ test('the Web Client settings button is relabelled in German without a reload', 
   await web.context.close();
 });
 
+test('an open Web Client settings dialog switches to German without closing', async ({ browser, api, host }) => {
+  await api.useEnglish();
+  const web = await connectWebClient(browser, host, api);
+  await web.page.locator('.wc-client-settings-trigger').click();
+  const dialog = web.page.locator('.wc-client-settings-dialog');
+  await expect(dialog.locator('.wc-client-settings-title')).toHaveText(en('Settings.Title'));
+  await dialog.evaluate(node => node.setAttribute('data-e2e-opened', 'before'));
+
+  const catalogReloaded = web.page.waitForResponse(response =>
+    new URL(response.url()).pathname === '/api/localization' && response.ok());
+  await useGerman(api);
+  await catalogReloaded;
+
+  await expect(dialog.locator('.wc-client-settings-title')).toHaveText(de('Settings.Title'));
+  await expect(dialog).toHaveAttribute('data-e2e-opened', 'before');
+  await expect(dialog.getByText(de('Settings.Appearance.Dark'), { exact: true })).toBeVisible();
+  await expect(dialog.getByText(de('WebClient.Account.SignOut'), { exact: true })).toBeVisible();
+  await expect(dialog.locator('.wc-client-settings-close')).toHaveAccessibleName(de('Common.Close'));
+  await expectGermanPage(web.page, 'the Web Client settings left open across the switch');
+  await web.context.close();
+});
+
 test('an open Web Client device setup wizard switches to German without closing', async ({ browser, api, host }) => {
   await api.useEnglish();
   const web = await connectWebClient(browser, host, api);

@@ -297,6 +297,7 @@ export class Shell {
     this.notificationToasts.repaint();
     this.notificationDialogs.repaint();
     if (this.settings !== null) this.settings.repaint();
+    if (this.sidebar !== null) this.sidebar.repaint();
     if (this.setupBanner !== null) this.setupBanner.repaint();
     if (this.wizard !== null) this.wizard.repaint();
   }

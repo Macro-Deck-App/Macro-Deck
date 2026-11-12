@@ -1,6 +1,6 @@
 import {
   ClientAppStrings, DEFAULT_WEB_CLIENT_TARGET, UiComponents, VideoStreamClient, WidgetType, type GridWidget, type UiNode,
-  type UiRenderHost, type WebClientTarget,
+  Strings, type UiRenderHost, type WebClientTarget,
 } from '@macro-deck/runtime';
 import { Appearance } from './appearance';
 import { Client } from './client';
@@ -438,6 +438,42 @@ describe('Shell', () => {
     shell.repaint();
 
     expect(trigger.getAttribute('aria-label')).toBe('Macro-Deck-Einstellungen öffnen');
+  });
+
+  it('switches an open settings dialog to the new UI language without closing it', () => {
+    const shell = mount();
+    client.app.set({ probed: true, authenticated: true, deckRendered: true });
+    (root.querySelector('.wc-client-settings-trigger') as HTMLElement).click();
+    const dialog = document.querySelector('.wc-client-settings-dialog') as HTMLElement;
+    const dark = Array.prototype.filter.call(
+      dialog.querySelectorAll('.wc-seg-option'),
+      (option: HTMLElement) => option.textContent === text(ClientAppStrings.Settings.Appearance.Dark),
+    )[0] as HTMLButtonElement;
+    dark.focus();
+    const englishSignOut = text(ClientAppStrings.WebClient.Account.SignOut);
+
+    client.localization.apply({
+      culture: 'de',
+      translations: {
+        [Strings.Settings.Title]: 'Einstellungen',
+        [ClientAppStrings.WebClient.Settings.DisplaySection]: 'Anzeige',
+        [ClientAppStrings.Settings.Appearance.Dark]: 'Dunkel',
+        [ClientAppStrings.WebClient.Account.SignOut]: 'Abmelden',
+        [Strings.Common.Close]: 'Schließen',
+      },
+    });
+    shell.repaint();
+
+    expect(document.querySelector('.wc-client-settings-dialog')).withContext('still open').toBe(dialog);
+    expect(dialog.querySelector('.wc-client-settings-title')!.textContent).toBe('Einstellungen');
+    expect(dialog.querySelector('.wc-client-settings-close')!.getAttribute('aria-label')).toBe('Schließen');
+    expect(dialog.textContent).toContain('Anzeige');
+    expect(dialog.textContent).toContain('Abmelden');
+    expect(dialog.textContent).not.toContain(englishSignOut);
+    expect(dark.textContent).toBe('Dunkel');
+    expect(document.activeElement).withContext('focus stays where it was').toBe(dark);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
   });
 
   it('puts the settings entry on screen, which is the only way to sign out', () => {
@@ -1379,6 +1415,31 @@ describe('Shell', () => {
 
       expect(document.querySelector('.wc-client-settings-backdrop')).withContext('the settings dialog').not.toBeNull();
       expect(sidebar()).toBeNull();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+
+    it('switches an open sidebar to the new UI language without closing it', () => {
+      const shell = mountWith();
+      showDeck();
+      setHidden(true);
+      swipe(tileSurface(), 10, 48);
+      const panel = sidebar() as HTMLElement;
+      const button = panel.querySelector('button') as HTMLButtonElement;
+      expect(document.activeElement).toBe(button);
+
+      client.localization.apply({
+        culture: 'de',
+        translations: {
+          [ClientAppStrings.WebClient.Settings.Sidebar]: 'Seitenleiste',
+          [ClientAppStrings.WebClient.Settings.OpenSettings]: 'Macro-Deck-Einstellungen öffnen',
+        },
+      });
+      shell.repaint();
+
+      expect(sidebar()).withContext('still open').toBe(panel);
+      expect(panel.getAttribute('aria-label')).toBe('Seitenleiste');
+      expect(button.getAttribute('aria-label')).toBe('Macro-Deck-Einstellungen öffnen');
+      expect(document.activeElement).toBe(button);
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     });
 

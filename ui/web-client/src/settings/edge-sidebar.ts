@@ -11,24 +11,37 @@ export interface EdgeSidebarHandle {
   open(): void;
   close(): void;
   isOpen(): boolean;
+  repaint(): void;
+}
+
+interface OpenSidebar {
+  backdrop: HTMLElement;
+  panel: HTMLElement;
+  button: HTMLButtonElement;
 }
 
 export function createEdgeSidebar(options: EdgeSidebarOptions): EdgeSidebarHandle {
-  let backdrop: HTMLElement | null = null;
+  let opened: OpenSidebar | null = null;
 
   function onKeydown(event: KeyboardEvent): void {
     if (event.key === 'Escape') {
       close();
       return;
     }
-    if (event.key === 'Tab' && backdrop !== null) {
+    if (event.key === 'Tab' && opened !== null) {
       event.preventDefault();
-      const button = backdrop.querySelector('button');
-      if (button !== null) button.focus();
+      opened.button.focus();
     }
   }
 
-  function build(): HTMLElement {
+  function paint(sidebar: OpenSidebar): void {
+    sidebar.panel.setAttribute('aria-label', options.translate(ClientAppStrings.WebClient.Settings.Sidebar));
+    sidebar.button.setAttribute(
+      'aria-label',
+      options.translate(ClientAppStrings.WebClient.Settings.OpenSettings));
+  }
+
+  function build(): OpenSidebar {
     const layer = document.createElement('div');
     layer.className = 'wc-edge-sidebar-backdrop';
     layer.addEventListener('click', event => {
@@ -39,13 +52,11 @@ export function createEdgeSidebar(options: EdgeSidebarOptions): EdgeSidebarHandl
     panel.className = 'wc-edge-sidebar';
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'true');
-    panel.setAttribute('aria-label', options.translate(ClientAppStrings.WebClient.Settings.Sidebar));
     layer.appendChild(panel);
 
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'wc-edge-sidebar-button';
-    button.setAttribute('aria-label', options.translate(ClientAppStrings.WebClient.Settings.OpenSettings));
     button.appendChild(gearIcon());
     button.addEventListener('click', () => {
       close();
@@ -53,29 +64,33 @@ export function createEdgeSidebar(options: EdgeSidebarOptions): EdgeSidebarHandl
     });
     panel.appendChild(button);
 
-    return layer;
+    const sidebar: OpenSidebar = { backdrop: layer, panel: panel, button: button };
+    paint(sidebar);
+    return sidebar;
   }
 
   function open(): void {
-    if (backdrop !== null) return;
-    backdrop = build();
-    options.container.appendChild(backdrop);
+    if (opened !== null) return;
+    opened = build();
+    options.container.appendChild(opened.backdrop);
     document.addEventListener('keydown', onKeydown);
-    const button = backdrop.querySelector('button');
-    if (button !== null) button.focus();
+    opened.button.focus();
   }
 
   function close(): void {
-    const layer = backdrop;
-    if (layer === null) return;
-    backdrop = null;
+    const sidebar = opened;
+    if (sidebar === null) return;
+    opened = null;
     document.removeEventListener('keydown', onKeydown);
-    if (layer.parentNode !== null) layer.parentNode.removeChild(layer);
+    if (sidebar.backdrop.parentNode !== null) sidebar.backdrop.parentNode.removeChild(sidebar.backdrop);
   }
 
   return {
     open: open,
     close: close,
-    isOpen: () => backdrop !== null,
+    isOpen: () => opened !== null,
+    repaint: () => {
+      if (opened !== null) paint(opened);
+    },
   };
 }
