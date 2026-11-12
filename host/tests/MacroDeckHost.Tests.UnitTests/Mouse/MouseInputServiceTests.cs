@@ -254,9 +254,17 @@ public class MouseInputServiceTests
 	}
 
 	[Test]
-	public async Task Scroll_emits_one_call_per_notch()
+	public async Task Scroll_without_a_step_delay_hands_every_notch_to_the_platform_in_one_burst()
 	{
 		await _service.ScrollAsync(ScrollAxis.Vertical, -3);
+
+		AssertCalls("scroll(Vertical,-3)");
+	}
+
+	[Test]
+	public async Task Scroll_with_a_step_delay_emits_one_call_per_notch()
+	{
+		await _service.ScrollAsync(ScrollAxis.Vertical, -3, default, 1);
 
 		AssertCalls("scroll(Vertical,-1)", "scroll(Vertical,-1)", "scroll(Vertical,-1)");
 	}
@@ -282,7 +290,7 @@ public class MouseInputServiceTests
 	{
 		await _service.ScrollAsync(ScrollAxis.Horizontal, 2);
 
-		AssertCalls("scroll(Horizontal,1)", "scroll(Horizontal,1)");
+		AssertCalls("scroll(Horizontal,2)");
 	}
 
 	[Test]

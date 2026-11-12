@@ -162,26 +162,28 @@ public abstract class MouseInputCases
 	[TestCase("right", 3)]
 	public async Task Every_scrolled_notch_arrives(string direction, int expected)
 	{
-		if (NotchesRedToday is { } reason)
-		{
-			Assert.Ignore(reason);
-		}
-
 		var scrolls = await ScrollAsync(direction);
 
 		Assert.That(scrolls.Sum(e => e.Delta), Is.EqualTo(expected), _probe.Diagnostics);
 	}
 
-	protected virtual string? NotchesRedToday => null;
+	[TestCase("up", 300)]
+	[TestCase("down", -300)]
+	public async Task Every_notch_of_a_scroll_too_long_for_one_wheel_event_arrives(string direction, int expected)
+	{
+		var scrolls = await ScrollAsync(direction, 300);
 
-	private async Task<ProbeEvent[]> ScrollAsync(string direction)
+		Assert.That(scrolls.Sum(e => e.Delta), Is.EqualTo(expected), _probe.Diagnostics);
+	}
+
+	private async Task<ProbeEvent[]> ScrollAsync(string direction, int notches = 3)
 	{
 		var (scrollAxis, sign) = MouseActionValues.ReadScrollDirection(new Dictionary<string, object>
 		{
 			["direction"] = direction
 		});
 
-		await _mouse.ScrollAsync(scrollAxis, 3 * sign);
+		await _mouse.ScrollAsync(scrollAxis, notches * sign);
 		_probe.Settle();
 
 		return _probe.Events.Where(e => e.Type == "scroll").ToArray();
@@ -224,11 +226,7 @@ public abstract class MouseInputCases
 
 [Platform("Win")]
 [Category("Windows")]
-public sealed class WindowsMouseInputTests : MouseInputCases
-{
-	protected override string NotchesRedToday
-		=> "Red today: #1726 scrolling sometimes delivers fewer notches than configured";
-}
+public sealed class WindowsMouseInputTests : MouseInputCases;
 
 [Platform("Linux")]
 [Category("X11")]
