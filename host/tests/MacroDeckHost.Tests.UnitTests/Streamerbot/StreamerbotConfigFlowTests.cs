@@ -157,6 +157,24 @@ internal sealed class StreamerbotConfigFlowTests
 		});
 	}
 
+	[TestCase("secret", "Authenticate")]
+	[TestCase("", "GetInfo")]
+	public async Task A_connection_that_drops_while_authenticating_is_reported_as_a_connection_failure(
+		string password,
+		string request)
+	{
+		_client.Hello = new StreamerbotHello(_info, new StreamerbotChallenge("c2FsdA==", "Y2hhbGxlbmdl"));
+		_client.DroppingRequests.Add(request);
+
+		var result = await Submit(password: password);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Kind, Is.EqualTo(ConfigFlowResultKind.Error));
+			Assert.That(TestLocalization.Resolve(result.ErrorMessage), Does.Contain("Could not connect"));
+		});
+	}
+
 	[Test]
 	public async Task An_unreachable_server_is_reported_on_the_step()
 	{

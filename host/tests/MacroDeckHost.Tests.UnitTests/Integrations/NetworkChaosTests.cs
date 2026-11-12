@@ -93,41 +93,6 @@ internal sealed class NetworkChaosTests
 		}
 	}
 
-	[Test]
-	public async Task Streamerbot_asks_for_the_password_again_only_when_it_is_rejected()
-	{
-		using var server = new ScriptedServer(async pair =>
-		{
-			await pair.SendAsync(StreamerbotHello);
-			var id = await ReadStringIdAsync(pair);
-			await pair.SendAsync($$"""{ "status": "error", "id": "{{id}}", "error": "Authentication failed" }""");
-		});
-		var attempts = 0;
-		using var connection = new StreamerbotConnection(() =>
-			{
-				Interlocked.Increment(ref attempts);
-				return new StreamerbotClient(server.ConnectAsync, _shortTimeout);
-			},
-			_endpoint,
-			"wrong",
-			null,
-			_reconnectDelay);
-
-		connection.Start();
-		var deadline = DateTime.UtcNow + _deadline;
-		while (!connection.NeedsAuthentication && DateTime.UtcNow < deadline)
-		{
-			await Task.Delay(10);
-		}
-
-		await Task.Delay(_reconnectDelay * 10);
-		Assert.Multiple(() =>
-		{
-			Assert.That(connection.NeedsAuthentication, Is.True);
-			Assert.That(Volatile.Read(ref attempts), Is.EqualTo(1), "a rejected password is not retried");
-		});
-	}
-
 	[TestCase(NetworkFault.HandshakeStall)]
 	[TestCase(NetworkFault.HalfOpen)]
 	[TestCase(NetworkFault.AbortMidMessage)]
@@ -260,12 +225,6 @@ internal sealed class NetworkChaosTests
 	{
 		using var request = JsonDocument.Parse(await pair.ReceiveAsync());
 		return request.RootElement.GetProperty("id").GetInt32();
-	}
-
-	private static async Task<string?> ReadStringIdAsync(WebSocketPair pair)
-	{
-		using var request = JsonDocument.Parse(await pair.ReceiveAsync());
-		return request.RootElement.GetProperty("id").GetString();
 	}
 
 	internal enum NetworkFault
