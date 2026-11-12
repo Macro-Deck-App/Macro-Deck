@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
 using MacroDeckHost.Localization;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
@@ -155,10 +157,17 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 		return (File.GetUnixFileMode(path) & anyExecute) != 0;
 	}
 
+	[DllImport("kernel32.dll")]
+	private static extern uint GetOEMCP();
+
 	private sealed class Executor : IActionExecutor
 	{
+		private const string PowerShellUtf8Output = "[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false);";
+
 		private static readonly ILogger _logger =
 			IntegrationLog.For<RunCommandActionDefinition>(SystemIntegration.IntegrationId);
+
+		private static readonly UTF8Encoding _utf8 = new(false);
 
 		private readonly VariableApiAccessor _variables;
 
@@ -184,6 +193,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			var capture = !string.IsNullOrWhiteSpace(outputVariable);
 
 			var (fileName, switchArgument, useArgumentsString) = ResolveShell(shell, OperatingSystem.IsWindows());
+			var windowsPowerShell = OperatingSystem.IsWindows() && fileName is "pwsh" or "powershell.exe";
 			var detach = !capture && !OperatingSystem.IsWindows();
 
 			if (detach && !IsOnPath(fileName))
@@ -201,16 +211,6 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 				RedirectStandardError = capture
 			};
 
-			if (useArgumentsString)
-			{
-				startInfo.Arguments = $"{switchArgument} \"{command}\"";
-			}
-			else
-			{
-				startInfo.ArgumentList.Add(switchArgument);
-				startInfo.ArgumentList.Add(command);
-			}
-
 			if (!string.IsNullOrWhiteSpace(workingDirectory))
 			{
 				startInfo.WorkingDirectory = workingDirectory;
@@ -219,6 +219,7 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 			AppImageEnvironment.RestoreOutside(startInfo);
 
 			Process? process = null;
+			string? scriptPath = null;
 			using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
 			if (timeout > 0)
 			{
@@ -227,12 +228,44 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 
 			try
 			{
+				if (useArgumentsString)
+				{
+					var cmdCommand = command.Trim('\r', '\n');
+					if (cmdCommand.AsSpan().IndexOfAny('\r', '\n') >= 0)
+					{
+						scriptPath = WriteBatchScript(cmdCommand);
+						cmdCommand = $"\"{scriptPath}\"";
+					}
+
+					startInfo.Arguments = $"{switchArgument} \"{cmdCommand}\"";
+				}
+				else
+				{
+					startInfo.ArgumentList.Add(switchArgument);
+					startInfo.ArgumentList.Add(capture && windowsPowerShell ? PowerShellUtf8Output + command : command);
+				}
+
+				if (capture && (useArgumentsString || windowsPowerShell))
+				{
+					// The host has no console, so the default decoding is UTF-8 while the child writes in its
+					// console code page: OEM for a cmd line, UTF-8 after the batch chcp or the PowerShell prefix.
+					var outputEncoding = useArgumentsString && scriptPath is null ? OemEncoding() : _utf8;
+					startInfo.StandardOutputEncoding = outputEncoding;
+					startInfo.StandardErrorEncoding = outputEncoding;
+				}
+
 				if (detach && !OperatingSystem.IsWindows())
 				{
 					return ExitResult(await DetachedProcess.Spawn(startInfo).WaitAsync(cts.Token));
 				}
 
 				process = Process.Start(startInfo);
+				if (process is not null && scriptPath is not null)
+				{
+					DeleteWhenExited(process, scriptPath);
+					scriptPath = null;
+				}
+
 				if (process is null)
 				{
 					return ActionResult.Failed("PROCESS_START_FAILED",
@@ -300,6 +333,47 @@ internal sealed class RunCommandActionDefinition : IActionDefinition
 				_logger.Warning(exception, "Failed to run command: {Command}", command);
 				return ActionResult.Failed(ActionErrorCodes.ProviderError,
 					AppStrings.Integrations.System.Errors.CommandCouldNotRun());
+			}
+			finally
+			{
+				if (scriptPath is not null)
+				{
+					TryDelete(scriptPath);
+				}
+			}
+		}
+
+		private static string WriteBatchScript(string command)
+		{
+			var path = Path.Combine(Path.GetTempPath(), $"macrodeck-run-command-{Guid.NewGuid():N}.cmd");
+			var lines = command.Replace("\r\n", "\n").Replace('\r', '\n').Replace("\n", "\r\n");
+			using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write);
+			// cmd decodes each batch line in the current console code page, so it switches to UTF-8 first.
+			stream.Write(_utf8.GetBytes($"@chcp 65001>nul\r\n@echo off\r\n{lines}\r\n"));
+			return path;
+		}
+
+		private static Encoding OemEncoding()
+		{
+			var codePage = (int)GetOEMCP();
+			return CodePagesEncodingProvider.Instance.GetEncoding(codePage) ?? Encoding.GetEncoding(codePage);
+		}
+
+		private static void DeleteWhenExited(Process process, string scriptPath)
+		{
+			// cmd reads a batch file line by line while it runs, so the file may only go once cmd has exited.
+			_ = process.WaitForExitAsync().ContinueWith(_ => TryDelete(scriptPath), TaskScheduler.Default);
+		}
+
+		private static void TryDelete(string path)
+		{
+			try
+			{
+				File.Delete(path);
+			}
+			catch (Exception exception)
+			{
+				_logger.Warning(exception, "Failed to delete command script {Path}", path);
 			}
 		}
 
