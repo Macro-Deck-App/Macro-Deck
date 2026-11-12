@@ -38,6 +38,33 @@ internal sealed class ObsClientTests
 	}
 
 	[Test]
+	public async Task A_server_that_never_says_hello_ends_the_attempt_with_exactly_one_disconnect()
+	{
+		await using var server = new FakeObsWebSocketServer(_ => 100, ObsServerFault.NoHello);
+		var client = new ObsClient(null, TimeSpan.FromSeconds(2), TimeSpan.FromMilliseconds(300));
+		var connected = 0;
+		var disconnected = 0;
+		var first = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		client.Connected += (_, _) => Interlocked.Increment(ref connected);
+		client.Disconnected += (_, _) =>
+		{
+			Interlocked.Increment(ref disconnected);
+			first.TrySetResult();
+		};
+
+		client.Connect(server.Url, null);
+		await first.Task.WaitAsync(TimeSpan.FromSeconds(10));
+		await Task.Delay(TimeSpan.FromSeconds(1));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Volatile.Read(ref disconnected), Is.EqualTo(1));
+			Assert.That(Volatile.Read(ref connected), Is.Zero);
+			Assert.That(client.IsConnected, Is.False);
+		});
+	}
+
+	[Test]
 	public async Task Connect_WhenObsIsUnreachable_DoesNotLogEachRetry()
 	{
 		var listener = new TcpListener(IPAddress.Loopback, 0);
