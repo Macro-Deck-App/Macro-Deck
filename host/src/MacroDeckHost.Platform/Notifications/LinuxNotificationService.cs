@@ -17,6 +17,6 @@ internal sealed class LinuxNotificationService : IPlatformNotificationService
 			return Task.CompletedTask;
 		}
 
-		return ProcessRunner.RunAsync("notify-send", [title, message], cancellationToken);
+		return ProcessRunner.RunAsync("notify-send", ["--", title, message], cancellationToken);
 	}
 }

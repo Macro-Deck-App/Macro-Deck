@@ -126,7 +126,7 @@ public sealed class UiWebSocketEndpoint(
 				connectionId,
 				principal,
 				cancellation.Token,
-				(Action)cancellation.Cancel);
+				(Action)(() => Cancel(cancellation)));
 			dispatcherStarted = true;
 			if (!await dispatcher.ConnectedAsync())
 			{

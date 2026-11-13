@@ -30,8 +30,6 @@ public sealed class WindowsKeyboardInputTests : KeyboardInputCases
 		[KeyCode.RightControl] = (0x11, null, true)
 	};
 
-	protected override string LineBreaksRedToday => "Red today: #1713 typed line breaks do not arrive as the Enter key";
-
 	protected override bool IsKey(ProbeEvent keyEvent, KeyCode key)
 	{
 		return _keys.TryGetValue(key, out var expected)

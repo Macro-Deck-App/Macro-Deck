@@ -20,10 +20,11 @@
         <a [href]="run.href" [attr.title]="run.title" target="_blank" rel="noopener noreferrer"><ng-container *ngTemplateOutlet="inlines; context: { $implicit: run.children }" /></a>
       }
       @case ('image') {
-        @if (failedImages().has(run.src)) {
-          <span>{{ run.alt }}</span>
+        @if (run.darkSrc) {
+          <span class="md-variant md-variant--light"><ng-container *ngTemplateOutlet="image; context: { $implicit: run, src: run.src }" /></span>
+          <span class="md-variant md-variant--dark"><ng-container *ngTemplateOutlet="image; context: { $implicit: run, src: run.darkSrc }" /></span>
         } @else {
-          <img class="md-image" [src]="run.src" [alt]="run.alt" [attr.width]="run.width ?? null" [attr.height]="run.height ?? null" loading="lazy" referrerpolicy="no-referrer" (error)="imageFailed(run.src)">
+          <ng-container *ngTemplateOutlet="image; context: { $implicit: run, src: run.src }" />
         }
       }
       @case ('video') {
@@ -33,6 +34,14 @@
         <span>{{ run.text }}</span>
       }
     }
+  }
+</ng-template>
+
+<ng-template #image let-run let-src="src">
+  @if (failedImages().has(src)) {
+    <span>{{ run.alt }}</span>
+  } @else {
+    <img class="md-image" [src]="src" [alt]="run.alt" [attr.width]="run.width ?? null" [attr.height]="run.height ?? null" loading="lazy" referrerpolicy="no-referrer" (error)="imageFailed(src)">
   }
 </ng-template>
 

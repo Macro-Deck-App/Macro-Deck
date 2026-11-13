@@ -111,7 +111,9 @@ plugin action. The setting also covers actions that a script or automation runs 
 ## Undo changes
 
 You can ask the AI client to undo its changes. Macro Deck keeps the last 20 changes of all AI clients
-together, and restoring a backup clears them. Anything you edited yourself since the change stays as it
+together. Changes that delete something are kept apart for up to 30 days (the last 100 of them), so
+later changes cannot push a deletion out of reach. Restoring a backup clears them all. Anything you
+edited yourself since the change stays as it
 is. The details are in [the developer reference](/reference/mcp/#undo).
 
 ## Connected clients and revoking a token

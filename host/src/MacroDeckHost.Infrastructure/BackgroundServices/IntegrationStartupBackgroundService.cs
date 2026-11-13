@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Infrastructure.Integrations;
 using MacroDeckHost.Infrastructure.SystemIntegrations;
 using MacroDeck.Sdk;
+using MacroDeck.Sdk.ConfigFlow;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -175,7 +176,7 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 		try
 		{
 			await Task.WhenAll(initializing
-				.Where(entry => entry.Integration is ISystemIntegration)
+				.Where(entry => HoldsBackEventFlows(entry.Integration))
 				.Select(entry => entry.Initialized));
 		}
 		finally
@@ -183,6 +184,13 @@ public class IntegrationStartupBackgroundService : HostReadyBackgroundService
 			_builtInRegistration.Complete();
 			await Task.WhenAll(initializing.Select(entry => entry.Initialized));
 		}
+	}
+
+	private static bool HoldsBackEventFlows(IIntegration integration)
+	{
+		// A config flow is how a built-in reaches an outside service; a hung one must not delay every
+		// automation by the initialization timeout, so only built-ins without one are waited for.
+		return integration is ISystemIntegration or not IConfigFlowProvider;
 	}
 
 	private async Task InitializeOneAsync(PendingIntegration pending, CancellationToken stoppingToken)

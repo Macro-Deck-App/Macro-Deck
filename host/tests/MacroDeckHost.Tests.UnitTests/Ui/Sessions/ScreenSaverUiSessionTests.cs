@@ -1,6 +1,7 @@
 using MacroDeck.Localization;
 using MacroDeck.Sdk.ScreenSavers;
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.ScreenSavers;
 using MacroDeckHost.Application.Ui.Sessions;
@@ -17,6 +18,8 @@ namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
 internal sealed class ScreenSaverUiSessionTests
 {
 	private const string ProviderId = "com.example.home";
+	private const string LateProviderId = "com.example.late";
+	private const string LateScreenSaverId = LateProviderId + "::slideshow";
 
 	private ManualTimeProvider _time = null!;
 	private UiSessionRegistry _registry = null!;
@@ -24,6 +27,7 @@ internal sealed class ScreenSaverUiSessionTests
 	private ScreenSaverRegistry _screenSavers = null!;
 	private string _screenSaverId = null!;
 	private UiSessionBroker _broker = null!;
+	private ScreenSaverFallbackRecovery _recovery = null!;
 	private ScreenSaverUiSessionOpener _opener = null!;
 
 	[SetUp]
@@ -36,7 +40,8 @@ internal sealed class ScreenSaverUiSessionTests
 		_screenSaverId = (await _screenSavers.Register(ProviderId,
 			new ScreenSaverDescriptor("photos", LocalizedText.FromLiteral("Photos"), Interactive: true))).ScreenSaverId;
 
-		_broker = new UiSessionBroker(new AcceptingProviderResolver(ProviderId, BuiltInScreenSavers.ProviderId),
+		_broker = new UiSessionBroker(
+			new AcceptingProviderResolver(ProviderId, LateProviderId, BuiltInScreenSavers.ProviderId),
 			new RecordingUiSessionTransport(),
 			_registry,
 			new PluginSessionRegistry(_time, Serilog.Core.Logger.None),
@@ -45,15 +50,18 @@ internal sealed class ScreenSaverUiSessionTests
 			Serilog.Core.Logger.None);
 
 		var services = new ServiceCollection().AddSingleton<IDeviceRepository>(_devices).BuildServiceProvider();
+		_recovery = new ScreenSaverFallbackRecovery(_registry, _screenSavers);
 		_opener = new ScreenSaverUiSessionOpener(services.GetRequiredService<IServiceScopeFactory>(),
 			_screenSavers,
 			_registry,
-			_broker);
+			_broker,
+			_recovery);
 	}
 
 	[TearDown]
 	public void TearDown()
 	{
+		_recovery.Dispose();
 		_broker.Dispose();
 		_registry.Dispose();
 	}
@@ -156,6 +164,89 @@ internal sealed class ScreenSaverUiSessionTests
 			Assert.That(second.SessionId, Is.Not.EqualTo(first.SessionId));
 			Assert.That(third.SessionId, Is.Not.EqualTo(first.SessionId));
 		});
+	}
+
+	[Test]
+	public async Task TheClockStandingInForAScreenSaverThatIsNotBackYet_IsReplacedOnceItRegisters()
+	{
+		var device = await Device(LateScreenSaverId);
+		var standIn = await _opener.OpenAsync(device.Id, CancellationToken.None);
+		UiSessionEndedEventArgs? ended = null;
+		_registry.Ended += (_, e) =>
+		{
+			if (e.Session.SessionId == standIn.SessionId)
+			{
+				ended = e;
+			}
+		};
+
+		await RegisterLateScreenSaver();
+		var reopened = await _opener.OpenAsync(device.Id, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(standIn.ScreenSaverId, Is.EqualTo(BuiltInScreenSavers.Clock));
+			Assert.That(ended?.Reason, Is.EqualTo(UiSessionEndReason.Invalidated));
+			Assert.That(ended?.Retryable, Is.True);
+			Assert.That(reopened.ScreenSaverId, Is.EqualTo(LateScreenSaverId));
+			Assert.That(_registry.Find(reopened.SessionId)!.ProviderId, Is.EqualTo(LateProviderId));
+		});
+	}
+
+	[Test]
+	public async Task TheClockStandingIn_StaysWhenAnotherScreenSaverRegisters()
+	{
+		var device = await Device(LateScreenSaverId);
+		var standIn = await _opener.OpenAsync(device.Id, CancellationToken.None);
+
+		await _screenSavers.Register(LateProviderId,
+			new ScreenSaverDescriptor("aquarium", LocalizedText.FromLiteral("Aquarium")));
+		await new ScreenSaverFallbackRecoveryHandler(_recovery).Handle(new ScreenSaverCatalogChangedNotification(),
+			CancellationToken.None);
+
+		Assert.That(_registry.WasEnded(standIn.SessionId), Is.False);
+	}
+
+	[Test]
+	public async Task ASelectedClockOrAvailableScreenSaver_IsNeverReplaced()
+	{
+		var clockDevice = await Device(null);
+		var photosDevice = await Device(_screenSaverId);
+		var clock = await _opener.OpenAsync(clockDevice.Id, CancellationToken.None);
+		var photos = await _opener.OpenAsync(photosDevice.Id, CancellationToken.None);
+
+		await RegisterLateScreenSaver();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_registry.WasEnded(clock.SessionId), Is.False);
+			Assert.That(_registry.WasEnded(photos.SessionId), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task AStandInReusedAfterTheDeviceChoseTheClock_StaysWhenTheOldSelectionRegisters()
+	{
+		var device = await Device(LateScreenSaverId);
+		var standIn = await _opener.OpenAsync(device.Id, CancellationToken.None);
+
+		device.ScreenSaverId = null;
+		var clock = await _opener.OpenAsync(device.Id, CancellationToken.None);
+		await RegisterLateScreenSaver();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(clock.SessionId, Is.EqualTo(standIn.SessionId));
+			Assert.That(_registry.WasEnded(clock.SessionId), Is.False);
+		});
+	}
+
+	private async Task RegisterLateScreenSaver()
+	{
+		await _screenSavers.Register(LateProviderId,
+			new ScreenSaverDescriptor("slideshow", LocalizedText.FromLiteral("Slideshow")));
+		await new ScreenSaverFallbackRecoveryHandler(_recovery).Handle(new ScreenSaverCatalogChangedNotification(),
+			CancellationToken.None);
 	}
 
 	private async Task<DeviceEntity> Device(string? screenSaverId, string? configuration = null)

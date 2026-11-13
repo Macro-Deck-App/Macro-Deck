@@ -2,8 +2,8 @@ name: CI
 
 on:
   workflow_dispatch:
+  # Every pull request, whatever its base: a hotfix branch needs the same checks as main.
   pull_request:
-    branches: [main, production]
   push:
     branches: [main, production]
 

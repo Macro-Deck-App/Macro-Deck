@@ -14,6 +14,7 @@ using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeck.Sdk;
 using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.ConfigFlow;
 using MacroDeck.Sdk.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -173,7 +174,7 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 	}
 
 	[Test]
-	public async Task Built_in_readiness_waits_for_system_integrations_but_not_for_a_slow_ordinary_one()
+	public async Task Built_in_readiness_waits_for_connectionless_built_ins_but_not_for_config_flow_ones()
 	{
 		using var serviceProvider = BuildScopeServices();
 		var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -189,29 +190,42 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 			new LoggerConfiguration().CreateLogger());
 		var systemStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		var systemRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		var ordinaryRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var localStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var localRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		var connectedRelease = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		var system = new RecordingSystemIntegration(() =>
 		{
 			systemStarted.TrySetResult();
 			return systemRelease.Task;
 		});
-		var ordinary = new RecordingIntegration { Id = "ordinary", InitializeWork = () => ordinaryRelease.Task };
+		var local = new RecordingIntegration
+		{
+			Id = "local",
+			OnInitializeStart = () => localStarted.TrySetResult(),
+			InitializeWork = () => localRelease.Task
+		};
+		var connected = new RecordingConfigFlowIntegration(() => connectedRelease.Task);
 
-		var pending = await service.RegisterAllAsync([system, ordinary]);
+		var pending = await service.RegisterAllAsync([system, local, connected]);
 		var initializing = service.InitializeAllAsync(pending, CancellationToken.None);
-		await systemStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+		await Task.WhenAll(systemStarted.Task, localStarted.Task).WaitAsync(TimeSpan.FromSeconds(5));
 		var completedDuringSystemInitialization = builtInRegistration.IsComplete;
 
 		systemRelease.SetResult();
+		await Task.Delay(TimeSpan.FromMilliseconds(100));
+		var completedDuringLocalInitialization = builtInRegistration.IsComplete;
+
+		localRelease.SetResult();
 		await builtInRegistration.Completed.WaitAsync(TimeSpan.FromSeconds(5));
-		var initializationStillRunning = !initializing.IsCompleted;
-		ordinaryRelease.SetResult();
+		var connectedStillInitializing = !initializing.IsCompleted;
+		connectedRelease.SetResult();
 		await initializing.WaitAsync(TimeSpan.FromSeconds(5));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(completedDuringSystemInitialization, Is.False);
-			Assert.That(initializationStillRunning, Is.True);
+			Assert.That(completedDuringLocalInitialization, Is.False);
+			Assert.That(connectedStillInitializing, Is.True);
 		});
 	}
 
@@ -501,6 +515,37 @@ internal sealed class IntegrationStartupBackgroundServiceTests
 		public string Version => "1.0.0";
 		public bool IsInitialized => true;
 		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public Task InitializeAsync(IIntegrationContext context)
+		{
+			return _initialize();
+		}
+
+		public Task ShutdownAsync()
+		{
+			return Task.CompletedTask;
+		}
+	}
+
+	private sealed class RecordingConfigFlowIntegration : IIntegration, IConfigFlowProvider
+	{
+		private readonly Func<Task> _initialize;
+
+		public RecordingConfigFlowIntegration(Func<Task> initialize)
+		{
+			_initialize = initialize;
+		}
+
+		public string Id => "connected";
+		public LocalizedText Name => "Connected";
+		public string Version => "1.0.0";
+		public bool IsInitialized => true;
+		public IReadOnlyList<IActionDefinition> Actions => [];
+
+		public IConfigFlow CreateConfigFlow()
+		{
+			throw new NotSupportedException();
+		}
 
 		public Task InitializeAsync(IIntegrationContext context)
 		{

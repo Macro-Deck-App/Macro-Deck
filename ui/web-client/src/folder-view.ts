@@ -13,6 +13,7 @@ import {
 import { MAX_BUSY_RETRIES, TOO_MANY_SESSIONS, busyRetryDelayMs } from './busy-retry';
 
 const NAVIGATION_HIDDEN = 'hidden';
+const PROVIDER_UNAVAILABLE = 'PROVIDER_UNAVAILABLE';
 const MAX_REOPENS_WITHOUT_A_TREE = 3;
 
 interface OpenResponse {
@@ -28,6 +29,7 @@ export interface FolderViewOptions {
   sessions: UiSessionStore;
   localization: LocalizationCatalog;
   host: UiRenderHost;
+  folderViewIds(): readonly string[];
   canGoBack(): boolean;
   onBack(): void;
 }
@@ -46,6 +48,8 @@ export class FolderView {
   private viewId = '';
   private navigation = '';
   private rejected = false;
+  private missingViewId: string | null = null;
+  private rechecked = false;
   private reopensWithoutTree = 0;
   private busyRetries = 0;
   private retry: ReturnType<typeof setTimeout> | null = null;
@@ -73,6 +77,17 @@ export class FolderView {
   open(folderId: string): void {
     if (folderId === this.openedFolderId) return;
     this.close();
+    this.reopensWithoutTree = 0;
+    this.request(folderId);
+  }
+
+  catalogChanged(viewIds: readonly string[]): void {
+    const folderId = this.openedFolderId;
+    if (this.missingViewId === null || folderId === null || viewIds.indexOf(this.missingViewId) < 0) return;
+
+    this.missingViewId = null;
+    this.rejected = false;
+    this.rechecked = false;
     this.reopensWithoutTree = 0;
     this.request(folderId);
   }
@@ -109,14 +124,24 @@ export class FolderView {
             return;
           }
 
+          const missing = response && response.code === PROVIDER_UNAVAILABLE && this.viewId ? this.viewId : null;
+          // The catalog event that brings the view back can overtake this refusal on the wire.
+          if (missing !== null && !this.rechecked && this.options.folderViewIds().indexOf(missing) >= 0) {
+            this.rechecked = true;
+            this.request(folderId);
+            return;
+          }
+
           // Rejected, which is not the same as no tree yet: both draw nothing, and telling someone
           // their folder is broken while it is merely loading is worse than a moment of blank.
+          this.missingViewId = missing;
           this.rejected = true;
           this.paint();
           return;
         }
 
         this.busyRetries = 0;
+        this.missingViewId = null;
         this.sessionId = response.sessionId;
         void this.options.connection.request('AttachUiSession', [{ sessionId: response.sessionId }]);
         this.paint();
@@ -175,6 +200,8 @@ export class FolderView {
     this.sessionId = null;
     this.openedFolderId = null;
     this.rejected = false;
+    this.missingViewId = null;
+    this.rechecked = false;
     this.viewId = '';
     this.navigation = '';
   }

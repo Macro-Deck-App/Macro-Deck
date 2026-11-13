@@ -159,6 +159,7 @@ export class Shell {
     this.client.reopenableSessions.subscribe(lost => {
       if (lost !== null) this.folderView?.sessionLost(lost.sessionId);
     });
+    this.client.folderViewCatalog.subscribe(viewIds => this.folderView?.catalogChanged(viewIds));
     this.client.hostLock.state.subscribe(() => this.paintOverlays());
     this.idleTimer = new IdleTimer(() => this.showScreenSaver(), document, services.idleClock);
     // Any change to the settings ends a showing screensaver: what it draws is fixed at open time.
@@ -538,6 +539,7 @@ export class Shell {
         sessions: this.client.sessions,
         localization: this.client.localization,
         host: this.host,
+        folderViewIds: () => this.client.folderViewCatalog.get(),
         canGoBack: () => this.client.deck.canGoBack,
         onBack: () => this.client.deck.back(),
       });

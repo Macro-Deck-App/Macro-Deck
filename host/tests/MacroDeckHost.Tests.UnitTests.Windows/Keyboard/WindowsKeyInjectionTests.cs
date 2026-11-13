@@ -17,6 +17,9 @@ public class WindowsKeyInjectionTests
 	private const uint LlkhfUp = 0x80;
 	private const uint PmRemove = 0x0001;
 	private const int PumpMs = 250;
+	private const uint VkReturn = 0x0D;
+	private const uint VkPacket = 0xE7;
+	private const char EnterMark = '⏎';
 
 	private static readonly bool[] _downThenUp = [false, true];
 	private static readonly int[] _lockKeys = [0x90, 0x14, 0x91];
@@ -51,22 +54,58 @@ public class WindowsKeyInjectionTests
 			}));
 	}
 
+	[TestCase("one\ntwo")]
+	[TestCase("one\r\ntwo")]
+	[TestCase("one\rtwo")]
+	[TestCase("a\n\nb")]
+	public void Each_typed_line_break_reaches_windows_as_one_enter_press(string text)
+	{
+		var provider = new WindowsKeyboardInputProvider();
+		var events = Capture(info => info.vkCode is VkReturn or VkPacket, () => provider.TypeUnicode(text));
+
+		var typed = new string(events
+			.Where(e => !e.IsUp)
+			.Select(e => e.VirtualKey == VkReturn ? EnterMark : (char)e.ScanCode)
+			.ToArray());
+		Assert.Multiple(() =>
+		{
+			Assert.That(typed, Is.EqualTo(text.Replace("\r\n", "\n").Replace('\r', '\n').Replace('\n', EnterMark)));
+			Assert.That(events.Count(e => e.VirtualKey == VkReturn && e.IsUp),
+				Is.EqualTo(events.Count(e => e.VirtualKey == VkReturn && !e.IsUp)));
+		});
+	}
+
 	private static List<KeyEvent> Press(KeyCode key)
+	{
+		var locks = _lockKeys.ToDictionary(k => k, IsToggled);
+		var provider = new WindowsKeyboardInputProvider();
+		_ = WindowsKeyboardInputProvider.TryMapKey(key, GetKeyboardLayout(0), out _, out var sentScanCode);
+
+		var events = Capture(info => info.scanCode == sentScanCode,
+			() =>
+			{
+				provider.KeyDown(key);
+				Pump();
+				provider.KeyUp(key);
+			});
+
+		// A hook that answers too late lets the key through: put the developer's lock keys back.
+		RestoreLocks(provider, locks);
+		return events;
+	}
+
+	private static List<KeyEvent> Capture(Func<KbdLlHookStruct, bool> matches, Action send)
 	{
 		if (Win32Windows.GetForegroundWindow() == IntPtr.Zero)
 		{
 			Interactive.Require("No foreground window in this session (headless or locked desktop).");
 		}
 
-		var locks = _lockKeys.ToDictionary(k => k, IsToggled);
-		var provider = new WindowsKeyboardInputProvider();
 		var events = new List<KeyEvent>();
-		_ = WindowsKeyboardInputProvider.TryMapKey(key, GetKeyboardLayout(0), out _, out var sentScanCode);
-
 		HookProc callback = (code, message, data) =>
 		{
 			var info = Marshal.PtrToStructure<KbdLlHookStruct>(data);
-			if (code < 0 || (info.flags & LlkhfInjected) == 0 || info.scanCode != sentScanCode)
+			if (code < 0 || (info.flags & LlkhfInjected) == 0 || !matches(info))
 			{
 				return CallNextHookEx(IntPtr.Zero, code, message, data);
 			}
@@ -86,9 +125,7 @@ public class WindowsKeyInjectionTests
 
 		try
 		{
-			provider.KeyDown(key);
-			Pump();
-			provider.KeyUp(key);
+			send();
 			Pump();
 		}
 		finally
@@ -96,9 +133,6 @@ public class WindowsKeyInjectionTests
 			_ = UnhookWindowsHookEx(hook);
 			GC.KeepAlive(callback);
 		}
-
-		// A hook that answers too late lets the key through: put the developer's lock keys back.
-		RestoreLocks(provider, locks);
 
 		if (events.Count == 0)
 		{
