@@ -26,6 +26,8 @@ public static class PluginDependencyWarningCodes
 	/// see the remarks on that method for why it never gates an actual install.</summary>
 	public const string NotTrusted = "not_trusted";
 
+	public const string TrustDowngrade = "trust_downgrade";
+
 	public const string SdkCompatibilityUnchecked = "sdk_compatibility_unchecked";
 
 	public const string NoEntrypointForRuntime = "no_entrypoint_for_runtime";

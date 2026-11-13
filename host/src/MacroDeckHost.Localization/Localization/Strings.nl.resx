@@ -3036,6 +3036,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Deze plug-in is ondertekend door een andere uitgever dan de versie die je al hebt, dus is hij niet geïnstalleerd.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Er is al een ondertekende en geverifieerde versie van deze plug-in geïnstalleerd, dus een niet-geverifieerd pakket kan die niet vervangen. Vraag de maker om je als tester uit te nodigen als je een build wilt proberen voordat hij wordt gepubliceerd.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Een deel van de opgeslagen gegevens van de plug-in kon niet worden verwijderd omdat een bestand nog in gebruik is, dus de plug-in is niet verwijderd. Sluit de programma's die het gebruiken en probeer het opnieuw.</value>
   </data>

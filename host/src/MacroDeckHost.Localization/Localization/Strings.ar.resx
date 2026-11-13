@@ -3036,6 +3036,9 @@
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>هذا المكوّن الإضافي موقّع من ناشر مختلف عن ناشر الإصدار الذي لديك، لذلك لم يُثبَّت.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>توجد نسخة موقّعة وتم التحقق منها من هذا المكوّن الإضافي مثبّتة بالفعل، لذلك لا يمكن لحزمة لم يتم التحقق منها أن تحل محلها. لتجربة إصدار قبل نشره، اطلب من منشئه دعوتك كمختبِر.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>تعذّر حذف بعض البيانات المحفوظة للمكوّن الإضافي لأن ملفاً لا يزال قيد الاستخدام، لذا لم يتم إلغاء تثبيته. أغلق البرامج التي تستخدمه ثم حاول مرة أخرى.</value>
   </data>

@@ -3036,6 +3036,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Bu eklenti, sahip olduğunuz sürümden farklı bir yayımcı tarafından imzalandığı için yüklenmedi.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Bu eklentinin imzalı ve doğrulanmış bir sürümü zaten yüklü, bu nedenle doğrulanmamış bir paket onun yerini alamaz. Bir derlemeyi yayımlanmadan önce denemek için geliştiricisinden sizi test kullanıcısı olarak davet etmesini isteyin.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Bir dosya hâlâ kullanımda olduğu için eklentinin kayıtlı verilerinin bir kısmı silinemedi, bu yüzden eklenti kaldırılmadı. Onu kullanan programları kapatın ve yeniden deneyin.</value>
   </data>

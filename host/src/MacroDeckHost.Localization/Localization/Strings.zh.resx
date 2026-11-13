@@ -3036,6 +3036,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>此插件由与你已有版本不同的发布者签名，因此未被安装。</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>此插件已安装经过签名和验证的版本，因此未经验证的安装包无法替换它。如需在发布前试用某个版本，请让其创作者邀请你成为测试人员。</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>由于有文件仍在使用中，插件的部分已存储数据未能删除，因此未卸载插件。请关闭正在使用该文件的程序，然后重试。</value>
   </data>

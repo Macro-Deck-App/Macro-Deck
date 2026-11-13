@@ -433,11 +433,40 @@ internal sealed class PluginInstallerTrustAcceptanceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Error, Is.EqualTo(PluginInstallError.TrustDowngrade));
+			Assert.That(result.ErrorMessage, Does.Contain("invite you as a tester"));
 			Assert.That(_catalog.Discover()
 					.First(p => p.PluginId == PluginId)
 					.ActiveVersion?.Version,
 				Is.EqualTo("1.0.0"));
 		});
+	}
+
+	[Test]
+	public async Task The_preview_of_an_unsigned_package_over_a_trusted_version_says_it_cannot_be_installed()
+	{
+		await _installer.Install(PluginArtifactSource.FromPath(await TrustedArtifact()), new PluginInstallRequest());
+
+		var preview = await _installer.Inspect(PluginArtifactSource.FromPath(await UnsignedArtifact("1.1.0")));
+
+		var downgrade = preview.Warnings.SingleOrDefault(w => w.Code == PluginDependencyWarningCodes.TrustDowngrade);
+		Assert.Multiple(() =>
+		{
+			Assert.That(preview.Success, Is.True);
+			Assert.That(downgrade?.Severity, Is.EqualTo(PluginInstallWarningSeverity.Blocking));
+			Assert.That(downgrade?.Message, Does.Contain("invite you as a tester"));
+		});
+	}
+
+	[Test]
+	public async Task The_preview_of_an_unsigned_package_over_an_unsigned_version_still_offers_the_install()
+	{
+		await _installer.Install(PluginArtifactSource.FromPath(await UnsignedArtifact()),
+			new PluginInstallRequest { AllowUnsigned = true });
+
+		var preview = await _installer.Inspect(PluginArtifactSource.FromPath(await UnsignedArtifact("1.1.0")));
+
+		Assert.That(preview.Warnings.Select(w => w.Code),
+			Has.None.EqualTo(PluginDependencyWarningCodes.TrustDowngrade));
 	}
 
 	[Test]

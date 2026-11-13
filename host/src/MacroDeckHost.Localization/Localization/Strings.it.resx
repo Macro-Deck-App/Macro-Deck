@@ -3037,6 +3037,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Questo plugin è firmato da un autore diverso da quello della versione che hai già, quindi non è stato installato.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Una versione firmata e verificata di questo plugin è già installata, quindi un pacchetto non verificato non può sostituirla. Per provare una build prima della pubblicazione, chiedi al creatore di invitarti come tester.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Alcuni dati salvati del plugin non sono stati eliminati perché un file è ancora in uso, quindi il plugin non è stato disinstallato. Chiudi i programmi che lo usano e riprova.</value>
   </data>
