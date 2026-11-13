@@ -41,6 +41,7 @@ assets:
       - ui/web-client/public/icons/icon-maskable-512.png
       - ui/angular/projects/desktop-ui/public/favicon.ico
       - ui/angular/projects/desktop-ui/public/images/logo.png
+      - host/src/MacroDeckHost.Integrations/Companion/Icons/companion-icon.png
       - host/src/MacroDeckHost.Integrations/Delegation/Icons/delegate-icon.png
 
   - name: Lucide icons
@@ -194,7 +195,6 @@ assets:
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/volume-2.svg
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/wifi.svg
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/zap.svg
-      - host/src/MacroDeckHost.Integrations/Companion/Icons/companion-icon.svg
       - host/src/MacroDeckHost.Integrations/Feeds/Icons/widget/rss.svg
       - host/src/MacroDeckHost.Integrations/Http/Icons/http-icon.svg
       - host/src/MacroDeckHost.Integrations/Imap/Icons/imap-icon.svg
