@@ -1486,6 +1486,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>The application could not be added</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Failed to copy the style</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Delete Widget</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>The copied widgets do not fit anywhere on this deck. Right-click a free cell to paste them there instead.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Failed to paste the style</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Failed to pin the widget</value>
@@ -3308,6 +3314,12 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>No provider handled the widget</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>The copied style is not valid. Copy it again.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>The style cannot be applied to this selection.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>At most {max} widgets can be favorites.</value>
@@ -21342,6 +21354,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Copy {count} widgets</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Copy Style</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Cut</value>
   </data>
@@ -21373,6 +21388,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Paste</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Paste Style</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Pin</value>

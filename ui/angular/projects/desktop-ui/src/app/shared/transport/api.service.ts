@@ -37,6 +37,7 @@ import {
   CompleteUiModalRequest,
   CompleteUiModalResponse,
   ConnectSessionChangedNotification,
+  CopyWidgetStyleResponse,
   CreateAutomationRequest,
   CreateAutomationResponse,
   CreateBackupRequest,
@@ -262,6 +263,8 @@ import {
   OpenWidgetUiSessionRequest,
   OpenWidgetUiSessionResponse,
   PairingCodeResponse,
+  PasteWidgetStyleRequest,
+  PasteWidgetStyleResponse,
   PluginInstallActionResponse,
   PluginPairingActionResponse,
   PluginRuntimeOperationResponse,
@@ -1898,6 +1901,14 @@ export class ApiService {
 
   setWidgetsPinned(request: SetWidgetsPinnedRequest): Promise<SetWidgetsPinnedResponse> {
     return this.http('PUT', '/api/widgets/pinned/batch', request);
+  }
+
+  copyWidgetStyle(widgetId: string): Promise<CopyWidgetStyleResponse> {
+    return this.http('GET', `/api/widgets/${encodeURIComponent(widgetId)}/style`);
+  }
+
+  pasteWidgetStyle(request: PasteWidgetStyleRequest): Promise<PasteWidgetStyleResponse> {
+    return this.http('POST', '/api/widgets/style/paste', request);
   }
 
   createWidgetFromApplication(request: CreateWidgetFromApplicationRequest): Promise<CreateWidgetResponse> {

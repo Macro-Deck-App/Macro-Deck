@@ -1486,6 +1486,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>Не вдалося додати застосунок</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Не вдалося скопіювати стиль</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Видалити віджет</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>Скопійовані віджети не вміщуються на цій панелі. Клацніть правою кнопкою миші по вільній комірці, щоб вставити їх туди.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Не вдалося вставити стиль</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Не вдалося закріпити віджет</value>
@@ -3308,6 +3314,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Жоден постачальник не обробив віджет</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>Скопійований стиль недійсний. Скопіюйте його ще раз.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>Стиль не можна застосувати до вибраних елементів.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>Обраними можна зробити щонайбільше {max} віджетів.</value>
@@ -21337,6 +21349,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Копіювати віджетів: {count}</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Копіювати стиль</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Вирізати</value>
   </data>
@@ -21368,6 +21383,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Вставити</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Вставити стиль</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Закріпити</value>

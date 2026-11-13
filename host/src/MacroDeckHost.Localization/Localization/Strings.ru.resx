@@ -1486,6 +1486,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>Не удалось добавить приложение</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Не удалось скопировать стиль</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Удалить виджет</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>Скопированные виджеты не помещаются на этой панели. Щёлкните правой кнопкой мыши по свободной ячейке, чтобы вставить их туда.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Не удалось вставить стиль</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Не удалось закрепить виджет</value>
@@ -3308,6 +3314,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Ни один поставщик не обработал виджет</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>Скопированный стиль недействителен. Скопируйте его ещё раз.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>Стиль нельзя применить к выбранным элементам.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>Избранными может быть не более {max} виджетов.</value>
@@ -21337,6 +21349,9 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Копировать виджеты ({count})</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Копировать стиль</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Вырезать</value>
   </data>
@@ -21368,6 +21383,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Вставить</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Вставить стиль</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Закрепить</value>

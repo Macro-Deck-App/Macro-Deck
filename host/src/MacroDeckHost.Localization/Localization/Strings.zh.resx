@@ -1486,6 +1486,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>无法添加该应用程序</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>无法复制样式</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>删除组件</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>复制的组件在此面板上没有可放置的位置。请改为右键点击空闲单元格，将它们粘贴到那里。</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>无法粘贴样式</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>无法固定组件</value>
@@ -3308,6 +3314,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>没有提供方处理该组件</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>复制的样式无效，请重新复制。</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>无法将样式应用于当前所选内容。</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>最多只能有 {max} 个组件设为收藏。</value>
@@ -21319,6 +21331,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>复制 {count} 个组件</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>复制样式</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>剪切</value>
   </data>
@@ -21350,6 +21365,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>粘贴</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>粘贴样式</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>固定</value>

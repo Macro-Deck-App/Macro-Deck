@@ -1487,6 +1487,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>Nie udało się dodać aplikacji</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Nie udało się skopiować stylu</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Usuń widget</value>
     <comment>[plural]</comment>
@@ -1573,6 +1576,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>Skopiowane widżety nigdzie nie mieszczą się na tym deckcie. Kliknij prawym przyciskiem wolną komórkę, aby wkleić je tam.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Nie udało się wkleić stylu</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Nie udało się przypiąć widżetu</value>
@@ -3309,6 +3315,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Żaden dostawca nie obsłużył widżetu</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>Skopiowany styl jest nieprawidłowy. Należy skopiować go ponownie.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>Nie można zastosować stylu do tego zaznaczenia.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>Maksymalna liczba ulubionych widżetów: {max}.</value>
@@ -21318,6 +21330,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Kopiuj widgety ({count})</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Kopiuj styl</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Wytnij</value>
   </data>
@@ -21349,6 +21364,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Wklej</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Wklej styl</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Przypnij</value>

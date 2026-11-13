@@ -33,6 +33,7 @@ export {
 } from './services/ui-session.service';
 export { VariableService } from './services/variable.service';
 export { WidgetClipboardService } from './services/widget-clipboard.service';
+export { WidgetStyleClipboardService } from './services/widget-style-clipboard.service';
 export { WidgetRegistryService } from './services/widget-registry.service';
 export { WidgetTypeCatalogService } from './services/widget-type-catalog.service';
 export { WidgetTypeFavoritesService } from './services/widget-type-favorites.service';

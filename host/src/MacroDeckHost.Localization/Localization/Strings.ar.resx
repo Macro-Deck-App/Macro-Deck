@@ -1486,6 +1486,9 @@
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>تعذّرت إضافة التطبيق</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>تعذّر نسخ النمط</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>حذف الأداة</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>الأدوات المنسوخة لا تتسع في أي مكان على هذه اللوحة. انقر بالزر الأيمن على خلية فارغة للصقها فيها.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>تعذّر لصق النمط</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>تعذّر تثبيت الأداة</value>
@@ -3308,6 +3314,12 @@
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>لم يعالج أي مزوّد الأداة</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>النمط المنسوخ غير صالح. انسخه مرة أخرى.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>لا يمكن تطبيق النمط على هذا التحديد.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>يمكن أن تكون {max} أدوات مفضلة كحد أقصى.</value>
@@ -21337,6 +21349,9 @@
     <value>نسخ الأدوات ({count})</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>نسخ النمط</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>قص</value>
   </data>
@@ -21368,6 +21383,9 @@
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>لصق</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>لصق النمط</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>تثبيت</value>
