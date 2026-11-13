@@ -196,6 +196,15 @@ public sealed class PluginInstaller : IPluginInstaller
 					trust.Message ?? $"The artifact's signature verifies as {trust.Verdict}."));
 			}
 
+			if (trust.Verdict != PluginTrustVerdict.Revoked
+				&& PluginTrustPolicy.IsDowngrade(await GetHighestAdmittedTier(manifest.Id),
+					trust.Verdict,
+					acquisition.SourceKind))
+			{
+				warnings.Add(PluginInstallWarning.Blocking(PluginDependencyWarningCodes.TrustDowngrade,
+					await ActiveLocalization.Resolve(_scopeFactory, AppStrings.Errors.Plugins.TrustDowngrade())));
+			}
+
 			return PluginInstallResult.Ok(manifest.Id,
 					manifest.Version,
 					ActiveVersionOf(manifest.Id),
@@ -948,9 +957,9 @@ public sealed class PluginInstaller : IPluginInstaller
 		if (trust.Verdict != PluginTrustVerdict.Revoked
 			&& PluginTrustPolicy.IsDowngrade(admittedVerdict, trust.Verdict, acquisition.SourceKind))
 		{
+			var downgrade = await ActiveLocalization.Resolve(_scopeFactory, AppStrings.Errors.Plugins.TrustDowngrade());
 			return PluginInstallResult.Fail(PluginInstallError.TrustDowngrade,
-					$"'{manifest.Id}' was previously admitted as trusted; this update verifies as "
-					+ $"{trust.Verdict} and would install at a lower trust tier.",
+					downgrade,
 					manifest.Id,
 					manifest.Version,
 					previousVersion)

@@ -3037,6 +3037,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Cette extension est signée par un autre éditeur que la version que tu as déjà, elle n'a donc pas été installée.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Une version signée et vérifiée de cette extension est déjà installée, un paquet non vérifié ne peut donc pas la remplacer. Pour essayer un build avant sa publication, demande à son créateur de t'inviter comme testeur.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Certaines données enregistrées de l'extension n'ont pas pu être supprimées, car un fichier est encore utilisé ; l'extension n'a donc pas été désinstallée. Ferme les programmes qui l'utilisent et réessaie.</value>
   </data>

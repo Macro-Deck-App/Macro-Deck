@@ -3036,6 +3036,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>此外掛由與您目前版本不同的發行者簽署，因此未安裝。</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>此外掛已安裝經過簽署並驗證的版本，因此未經驗證的套件無法取代它。若要在發佈前試用某個版本，請讓其創作者邀請您成為測試人員。</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>由於有檔案仍在使用中，外掛的部分已儲存資料無法刪除，因此未解除安裝外掛。請關閉正在使用該檔案的程式，然後再試一次。</value>
   </data>

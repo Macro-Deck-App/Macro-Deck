@@ -363,6 +363,18 @@ describe('PluginInstallConfirmModalComponent', () => {
       expect(emitted).toEqual([{ allowUnsigned: false }]);
     });
 
+    it('refuses an unsigned package over a verified version instead of asking for consent the host ignores', async () => {
+      await setupWithChoice(inspection({
+        signature: { verification: 'not_signed' },
+        warnings: [warning({ code: 'trust_downgrade', severity: 'blocking', message: 'A verified version is installed.' })],
+      }));
+
+      expect(consentBox()).toBeNull();
+      expect(installButton().disabled).toBeTrue();
+      expect(text()).toContain('A verified version is installed.');
+      expect(text()).not.toContain('will not start');
+    });
+
     // A store download can never install unsigned, so offering the choice there would be a checkbox that
     // does nothing. The install stays available because the host is the one that refuses it.
     it('offers no consent affordance for a source that cannot carry it', async () => {
