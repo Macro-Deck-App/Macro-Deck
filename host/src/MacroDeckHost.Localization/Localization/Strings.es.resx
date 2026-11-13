@@ -3037,6 +3037,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Este complemento está firmado por un editor distinto al de la versión que ya tienes, así que no se instaló.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Ya hay instalada una versión firmada y verificada de este complemento, así que un paquete no verificado no puede reemplazarla. Para probar una compilación antes de que se publique, pide a su creador que te invite como tester.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>No se pudieron eliminar algunos datos guardados del complemento porque un archivo sigue en uso, así que no se ha desinstalado. Cierra los programas que lo usen y vuelve a intentarlo.</value>
   </data>

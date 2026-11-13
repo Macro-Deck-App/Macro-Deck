@@ -3036,6 +3036,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>このプラグインは、既に入手しているバージョンとは別の公開者によって署名されているため、インストールしませんでした。</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>このプラグインは署名済みで検証済みのバージョンが既にインストールされているため、検証されていないパッケージで置き換えることはできません。公開前のビルドを試すには、作成者にテスターとして招待してもらってください。</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>使用中のファイルがあるため、プラグインの保存データの一部を削除できず、プラグインはアンインストールされませんでした。そのファイルを使用しているプログラムを閉じてから、もう一度お試しください。</value>
   </data>

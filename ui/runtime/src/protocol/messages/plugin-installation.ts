@@ -89,6 +89,7 @@ export const PLUGIN_INSTALL_ERROR_CANCELLED = 'cancelled';
 
 export const PLUGIN_WARNING_ARTIFACT_UNSIGNED = 'unsigned';
 export const PLUGIN_WARNING_SIGNATURE_UNVERIFIED = 'signature_unverified';
+export const PLUGIN_WARNING_TRUST_DOWNGRADE = 'trust_downgrade';
 export const PLUGIN_WARNING_USES_ADB = 'uses_adb';
 export const PLUGIN_PERMISSION_HOST_ADB = 'host:adb';
 export const PLUGIN_WARNING_USES_COMPANION_DEVICES = 'uses_companion_devices';

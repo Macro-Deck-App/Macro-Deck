@@ -3036,6 +3036,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Plugin ini ditandatangani oleh penerbit yang berbeda dari versi yang sudah Anda miliki, sehingga tidak dipasang.</value>
   </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Versi plugin ini yang ditandatangani dan terverifikasi sudah terpasang, sehingga paket yang tidak terverifikasi tidak dapat menggantikannya. Untuk mencoba build sebelum dipublikasikan, minta pembuatnya mengundang Anda sebagai penguji.</value>
+  </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Sebagian data tersimpan plugin tidak dapat dihapus karena sebuah file masih digunakan, jadi plugin tidak dicopot. Tutup program yang menggunakannya, lalu coba lagi.</value>
   </data>
