@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Packaging.Versioning;
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Services;
@@ -21,6 +22,7 @@ public sealed class StoreAutoUpdater : IDisposable
 	private readonly IStoreOperationTracker _tracker;
 	private readonly IUserNotificationStore _notifications;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly HostSession _session;
 	private readonly ILogger _logger;
 	private readonly Lock _sync = new();
 	private readonly HashSet<string> _attempted = new(StringComparer.Ordinal);
@@ -35,6 +37,7 @@ public sealed class StoreAutoUpdater : IDisposable
 		IStoreOperationTracker tracker,
 		IUserNotificationStore notifications,
 		IServiceScopeFactory scopeFactory,
+		HostSession session,
 		ILogger logger)
 	{
 		_installations = installations;
@@ -43,6 +46,7 @@ public sealed class StoreAutoUpdater : IDisposable
 		_tracker = tracker;
 		_notifications = notifications;
 		_scopeFactory = scopeFactory;
+		_session = session;
 		_logger = logger.ForContext<StoreAutoUpdater>();
 		_tracker.Changed += OnOperationChanged;
 	}
@@ -109,6 +113,7 @@ public sealed class StoreAutoUpdater : IDisposable
 		{
 			var eligible = updates
 				.Where(update => StoreUpdateScope.IsUpdatable(update.Kind))
+				.Where(update => !(_session.PluginsDisabledAtStartup && update.Kind == StoreExtensionKind.Plugin))
 				.Where(update => !_attempted.Contains(StoreUpdateScope.Key(update)))
 				.Where(update => _tracker.FindLive(update.Kind, update.PackageId) is null)
 				.Where(IsInstalledFromStore)

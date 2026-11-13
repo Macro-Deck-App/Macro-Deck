@@ -26180,4 +26180,76 @@
     <value>تعذّر إرسال الحزمة إلى {address}.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>خيارات سطر الأوامر في Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>اعرض هذه المساعدة ثم اخرج.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>اعرض إصدار Macro Deck المثبّت ثم اخرج.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>اعرض قائمة الإضافات المثبّتة دون تشغيلها ثم اخرج.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>شغّل Macro Deck دون تشغيل الإضافات المثبّتة. شغّلها واحدة تلو الأخرى من أدوات المطوّر. ينطبق على هذه الجلسة فقط.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>أغلق Macro Deck قيد التشغيل.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>القناة: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>الإيداع: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>مجلد الإضافات: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>تعذّرت قراءة مجلد الإضافات: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>لا توجد إضافات مثبّتة.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>الاسم: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>الإصدار النشط: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>إصدارات مثبّتة أخرى: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>لا يوجد إصدار نشط صالح للاستخدام.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>بيان الإصدار {version} غير صالح ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>لا يحتوي الإصدار {version} على بيان.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: ليس مجلد إضافة صالحًا.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>لم يُعثر على مضيف Macro Deck. أعد تثبيت Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>تعذّر تشغيل مضيف Macro Deck: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck قيد التشغيل بالفعل. أغلق Macro Deck أولًا، ثم شغّله مجددًا باستخدام {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>الإضافات معطّلة</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>تم تشغيل Macro Deck باستخدام --disable-plugins. لا تبدأ الإضافات المثبّتة تلقائيًا في هذه الجلسة. شغّلها واحدة تلو الأخرى من أدوات المطوّر.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>تم تشغيل Macro Deck باستخدام --disable-plugins، لذلك لم تُشغَّل الإضافات المثبّتة تلقائيًا. شغّلها هنا واحدة تلو الأخرى. التشغيل أو الإيقاف هنا ينطبق على هذه الجلسة فقط.</value>
+  </data>
 </root>

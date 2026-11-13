@@ -15,6 +15,8 @@ public sealed class HostSession
 
 	public RestoreFailure RestoreFailure { get; private set; }
 
+	public bool PluginsDisabledAtStartup { get; private set; }
+
 	public void MarkRestoreApplied()
 	{
 		RestoreApplied = true;
@@ -23,5 +25,10 @@ public sealed class HostSession
 	public void MarkRestoreFailed(RestoreFailure failure)
 	{
 		RestoreFailure = failure;
+	}
+
+	public void MarkPluginsDisabledAtStartup()
+	{
+		PluginsDisabledAtStartup = true;
 	}
 }

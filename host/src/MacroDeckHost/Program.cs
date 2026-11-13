@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Cli;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Network.Http;
@@ -29,6 +31,16 @@ public static class Program
 {
 	public static void Main(string[] args)
 	{
+		var commandLine = HostCommandLine.Parse(args);
+		if (commandLine.Command != HostCommand.Run)
+		{
+			Environment.ExitCode = RunCommand(commandLine.Command);
+			return;
+		}
+
+		HostStartupFacts.PluginsDisabled = commandLine.DisablePlugins;
+		args = commandLine.RemainingArguments;
+
 		if (!OperatingSystem.IsMacOS())
 		{
 			RunHostAsync(args).GetAwaiter().GetResult();
@@ -49,6 +61,13 @@ public static class Program
 		}
 
 		host.GetAwaiter().GetResult();
+	}
+
+	private static int RunCommand(HostCommand command)
+	{
+		using var output = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false));
+		var cli = new HostCli(output, CultureInfo.CurrentUICulture.Name);
+		return cli.Run(command, DataRootEnvironment.Current());
 	}
 
 	private static async Task RunHostAsync(string[] args)

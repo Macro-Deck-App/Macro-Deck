@@ -11,6 +11,7 @@ mod appearance;
 mod appimage;
 mod backup_download;
 mod bridge;
+mod cli;
 mod deep_links;
 mod dock_icon;
 mod external_url;
@@ -236,8 +237,24 @@ fn main() {
     // A relaunch races the instance that started it: the single-instance lock is only released once
     // that process is gone, and claiming it too early makes this instance forward its argv to a
     // dying process and exit - the app would simply disappear.
-    if std::env::var_os(host::RELAUNCH_MARKER_ENVIRONMENT_VARIABLE).is_some() {
+    let relaunched = std::env::var_os(host::RELAUNCH_MARKER_ENVIRONMENT_VARIABLE).is_some();
+    if relaunched {
         std::thread::sleep(host::RELAUNCH_SETTLE_DELAY);
+    }
+
+    let context = tauri::generate_context!();
+    let args: Vec<std::ffi::OsString> = std::env::args_os().collect();
+    // Before the single-instance lock, so the information options also answer while the app runs.
+    if let Some(option) = cli::info_option(&args) {
+        let resource_dir =
+            tauri::utils::platform::resource_dir(context.package_info(), &tauri::Env::default())
+                .ok();
+        std::process::exit(cli::run_info(option, resource_dir));
+    }
+    if cli::plugins_disabled() && !relaunched {
+        if let Some(code) = cli::already_running_exit_code() {
+            std::process::exit(code);
+        }
     }
 
     tauri::Builder::default()
@@ -372,7 +389,7 @@ fn main() {
             tauri::async_runtime::spawn(async move { startup(handle).await });
             Ok(())
         })
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while building Macro Deck Bootstrapper")
         // Must stay the last thing main does: the runtime installs this
         // callback before it starts pumping events, and an Opened that arrives

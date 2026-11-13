@@ -4,6 +4,7 @@ import { AppStrings } from '@macro-deck/runtime';
 import { TranslatePipe } from '@shared';
 import {ProfileSelectorComponent} from '../../widgets';
 import { NavigationService } from '../../../services';
+import { HostSessionService } from '../../../services/host-session.service';
 
 @Component({
   selector: 'app-statusbar',
@@ -26,5 +27,6 @@ export class StatusbarComponent {
   readonly isMacOS = navigator.platform.toLowerCase().includes('mac');
   readonly isShellMacOS = this.isShell && this.isMacOS;
   protected readonly navigationService = inject(NavigationService);
+  protected readonly hostSession = inject(HostSessionService);
   protected readonly appStrings = AppStrings;
 }

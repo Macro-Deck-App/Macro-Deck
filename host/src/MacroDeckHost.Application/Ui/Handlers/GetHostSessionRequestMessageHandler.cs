@@ -21,7 +21,8 @@ public sealed class GetHostSessionRequestMessageHandler
 		return ValueTask.FromResult(new GetHostSessionResponse
 		{
 			SessionId = _session.Id,
-			RestoreApplied = _session.RestoreApplied
+			RestoreApplied = _session.RestoreApplied,
+			PluginsDisabledAtStartup = _session.PluginsDisabledAtStartup
 		});
 	}
 }

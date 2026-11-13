@@ -26162,4 +26162,76 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>无法向 {address} 发送数据包。</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck 命令行选项：</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>显示此帮助并退出。</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>显示已安装的 Macro Deck 版本并退出。</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>列出已安装的插件但不启动它们，然后退出。</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>启动 Macro Deck 但不启动已安装的插件。可在开发者工具中逐个启动插件。仅适用于本次会话。</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>退出正在运行的 Macro Deck。</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>渠道：{channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>提交：{commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>插件文件夹：{path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>无法读取插件文件夹：{error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>未安装任何插件。</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>名称：{name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>当前版本：{version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>其他已安装版本：{versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>没有可用的当前版本。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>版本 {version} 的清单无效（{error}）。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>版本 {version} 没有清单。</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}：不是有效的插件文件夹。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>未找到 Macro Deck 主机。请重新安装 Macro Deck。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>无法运行 Macro Deck 主机：{error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck 已在运行。请先退出 Macro Deck，然后使用 {option} 重新启动。</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>插件已禁用</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck 以 --disable-plugins 启动。本次会话中已安装的插件不会自动启动。可在开发者工具中逐个启动。</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck 以 --disable-plugins 启动，因此已安装的插件未自动启动。可在此处逐个启动。在此处启动或停止仅对本次会话有效。</value>
+  </data>
 </root>

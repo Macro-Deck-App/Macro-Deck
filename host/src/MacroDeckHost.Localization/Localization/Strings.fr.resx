@@ -26158,4 +26158,76 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
     <value>Impossible d'envoyer le paquet à {address}.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Options de ligne de commande de Macro Deck :</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Affiche cette aide et quitte.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Affiche la version installée de Macro Deck et quitte.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Liste les plugins installés sans les démarrer, puis quitte.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Démarre Macro Deck sans démarrer les plugins installés. Démarre-les un par un dans les Outils développeur. S'applique uniquement à cette session.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Quitte le Macro Deck en cours d’exécution.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Canal : {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit : {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Dossier des plugins : {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Impossible de lire le dossier des plugins : {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Aucun plugin n'est installé.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Nom : {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Version active : {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Autres versions installées : {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Aucune version active utilisable.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>Le manifeste de la version {version} n'est pas valide ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>La version {version} n'a pas de manifeste.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder} : dossier de plugin non valide.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>L'hôte de Macro Deck est introuvable. Réinstalle Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Impossible d'exécuter l'hôte de Macro Deck : {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck est déjà en cours d'exécution. Quitte d'abord Macro Deck, puis redémarre-le avec {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Plugins désactivés</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck a été démarré avec --disable-plugins. Les plugins installés ne démarrent pas automatiquement dans cette session. Démarre-les un par un dans les Outils développeur.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck a été démarré avec --disable-plugins : les plugins installés n'ont donc pas été démarrés automatiquement. Démarre-les ici un par un. Les démarrer ou les arrêter ici ne s'applique qu'à cette session.</value>
+  </data>
 </root>

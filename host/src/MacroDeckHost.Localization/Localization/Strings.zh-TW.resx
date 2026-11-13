@@ -26180,4 +26180,76 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>無法向 {address} 傳送封包。</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck 命令列選項：</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>顯示此說明並結束。</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>顯示已安裝的 Macro Deck 版本並結束。</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>列出已安裝的外掛程式但不啟動，然後結束。</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>啟動 Macro Deck 但不啟動已安裝的外掛程式。可在開發人員工具中逐一啟動。僅適用於本次工作階段。</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>結束正在執行的 Macro Deck。</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>通道：{channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>提交：{commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>外掛程式資料夾：{path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>無法讀取外掛程式資料夾：{error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>未安裝任何外掛程式。</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>名稱：{name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>目前版本：{version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>其他已安裝版本：{versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>沒有可用的目前版本。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>版本 {version} 的資訊清單無效（{error}）。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>版本 {version} 沒有資訊清單。</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}：不是有效的外掛程式資料夾。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>找不到 Macro Deck 主機。請重新安裝 Macro Deck。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>無法執行 Macro Deck 主機：{error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck 已在執行中。請先結束 Macro Deck，然後使用 {option} 重新啟動。</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>外掛程式已停用</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck 以 --disable-plugins 啟動。本次工作階段中已安裝的外掛程式不會自動啟動。可在開發人員工具中逐一啟動。</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck 以 --disable-plugins 啟動，因此已安裝的外掛程式未自動啟動。可在此逐一啟動。在此啟動或停止僅適用於本次工作階段。</value>
+  </data>
 </root>
