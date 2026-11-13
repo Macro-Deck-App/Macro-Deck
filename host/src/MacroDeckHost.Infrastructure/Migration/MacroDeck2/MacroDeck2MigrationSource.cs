@@ -568,7 +568,7 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 
 	private List<MacroDeck2Profile> ReadProfiles(MacroDeck2Paths paths)
 	{
-		var profiles = new List<MacroDeck2Profile>();
+		var files = new List<MacroDeck2Profile>();
 
 		if (Directory.Exists(paths.ProfilesDirectory))
 		{
@@ -578,20 +578,36 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 				var profile = Deserialize(ReadAllText(file));
 				if (profile is not null)
 				{
-					profiles.Add(profile);
+					files.Add(profile);
 				}
 			}
 		}
 
-		// Only an unsuffixed database is still authoritative. Macro Deck 2 renames it to
-		// "profiles.db.migrated" the moment it has written the JSON files beside it, so a file carrying
-		// that suffix is a spent tombstone holding older data than what sits next to it.
-		if (profiles.Count == 0 && File.Exists(paths.LegacyProfilesDatabase))
+		// Macro Deck 2 renames the database to profiles.db.migrated once it has written the JSON files, so an
+		// unsuffixed one was never migrated and the JSON beside it did not come from it.
+		if (!File.Exists(paths.LegacyProfilesDatabase))
 		{
-			profiles.AddRange(ReadLegacyDatabase(paths.LegacyProfilesDatabase));
+			return files;
 		}
 
-		return profiles;
+		var database = ReadLegacyDatabase(paths.LegacyProfilesDatabase);
+		if (database.Count == 0)
+		{
+			return files;
+		}
+
+		// 2.15 skips that migration once any JSON profile exists, and it writes an empty default profile
+		// itself, for example when a pre-2.15 backup is restored: the database then holds the real layout.
+		var kept = files.Where(HasButtons).ToList();
+		var keptIds = kept.Select(profile => profile.ProfileId).ToHashSet(StringComparer.Ordinal);
+		return database.Where(profile => !keptIds.Contains(profile.ProfileId))
+			.Concat(kept)
+			.ToList();
+	}
+
+	private static bool HasButtons(MacroDeck2Profile profile)
+	{
+		return profile.Folders.Any(folder => folder.ActionButtons.Count > 0);
 	}
 
 	private List<MacroDeck2Profile> ReadLegacyDatabase(string databasePath)
@@ -602,7 +618,8 @@ public sealed class MacroDeck2MigrationSource : IMigrationSource
 			var connectionString = new SqliteConnectionStringBuilder
 			{
 				DataSource = databasePath,
-				Mode = SqliteOpenMode.ReadOnly
+				Mode = SqliteOpenMode.ReadOnly,
+				Pooling = false
 			}.ToString();
 
 			using var connection = new SqliteConnection(connectionString);

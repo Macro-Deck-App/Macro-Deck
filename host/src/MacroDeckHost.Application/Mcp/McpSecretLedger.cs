@@ -25,6 +25,7 @@ public sealed class McpSecretLedger : IMcpSecretLedger
 	private readonly IScriptCache _scripts;
 	private readonly IMcpSecretHolders _holders;
 	private readonly ISecretService _secrets;
+	private readonly TimeProvider _timeProvider;
 	private readonly ISecretLineage? _lineage;
 	private static readonly Lock _gate = new();
 
@@ -35,8 +36,10 @@ public sealed class McpSecretLedger : IMcpSecretLedger
 		IScriptCache scripts,
 		IMcpSecretHolders holders,
 		ISecretService secrets,
+		TimeProvider timeProvider,
 		ISecretLineage? lineage = null)
 	{
+		_timeProvider = timeProvider;
 		_lineage = lineage;
 		_store = store;
 		_folders = folders;
@@ -139,7 +142,9 @@ public sealed class McpSecretLedger : IMcpSecretLedger
 			.Concat(_automations.GetAll().Select(automation => automation.Flows))
 			.Concat(_scripts.GetAll().Select(script => script.Flows));
 
-		var referenced = _store.Read<McpJournalDocument>(IMcpStateStore.JournalDocument)?.SecretIds() ?? [];
+		var journal = _store.Read<McpJournalDocument>(IMcpStateStore.JournalDocument) ?? new McpJournalDocument();
+		journal.RemoveExpired(_timeProvider.GetUtcNow().UtcDateTime);
+		var referenced = journal.SecretIds();
 		foreach (var text in texts)
 		{
 			referenced.UnionWith(SecretReferences.Extract(text));

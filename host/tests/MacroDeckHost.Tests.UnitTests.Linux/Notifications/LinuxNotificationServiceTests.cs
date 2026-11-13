@@ -29,7 +29,6 @@ public class LinuxNotificationServiceTests
 		Directory.Delete(_directory, true);
 	}
 
-	[Ignore("Red today: #1712 notify-send receives the title and message without --")]
 	[TestCase("-x marks the spot")]
 	[TestCase("--help")]
 	[TestCase("Plain title")]
@@ -43,7 +42,7 @@ public class LinuxNotificationServiceTests
 		Assert.That(Positionals(arguments), Is.EqualTo(new[] { title, "-message" }), string.Join(" | ", arguments));
 	}
 
-	// notify-send parses its arguments with GOption: anything after "--" is text, before it a leading dash is an option.
+	// notify-send parses with GOption: anything after "--" is text, before it a leading dash is an option.
 	private static List<string> Positionals(IEnumerable<string> arguments)
 	{
 		var positionals = new List<string>();

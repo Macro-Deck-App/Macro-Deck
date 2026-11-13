@@ -54,11 +54,26 @@ public sealed class McpJournalBatch
 	public List<McpJournalItem> Items { get; init; } = [];
 
 	public bool Undone { get; set; }
+
+	public bool DeletesSomething()
+	{
+		return Items.Any(item => item.Operation == McpJournalOperation.Deleted);
+	}
+
+	public bool ExpiredAt(DateTime now)
+	{
+		return DeletesSomething() && now - At > McpJournal.DeleteRetention;
+	}
 }
 
 public sealed class McpJournalDocument
 {
 	public List<McpJournalBatch> Batches { get; init; } = [];
+
+	public int RemoveExpired(DateTime now)
+	{
+		return Batches.RemoveAll(batch => batch.ExpiredAt(now));
+	}
 
 	public HashSet<Guid> SecretIds()
 	{
@@ -126,20 +141,27 @@ public interface IMcpJournal
 	Task Append(McpJournalBatch batch, CancellationToken cancellationToken = default);
 
 	void MarkUndone(Guid batchId);
+
+	void RemoveExpired();
 }
 
 public sealed class McpJournal : IMcpJournal
 {
 	public const int Capacity = 20;
+	public const int DeleteCapacity = 100;
+
+	public static readonly TimeSpan DeleteRetention = TimeSpan.FromDays(30);
 
 	private readonly IMcpStateStore _store;
 	private readonly IMcpSecretLedger _secrets;
+	private readonly TimeProvider _timeProvider;
 	private static readonly Lock _gate = new();
 
-	public McpJournal(IMcpStateStore store, IMcpSecretLedger secrets)
+	public McpJournal(IMcpStateStore store, IMcpSecretLedger secrets, TimeProvider timeProvider)
 	{
 		_store = store;
 		_secrets = secrets;
+		_timeProvider = timeProvider;
 	}
 
 	public static string Fingerprint(JsonElement? snapshot)
@@ -152,7 +174,8 @@ public sealed class McpJournal : IMcpJournal
 	{
 		lock (_gate)
 		{
-			return Document().Batches.ToList();
+			var now = Now();
+			return Document().Batches.Where(batch => !batch.ExpiredAt(now)).ToList();
 		}
 	}
 
@@ -160,23 +183,19 @@ public sealed class McpJournal : IMcpJournal
 	{
 		lock (_gate)
 		{
-			return Document().Batches.FirstOrDefault(batch => batch.BatchId == batchId);
+			var now = Now();
+			return Document().Batches.FirstOrDefault(batch => batch.BatchId == batchId && !batch.ExpiredAt(now));
 		}
 	}
 
 	public async Task Append(McpJournalBatch batch, CancellationToken cancellationToken = default)
 	{
-		var evicted = false;
+		bool evicted;
 		lock (_gate)
 		{
 			var document = Document();
 			document.Batches.Add(batch);
-			while (document.Batches.Count > Capacity)
-			{
-				document.Batches.RemoveAt(0);
-				evicted = true;
-			}
-
+			evicted = Evict(document, Now());
 			_store.Write(IMcpStateStore.JournalDocument, document);
 		}
 
@@ -198,6 +217,43 @@ public sealed class McpJournal : IMcpJournal
 				_store.Write(IMcpStateStore.JournalDocument, document);
 			}
 		}
+	}
+
+	public void RemoveExpired()
+	{
+		lock (_gate)
+		{
+			var document = Document();
+			if (document.RemoveExpired(Now()) > 0)
+			{
+				_store.Write(IMcpStateStore.JournalDocument, document);
+			}
+		}
+	}
+
+	private static bool Evict(McpJournalDocument document, DateTime now)
+	{
+		var removed = document.RemoveExpired(now);
+		removed += RemoveOldest(document.Batches, batch => batch.DeletesSomething(), DeleteCapacity);
+		removed += RemoveOldest(document.Batches, batch => !batch.DeletesSomething(), Capacity);
+		return removed > 0;
+	}
+
+	private static int RemoveOldest(List<McpJournalBatch> batches, Func<McpJournalBatch, bool> kind, int capacity)
+	{
+		var surplus = batches.Count(kind) - capacity;
+		if (surplus <= 0)
+		{
+			return 0;
+		}
+
+		var oldest = batches.Where(kind).Take(surplus).ToHashSet();
+		return batches.RemoveAll(oldest.Contains);
+	}
+
+	private DateTime Now()
+	{
+		return _timeProvider.GetUtcNow().UtcDateTime;
 	}
 
 	private McpJournalDocument Document()

@@ -22,6 +22,7 @@ public sealed class McpDeferredScrubService : BackgroundService
 		{
 			await _readiness.WhenReady.WaitAsync(stoppingToken);
 			await using var scope = _scopes.CreateAsyncScope();
+			scope.ServiceProvider.GetRequiredService<IMcpJournal>().RemoveExpired();
 			await scope.ServiceProvider.GetRequiredService<IMcpSecretLedger>().ScrubDeferred(stoppingToken);
 		}
 		catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)

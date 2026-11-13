@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { EMPTY, Observable } from 'rxjs';
+import { EMPTY, Observable, Subject } from 'rxjs';
 
 import { FolderViewHostComponent } from './folder-view-host.component';
 import {
@@ -10,7 +10,7 @@ import { FolderViewService } from '../../services/folder-view.service';
 import { ApiService, ConnectionState } from '../../transport';
 import { HOST_URL_RESOLVER } from '../../transport/host-url';
 import { provideLocalizationTesting } from '../../localization/localization-test-support';
-import { type IpcFolderView, UiNode, UiNodeEvent } from '@macro-deck/runtime';
+import { type FolderViewCatalogChangedEvent, type IpcFolderView, UiNode, UiNodeEvent } from '@macro-deck/runtime';
 
 class FakeUiSessionHandle implements UiSessionHandle {
   readonly root = signal<UiNode | null>(null);
@@ -42,6 +42,8 @@ describe('FolderViewHostComponent', () => {
   let opens: UiSessionOpenRequest[];
   let handles: FakeUiSessionHandle[];
   let catalog: IpcFolderView[];
+  let catalogChanged: Subject<FolderViewCatalogChangedEvent>;
+  let listCatalog: (views: IpcFolderView[]) => void;
 
   function createFixture(inputs: {
     folderId?: string;
@@ -68,6 +70,7 @@ describe('FolderViewHostComponent', () => {
     opens = [];
     handles = [];
     catalog = [view(viewId, 'default')];
+    catalogChanged = new Subject<FolderViewCatalogChangedEvent>();
 
     const fakeUiSessions = {
       open: (request: UiSessionOpenRequest): UiSessionHandle => {
@@ -78,12 +81,20 @@ describe('FolderViewHostComponent', () => {
       },
     };
 
-    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['getLocalization', 'onNotification']);
+    const apiSpy = jasmine.createSpyObj<ApiService>('ApiService',
+      ['getLocalization', 'onNotification', 'onFolderViewCatalogChanged']);
+    apiSpy.onFolderViewCatalogChanged.and.returnValue(catalogChanged);
     apiSpy.getLocalization.and.resolveTo({
       culture: 'en', fallbackCulture: 'en', translations: {}, followSystem: false, availableCultures: ['en'],
     });
     apiSpy.onNotification.and.callFake(<T,>(): Observable<T> => EMPTY);
     Object.defineProperty(apiSpy, 'connectionStateSignal', { value: signal<ConnectionState>('connected') });
+
+    const catalogVersion = signal(0);
+    listCatalog = views => {
+      catalog = views;
+      catalogVersion.update(version => version + 1);
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -98,7 +109,10 @@ describe('FolderViewHostComponent', () => {
             folderViews: signal(catalog),
             load: () => Promise.resolve(),
             reload: () => Promise.resolve(),
-            find: (id: string) => catalog.find(candidate => candidate.id === id),
+            find: (id: string) => {
+              catalogVersion();
+              return catalog.find(candidate => candidate.id === id);
+            },
           },
         },
       ],
@@ -147,8 +161,10 @@ describe('FolderViewHostComponent', () => {
 
   describe('when nothing provides the view', () => {
     function rejectAndDetect(fixture: ComponentFixture<FolderViewHostComponent>): void {
-      handles[0].rejection.set({ code: 'PROVIDER_UNAVAILABLE' });
-      fixture.detectChanges();
+      for (let index = 0; index < handles.length; index++) {
+        handles[index].rejection.set({ code: 'PROVIDER_UNAVAILABLE' });
+        fixture.detectChanges();
+      }
     }
 
     it('shows the placeholder rather than an empty view', () => {
@@ -191,5 +207,67 @@ describe('FolderViewHostComponent', () => {
 
     expect(handles[0].closed).toBeTrue();
     expect(opens.length).toBe(2);
+  });
+
+  describe('when its view comes back', () => {
+    function refuse(fixture: ComponentFixture<FolderViewHostComponent>, code = 'PROVIDER_UNAVAILABLE'): void {
+      handles[handles.length - 1].rejection.set({ code });
+      fixture.detectChanges();
+    }
+
+    function announce(fixture: ComponentFixture<FolderViewHostComponent>, views: IpcFolderView[]): void {
+      listCatalog(views);
+      catalogChanged.next({ folderViews: views });
+      fixture.detectChanges();
+    }
+
+    beforeEach(() => {
+      catalog = [];
+    });
+
+    it('opens the folder again and leaves the placeholder', () => {
+      const fixture = createFixture();
+      listCatalog([]);
+      refuse(fixture);
+
+      announce(fixture, [view('com.example.other::clock', 'default'), view(viewId, 'default')]);
+
+      expect(opens.length).toBe(2);
+      expect(opens[1]).toEqual({ kind: 'folder', folderId: 'folder-1' });
+      expect(html(fixture).querySelector('.folder-view-placeholder')).toBeNull();
+    });
+
+    it('stays on the placeholder while the catalog still lacks the view', () => {
+      const fixture = createFixture();
+      listCatalog([]);
+      refuse(fixture);
+
+      announce(fixture, [view('com.example.other::clock', 'default')]);
+
+      expect(opens.length).toBe(1);
+      expect(html(fixture).querySelector('.folder-view-placeholder')).not.toBeNull();
+    });
+
+    it('does not restart a view that failed for another reason', () => {
+      const fixture = createFixture();
+      listCatalog([]);
+      refuse(fixture, 'PROVIDER_FAULTED');
+
+      announce(fixture, [view(viewId, 'default')]);
+
+      expect(opens.length).toBe(1);
+    });
+
+    it('asks once more when the view was listed before the refusal arrived', () => {
+      listCatalog([view(viewId, 'default')]);
+      const fixture = createFixture();
+      refuse(fixture);
+
+      expect(opens.length).toBe(2);
+      refuse(fixture);
+
+      expect(opens.length).toBe(2);
+      expect(html(fixture).querySelector('.folder-view-placeholder')).not.toBeNull();
+    });
   });
 });

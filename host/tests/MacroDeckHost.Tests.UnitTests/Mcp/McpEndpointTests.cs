@@ -34,6 +34,7 @@ public partial class McpEndpointTests
 		"catalog", "list", "get", "set_secret", "apply_changes", "undo", "run_action", "run_script", "trigger_event"
 	];
 
+	private readonly ShiftedClock _clock = new();
 	private IHost _host = null!;
 	private HttpClient _client = null!;
 	private string _dataDir = null!;
@@ -64,6 +65,8 @@ public partial class McpEndpointTests
 					readiness.MarkCachesReady();
 					readiness.MarkVariablesReady();
 					services.AddSingleton(readiness);
+					services.RemoveAll<TimeProvider>();
+					services.AddSingleton<TimeProvider>(_clock);
 				});
 			})
 			.StartAsync();

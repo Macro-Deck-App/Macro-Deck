@@ -571,6 +571,113 @@ public class MacroDeck2MigrationSourceTests
 	}
 
 	[Test]
+	public async Task Read_FromABackupMadeBefore2_15_TakesTheProfilesFromItsDatabase()
+	{
+		_fixture.WithConfig()
+			.WithLegacyProfile("0",
+				"Stream",
+				3,
+				5,
+				[
+					MacroDeck2Fixture.Folder("root",
+						"*Root*",
+						[MacroDeck2Fixture.Button(1, 1), MacroDeck2Fixture.Button(2, 0)])
+				])
+			.Build();
+
+		var backup = _fixture.PackAsBackup();
+		try
+		{
+			var result = await CreateSource(MachineKey)
+				.Read(new MigrationRequest(MacroDeck2MigrationSource.SourceId, backup, null, false),
+					CancellationToken.None);
+
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.Data!.Profiles.Select(profile => profile.Profile!.Name),
+					Is.EqualTo(new[] { "Stream" }));
+				Assert.That(result.Data!.WidgetCount, Is.EqualTo(2));
+			});
+		}
+		finally
+		{
+			File.Delete(backup);
+		}
+	}
+
+	// Macro Deck 2.15 writes an empty default profile when a pre-2.15 backup is restored, and from then on
+	// never migrates the database that still holds the real layout.
+	[Test]
+	public async Task Read_WithAnUnmigratedDatabaseBesideAnEmptyDefaultProfile_TakesTheDatabase()
+	{
+		_fixture.WithConfig()
+			.WithLegacyProfile("0",
+				"Stream",
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(1, 1)])])
+			.WithProfile("0199a1b2-0000-7000-8000-000000000000",
+				"Profile 1",
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("default-root", "*Root*", [])])
+			.Build();
+
+		var plan = await Read();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plan.Profiles.Select(profile => profile.Profile!.Name), Is.EqualTo(new[] { "Stream" }));
+			Assert.That(plan.WidgetCount, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task Read_WithAnUnmigratedDatabaseBesideAProfileBuiltIn2_15_KeepsBoth()
+	{
+		_fixture.WithConfig()
+			.WithLegacyProfile("0",
+				"Stream",
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(1, 1)])])
+			.WithProfile("0199a1b2-0000-7000-8000-000000000000",
+				"Gaming",
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("gaming-root", "*Root*", [MacroDeck2Fixture.Button(0, 0)])])
+			.Build();
+
+		var plan = await Read();
+
+		Assert.That(plan.Profiles.Select(profile => profile.Profile!.Name),
+			Is.EquivalentTo(new[] { "Stream", "Gaming" }));
+	}
+
+	[Test]
+	public async Task Read_WithADatabaseMacroDeck2AlreadyMigrated_TakesOnlyTheJsonProfiles()
+	{
+		_fixture.WithConfig()
+			.WithLegacyProfile("0",
+				"Before the update",
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(1, 1)])])
+			.WithProfile("0",
+				"After the update",
+				3,
+				5,
+				[MacroDeck2Fixture.Folder("root", "*Root*", [MacroDeck2Fixture.Button(1, 1)])])
+			.Build();
+		File.Move(Path.Combine(_fixture.Root, "profiles.db"), Path.Combine(_fixture.Root, "profiles.db.migrated"));
+
+		var plan = await Read();
+
+		Assert.That(plan.Profiles.Select(profile => profile.Profile!.Name), Is.EqualTo(new[] { "After the update" }));
+	}
+
+	[Test]
 	public async Task Read_FromABackupArchiveThatHoldsNoProfiles_SaysSo()
 	{
 		var empty = Path.Combine(Path.GetTempPath(), $"md2-empty-{Guid.NewGuid():N}.zip");
