@@ -26162,4 +26162,76 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>{address} पर पैकेट नहीं भेजा जा सका।</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck के कमांड-लाइन विकल्प:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>यह सहायता दिखाएँ और बाहर निकलें।</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Macro Deck का इंस्टॉल किया गया संस्करण दिखाएँ और बाहर निकलें।</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>इंस्टॉल किए गए प्लगइन बिना शुरू किए सूचीबद्ध करें, फिर बाहर निकलें।</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>इंस्टॉल किए गए प्लगइन शुरू किए बिना Macro Deck शुरू करें। प्लगइन को डेवलपर टूल में एक-एक करके शुरू करें। यह केवल इस सत्र पर लागू होता है।</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>चल रहे Macro Deck को बंद करें।</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>चैनल: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>कमिट: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>प्लगइन फ़ोल्डर: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>प्लगइन फ़ोल्डर पढ़ा नहीं जा सका: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>कोई प्लगइन इंस्टॉल नहीं है।</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>नाम: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>सक्रिय संस्करण: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>अन्य इंस्टॉल किए गए संस्करण: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>कोई उपयोग योग्य सक्रिय संस्करण नहीं।</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>संस्करण {version} का मैनिफ़ेस्ट अमान्य है ({error})।</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>संस्करण {version} में कोई मैनिफ़ेस्ट नहीं है।</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: मान्य प्लगइन फ़ोल्डर नहीं है।</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Macro Deck होस्ट नहीं मिला। Macro Deck फिर से इंस्टॉल करें।</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Macro Deck होस्ट चलाया नहीं जा सका: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck पहले से चल रहा है। पहले Macro Deck बंद करें, फिर उसे {option} के साथ दोबारा शुरू करें।</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>प्लगइन अक्षम</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck को --disable-plugins के साथ शुरू किया गया। इस सत्र में इंस्टॉल किए गए प्लगइन अपने-आप शुरू नहीं होते। उन्हें डेवलपर टूल में एक-एक करके शुरू करें।</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck को --disable-plugins के साथ शुरू किया गया, इसलिए इंस्टॉल किए गए प्लगइन अपने-आप शुरू नहीं हुए। उन्हें यहाँ एक-एक करके शुरू करें। यहाँ शुरू या बंद करना केवल इस सत्र पर लागू होता है।</value>
+  </data>
 </root>

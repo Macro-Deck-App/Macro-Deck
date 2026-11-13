@@ -26162,4 +26162,76 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Paket ke {address} tidak dapat dikirim.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Opsi baris perintah Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Tampilkan bantuan ini lalu keluar.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Tampilkan versi Macro Deck yang terpasang lalu keluar.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Tampilkan daftar plugin yang terpasang tanpa menjalankannya, lalu keluar.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Jalankan Macro Deck tanpa menjalankan plugin yang terpasang. Jalankan plugin satu per satu di Alat pengembang. Hanya berlaku untuk sesi ini.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Tutup Macro Deck yang sedang berjalan.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Kanal: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Folder plugin: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Folder plugin tidak dapat dibaca: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Tidak ada plugin yang terpasang.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Nama: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Versi aktif: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Versi lain yang terpasang: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Tidak ada versi aktif yang dapat digunakan.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>Manifes versi {version} tidak valid ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>Versi {version} tidak memiliki manifes.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: bukan folder plugin yang valid.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Host Macro Deck tidak ditemukan. Pasang ulang Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Host Macro Deck tidak dapat dijalankan: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck sudah berjalan. Tutup Macro Deck terlebih dahulu, lalu jalankan lagi dengan {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Plugin dinonaktifkan</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck dijalankan dengan --disable-plugins. Plugin yang terpasang tidak berjalan otomatis di sesi ini. Jalankan satu per satu di Alat pengembang.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck dijalankan dengan --disable-plugins, sehingga plugin yang terpasang tidak dijalankan otomatis. Jalankan di sini satu per satu. Menjalankan atau menghentikan di sini hanya berlaku untuk sesi ini.</value>
+  </data>
 </root>

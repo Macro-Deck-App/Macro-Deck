@@ -6,6 +6,12 @@
     </div>
   </div>
 
+  @if (hostSession.pluginsDisabledAtStartup()) {
+    <p class="managed-plugins-disabled-notice" role="status">
+      {{ 'macrodeck.app:Developer.ManagedPlugins.PluginsDisabledNotice' | translate }}
+    </p>
+  }
+
   @if (runtimeService.loadError(); as loadError) {
     <shared-error-banner class="managed-plugins-error" [message]="loadError" [dismissible]="false" />
   }

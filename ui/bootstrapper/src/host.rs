@@ -578,6 +578,10 @@ pub fn shell_executable() -> Option<PathBuf> {
 }
 
 fn host_binary_candidates(app: &AppHandle) -> Vec<PathBuf> {
+    host_binary_candidates_in(app.path().resource_dir().ok())
+}
+
+pub fn host_binary_candidates_in(resource_dir: Option<PathBuf>) -> Vec<PathBuf> {
     let binary = host_binary_name();
     let mut candidates = Vec::new();
     if let Ok(exe) = std::env::current_exe() {
@@ -585,7 +589,7 @@ fn host_binary_candidates(app: &AppHandle) -> Vec<PathBuf> {
             candidates.push(dir.join("host").join(binary));
         }
     }
-    if let Ok(dir) = app.path().resource_dir() {
+    if let Some(dir) = resource_dir {
         candidates.push(dir.join("host").join(binary));
     }
     candidates
@@ -595,6 +599,26 @@ pub fn host_binary_path(app: &AppHandle) -> Option<PathBuf> {
     host_binary_candidates(app)
         .into_iter()
         .find(|path| path.exists())
+}
+
+pub fn host_command(binary: &Path, config_dir: Option<&Path>) -> Command {
+    let mut command = Command::new(binary);
+    #[cfg(target_os = "linux")]
+    crate::font_guard::restore_for_child(&mut command);
+    command.current_dir(binary.parent().unwrap_or(Path::new(".")));
+    if let Some(dir) = config_dir {
+        command.env("DOTNET_BUNDLE_EXTRACT_BASE_DIR", dir.join("host-runtime"));
+    }
+    if let Some(exe) = shell_executable() {
+        command.env("MACRODECK_SHELL_EXECUTABLE", exe);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    command
 }
 
 pub fn host_dir(app: &AppHandle) -> PathBuf {
@@ -895,27 +919,15 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
     }
     loopback_secret::set_secret(secret.clone());
 
-    let mut command = Command::new(&binary);
-    #[cfg(target_os = "linux")]
-    crate::font_guard::restore_for_child(&mut command);
+    let mut command = host_command(&binary, config_dir.as_deref());
     command
-        .current_dir(binary.parent().unwrap_or(Path::new(".")))
         .env("MACRODECK_HOST_PORT", port.to_string())
         .env(loopback_secret::ENVIRONMENT_VARIABLE, &secret)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    if let Some(dir) = &config_dir {
-        command.env("DOTNET_BUNDLE_EXTRACT_BASE_DIR", dir.join("host-runtime"));
-    }
-    if let Some(exe) = shell_executable() {
-        command.env("MACRODECK_SHELL_EXECUTABLE", exe);
-    }
-    #[cfg(windows)]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-        command.creation_flags(CREATE_NO_WINDOW);
+    if crate::cli::plugins_disabled() {
+        command.arg(crate::cli::DISABLE_PLUGINS);
     }
     // Puts the host in its own process group so a forced stop can signal the whole tree (the
     // plugins it spawns) instead of just the host pid; a .NET child inherits its parent's group.

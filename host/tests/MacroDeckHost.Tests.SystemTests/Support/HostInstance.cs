@@ -24,6 +24,7 @@ internal sealed class HostInstance : IAsyncDisposable
 	private readonly ConcurrentQueue<string> _output = new();
 	private readonly string _root;
 	private readonly IReadOnlyDictionary<string, string?> _extraEnvironment;
+	private readonly IReadOnlyList<string> _arguments;
 	private readonly string _loopbackSecret = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
 	private readonly Lock _gate = new();
 
@@ -32,10 +33,14 @@ internal sealed class HostInstance : IAsyncDisposable
 	private int _starts;
 	private bool _stopping;
 
-	private HostInstance(string root, IReadOnlyDictionary<string, string?> extraEnvironment)
+	private HostInstance(
+		string root,
+		IReadOnlyDictionary<string, string?> extraEnvironment,
+		IReadOnlyList<string> arguments)
 	{
 		_root = root;
 		_extraEnvironment = extraEnvironment;
+		_arguments = arguments;
 		Directory.CreateDirectory(DataDirectory);
 		Directory.CreateDirectory(TempDirectory);
 	}
@@ -73,9 +78,10 @@ internal sealed class HostInstance : IAsyncDisposable
 
 	public static async Task<HostInstance> StartAsync(
 		string root,
-		IReadOnlyDictionary<string, string?>? environment = null)
+		IReadOnlyDictionary<string, string?>? environment = null,
+		IReadOnlyList<string>? arguments = null)
 	{
-		var host = new HostInstance(root, environment ?? new Dictionary<string, string?>());
+		var host = new HostInstance(root, environment ?? new Dictionary<string, string?>(), arguments ?? []);
 		await host.StartWithFreshPortsAsync();
 		return host;
 	}
@@ -248,13 +254,26 @@ internal sealed class HostInstance : IAsyncDisposable
 		}
 	}
 
-	public async Task<(int ExitCode, IReadOnlyList<string> Output)> RunAnotherInstanceAsync(TimeSpan timeout)
+	public Task<(int ExitCode, IReadOnlyList<string> Output)> RunAnotherInstanceAsync(TimeSpan timeout)
+	{
+		var start = StartInfo(FreePort(), FreePort(), Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));
+		return RunToExitAsync(start, timeout);
+	}
+
+	public Task<(int ExitCode, IReadOnlyList<string> Output)> RunCommandAsync(string argument, TimeSpan timeout)
+	{
+		var start = StartInfo(FreePort(), FreePort(), Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));
+		start.ArgumentList.Clear();
+		start.ArgumentList.Add(argument);
+		return RunToExitAsync(start, timeout);
+	}
+
+	private static async Task<(int ExitCode, IReadOnlyList<string> Output)> RunToExitAsync(
+		ProcessStartInfo start,
+		TimeSpan timeout)
 	{
 		var output = new ConcurrentQueue<string>();
-		using var process = new Process
-		{
-			StartInfo = StartInfo(FreePort(), FreePort(), Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)))
-		};
+		using var process = new Process { StartInfo = start };
 		process.OutputDataReceived += (_, line) => Collect(output, line.Data);
 		process.ErrorDataReceived += (_, line) => Collect(output, line.Data);
 		process.Start();
@@ -307,6 +326,11 @@ internal sealed class HostInstance : IAsyncDisposable
 		foreach (var (name, value) in _extraEnvironment)
 		{
 			start.Environment[name] = value;
+		}
+
+		foreach (var argument in _arguments)
+		{
+			start.ArgumentList.Add(argument);
 		}
 
 		return start;

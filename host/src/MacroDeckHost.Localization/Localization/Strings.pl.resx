@@ -26140,4 +26140,76 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Nie można wysłać pakietu na {address}.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Opcje wiersza poleceń Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Wyświetla tę pomoc i kończy działanie.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Wyświetla zainstalowaną wersję Macro Deck i kończy działanie.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Wyświetla listę zainstalowanych wtyczek bez ich uruchamiania i kończy działanie.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Uruchamia Macro Deck bez uruchamiania zainstalowanych wtyczek. Wtyczki można uruchamiać pojedynczo w Narzędziach deweloperskich. Dotyczy tylko tej sesji.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Zamyka uruchomiony Macro Deck.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Kanał: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Folder wtyczek: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Nie można odczytać folderu wtyczek: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Brak zainstalowanych wtyczek.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Nazwa: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Aktywna wersja: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Inne zainstalowane wersje: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Brak użytecznej aktywnej wersji.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>Manifest wersji {version} jest nieprawidłowy ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>Wersja {version} nie ma manifestu.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: nieprawidłowy folder wtyczki.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Nie znaleziono hosta Macro Deck. Zainstaluj Macro Deck ponownie.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Nie można uruchomić hosta Macro Deck: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck już działa. Najpierw zamknij Macro Deck, a następnie uruchom go ponownie z {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Wtyczki wyłączone</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck uruchomiono z --disable-plugins. Zainstalowane wtyczki nie uruchamiają się automatycznie w tej sesji. Można je uruchamiać pojedynczo w Narzędziach deweloperskich.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck uruchomiono z --disable-plugins, więc zainstalowane wtyczki nie zostały uruchomione automatycznie. Tutaj można je uruchamiać pojedynczo. Uruchomienie lub zatrzymanie tutaj dotyczy tylko tej sesji.</value>
+  </data>
 </root>

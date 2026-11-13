@@ -26162,4 +26162,76 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Paket {address} adresine gönderilemedi.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck komut satırı seçenekleri:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Bu yardımı gösterir ve çıkar.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Yüklü Macro Deck sürümünü gösterir ve çıkar.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Yüklü eklentileri başlatmadan listeler ve çıkar.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Macro Deck'i yüklü eklentileri başlatmadan başlatır. Eklentileri Geliştirici araçlarında tek tek başlatın. Yalnızca bu oturum için geçerlidir.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Çalışan Macro Deck’ten çıkar.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Kanal: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Eklenti klasörü: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Eklenti klasörü okunamadı: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Yüklü eklenti yok.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Ad: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Etkin sürüm: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Diğer yüklü sürümler: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Kullanılabilir etkin sürüm yok.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>{version} sürümünün bildirimi geçersiz ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>{version} sürümünün bildirimi yok.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: geçerli bir eklenti klasörü değil.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Macro Deck ana bilgisayarı bulunamadı. Macro Deck'i yeniden yükleyin.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Macro Deck ana bilgisayarı çalıştırılamadı: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck zaten çalışıyor. Önce Macro Deck'ten çıkın, ardından {option} ile yeniden başlatın.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Eklentiler devre dışı</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck --disable-plugins ile başlatıldı. Yüklü eklentiler bu oturumda otomatik olarak başlamaz. Bunları Geliştirici araçlarında tek tek başlatın.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck --disable-plugins ile başlatıldığı için yüklü eklentiler otomatik olarak başlatılmadı. Bunları burada tek tek başlatın. Burada başlatma veya durdurma yalnızca bu oturum için geçerlidir.</value>
+  </data>
 </root>

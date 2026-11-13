@@ -287,6 +287,49 @@ If the host does not start although nothing seems to use the port, a host left o
 Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in
 Task Manager or Activity Monitor, then choose **Restart Macro Deck**.
 
+## A plugin keeps Macro Deck from starting or working
+
+Start the Macro Deck program with `--disable-plugins`. Macro Deck then starts without starting any
+installed plugin, and the status bar shows **Plugins disabled**. Your plugins stay installed and listed,
+and you can uninstall one without starting it.
+
+To find the plugin that causes the problem, turn on developer mode and open **Developer Tools**. Under
+**Managed plugins**, every plugin shows whether it is stopped or running. Start them one at a time: a
+started plugin runs as usual, with its logs and errors, and one that fails to start does not affect
+Macro Deck.
+
+This only applies until you quit Macro Deck. Starting or stopping a plugin in this mode does not change
+which plugins start the next time, and plugins are not updated automatically. A plugin you install in
+this mode runs right away but only starts automatically again once you start it in a normal session.
+When Macro Deck restarts itself, for example after an update, it stays in this mode.
+
+Quit Macro Deck before you start it with `--disable-plugins`. If it is already running, the program says
+so and exits without changing anything. If the running Macro Deck is still starting or shows that it
+stopped, the new start only brings its window to the front.
+
+## Command-line options
+
+Start the Macro Deck program with one of these options to get information without starting Macro Deck.
+They only read the installed files, start no plugin and also work while Macro Deck is running.
+
+| Option | What it does |
+| --- | --- |
+| `--help`, `-h` | Lists the command-line options. |
+| `--version` | Shows the installed version and build. |
+| `--list-plugins` | Lists every installed plugin with its name, identifier and versions. A plugin whose files are damaged is listed with what is wrong, and the others are still listed. |
+| `--disable-plugins` | Starts Macro Deck without starting installed plugins, see [above](#a-plugin-keeps-macro-deck-from-starting-or-working). |
+| `--quit` | Quits the running Macro Deck, see [Macro Deck does not open a second time](#macro-deck-does-not-open-a-second-time). |
+
+The output is in the language of your operating system. The exit code is `0` when the command worked,
+`1` when the plugins folder or the Macro Deck installation could not be read, and `89` when
+`--disable-plugins` found Macro Deck already running.
+
+On Windows, a Command Prompt or PowerShell window does not wait for Macro Deck, so the output appears
+after the next prompt and the exit code is lost. Run it from a batch file, which waits, or in PowerShell use
+`(Start-Process "Macro Deck.exe" --version -Wait -PassThru -NoNewWindow).ExitCode` for the exit code or
+`& "Macro Deck.exe" --version | Out-String` for the output. On macOS, run the program inside the app
+bundle directly, not with `open`.
+
 ## Plugins show up as dotnet in Task Manager
 
 Most plugins run on the .NET runtime that comes with Macro Deck, so Task Manager and Activity Monitor

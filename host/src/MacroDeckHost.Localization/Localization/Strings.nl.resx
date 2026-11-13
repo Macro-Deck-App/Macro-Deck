@@ -26162,4 +26162,76 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Het pakket naar {address} kon niet worden verzonden.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Opdrachtregelopties van Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Toont deze hulp en sluit af.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Toont de geïnstalleerde versie van Macro Deck en sluit af.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Toont de geïnstalleerde plugins zonder ze te starten en sluit af.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Start Macro Deck zonder geïnstalleerde plugins te starten. Start ze één voor één in de Ontwikkelaarshulpmiddelen. Geldt alleen voor deze sessie.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Sluit de actieve Macro Deck af.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Kanaal: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Pluginmap: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>De pluginmap kan niet worden gelezen: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Er zijn geen plugins geïnstalleerd.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Naam: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Actieve versie: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Andere geïnstalleerde versies: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Geen bruikbare actieve versie.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>Het manifest van versie {version} is ongeldig ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>Versie {version} heeft geen manifest.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: geen geldige pluginmap.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>De Macro Deck-host is niet gevonden. Installeer Macro Deck opnieuw.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>De Macro Deck-host kan niet worden uitgevoerd: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck draait al. Sluit Macro Deck eerst af en start het daarna opnieuw met {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Plugins uitgeschakeld</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck is gestart met --disable-plugins. Geïnstalleerde plugins starten in deze sessie niet automatisch. Start ze één voor één in de Ontwikkelaarshulpmiddelen.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck is gestart met --disable-plugins, dus geïnstalleerde plugins zijn niet automatisch gestart. Start ze hier één voor één. Starten of stoppen hier geldt alleen voor deze sessie.</value>
+  </data>
 </root>

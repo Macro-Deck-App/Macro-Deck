@@ -26162,4 +26162,76 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Не вдалося надіслати пакет на {address}.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Параметри командного рядка Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Показати цю довідку й вийти.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Показати встановлену версію Macro Deck і вийти.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Вивести список встановлених плагінів, не запускаючи їх, і вийти.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Запустити Macro Deck без запуску встановлених плагінів. Запускайте їх по одному в інструментах розробника. Діє лише для цього сеансу.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Закрити запущений Macro Deck.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Канал: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Коміт: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Папка плагінів: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Не вдалося прочитати папку плагінів: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Плагіни не встановлено.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Назва: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Активна версія: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Інші встановлені версії: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Немає придатної активної версії.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>Маніфест версії {version} недійсний ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>Версія {version} не має маніфесту.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: недійсна папка плагіна.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Хост Macro Deck не знайдено. Перевстановіть Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Не вдалося запустити хост Macro Deck: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck уже запущено. Спочатку закрийте Macro Deck, потім запустіть його знову з {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Плагіни вимкнено</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck запущено з --disable-plugins. У цьому сеансі встановлені плагіни не запускаються автоматично. Запускайте їх по одному в інструментах розробника.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck запущено з --disable-plugins, тому встановлені плагіни не було запущено автоматично. Запускайте їх тут по одному. Запуск або зупинка тут діє лише для цього сеансу.</value>
+  </data>
 </root>

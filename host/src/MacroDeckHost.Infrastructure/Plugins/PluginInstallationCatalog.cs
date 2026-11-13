@@ -97,47 +97,55 @@ public sealed class PluginInstallationCatalog : IPluginInstallationCatalog
 
 		foreach (var pluginDirectory in Directory.EnumerateDirectories(_pluginsDirectory))
 		{
-			var pluginId = Path.GetFileName(pluginDirectory);
-			if (!PluginId.IsValid(pluginId))
+			if (ReadPlugin(pluginDirectory) is { } plugin)
 			{
-				continue;
+				result.Add(plugin);
 			}
-
-			var versionsDirectory = Path.Combine(pluginDirectory, "versions");
-			var versions = new List<InstalledPluginVersion>();
-
-			if (Directory.Exists(versionsDirectory))
-			{
-				foreach (var versionDirectory in Directory.EnumerateDirectories(versionsDirectory))
-				{
-					var version = Path.GetFileName(versionDirectory);
-					var manifestPath = Path.Combine(versionDirectory, "manifest.json");
-					if (!File.Exists(manifestPath))
-					{
-						continue;
-					}
-
-					versions.Add(new InstalledPluginVersion
-					{
-						Version = version,
-						VersionDirectory = versionDirectory,
-						ManifestPath = manifestPath
-					});
-				}
-			}
-
-			var activeVersion = TryReadActiveVersion(pluginDirectory, versions);
-
-			result.Add(new InstalledPlugin
-			{
-				PluginId = pluginId,
-				PluginDirectory = pluginDirectory,
-				Versions = versions,
-				ActiveVersion = activeVersion
-			});
 		}
 
 		return result;
+	}
+
+	public InstalledPlugin? ReadPlugin(string pluginDirectory)
+	{
+		var pluginId = Path.GetFileName(pluginDirectory);
+		if (!PluginId.IsValid(pluginId))
+		{
+			return null;
+		}
+
+		var versionsDirectory = Path.Combine(pluginDirectory, "versions");
+		var versions = new List<InstalledPluginVersion>();
+
+		if (Directory.Exists(versionsDirectory))
+		{
+			foreach (var versionDirectory in Directory.EnumerateDirectories(versionsDirectory))
+			{
+				var version = Path.GetFileName(versionDirectory);
+				var manifestPath = Path.Combine(versionDirectory, "manifest.json");
+				if (!File.Exists(manifestPath))
+				{
+					continue;
+				}
+
+				versions.Add(new InstalledPluginVersion
+				{
+					Version = version,
+					VersionDirectory = versionDirectory,
+					ManifestPath = manifestPath
+				});
+			}
+		}
+
+		var activeVersion = TryReadActiveVersion(pluginDirectory, versions);
+
+		return new InstalledPlugin
+		{
+			PluginId = pluginId,
+			PluginDirectory = pluginDirectory,
+			Versions = versions,
+			ActiveVersion = activeVersion
+		};
 	}
 
 	private InstalledPluginVersion? TryReadActiveVersion(

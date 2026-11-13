@@ -707,7 +707,14 @@ public class Startup
 		services.AddMacroDeckPluginPackaging();
 		services.AddSingleton(PluginSupervisorOptions.Default);
 		services.AddSingleton<IPluginInstallationCatalog, PluginInstallationCatalog>();
-		services.AddSingleton<IPluginRuntimeStateStore, PluginRuntimeStateStore>();
+		services.AddSingleton<PluginRuntimeStateStore>();
+		services.AddSingleton<IPluginRuntimeStateStore>(provider =>
+		{
+			var persistent = provider.GetRequiredService<PluginRuntimeStateStore>();
+			return provider.GetRequiredService<HostSession>().PluginsDisabledAtStartup
+				? new SessionPluginRuntimeStateStore(persistent)
+				: persistent;
+		});
 		services.AddSingleton<IPluginProcessJournal, PluginProcessJournal>();
 		services.AddSingleton<IProcessTable, ProcessTable>();
 		services.AddSingleton<IPluginOrphanReaper, PluginOrphanReaper>();
@@ -1079,6 +1086,10 @@ public class Startup
 			}
 
 			session.MarkRestoreFailed(HostStartupFacts.RestoreFailure);
+			if (HostStartupFacts.PluginsDisabled)
+			{
+				session.MarkPluginsDisabledAtStartup();
+			}
 
 			return session;
 		});

@@ -26162,4 +26162,76 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{address} にパケットを送信できませんでした。</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck のコマンドライン オプション:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>このヘルプを表示して終了します。</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>インストールされている Macro Deck のバージョンを表示して終了します。</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>インストール済みのプラグインを起動せずに一覧表示して終了します。</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>インストール済みのプラグインを起動せずに Macro Deck を起動します。プラグインは開発者ツールで 1 つずつ起動してください。このセッションにのみ適用されます。</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>実行中の Macro Deck を終了します。</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>チャネル: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>コミット: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>プラグイン フォルダー: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>プラグイン フォルダーを読み取れませんでした: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>プラグインはインストールされていません。</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>名前: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>有効なバージョン: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>その他のインストール済みバージョン: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>使用できる有効なバージョンがありません。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>バージョン {version} のマニフェストが無効です ({error})。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>バージョン {version} にマニフェストがありません。</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: 有効なプラグイン フォルダーではありません。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Macro Deck のホストが見つかりません。Macro Deck を再インストールしてください。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Macro Deck のホストを実行できませんでした: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck はすでに実行中です。先に Macro Deck を終了してから、{option} を付けて再起動してください。</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>プラグイン無効</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck は --disable-plugins で起動されました。このセッションでは、インストール済みのプラグインは自動的に起動しません。開発者ツールで 1 つずつ起動してください。</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck は --disable-plugins で起動されたため、インストール済みのプラグインは自動的に起動されていません。ここで 1 つずつ起動してください。ここでの起動や停止はこのセッションにのみ適用されます。</value>
+  </data>
 </root>

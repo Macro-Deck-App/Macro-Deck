@@ -26140,4 +26140,76 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Paket na {address} nelze odeslat.</value>
     <comment>[address:string]</comment>
   </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Možnosti příkazového řádku Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Zobrazí tuto nápovědu a skončí.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Zobrazí nainstalovanou verzi Macro Deck a skončí.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Vypíše nainstalované pluginy bez jejich spuštění a skončí.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Spustí Macro Deck bez spuštění nainstalovaných pluginů. Pluginy lze spouštět jednotlivě v Nástrojích pro vývojáře. Platí jen pro tuto relaci.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Ukončí spuštěný Macro Deck.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Kanál: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Složka pluginů: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Složku pluginů nelze přečíst: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Nejsou nainstalovány žádné pluginy.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Název: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Aktivní verze: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Další nainstalované verze: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Žádná použitelná aktivní verze.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>Manifest verze {version} je neplatný ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>Verze {version} nemá manifest.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: neplatná složka pluginu.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Hostitel Macro Deck nebyl nalezen. Přeinstalujte Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Hostitele Macro Deck nelze spustit: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck už běží. Nejprve ukončete Macro Deck a pak jej spusťte znovu s {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Pluginy vypnuty</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck byl spuštěn s --disable-plugins. Nainstalované pluginy se v této relaci nespouštějí automaticky. Lze je spouštět jednotlivě v Nástrojích pro vývojáře.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck byl spuštěn s --disable-plugins, proto se nainstalované pluginy nespustily automaticky. Zde je lze spouštět jednotlivě. Spuštění nebo zastavení zde platí jen pro tuto relaci.</value>
+  </data>
 </root>
