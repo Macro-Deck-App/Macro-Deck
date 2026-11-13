@@ -1486,6 +1486,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>앱을 추가할 수 없습니다</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>스타일을 복사하지 못했습니다</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>위젯 삭제</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>복사한 위젯을 이 덱의 어디에도 맞출 수 없습니다. 빈 셀을 마우스 오른쪽 버튼으로 클릭하면 그곳에 붙여넣을 수 있습니다.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>스타일을 붙여넣지 못했습니다</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>위젯을 고정하지 못했습니다</value>
@@ -3308,6 +3314,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>위젯을 처리한 제공자가 없습니다</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>복사한 스타일이 올바르지 않습니다. 다시 복사하세요.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>선택한 항목에 스타일을 적용할 수 없습니다.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>즐겨찾기로 지정할 수 있는 위젯은 최대 {max}개입니다.</value>
@@ -21337,6 +21349,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>위젯 {count}개 복사</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>스타일 복사</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>잘라내기</value>
   </data>
@@ -21368,6 +21383,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>붙여넣기</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>스타일 붙여넣기</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>고정</value>

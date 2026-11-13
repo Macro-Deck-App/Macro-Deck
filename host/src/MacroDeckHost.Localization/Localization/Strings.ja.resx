@@ -1486,6 +1486,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>アプリケーションを追加できませんでした</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>スタイルをコピーできませんでした</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>ウィジェットを削除</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>コピーしたウィジェットは、このデッキのどこにも収まりません。空いているセルを右クリックして、そこに貼り付けてください。</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>スタイルを貼り付けできませんでした</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>ウィジェットを固定できませんでした</value>
@@ -3308,6 +3314,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>どのプロバイダーもこのウィジェットを処理しませんでした</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>コピーしたスタイルが無効です。もう一度コピーしてください。</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>このスタイルは選択した項目に適用できません。</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>お気に入りにできるウィジェットは最大 {max} 件です。</value>
@@ -21337,6 +21349,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{count} 個のウィジェットをコピー</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>スタイルをコピー</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>切り取り</value>
   </data>
@@ -21368,6 +21383,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>貼り付け</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>スタイルを貼り付け</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>固定</value>

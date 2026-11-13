@@ -1486,6 +1486,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>एप्लिकेशन नहीं जोड़ा जा सका</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>स्टाइल कॉपी नहीं हो सका</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>विजेट हटाएं</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>कॉपी किए गए विजेट इस डेक में कहीं फिट नहीं होते। उन्हें वहाँ चिपकाने के लिए किसी खाली सेल पर राइट-क्लिक करें।</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>स्टाइल पेस्ट नहीं हो सका</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>विजेट पिन नहीं हो सका</value>
@@ -3308,6 +3314,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>किसी प्रदाता ने विजेट को संभाला नहीं</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>कॉपी किया गया स्टाइल मान्य नहीं है। इसे फिर से कॉपी करें।</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>यह स्टाइल इस चयन पर लागू नहीं किया जा सकता।</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>अधिकतम {max} विजेट पसंदीदा हो सकते हैं।</value>
@@ -21337,6 +21349,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>{count} विजेट कॉपी करें</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>स्टाइल कॉपी करें</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>काटें</value>
   </data>
@@ -21368,6 +21383,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>चिपकाएं</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>स्टाइल चिपकाएं</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>पिन करें</value>

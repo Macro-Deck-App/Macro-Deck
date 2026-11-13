@@ -1486,6 +1486,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>Die Anwendung konnte nicht hinzugefügt werden</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Der Stil konnte nicht kopiert werden</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Widget löschen</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>Die kopierten Widgets passen nirgends auf dieses Deck. Klicke mit der rechten Maustaste auf eine freie Zelle, um sie dort einzufügen.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Der Stil konnte nicht eingefügt werden</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Das Widget konnte nicht angeheftet werden</value>
@@ -3308,6 +3314,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Kein Anbieter hat das Widget verarbeitet</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>Der kopierte Stil ist ungültig. Kopiere ihn erneut.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>Der Stil kann auf diese Auswahl nicht angewendet werden.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>Höchstens {max} Widgets können Favoriten sein.</value>
@@ -21316,6 +21328,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>{count} Widgets kopieren</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Stil kopieren</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Ausschneiden</value>
   </data>
@@ -21347,6 +21362,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Einfügen</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Stil einfügen</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Anpinnen</value>

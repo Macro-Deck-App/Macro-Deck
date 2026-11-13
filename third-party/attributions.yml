@@ -130,6 +130,8 @@ assets:
       - ui/runtime/styles/icons/moon.svg
       - ui/runtime/styles/icons/music-note.svg
       - ui/runtime/styles/icons/music-player-type.svg
+      - ui/runtime/styles/icons/paint-roller.svg
+      - ui/runtime/styles/icons/paintbrush.svg
       - ui/runtime/styles/icons/pause.svg
       - ui/runtime/styles/icons/pencil.svg
       - ui/runtime/styles/icons/pin-off.svg

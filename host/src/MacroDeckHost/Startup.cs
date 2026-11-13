@@ -572,6 +572,7 @@ public class Startup
 		services.AddSingleton<WidgetLayoutGate>();
 		services.AddScoped<IWidgetService, WidgetService>();
 		services.AddScoped<IWidgetAppearanceService, WidgetAppearanceService>();
+		services.AddScoped<IWidgetStyleService, WidgetStyleService>();
 		services.AddScoped<IFlowExecutor, FlowExecutor>();
 		services.AddSingleton<IActionExecutionCoordinator, ActionExecutionCoordinator>();
 		services.AddScoped<IScriptRunner, ScriptRunner>();

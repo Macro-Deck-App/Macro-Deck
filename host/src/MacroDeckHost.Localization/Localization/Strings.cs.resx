@@ -1487,6 +1487,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>Aplikaci se nepodařilo přidat</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Zkopírování stylu se nezdařilo</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Odstranit widget</value>
     <comment>[plural]</comment>
@@ -1573,6 +1576,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>Zkopírované widgety se nikam na tento deck nevejdou. Vložte je pravým kliknutím na volnou buňku.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Vložení stylu se nezdařilo</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Připnutí widgetu se nezdařilo</value>
@@ -3309,6 +3315,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Žádný poskytovatel widget nezpracoval</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>Zkopírovaný styl není platný. Je třeba ho zkopírovat znovu.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>Styl nelze na tento výběr použít.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>Maximální počet oblíbených widgetů: {max}.</value>
@@ -21318,6 +21330,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Kopírovat widgety (počet: {count})</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Kopírovat styl</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Vyjmout</value>
   </data>
@@ -21349,6 +21364,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Vložit</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Vložit styl</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Připnout</value>
