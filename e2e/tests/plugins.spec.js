@@ -82,9 +82,7 @@ test('a local plugin installed in the desktop UI serves its action, variable and
   await web.context.close();
 });
 
-// Host bug: once the stopped plugin's integration is unregistered, WidgetProviderAvailability names the
-// provider by its plugin id instead of its display name. Unskip when the name survives a stop.
-test.fixme('the tile of a stopped plugin names the plugin by its display name', async ({ browser, api, host }) => {
+test('the tile of a stopped plugin names the plugin by its display name', async ({ browser, api, host }) => {
   await ensurePluginRunning(api);
   const profile = await api.profile('E2E Plugin Name', { columns: 3, rows: 2 });
   const tile = await api.widget(profile.rootFolder.id, { type: FIXTURE_PLUGIN.tileType });

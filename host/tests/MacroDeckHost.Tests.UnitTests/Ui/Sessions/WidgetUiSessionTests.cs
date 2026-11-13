@@ -43,6 +43,7 @@ internal sealed class WidgetUiSessionTests
 	private WidgetTypeRegistry _widgetTypes = null!;
 	private StubIntegrationRegistry _integrations = null!;
 	private NoPluginConnections _connections = null!;
+	private WidgetProviderAvailability _availability = null!;
 	private UnavailableWidgetSessionRecovery _recovery = null!;
 	private ProfileRegistry _profiles = null!;
 
@@ -86,8 +87,8 @@ internal sealed class WidgetUiSessionTests
 			_profiles);
 
 		_connections = new NoPluginConnections();
-		var availability = new WidgetProviderAvailability(_widgetTypes, _integrations, _connections);
-		_recovery = new UnavailableWidgetSessionRecovery(_registry, availability, _integrations);
+		_availability = new WidgetProviderAvailability(_widgetTypes, _integrations, _connections);
+		_recovery = new UnavailableWidgetSessionRecovery(_registry, _availability, _integrations);
 
 		_opener = new WidgetUiSessionOpener(_folders,
 			new EmptyProfileCache(),
@@ -95,7 +96,7 @@ internal sealed class WidgetUiSessionTests
 			_widgetTypes,
 			_registry,
 			_broker,
-			availability,
+			_availability,
 			_recovery,
 			TestColors.None,
 			profiles: _profiles);
@@ -581,8 +582,12 @@ internal sealed class WidgetUiSessionTests
 	private const string GaugeType = GaugeOwner + "::gauge";
 
 	[Test]
-	public async Task A_widget_whose_plugin_is_gone_is_served_a_placeholder_naming_the_plugin_id()
+	public async Task A_widget_whose_plugin_stops_keeps_its_last_known_integration_name()
 	{
+		_integrations.Add(new FakeIntegration { Id = GaugeOwner });
+		_availability.Check(GaugeType);
+		await _integrations.UnregisterAsync(GaugeOwner);
+
 		var widget = AddWidget(GaugeType, "{}");
 
 		var ticket = OpenLive(widget, DeviceA);
@@ -592,7 +597,8 @@ internal sealed class WidgetUiSessionTests
 		{
 			Assert.That(ticket.Accepted, Is.True, ticket.Message);
 			Assert.That(tree, Does.Contain("Deck.UnavailableWidget.Tile"));
-			Assert.That(tree, Does.Contain(GaugeOwner));
+			Assert.That(tree, Does.Contain("\"unavailableProviderName\":\"Test Integration\""));
+			Assert.That(tree, Does.Contain("\"plugin\":\"Test Integration\""));
 		});
 	}
 
