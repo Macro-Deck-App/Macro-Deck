@@ -1098,7 +1098,14 @@ public sealed class PluginWebSocketEndpoint
 		{
 			await foreach (var envelope in dispatch.LogQueue.Reader.ReadAllAsync(cancellationToken))
 			{
-				await HandleLogPublishAsync(connection, pluginId, sessionId, envelope, cancellationToken);
+				try
+				{
+					await HandleLogPublishAsync(connection, pluginId, sessionId, envelope, cancellationToken);
+				}
+				catch (Exception exception) when (exception is not (OperationCanceledException or WebSocketException or OutOfMemoryException))
+				{
+					PluginWebSocketLog.LogPublishFailed(_logger, pluginId, exception);
+				}
 			}
 		}
 		catch (Exception exception) when (exception is OperationCanceledException or WebSocketException)
