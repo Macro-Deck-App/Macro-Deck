@@ -106,6 +106,7 @@ describe('IconPickerDialogComponent', () => {
 
   let restoreFromPathSpy: jasmine.Spy;
   let importPacksSpy: jasmine.Spy;
+  let loadPacksSpy: jasmine.Spy;
 
   beforeEach(() => {
     // The directive reads ShellFileDropService.supported once, at construction - which happens when
@@ -120,13 +121,14 @@ describe('IconPickerDialogComponent', () => {
     importFromPathSpy = jasmine.createSpy('importFromPath').and.resolveTo(null);
     restoreFromPathSpy = jasmine.createSpy('restoreFromPath').and.resolveTo(null);
     importPacksSpy = jasmine.createSpy('importPacks').and.resolveTo(false);
+    loadPacksSpy = jasmine.createSpy('loadPacks').and.resolveTo(undefined);
 
     const iconPacksStub = {
       packs,
       isLoading: signal(false),
       loadError: signal<string | null>(null),
       activeBatches,
-      loadPacks: jasmine.createSpy('loadPacks').and.resolveTo(undefined),
+      loadPacks: loadPacksSpy,
       iconsFor: (packId: string) => iconsSignal(packId).asReadonly(),
       import: importSpy,
       importFromPath: importFromPathSpy,
@@ -160,6 +162,24 @@ describe('IconPickerDialogComponent', () => {
     await settle();
 
     expect(component.selectedPackId()).toBe('b');
+  });
+
+  it('picks the default pack when another pack arrived by event before the pack list loaded', async () => {
+    let finishLoad!: () => void;
+    loadPacksSpy.and.returnValue(new Promise<void>(resolve => finishLoad = resolve));
+    fixture = TestBed.createComponent(IconPickerDialogComponent);
+    component = fixture.componentInstance as unknown as DialogAccess;
+
+    packs.set([pack('included', 'Included', { isReadOnly: true })]);
+    await settle();
+    packs.set([
+      pack('imported', 'Imported Icons', { isDefault: true }),
+      pack('included', 'Included', { isReadOnly: true })
+    ]);
+    finishLoad();
+    await settle();
+
+    expect(component.selectedPackId()).toBe('imported');
   });
 
   it('falls back to packs[0] when none is default', async () => {
