@@ -15,6 +15,8 @@ Specs seed what they need through the host's own REST API ([`tests/support/seed.
 
 Specs do not depend on each other, so a single file runs on its own and `E2E_WORKERS=2` runs two files side by side.
 
+`plugins.spec.js` installs a real plugin: before its first test it publishes [`host/tests/fixtures/MacroDeckHost.Tests.E2EPlugin`](../host/tests/fixtures/MacroDeckHost.Tests.E2EPlugin) and packs it with the repository's own plugin CLI ([`tests/support/plugin.js`](tests/support/plugin.js)), so that spec needs the .NET SDK on the machine that runs it.
+
 ## Run locally
 
 `make test-e2e` (or `make test-e2e-smoke`) builds the UIs, stages the host and runs the suite in one go through [`scripts/run-local.sh`](scripts/run-local.sh), on Linux, macOS and Git Bash on Windows. `E2E_SKIP_BUILD=1` reuses the staged host.
