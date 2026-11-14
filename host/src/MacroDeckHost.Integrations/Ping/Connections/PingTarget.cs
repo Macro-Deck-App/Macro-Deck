@@ -12,8 +12,6 @@ internal sealed class PingTarget : IAsyncDisposable
 {
 	public const int LossWindow = 20;
 
-	public const int HistoryLength = 30;
-
 	private static readonly ILogger _logger = IntegrationLog.For<PingTarget>(PingIntegration.IntegrationId);
 
 	private readonly IPingProber _prober;
@@ -23,7 +21,6 @@ internal sealed class PingTarget : IAsyncDisposable
 	private readonly SemaphoreSlim _pollGate = new(1, 1);
 	private readonly Lock _sync = new();
 	private readonly Queue<bool> _outcomes = new();
-	private readonly Queue<double> _history = new();
 
 	private PingSnapshot _snapshot;
 	private PingTargetSettings _settings;
@@ -44,7 +41,7 @@ internal sealed class PingTarget : IAsyncDisposable
 		_prober = prober;
 		_time = time;
 		_publish = publish;
-		_snapshot = new PingSnapshot(entryId, title, key, settings.Host);
+		_snapshot = new PingSnapshot(entryId, title, key, settings.Host) { Interval = settings.Interval };
 	}
 
 	public PingSnapshot Snapshot
@@ -80,7 +77,7 @@ internal sealed class PingTarget : IAsyncDisposable
 		lock (_sync)
 		{
 			_settings = settings;
-			next = _snapshot = _snapshot with { Title = title, Key = key };
+			next = _snapshot = _snapshot with { Title = title, Key = key, Interval = settings.Interval };
 			_waiting?.Cancel();
 		}
 
@@ -155,15 +152,13 @@ internal sealed class PingTarget : IAsyncDisposable
 		if (result.Succeeded)
 		{
 			_consecutiveFailures = 0;
-			Record(_history, result.RoundtripMilliseconds ?? 0, HistoryLength);
 			var online = current with
 			{
 				Reachability = PingReachability.Online,
 				LatencyMilliseconds = result.RoundtripMilliseconds,
 				PacketLossPercent = loss,
 				LastSeen = _time.GetUtcNow(),
-				Problem = PingProblem.None,
-				LatencyHistory = [.. _history]
+				Problem = PingProblem.None
 			};
 			return (online, current.Reachability == PingReachability.Offline ? PingReachability.Online : null);
 		}

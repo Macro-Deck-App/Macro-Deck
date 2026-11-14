@@ -1,4 +1,6 @@
+using MacroDeck.Sdk;
 using MacroDeck.Sdk.Ui;
+using MacroDeck.Sdk.Variables;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Widgets;
@@ -10,10 +12,12 @@ namespace MacroDeckHost.Integrations.Ping.Widgets;
 internal sealed class PingUiProvider : IUiProvider
 {
 	private readonly IPingTargets _targets;
+	private readonly Func<IIntegrationContext?> _context;
 
-	public PingUiProvider(IPingTargets targets)
+	public PingUiProvider(IPingTargets targets, Func<IIntegrationContext?> context)
 	{
 		_targets = targets;
+		_context = context;
 	}
 
 	public IReadOnlyList<UiSurfaceDeclaration> Surfaces { get; } =
@@ -51,6 +55,20 @@ internal sealed class PingUiProvider : IUiProvider
 				PingWidgetView.Build(sample, UiWidgetSafeArea.RadiusOf(surface), background))));
 		}
 
-		return Task.FromResult<IUiSession?>(new PingWidgetSession(surface, options, _targets, background));
+		return Task.FromResult<IUiSession?>(new PingWidgetSession(surface,
+			options,
+			_targets,
+			OpenHistoryAsync,
+			background));
+	}
+
+	private async Task<IVariableHistoryWindow?> OpenHistoryAsync(
+		string variableName,
+		int capacity,
+		CancellationToken cancellationToken)
+	{
+		return _context()?.Variables is { } variables
+			? await variables.OpenHistoryAsync(variableName, capacity, cancellationToken).ConfigureAwait(false)
+			: null;
 	}
 }

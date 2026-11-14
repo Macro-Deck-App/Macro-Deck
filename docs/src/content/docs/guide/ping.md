@@ -53,8 +53,10 @@ Add the **Ping status** widget to a folder and choose in its settings:
 
 The widget shows a green dot and the latency while the device answers, a red dot with **Offline** and the
 reason, for example **No reply** or **Name not found**, once it counts as offline, and a grey dot while
-Macro Deck waits for the first reply. Packet loss appears while it is above 0 %. The latency history is a
-line across the widget covering the last 30 replies.
+Macro Deck waits for the first reply. With packet loss turned on, the line below the latency shows the
+packet loss, 0 % included; turned off, it shows the status. The latency history is a line across the widget,
+starting at 0 ms, that moves on every second like the **History Graph** and covers about the last 30 pings,
+at most the last 10 minutes. While the device is offline it has no latency, so the line pauses.
 
 ![Three Ping status widgets: NAS and Router online with their latency and a latency history line, and Printer offline because it is unreachable](../../../assets/guide/ping-widgets.png)
 

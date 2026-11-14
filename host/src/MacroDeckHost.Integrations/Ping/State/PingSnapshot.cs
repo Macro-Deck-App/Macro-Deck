@@ -29,7 +29,7 @@ internal sealed record PingSnapshot(Guid EntryId, string Title, string Key, stri
 
 	public PingProblem Problem { get; init; }
 
-	public IReadOnlyList<double> LatencyHistory { get; init; } = [];
+	public TimeSpan Interval { get; init; }
 
 	public bool IsOnline => Reachability == PingReachability.Online;
 }

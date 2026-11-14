@@ -41,17 +41,29 @@ internal sealed record PingViewState
 
 internal static class PingViewStateResolver
 {
-	public static PingViewState Resolve(PingWidgetOptions options, IPingTargets targets)
+	public const int HistoryPings = 30;
+
+	public const int MaxHistorySamples = 600;
+
+	public static PingSnapshot? Target(PingWidgetOptions options, IPingTargets targets)
 	{
-		var snapshot = options.TargetId is { } id
+		return options.TargetId is { } id
 			? targets.Find(id)
 			: targets.Targets is [var first, ..]
 				? first
 				: null;
-		return Resolve(options, snapshot);
 	}
 
-	public static PingViewState Resolve(PingWidgetOptions options, PingSnapshot? snapshot)
+	public static int HistoryCapacity(PingSnapshot snapshot)
+	{
+		var seconds = (int)Math.Ceiling(snapshot.Interval.TotalSeconds);
+		return Math.Clamp(seconds * HistoryPings, HistoryPings, MaxHistorySamples);
+	}
+
+	public static PingViewState Resolve(
+		PingWidgetOptions options,
+		PingSnapshot? snapshot,
+		IReadOnlyList<double?> samples)
 	{
 		if (snapshot is null)
 		{
@@ -69,7 +81,7 @@ internal static class PingViewStateResolver
 		{
 			detail = snapshot.Reachability == PingReachability.Unknown ? default : Strings.NotPermitted();
 		}
-		else if (online && options.ShowPacketLoss && snapshot.PacketLossPercent is > 0 and var loss)
+		else if (online && options.ShowPacketLoss && snapshot.PacketLossPercent is { } loss)
 		{
 			detail = Strings.PacketLoss(loss.ToString("0.#", CultureInfo.CurrentCulture));
 		}
@@ -91,21 +103,20 @@ internal static class PingViewStateResolver
 				? Strings.Latency(snapshot.LatencyMilliseconds!.Value.ToString("N0", CultureInfo.CurrentCulture))
 				: status,
 			Detail = detail,
-			Points = options.ShowHistory ? Normalize(snapshot.LatencyHistory) : []
+			Points = options.ShowHistory ? Normalize(samples, HistoryCapacity(snapshot)) : []
 		};
 	}
 
-	internal static IReadOnlyList<double> Normalize(IReadOnlyList<double> samples)
+	internal static IReadOnlyList<double> Normalize(IReadOnlyList<double?> samples, int capacity)
 	{
-		if (samples.Count < 2)
+		double[] values = [.. samples.TakeLast(capacity).OfType<double>()];
+		if (values.Length < 2)
 		{
 			return [];
 		}
 
-		var low = samples.Min();
-		var high = samples.Max();
-		var range = high - low;
-		return [.. samples.Select(sample => range > 0 ? Math.Round((sample - low) / range, 4) : 0.5)];
+		var high = values.Max();
+		return [.. values.Select(sample => high > 0 ? Math.Round(Math.Clamp(sample / high, 0, 1), 4) : 0)];
 	}
 
 	private static LocalizedText StatusText(PingSnapshot snapshot)
