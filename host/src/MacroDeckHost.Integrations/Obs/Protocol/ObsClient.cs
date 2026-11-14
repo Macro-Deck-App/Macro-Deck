@@ -11,8 +11,11 @@ namespace MacroDeckHost.Integrations.Obs.Protocol;
 
 internal sealed class ObsClient : IObsClient
 {
+	private static readonly TimeSpan _closeEchoTimeout = TimeSpan.FromSeconds(2);
+
 	private readonly ILogger _logger;
 	private readonly TimeSpan _reachabilityTimeout;
+	private readonly TimeSpan _handshakeTimeout;
 
 	// Every category a handler below needs and nothing else. The library default is All, which also
 	// carries MediaInputs, Vendors and Canvases traffic nothing here reads.
@@ -27,12 +30,26 @@ internal sealed class ObsClient : IObsClient
 
 	private readonly OBSWebsocket _obs = new();
 	private int _activityHandlersAttached;
+	private ConnectAttempt? _attempt;
 
-	internal ObsClient(ILogger? logger = null, TimeSpan? reachabilityTimeout = null)
+	internal ObsClient(
+		ILogger? logger = null,
+		TimeSpan? reachabilityTimeout = null,
+		TimeSpan? handshakeTimeout = null,
+		TimeSpan? requestTimeout = null)
 	{
 		_logger = logger ?? IntegrationLog.For<ObsClient>(ObsIntegration.IntegrationId);
 		_reachabilityTimeout = reachabilityTimeout ?? TimeSpan.FromSeconds(2);
+		// Stays above the setup dialog's connect timeout, so the dialog shows its own localized message
+		// instead of this client's internal reason.
+		_handshakeTimeout = handshakeTimeout ?? TimeSpan.FromSeconds(10);
 		_obs.EventSubscriptions = BaseSubscriptions;
+		// Only safe before the first connection: on a live one the setter also arms a no-message reconnect.
+		if (requestTimeout is { } timeout)
+		{
+			_obs.WSTimeout = timeout;
+		}
+
 		_obs.Connected += OnConnected;
 		_obs.Disconnected += OnDisconnected;
 
@@ -124,6 +141,20 @@ internal sealed class ObsClient : IObsClient
 	}
 
 	public ObsStatus QueryStatus()
+	{
+		var attempt = Volatile.Read(ref _attempt);
+		try
+		{
+			return ReadFullStatus();
+		}
+		catch (ErrorResponseException ex) when (ex.ErrorCode == ObsRequestException.TimedOut)
+		{
+			_ = DropSessionAsync(attempt);
+			throw new ObsRequestException(ex.ErrorCode, ex.Message);
+		}
+	}
+
+	private ObsStatus ReadFullStatus()
 	{
 		var status = new ObsStatus();
 
@@ -539,6 +570,8 @@ internal sealed class ObsClient : IObsClient
 	// call in Connect cannot itself produce an unobserved exception.
 	private async Task ConnectCoreAsync(string url, string? password)
 	{
+		var attempt = new ConnectAttempt();
+		Volatile.Write(ref _attempt, attempt);
 		try
 		{
 			AttachActivityHandlers();
@@ -550,12 +583,68 @@ internal sealed class ObsClient : IObsClient
 			}
 
 			_obs.ConnectAsync(url, password ?? string.Empty);
+			await AwaitHandshakeAsync(attempt).ConfigureAwait(false);
 		}
 		catch (Exception ex)
 		{
 			_logger.Debug(ex, "OBS connect attempt failed");
 			Disconnected?.Invoke(this, ex.Message);
 		}
+	}
+
+	// obs-websocket-dotnet has no Hello timeout, and it reports the socket closed here later on another
+	// thread: that report is awaited before the failure is raised so it cannot end the next attempt.
+	private async Task AwaitHandshakeAsync(ConnectAttempt attempt)
+	{
+		var handshake = attempt.Handshake.Task;
+		if (await Task.WhenAny(handshake, Task.Delay(_handshakeTimeout)).ConfigureAwait(false) == handshake
+			|| !attempt.Handshake.TrySetResult(false))
+		{
+			return;
+		}
+
+		_logger.Debug("OBS did not complete the handshake within {Timeout}s", _handshakeTimeout.TotalSeconds);
+		_obs.Disconnect();
+		await Task.WhenAny(attempt.Closed.Task, Task.Delay(_closeEchoTimeout)).ConfigureAwait(false);
+		Disconnected?.Invoke(this, "handshake timed out");
+	}
+
+	// The library never times out an open socket that stopped answering. Pending requests of a socket that
+	// closed on its own still time out later, so only the first of the two ends the attempt.
+	private async Task DropSessionAsync(ConnectAttempt? attempt)
+	{
+		try
+		{
+			if (attempt is null
+				|| attempt != Volatile.Read(ref _attempt)
+				|| attempt.Handshake.Task is not { IsCompletedSuccessfully: true, Result: true }
+				|| !_obs.IsConnected
+				|| !attempt.TryEnd())
+			{
+				return;
+			}
+
+			_logger.Debug("OBS stopped answering requests; dropping the session");
+			_obs.Disconnect();
+			await Task.WhenAny(attempt.Closed.Task, Task.Delay(_closeEchoTimeout)).ConfigureAwait(false);
+			if (attempt == Volatile.Read(ref _attempt))
+			{
+				Disconnected?.Invoke(this, "OBS stopped answering requests");
+			}
+		}
+		catch (Exception ex)
+		{
+			_logger.Debug(ex, "Dropping the OBS session failed");
+		}
+	}
+
+	private ConnectAttempt? AbandonedAttempt()
+	{
+		var attempt = Volatile.Read(ref _attempt);
+
+		return attempt is null || attempt.Handshake.TrySetResult(true) || attempt.Handshake.Task.Result
+			? null
+			: attempt;
 	}
 
 	// These two are high-volume in obs-websocket: attaching a handler is what opts in, so it happens once
@@ -592,11 +681,28 @@ internal sealed class ObsClient : IObsClient
 
 	private void OnConnected(object? sender, EventArgs e)
 	{
+		if (AbandonedAttempt() is not null)
+		{
+			return;
+		}
+
 		Connected?.Invoke(this, EventArgs.Empty);
 	}
 
 	private void OnDisconnected(object? sender, ObsDisconnectionInfo e)
 	{
+		if (AbandonedAttempt() is { } abandoned)
+		{
+			abandoned.Closed.TrySetResult();
+			return;
+		}
+
+		if (Volatile.Read(ref _attempt) is { } attempt && !attempt.TryEnd())
+		{
+			attempt.Closed.TrySetResult();
+			return;
+		}
+
 		Disconnected?.Invoke(this, e.DisconnectReason);
 	}
 
@@ -658,7 +764,7 @@ internal sealed class ObsClient : IObsClient
 		{
 			throw new ObsNotReadyException(ex);
 		}
-		catch (Exception ex)
+		catch (Exception ex) when (ex is not ErrorResponseException { ErrorCode: ObsRequestException.TimedOut })
 		{
 			_logger.Debug(ex, "OBS query failed; using fallback value");
 			return fallback;
@@ -675,6 +781,20 @@ internal sealed class ObsClient : IObsClient
 		{
 			_logger.Debug(ex, "OBS query failed; using fallback value");
 			return fallback;
+		}
+	}
+
+	private sealed class ConnectAttempt
+	{
+		private int _ended;
+
+		public TaskCompletionSource<bool> Handshake { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public TaskCompletionSource Closed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public bool TryEnd()
+		{
+			return Interlocked.Exchange(ref _ended, 1) == 0;
 		}
 	}
 }

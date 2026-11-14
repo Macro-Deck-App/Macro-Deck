@@ -76,6 +76,7 @@ export class WidgetIconDisplayControlComponent implements OnChanges, OnDestroy {
   private dragPointerId: number | null = null;
   private dragOrigin = { x: 0, y: 0, offsetX: 0, offsetY: 0 };
   private pending: WidgetIconDisplay | null = null;
+  private readonly held = new Map<NumericField, string | number | null>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['display']) {
@@ -167,6 +168,22 @@ export class WidgetIconDisplayControlComponent implements OnChanges, OnDestroy {
     this.emit({ [field]: this.clamp(field, +value) });
   }
 
+  protected onNumberTyped(field: NumericField, value: string | number | null): void {
+    const storedAsTyped = value === '' || value === null
+      ? this.actionMode
+      : Number.isFinite(+value) && this.clamp(field, +value) === +value;
+    if (storedAsTyped) {
+      this.onNumberChange(field, value ?? '');
+      return;
+    }
+    this.held.set(field, value);
+  }
+
+  protected onNumberLeft(field: NumericField): void {
+    if (!this.held.has(field)) return;
+    this.onNumberChange(field, this.held.get(field) ?? '');
+  }
+
   protected onReset(): void {
     this.resetRequested.emit();
   }
@@ -222,6 +239,7 @@ export class WidgetIconDisplayControlComponent implements OnChanges, OnDestroy {
   }
 
   private emit(patch: Partial<WidgetIconDisplay>): void {
+    for (const field of Object.keys(patch)) this.held.delete(field as NumericField);
     this.pending = { ...this.current, ...patch };
     this.displayChange.emit(this.pending);
   }

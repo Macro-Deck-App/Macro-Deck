@@ -11,12 +11,22 @@ Unlock the deck to edit it, lock it to press buttons.
 | --- | --- |
 | Ctrl/Cmd + A | Select all widgets |
 | Ctrl/Cmd + C, X, V | Copy, cut, paste widgets |
+| Ctrl/Cmd + Shift + C, V | Copy a widget's style, paste it onto the selection |
 | Delete | Delete the selection |
 | Esc | Clear the selection |
 | Shift + click on Save | Save and close the widget editor |
 
 - **Select several widgets** by dragging a box around them. Hold Ctrl/Cmd to add to the selection.
 - **Paste somewhere specific:** right-click a free cell.
+- **Give several widgets the same look:** right-click the widget that looks right and choose
+  **Copy Style**, then select the others, right-click one of them and choose **Paste Style**. Only the
+  look is copied: colors, font and label styling, border, and an Action Button's icon color, zoom and
+  position. Labels, icons, actions and variables stay as they are.
+  - A button with several states passes on the look it is showing right now, and the buttons you paste
+    onto take it for all of their states.
+  - Between different widget types only what both have is copied, such as the background color and
+    the border. Widgets from plugins and integrations take the border and, where they support it, the
+    background color.
 - **Try a button without opening it:** right-click it and choose **Run**. It runs the Short Press actions
   as if you pressed the button, so a button set to **Cycle states on tap** also moves to its next state.
 - **Drop an image, an app or a shortcut** on a tile to use it as the background.
@@ -189,8 +199,10 @@ to store a new random number in a variable each time the action runs. For a Bool
 A step that uses a stored secret, such as a webhook URL or a token, only runs in the form you saved it in
 the app. If something else changed it, the step pauses, Macro Deck tells you in the notifications, and
 **Approvals** appears in the sidebar and lists it with what changed. Check the values, then choose
-**Approve**. Until then the step is skipped and the rest of the flow still runs. Once nothing is waiting,
-**Approvals** leaves the sidebar again.
+**Approve**. Until then the step is skipped and the rest of the flow still runs. If you did not make that
+change, choose **Decline**: the step leaves the list and keeps being skipped. To use the step again, edit
+it in the app. If it is changed outside the app once more, it shows up in **Approvals** again. Once nothing
+is waiting, **Approvals** leaves the sidebar again.
 
 ## Share and back up
 

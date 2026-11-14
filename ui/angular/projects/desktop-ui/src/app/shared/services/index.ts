@@ -11,6 +11,7 @@ export * from './folder.service';
 export * from './folder-view.service';
 export * from './screensaver.service';
 export * from './widget-clipboard.service';
+export * from './widget-style-clipboard.service';
 export * from './deck-drag.service';
 export * from './deck-marquee.service';
 export * from './profile.service';

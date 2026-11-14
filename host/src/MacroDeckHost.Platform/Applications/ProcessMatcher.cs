@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using MacroDeckHost.Platform.Native;
-using MacroDeckHost.Platform.ShellLinks;
 
 namespace MacroDeckHost.Platform.Applications;
 
@@ -9,24 +7,10 @@ internal static class ProcessMatcher
 {
 	public static IReadOnlyList<Process> Find(string configuredPath)
 	{
-		if (string.IsNullOrWhiteSpace(configuredPath))
+		if (ApplicationTarget.Resolve(configuredPath) is not { } target)
 		{
 			return [];
 		}
-
-		var candidates = CandidatePaths(configuredPath);
-		var normalizedPaths = candidates.Select(Normalize).ToList();
-
-		// A bundle executable is matched by path only: names such as Electron or stable are shared by
-		// unrelated apps, and stopping by name would hit those.
-		if (OperatingSystem.IsMacOS()
-			&& MacOsBundles.IsAppBundle(configuredPath)
-			&& MacOsBundles.TryGetExecutablePath(configuredPath.Trim()) is { } bundleExecutable)
-		{
-			normalizedPaths.Add(bundleExecutable);
-		}
-
-		var names = candidates.Select(SafeFileNameWithoutExtension).Where(name => name.Length > 0).ToList();
 
 		var byPath = new List<Process>();
 		var byName = new List<Process>();
@@ -34,12 +18,11 @@ internal static class ProcessMatcher
 		foreach (var process in Process.GetProcesses())
 		{
 			var executablePath = TryGetExecutablePath(process);
-			if (executablePath is not null
-				&& normalizedPaths.Contains(Normalize(executablePath), StringComparer.OrdinalIgnoreCase))
+			if (executablePath is not null && target.MatchesPath(executablePath))
 			{
 				byPath.Add(process);
 			}
-			else if (names.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase))
+			else if (target.MatchesName(process.ProcessName))
 			{
 				byName.Add(process);
 			}
@@ -83,57 +66,6 @@ internal static class ProcessMatcher
 		catch (InvalidOperationException)
 		{
 			return null;
-		}
-	}
-
-	private static List<string> CandidatePaths(string configuredPath)
-	{
-		var target = TryReadShortcutTarget(configuredPath.Trim());
-		return target is null ? [configuredPath] : [target, configuredPath];
-	}
-
-	private static string? TryReadShortcutTarget(string path)
-	{
-		if (!Path.GetExtension(path).Equals(".lnk", StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
-		{
-			return null;
-		}
-
-		try
-		{
-			var link = WindowsShellLinkParser.TryParseFile(path);
-
-			// With arguments (cmd.exe /k, Update.exe --processStart) the target alone is not the app the link starts.
-			return link is { TargetPath: not null, Arguments: null } ? link.TargetPath : null;
-		}
-		catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-		{
-			return null;
-		}
-	}
-
-	private static string Normalize(string path)
-	{
-		try
-		{
-			var full = Path.GetFullPath(path.Trim());
-			return full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-		}
-		catch
-		{
-			return path.Trim();
-		}
-	}
-
-	private static string SafeFileNameWithoutExtension(string path)
-	{
-		try
-		{
-			return Path.GetFileNameWithoutExtension(path);
-		}
-		catch
-		{
-			return string.Empty;
 		}
 	}
 }

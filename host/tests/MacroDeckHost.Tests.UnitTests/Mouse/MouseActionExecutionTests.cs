@@ -121,7 +121,7 @@ public class MouseActionExecutionTests
 		await Execute(Action("scroll"),
 			new Dictionary<string, object> { ["direction"] = "up", ["amount"] = 2 });
 
-		AssertCalls("scroll(Vertical,1)", "scroll(Vertical,1)");
+		AssertCalls("scroll(Vertical,2)");
 	}
 
 	[Test]

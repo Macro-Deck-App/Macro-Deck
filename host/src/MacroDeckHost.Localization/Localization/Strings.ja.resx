@@ -1486,6 +1486,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>アプリケーションを追加できませんでした</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>スタイルをコピーできませんでした</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>ウィジェットを削除</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>コピーしたウィジェットは、このデッキのどこにも収まりません。空いているセルを右クリックして、そこに貼り付けてください。</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>スタイルを貼り付けできませんでした</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>ウィジェットを固定できませんでした</value>
@@ -2545,6 +2551,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>アクションの応答が時間内に返りませんでした</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>このステップはシークレットを使用しており、拒否されたため実行されません。</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>このステップはシークレットを使用しており、承認待ちです。</value>
   </data>
@@ -3305,6 +3314,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>どのプロバイダーもこのウィジェットを処理しませんでした</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>コピーしたスタイルが無効です。もう一度コピーしてください。</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>このスタイルは選択した項目に適用できません。</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>お気に入りにできるウィジェットは最大 {max} 件です。</value>
@@ -5621,6 +5636,27 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>プロファイルを次に変更</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>巡回するフォルダーです。選択した順に切り替わります。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>フォルダー</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>アルファベット順</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>「フォルダーの順序」と「アルファベット順」は、開いているプロファイルのすべてのフォルダーを巡回します。「カスタム」は選択したフォルダーだけを巡回します。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>フォルダーの順序</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>順序</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>任意。このデバイスのみがナビゲートします。空欄の場合は、アクションを実行したデバイスがナビゲートします。アクションを実行したデバイスがない場合は、すべてのデバイスがナビゲートします。</value>
   </data>
@@ -5648,11 +5684,29 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>親フォルダーへ移動</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>選択した順序で次のフォルダーに切り替えます。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>次のフォルダー</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>選択した順序で前のフォルダーに切り替えます。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>前のフォルダー</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>切り替え先のプロファイルです。</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>プロファイル</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>最後のフォルダーの次は最初に、最初のフォルダーの前は最後に戻ります。オフの場合、両端では何も起こりません。</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>ループ</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>デバイス「{deviceId}」は接続されていません。</value>
@@ -5668,6 +5722,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>プロファイルが選択されていません。</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>開いているフォルダーが見つかりません。</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>プロファイル「{profileId}」は存在しません。</value>
@@ -7453,6 +7510,84 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} の Google サインインが期限切れです</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>JSON 内のパスにある配列の末尾に項目を追加し、結果を変数に保存します。配列がない場合は作成されます。</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>JSON 配列に追加</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>JSON 内のパスにある配列の項目数、またはオブジェクトのプロパティ数を変数に保存します。</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>JSON の項目数を数える</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>プロパティと配列インデックス。例: data.items[0].name、またはドキュメント全体を表す "$" のみ。</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>処理する JSON です。変数を挿入すると、その変数に保存された JSON を使用します。</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>値</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>真または偽</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>JSON フラグメント</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>値の種類</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>数値</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>テキスト</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>JSON 内のパスにあるプロパティまたは配列の項目を削除し、結果を変数に保存します。</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>JSON の値を削除</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>JSON 内のパスに値を書き込み、結果を変数に保存します。途中で不足しているオブジェクトは作成されます。</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>JSON の値を設定</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON が有効ではありません。</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>JSON パスが有効ではありません。</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>値が選択した値の種類と一致しません。</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>パスが JSON と一致しません。その位置では、プロパティ名にはオブジェクト、インデックスには配列が必要です。</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>ドキュメント全体は削除できません。その中のパスを選択してください。</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>そのパスの値は配列ではありません。</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>そのパスの値は配列でもオブジェクトでもありません。</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON のそのパスに値がありません。</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Microsoft へのサインインがキャンセルされたか、完了していません。続行すると、サインインを再度開きます。</value>
@@ -11627,6 +11762,118 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>通知を表示できませんでした。</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>質問する</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>フローを一時停止してデッキで質問し、回答を変数に保存します。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>質問の種類</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>はい / いいえ</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>リストから選択</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>テキスト入力</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>質問</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>メッセージ</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>選択肢</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>1 行に 1 つの選択肢、または JSON 配列です。変数を挿入すると、その変数からリストを取得します。選択肢は最大 50 個、各 100 文字までです。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>プレースホルダー</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>既定のテキスト</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>質問先</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>ウィジェットを押したデバイス</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>選択したデバイス</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>接続中のすべてのクライアント</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>デバイス</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>タイムアウト</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>質問が回答を待つ時間です。最大 9 分です。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>回答の変数</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>true か false、選択した項目、または入力したテキストが入ります。回答がない場合は false か空のテキストが入ります。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>位置の変数</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>選択した項目の位置が 0 から入ります。回答がない場合は -1 です。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>結果の変数</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>answered、cancelled、timedOut、noClient のいずれかが入ります。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>{count} 秒後に閉じます。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>{count} 秒後に閉じます。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>{count} 分後に閉じます。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>{count} 分後に閉じます。</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>質問はまだ利用できません。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>質問を表示できませんでした。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>選択肢のリストが空です。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>選択肢が {max} 個を超えています。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>{max} 文字を超える選択肢があります。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>選択肢のリストが大きすぎて表示できません。</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>回答を {variable} に保存できませんでした。変数の種類を確認してください。</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>選択した音声デバイスの音量を指定したレベルに設定します。</value>
   </data>
@@ -11918,6 +12165,66 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>フォーカス中のアプリケーションのバンドル ID</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>監視対象のアプリケーション</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck は、このアプリケーションが実行中かどうか、プロセスとウィンドウの数、ウィンドウの表示状態を報告します。</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>ゲーム</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>アプリケーション</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>chrome などの実行中のプロセス、またはプログラムのパスです。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>このアプリケーションの名前を入力してください。</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>実行中のアプリケーションを選択するか、プログラムのパスを入力してください。</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck で監視できるアプリケーションは最大 {count} 個です。追加するには、いずれかを削除してください。</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>一意の変数名を作成できませんでした。アプリケーションの名前を変更してもう一度お試しください。</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定ステップです。</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>実行中</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>実行中のプロセス</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>開いているウィンドウ</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>ウィンドウの状態</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>フォーカス中のアプリケーションのウィンドウの状態</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>フォーカス中のアプリケーションのプロセス</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>ウィンドウの状態を取得できません</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland では、Macro Deck が他のアプリのウィンドウを読み取ることはできません。監視対象のアプリケーションは引き続き実行中かどうかとプロセス数を報告しますが、ウィンドウの状態とウィンドウ数は取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>ウィンドウの状態を読み取るには、Macro Deck にアクセシビリティへのアクセスが必要です。システム設定 &gt; プライバシーとセキュリティ &gt; アクセシビリティ で Macro Deck を許可してください。許可されるまで、監視対象のアプリケーションのウィンドウの状態とウィンドウ数は取得できません。</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>アクセスを許可</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>操作に使う、接続済みの Twitch アカウントです。</value>
@@ -15824,6 +16131,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>変更あり</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>拒否</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>ステップを拒否できませんでした。</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>承認待ちのステップはありません</value>
   </data>
@@ -15831,7 +16144,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>シークレットを使用するすべてのステップが承認済みです。</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>シークレットを使用するステップは、承認されるまで実行されません。変更内容を確認してから承認してください。</value>
+    <value>シークレットを使用するステップは、承認されるまで実行されません。変更内容を確認してから、承認または拒否してください。</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>承認を読み込めませんでした。</value>
@@ -16489,6 +16802,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>回復キー</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>新しい回復キーを作成しますか？</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>以前に作成したバックアップには、以前に保存した回復キーが引き続き必要です。そのキーも保管してください。次に新しいキーが表示されます。</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>新しい回復キーを作成</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>リモート</value>
@@ -19186,6 +19508,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>予期しないエラーが発生しました。</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>強制的に更新</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>ストアレジストリの更新</value>
   </data>
@@ -20289,6 +20614,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>ディスプレイをスリープさせないようにしています。</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>ディスプレイをスリープさせないようにするには、画面のどこかをタップしてください。</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>ブラウザーまたは OS がディスプレイのスリープ防止を拒否しました（バッテリーセーバーなど）。</value>
   </data>
@@ -21021,6 +21349,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{count} 個のウィジェットをコピー</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>スタイルをコピー</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>切り取り</value>
   </data>
@@ -21052,6 +21383,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>貼り付け</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>スタイルを貼り付け</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>固定</value>
@@ -25586,5 +25920,336 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>シークレット</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>オンライン</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>遅延</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>パケットロス</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>最終応答</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>ターゲットがオンライン</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Ping ターゲットがオフラインの後に再び応答したとき。</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>ターゲットがオフライン</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Ping ターゲットが失敗のしきい値と同じ回数だけ連続して応答しなかったとき。</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>ターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>ホスト</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>遅延（ミリ秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定ステップです。</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>このターゲットの名前を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>ホスト名、IPv4 アドレス、または IPv6 アドレスを入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum} から {maximum} までの整数で秒数を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum} から {maximum} までの整数でミリ秒数を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>タイムアウトは間隔より短くする必要があります。</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum} から {maximum} までの整数を入力してください。</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>ホスト</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>Ping を送るデバイスのホスト名、IPv4 または IPv6 アドレスです。</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>間隔（秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>ターゲットに Ping を送る頻度です。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>タイムアウト（ミリ秒）</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>各応答を待つ時間です。</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>オフラインと判定するまでの失敗回数</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>ターゲットをオフラインとみなすまでに連続して失敗する必要がある Ping の回数です。単発のパケットロスは無視されます。</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping ターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck はこのデバイスに定期的に Ping を送り、応答の有無と速さを表示します。</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>一意の変数名を作成できませんでした。ターゲットの名前を変更してもう一度お試しください。</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping が許可されていません</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>このシステムでは Macro Deck が Ping リクエストを送信できないため、Ping ターゲットを確認できません。Linux では net.ipv4.ping_group_range 設定で特権なしの Ping を許可してください。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping ステータス</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Ping ターゲットに到達できるかどうかと応答の速さを表示します。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Ping ターゲットなし</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>オンライン</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>オフライン</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>応答を待機中</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping 不許可</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>応答なし</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>到達不可</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>名前が見つかりません</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping 失敗</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ミリ秒</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>パケットロス {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>ターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>このウィジェットに表示する Ping ターゲットです。</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>最初のターゲット</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>ターゲットの名前</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>遅延を表示</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>パケットロスを表示</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>遅延の履歴を表示</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>デバイスを起動</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>保存したデバイスに Wake on LAN のマジックパケットを送信します。パケットを送信しても、デバイスが起動したことは確認されません。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>デバイス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>起動する保存済みデバイス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>デバイスを選択</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>デバイスを追加</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck から起動するデバイスを保存します。デバイスのファームウェアとネットワークアダプターの設定で Wake on LAN を有効にする必要があります。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>不明な設定手順です。最初からやり直してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC アドレス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>デバイスのネットワークアダプターのハードウェアアドレス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>12 桁の 16 進数で MAC アドレスを入力してください。例: AA:BB:CC:DD:EE:FF</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>ブロードキャストアドレス</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>このネットワークでは 255.255.255.255 のままにするか、デバイスのサブネットのブロードキャストアドレスを入力してください。例: 192.168.2.255</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>IPv4 アドレスを入力してください。例: 192.168.1.255</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>ポート</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>パケットの送信先 UDP ポートです。ほとんどのデバイスはポート 9 で待ち受けます。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1 から 65535 までのポートを入力してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>パケット数</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>送信するパケットの数です。起動しにくいデバイスには複数送信してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1 から 10 までの数を入力してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>パケット間の待機時間 (ミリ秒)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>2 つのパケットの間に待機する時間 (ミリ秒)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0 から 10000 ミリ秒までの待機時間を入力してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>起動するデバイスを選択してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>選択したデバイスはもう存在しません。別のデバイスを選択してください。</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} の保存済み設定が無効です。デバイスを編集して保存し直してください。</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>{address} へのパケット送信が許可されませんでした。ブロードキャストが許可されているか、macOS では Macro Deck にローカルネットワークへのアクセスが許可されているかを確認してください。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address} への経路がありません。ブロードキャストアドレスと、macOS では Macro Deck にローカルネットワークへのアクセスが許可されているかを確認してください。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>{address} にパケットを送信できませんでした。</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck のコマンドライン オプション:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>このヘルプを表示して終了します。</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>インストールされている Macro Deck のバージョンを表示して終了します。</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>インストール済みのプラグインを起動せずに一覧表示して終了します。</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>インストール済みのプラグインを起動せずに Macro Deck を起動します。プラグインは開発者ツールで 1 つずつ起動してください。このセッションにのみ適用されます。</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>実行中の Macro Deck を終了します。</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>チャネル: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>コミット: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>プラグイン フォルダー: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>プラグイン フォルダーを読み取れませんでした: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>プラグインはインストールされていません。</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>名前: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>有効なバージョン: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>その他のインストール済みバージョン: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>使用できる有効なバージョンがありません。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>バージョン {version} のマニフェストが無効です ({error})。</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>バージョン {version} にマニフェストがありません。</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: 有効なプラグイン フォルダーではありません。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Macro Deck のホストが見つかりません。Macro Deck を再インストールしてください。</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Macro Deck のホストを実行できませんでした: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck はすでに実行中です。先に Macro Deck を終了してから、{option} を付けて再起動してください。</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>プラグイン無効</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck は --disable-plugins で起動されました。このセッションでは、インストール済みのプラグインは自動的に起動しません。開発者ツールで 1 つずつ起動してください。</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck は --disable-plugins で起動されたため、インストール済みのプラグインは自動的に起動されていません。ここで 1 つずつ起動してください。ここでの起動や停止はこのセッションにのみ適用されます。</value>
   </data>
 </root>

@@ -4,19 +4,10 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Domain.Enums;
 using Mediator;
 using Microsoft.Extensions.Hosting;
 
 namespace MacroDeckHost.Application.Events.Handlers;
-
-internal static class VariableEventScope
-{
-	public static bool IsLocalToRun(VariableEntity variable)
-	{
-		return variable.Scope is VariableScope.Script or VariableScope.Automation;
-	}
-}
 
 public sealed class VariableValueChangedEventTriggerHandler
 	: INotificationHandler<VariableValueChangedNotification>
@@ -41,7 +32,11 @@ public sealed class VariableValueChangedEventTriggerHandler
 				["variable"] = notification.Variable.Name,
 				["value"] = ActionConditionValue(notification.Variable),
 				["previousValue"] = notification.PreviousValue
-			}));
+			},
+			null,
+			null,
+			0,
+			EventVariableSource.Of(notification.Variable)));
 
 		return ValueTask.CompletedTask;
 	}
@@ -129,7 +124,11 @@ public sealed class VariableCreatedEventTriggerHandler : INotificationHandler<Va
 		}
 
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableCreated),
-			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name }));
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name },
+			null,
+			null,
+			0,
+			EventVariableSource.Of(notification.Variable)));
 
 		return ValueTask.CompletedTask;
 	}
@@ -152,7 +151,11 @@ public sealed class VariableDeletedEventTriggerHandler : INotificationHandler<Va
 		}
 
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableDeleted),
-			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name }));
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name },
+			null,
+			null,
+			0,
+			EventVariableSource.Of(notification.Variable)));
 
 		return ValueTask.CompletedTask;
 	}

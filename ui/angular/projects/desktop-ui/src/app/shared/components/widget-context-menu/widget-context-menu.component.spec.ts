@@ -20,7 +20,7 @@ describe('WidgetContextMenuComponent', () => {
     fixture.componentRef.setInput('mode', 'widget');
     fixture.detectChanges();
 
-    expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'copy', 'cut', 'pin', 'export', 'delete']);
+    expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'copy', 'cut', 'copy-style', 'paste-style', 'pin', 'export', 'delete']);
     expect(component.menuItems().find(i => i.id === 'delete')?.danger).toBeTrue();
   });
 
@@ -29,7 +29,7 @@ describe('WidgetContextMenuComponent', () => {
     fixture.componentRef.setInput('canRun', true);
     fixture.detectChanges();
 
-    expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'run', 'copy', 'cut', 'pin', 'export', 'delete']);
+    expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'run', 'copy', 'cut', 'copy-style', 'paste-style', 'pin', 'export', 'delete']);
     expect(component.menuItems().find(i => i.id === 'run')?.label).toBe('Run');
   });
 
@@ -40,7 +40,7 @@ describe('WidgetContextMenuComponent', () => {
     fixture.detectChanges();
 
     const items = component.menuItems();
-    expect(items.map(i => i.id)).toEqual(['edit', 'copy', 'pin', 'unpin', 'export', 'delete']);
+    expect(items.map(i => i.id)).toEqual(['edit', 'copy', 'copy-style', 'paste-style', 'pin', 'unpin', 'export', 'delete']);
     expect(items.find(i => i.id === 'cut')).toBeUndefined();
 
     const scopeChoices = items.find(i => i.id === 'pin')!.children!;
@@ -87,6 +87,29 @@ describe('WidgetContextMenuComponent', () => {
     expect(component.menuItems()[0].disabled).toBeFalse();
   });
 
+  it('names the style entries and keeps Paste Style disabled until a style was copied', () => {
+    fixture.componentRef.setInput('mode', 'widget');
+    fixture.detectChanges();
+
+    const items = component.menuItems();
+    expect(items.find(i => i.id === 'copy-style')?.label).toBe('Copy Style');
+    expect(items.find(i => i.id === 'paste-style')?.label).toBe('Paste Style');
+    expect(items.find(i => i.id === 'copy-style')?.disabled).toBeFalsy();
+    expect(items.find(i => i.id === 'paste-style')?.disabled).toBeTrue();
+  });
+
+  it('enables Paste Style for one widget and for a selection once a style was copied', () => {
+    fixture.componentRef.setInput('mode', 'widget');
+    fixture.componentRef.setInput('canPasteStyle', true);
+    fixture.detectChanges();
+    expect(component.menuItems().find(i => i.id === 'paste-style')?.disabled).toBeFalse();
+
+    fixture.componentRef.setInput('selectionCount', 3);
+    fixture.detectChanges();
+    expect(component.menuItems().find(i => i.id === 'paste-style')?.disabled).toBeFalse();
+    expect(component.menuItems().find(i => i.id === 'copy-style')).toBeUndefined();
+  });
+
   it('re-emits the clicked item id as a typed action', () => {
     const actions: WidgetContextMenuAction[] = [];
     component.action.subscribe(a => actions.push(a));
@@ -113,7 +136,7 @@ describe('WidgetContextMenuComponent', () => {
       fixture.detectChanges();
 
       const items = component.menuItems();
-      expect(items.map(i => i.id)).toEqual(['copy', 'cut', 'pin', 'delete']);
+      expect(items.map(i => i.id)).toEqual(['copy', 'cut', 'paste-style', 'pin', 'delete']);
       expect(items.find(i => i.id === 'copy')?.label).toBe('Copy 3 widgets');
       expect(items.find(i => i.id === 'delete')?.label).toBe('Delete 3 widgets');
       expect(items.find(i => i.id === 'delete')?.danger).toBeTrue();
@@ -139,14 +162,14 @@ describe('WidgetContextMenuComponent', () => {
       fixture.componentRef.setInput('selectionCount', 1);
       fixture.detectChanges();
 
-      expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'copy', 'cut', 'pin', 'export', 'delete']);
+      expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'copy', 'cut', 'copy-style', 'paste-style', 'pin', 'export', 'delete']);
     });
 
     it('defaults to the single-target menu when selectionCount is not provided', () => {
       fixture.componentRef.setInput('mode', 'widget');
       fixture.detectChanges();
 
-      expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'copy', 'cut', 'pin', 'export', 'delete']);
+      expect(component.menuItems().map(i => i.id)).toEqual(['edit', 'copy', 'cut', 'copy-style', 'paste-style', 'pin', 'export', 'delete']);
     });
   });
 });

@@ -203,7 +203,7 @@ public sealed class DiscordConfigFlow : IConfigFlow
 			return ConfigFlowResult.Error(AuthorizeStep(),
 				AppStrings.Integrations.Discord.Config.OAuthFailed(ex.Message));
 		}
-		catch (HttpRequestException ex)
+		catch (Exception ex) when (ex is HttpRequestException or TimeoutException)
 		{
 			_logger.Warning(ex, "Discord token exchange could not reach discord.com");
 			return ConfigFlowResult.Error(AuthorizeStep(),

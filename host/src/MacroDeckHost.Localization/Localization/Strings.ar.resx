@@ -1486,6 +1486,9 @@
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>تعذّرت إضافة التطبيق</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>تعذّر نسخ النمط</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>حذف الأداة</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>الأدوات المنسوخة لا تتسع في أي مكان على هذه اللوحة. انقر بالزر الأيمن على خلية فارغة للصقها فيها.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>تعذّر لصق النمط</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>تعذّر تثبيت الأداة</value>
@@ -2545,6 +2551,9 @@
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>لم يُجب الإجراء في الوقت المحدد</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>تستخدم هذه الخطوة سرًا وقد رُفضت، لذا لا تُشغَّل.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>تستخدم هذه الخطوة سرًا وتنتظر الموافقة.</value>
   </data>
@@ -3305,6 +3314,12 @@
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>لم يعالج أي مزوّد الأداة</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>النمط المنسوخ غير صالح. انسخه مرة أخرى.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>لا يمكن تطبيق النمط على هذا التحديد.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>يمكن أن تكون {max} أدوات مفضلة كحد أقصى.</value>
@@ -5621,6 +5636,27 @@
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>تغيير ملف التعريف إلى</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>المجلدات التي يتم التنقل بينها، بالترتيب الذي حُددت به.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>المجلدات</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>أبجديًا</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>مخصص</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>يمر «ترتيب المجلدات» و«أبجديًا» على جميع مجلدات ملف التعريف المفتوح. ويمر «مخصص» على المجلدات المحددة فقط.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>ترتيب المجلدات</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>الترتيب</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>اختياري. يتنقّل هذا الجهاز فقط. اتركه فارغًا للتنقّل بالجهاز الذي شغّل الإجراء، أو بكل الأجهزة إذا لم يكن هناك جهاز شغّله.</value>
   </data>
@@ -5648,11 +5684,29 @@
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>الانتقال إلى المجلد الأب</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>ينتقل إلى المجلد التالي حسب الترتيب المحدد.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>المجلد التالي</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>ينتقل إلى المجلد السابق حسب الترتيب المحدد.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>المجلد السابق</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>ملف التعريف المراد التبديل إليه.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>ملف التعريف</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>بعد المجلد الأخير يتم الانتقال إلى الأول، وقبل الأول إلى الأخير. عند إيقافه لا يحدث شيء عند الطرفين.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>التكرار الدائري</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>الجهاز '{deviceId}' غير متصل.</value>
@@ -5668,6 +5722,9 @@
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>لم يتم تحديد ملف تعريف.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>تعذر العثور على المجلد المفتوح.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>ملف التعريف '{profileId}' غير موجود.</value>
@@ -7453,6 +7510,84 @@
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>انتهت جلسة تسجيل الدخول إلى Google لـ {account}</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>يضيف عنصرًا إلى نهاية مصفوفة في مسار داخل JSON ويحفظ النتيجة في متغير. تُنشأ المصفوفة إذا كانت مفقودة.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>إضافة إلى مصفوفة JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>يحفظ في متغير عدد عناصر المصفوفة أو خصائص الكائن في مسار داخل JSON.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>عدّ عناصر JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>الخصائص وفهارس المصفوفات، مثل data.items[0].name، أو "$" وحدها للمستند بأكمله.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>بيانات JSON المراد العمل عليها. أدرج متغيرًا لاستخدام JSON المخزّن فيه.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>القيمة</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>صواب أو خطأ</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>جزء JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>نوع القيمة</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>رقم</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>نص</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>يزيل الخاصية أو عنصر المصفوفة في مسار داخل JSON ويحفظ النتيجة في متغير.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>إزالة قيمة JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>يكتب قيمة في مسار داخل JSON ويحفظ النتيجة في متغير. تُنشأ الكائنات المفقودة على المسار.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>تعيين قيمة JSON</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>بيانات JSON غير صالحة.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>مسار JSON غير صالح.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>القيمة لا تطابق نوع القيمة المختار.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>المسار لا يطابق JSON: يتطلب اسم الخاصية كائنًا في ذلك الموضع، ويتطلب الفهرس مصفوفة.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>لا يمكن إزالة المستند بأكمله. اختر مسارًا بداخله.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>القيمة في هذا المسار ليست مصفوفة.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>القيمة في هذا المسار ليست مصفوفة ولا كائنًا.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>لا توجد قيمة في هذا المسار داخل JSON.</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>أُلغي تسجيل الدخول إلى Microsoft أو لم يكتمل. تابع لفتحه مجدداً.</value>
@@ -11627,6 +11762,118 @@
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>تعذّر عرض الإشعار.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>طرح سؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>يوقف التدفق مؤقتًا ويطرح سؤالًا على اللوحة ويحفظ الإجابة في متغير.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>نوع السؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>نعم أو لا</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>الاختيار من قائمة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>إدخال نص</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>السؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>الرسالة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>الخيارات</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>خيار واحد في كل سطر أو مصفوفة JSON. أدرج متغيرًا لأخذ القائمة منه. 50 خيارًا على الأكثر، بحد أقصى 100 حرف لكل منها.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>نص توضيحي</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>النص الافتراضي</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>مكان السؤال</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>الجهاز الذي ضغط على الأداة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>جهاز مختار</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>كل العملاء المتصلين</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>الجهاز</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>المهلة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>المدة التي ينتظر فيها السؤال إجابة، 9 دقائق على الأكثر.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>متغير الإجابة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>يتلقى true أو false أو العنصر المختار أو النص المدخل. دون إجابة يتلقى false أو نصًا فارغًا.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>متغير الموضع</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>يتلقى موضع العنصر المختار بدءًا من 0، أو -1 دون إجابة.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>متغير النتيجة</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>يتلقى answered أو cancelled أو timedOut أو noClient.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>يُغلق بعد ثانية واحدة ({count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>يُغلق بعد انتهاء المهلة (بالثواني: {count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>يُغلق بعد دقيقة واحدة ({count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>يُغلق بعد انتهاء المهلة (بالدقائق: {count}).</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>الأسئلة غير متاحة بعد.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>تعذر عرض السؤال.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>قائمة الخيارات فارغة.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>تتجاوز القائمة الحد المسموح من الخيارات (الحد الأقصى: {max}).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>يتجاوز أحد الخيارات الطول المسموح (الحد الأقصى بالأحرف: {max}).</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>قائمة الخيارات أكبر من أن تُعرض.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>تعذر حفظ الإجابة في {variable}. تحقق من نوع المتغير.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>يضبط مستوى صوت جهاز الصوت المحدد على مستوى معين.</value>
   </data>
@@ -11918,6 +12165,66 @@
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>معرّف حزمة التطبيق النشط</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>تطبيق مراقَب</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>يعرض Macro Deck ما إذا كان هذا التطبيق قيد التشغيل، وعدد عملياته ونوافذه، وكيفية عرض نوافذه.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>لعبة</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>التطبيق</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>عملية قيد التشغيل، مثل chrome، أو مسار البرنامج.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>أدخل اسمًا لهذا التطبيق.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>اختر تطبيقًا قيد التشغيل أو أدخل مسار برنامج.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>الحد الأقصى للتطبيقات المراقَبة: {count}. أزل تطبيقًا لإضافة آخر.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>تعذر إنشاء اسم متغير فريد. أعد تسمية التطبيق ثم حاول مرة أخرى.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>خطوة إعداد غير معروفة.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>قيد التشغيل</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>العمليات قيد التشغيل</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>النوافذ المفتوحة</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>حالة النافذة</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>حالة نافذة التطبيق النشط</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>عمليات التطبيق النشط</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>حالات النوافذ غير متاحة</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>لا يسمح Wayland لـ Macro Deck بقراءة نوافذ التطبيقات الأخرى. تواصل التطبيقات المراقَبة الإبلاغ عمّا إذا كانت قيد التشغيل وعن عدد عملياتها، لكن حالة نوافذها وعددها تبقى غير متاحة.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>يحتاج Macro Deck إلى إذن إمكانية الوصول لقراءة حالات النوافذ. امنح Macro Deck الإذن من إعدادات النظام ← الخصوصية والأمان ← إمكانية الوصول. وحتى ذلك الحين، تبقى حالة نوافذ التطبيقات المراقَبة وعددها غير متاحة.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>امنح الإذن</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>الحساب المتصل بـ Twitch الذي سيُنفَّذ الإجراء باسمه.</value>
@@ -15824,6 +16131,12 @@
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>تغيّر</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>تعذّر رفض الخطوة.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>لا يوجد ما ينتظر الموافقة</value>
   </data>
@@ -15831,7 +16144,7 @@
     <value>تمت الموافقة على جميع الخطوات التي تستخدم سرًا.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>لا تُشغَّل الخطوات التي تستخدم سرًا إلا بعد الموافقة عليها. راجِع ما تغيّر، ثم وافِق عليها.</value>
+    <value>لا تُشغَّل الخطوات التي تستخدم سرًا إلا بعد الموافقة عليها. راجِع ما تغيّر، ثم وافِق عليها أو ارفضها.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>تعذّر تحميل الموافقات.</value>
@@ -16489,6 +16802,15 @@
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>مفتاح الاستعادة</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>هل تريد إنشاء مفتاح استعادة جديد؟</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>لا تزال النسخ الاحتياطية السابقة تحتاج إلى مفتاح الاستعادة الذي حفظته من قبل، لذا احتفظ به أيضًا. سيُعرض المفتاح الجديد بعد ذلك.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>إنشاء مفتاح استعادة جديد</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>عن بُعد</value>
@@ -19186,6 +19508,9 @@
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>حدث خطأ غير متوقع.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>فرض التحديث</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>تحديث سجل المتجر</value>
   </data>
@@ -20289,6 +20614,9 @@
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>الشاشة تبقى مُنشَّطة.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>انقر في أي مكان لإبقاء الشاشة مُنشَّطة.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>رفض المتصفح أو نظام التشغيل إبقاء الشاشة مُنشَّطة (مثل موفّر البطارية).</value>
   </data>
@@ -21021,6 +21349,9 @@
     <value>نسخ الأدوات ({count})</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>نسخ النمط</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>قص</value>
   </data>
@@ -21052,6 +21383,9 @@
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>لصق</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>لصق النمط</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>تثبيت</value>
@@ -25586,5 +25920,336 @@
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>السر</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>متصل</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>زمن الاستجابة</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>فقدان الحزم</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>آخر رد</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>الهدف متصل</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>عندما يرد هدف Ping مرة أخرى بعد أن كان غير متصل.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>الهدف غير متصل</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>عندما يتوقف هدف Ping عن الرد لعدد متتالٍ من طلبات Ping يساوي حد الإخفاق الخاص به.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>الهدف</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>المضيف</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>زمن الاستجابة (ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>خطوة إعداد غير معروفة.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>أدخل اسمًا لهذا الهدف.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>أدخل اسم مضيف أو عنوان IPv4 أو عنوان IPv6.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>أدخل عددًا صحيحًا من الثواني بين {minimum} و{maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>أدخل عددًا صحيحًا من أجزاء الثانية بين {minimum} و{maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>يجب أن تكون مهلة الانتظار أقصر من الفاصل الزمني.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>أدخل عددًا صحيحًا بين {minimum} و{maximum}.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>المضيف</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>اسم المضيف أو عنوان IPv4 أو IPv6 للجهاز المراد إرسال Ping إليه.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>الفاصل الزمني (بالثواني)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>عدد مرات إرسال Ping إلى الهدف.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>مهلة الانتظار (بأجزاء الثانية)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>مدة انتظار كل رد.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>عدد الإخفاقات قبل عدم الاتصال</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>عدد طلبات Ping المتتالية التي يجب أن تفشل قبل اعتبار الهدف غير متصل، وبذلك يتم تجاهل حزمة مفقودة واحدة.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>هدف Ping</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>يرسل Macro Deck طلبات Ping إلى هذا الجهاز بانتظام ويعرض ما إذا كان يرد ومدى سرعة رده.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>تعذر إنشاء اسم متغير فريد. أعد تسمية الهدف ثم حاول مرة أخرى.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping غير مسموح به</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>لا يسمح هذا النظام لـ Macro Deck بإرسال طلبات Ping، لذا لا يمكن التحقق من أهداف Ping. على Linux، اسمح بـ Ping بدون امتيازات باستخدام الإعداد net.ipv4.ping_group_range.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>حالة Ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>يعرض ما إذا كان هدف Ping قابلًا للوصول ومدى سرعة رده.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>لا يوجد هدف Ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>متصل</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>غير متصل</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>في انتظار الرد</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping غير مسموح به</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>لا يوجد رد</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>تعذر الوصول</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>لم يتم العثور على الاسم</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>فشل Ping</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>فقدان الحزم: {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>الهدف</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>هدف Ping الذي تعرضه هذه الأداة.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>الهدف الأول</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>الاسم المعروض</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>اسم الهدف</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>عرض زمن الاستجابة</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>عرض فقدان الحزم</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>عرض سجل زمن الاستجابة</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>إيقاظ الجهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>يرسل حزمة Wake on LAN السحرية إلى جهاز محفوظ. إرسال الحزمة لا يؤكد أن الجهاز قد استيقظ.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>الجهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>الجهاز المحفوظ المراد إيقاظه</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>اختر جهازًا</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>إضافة جهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>احفظ جهازًا لإيقاظه من Macro Deck. يجب تفعيل Wake on LAN في البرنامج الثابت للجهاز وفي إعدادات محوّل الشبكة.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>خطوة الإعداد هذه غير معروفة. ابدأ من جديد.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>عنوان MAC</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>العنوان المادي لمحوّل الشبكة في الجهاز</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>أدخل عنوان MAC مكوّنًا من 12 رقمًا سداسيًا عشريًا، مثل AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>عنوان البث</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>أبقِ 255.255.255.255 لهذه الشبكة، أو أدخل عنوان البث للشبكة الفرعية التي يتصل بها الجهاز، مثل 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>أدخل عنوان IPv4، مثل 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>المنفذ</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>منفذ UDP الذي تُرسل إليه الحزمة. تستمع معظم الأجهزة على المنفذ 9.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>أدخل منفذًا من 1 إلى 65535.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>عدد الحزم</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>عدد الحزم المرسلة. أرسل أكثر من حزمة إلى جهاز لا يستيقظ دائمًا.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>أدخل رقمًا من 1 إلى 10.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>المهلة بين الحزم (مللي ثانية)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>مدة الانتظار بين حزمتين، بالمللي ثانية</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>أدخل مهلة من 0 إلى 10000 مللي ثانية.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>اختر جهازًا لإيقاظه.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>الجهاز المحدد لم يعد موجودًا. اختر جهازًا آخر.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>الإعدادات المحفوظة لـ {device} غير صالحة. عدّل الجهاز واحفظه مرة أخرى.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>لم يُسمح بإرسال الحزمة إلى {address}. تحقق من السماح بالبث، ومن أن Macro Deck لديه إذن الوصول إلى الشبكة المحلية على macOS.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>لا يوجد مسار إلى {address}. تحقق من عنوان البث، ومن أن Macro Deck لديه إذن الوصول إلى الشبكة المحلية على macOS.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>تعذّر إرسال الحزمة إلى {address}.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>خيارات سطر الأوامر في Macro Deck:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>اعرض هذه المساعدة ثم اخرج.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>اعرض إصدار Macro Deck المثبّت ثم اخرج.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>اعرض قائمة الإضافات المثبّتة دون تشغيلها ثم اخرج.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>شغّل Macro Deck دون تشغيل الإضافات المثبّتة. شغّلها واحدة تلو الأخرى من أدوات المطوّر. ينطبق على هذه الجلسة فقط.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>أغلق Macro Deck قيد التشغيل.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>القناة: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>الإيداع: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>مجلد الإضافات: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>تعذّرت قراءة مجلد الإضافات: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>لا توجد إضافات مثبّتة.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>الاسم: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>الإصدار النشط: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>إصدارات مثبّتة أخرى: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>لا يوجد إصدار نشط صالح للاستخدام.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>بيان الإصدار {version} غير صالح ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>لا يحتوي الإصدار {version} على بيان.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: ليس مجلد إضافة صالحًا.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>لم يُعثر على مضيف Macro Deck. أعد تثبيت Macro Deck.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>تعذّر تشغيل مضيف Macro Deck: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck قيد التشغيل بالفعل. أغلق Macro Deck أولًا، ثم شغّله مجددًا باستخدام {option}.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>الإضافات معطّلة</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>تم تشغيل Macro Deck باستخدام --disable-plugins. لا تبدأ الإضافات المثبّتة تلقائيًا في هذه الجلسة. شغّلها واحدة تلو الأخرى من أدوات المطوّر.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>تم تشغيل Macro Deck باستخدام --disable-plugins، لذلك لم تُشغَّل الإضافات المثبّتة تلقائيًا. شغّلها هنا واحدة تلو الأخرى. التشغيل أو الإيقاف هنا ينطبق على هذه الجلسة فقط.</value>
   </data>
 </root>

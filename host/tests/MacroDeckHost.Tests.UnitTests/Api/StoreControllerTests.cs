@@ -123,6 +123,7 @@ internal sealed class StoreControllerTests
 			StoreRegistryOptions.Default with
 			{
 				BaseUrl = new Uri(StoreRegistryFixture.BaseUrl),
+				ArchiveUrl = new Uri(StoreRegistryFixture.ArchiveUrl),
 				RootPublicKeyOverride = MacroDeck.Signing.TestSupport.TestPki.Root.PublicKey,
 				UpdateRaceRetryDelays = []
 			},
@@ -137,9 +138,9 @@ internal sealed class StoreControllerTests
 			Serilog.Core.Logger.None);
 		var controller = CreateController(refresher, refreshTracker);
 
-		var started = controller.RefreshRegistry(CancellationToken.None);
+		var started = controller.RefreshRegistry(false, CancellationToken.None);
 		await fixture.ManifestRequested.Task.WaitAsync(TimeSpan.FromSeconds(10));
-		var joined = controller.RefreshRegistry(CancellationToken.None);
+		var joined = controller.RefreshRegistry(false, CancellationToken.None);
 		var status = await controller.GetStatus();
 		fixture.ManifestHold.SetResult();
 		var responses = await Task.WhenAll(started, joined);
@@ -154,6 +155,46 @@ internal sealed class StoreControllerTests
 				Is.All.True,
 				responses[0].Error?.Message.ToString());
 			Assert.That(responses[0].RefreshRun!.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+		});
+	}
+
+	[Test]
+	public async Task A_forced_refresh_request_downloads_the_registry_again_although_nothing_changed()
+	{
+		Directory.CreateDirectory(_paths.StoreRegistryDirectory);
+		Directory.CreateDirectory(_paths.StoreRegistryStagingDirectory);
+		var fixture = new StoreRegistryFixture { SignedAt = DateTimeOffset.UtcNow };
+		fixture.AddPackage("plugin", PluginId, "1.0.0", "Hue Bridge");
+		var refreshTracker = new StoreRegistryRefreshTracker(TimeProvider.System);
+		using var lifetime = new StubHostApplicationLifetime();
+		using var refresher = new StoreRegistryRefresher(fixture.Build(),
+			StoreRegistryOptions.Default with
+			{
+				BaseUrl = new Uri(StoreRegistryFixture.BaseUrl),
+				ArchiveUrl = new Uri(StoreRegistryFixture.ArchiveUrl),
+				RootPublicKeyOverride = MacroDeck.Signing.TestSupport.TestPki.Root.PublicKey,
+				UpdateRaceRetryDelays = []
+			},
+			new JsonStoreRegistryStateStore(_paths, Serilog.Core.Logger.None),
+			new StoreRegistryReader(Serilog.Core.Logger.None),
+			_catalog,
+			_paths,
+			TimeProvider.System,
+			refreshTracker,
+			new RecordingMediator(),
+			lifetime,
+			Serilog.Core.Logger.None);
+		var controller = CreateController(refresher, refreshTracker);
+		await controller.RefreshRegistry(false, CancellationToken.None);
+
+		var unchanged = await controller.RefreshRegistry(false, CancellationToken.None);
+		var forced = await controller.RefreshRegistry(true, CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(unchanged.RefreshRun!.Entries[^1].Step, Is.EqualTo(StoreRegistryRefreshStep.UpToDate));
+			Assert.That(forced.Success, Is.True, forced.Error?.Message.ToString());
+			Assert.That(forced.RefreshRun!.Entries[^1].Step, Is.EqualTo(StoreRegistryRefreshStep.Applied));
 		});
 	}
 
@@ -1252,6 +1293,14 @@ internal sealed class FakeStoreRegistryRefresher : IStoreRegistryRefresher
 
 	public Task<Result<RegistryRefreshError>> Refresh(
 		StoreRegistryRefreshTrigger trigger,
+		CancellationToken cancellationToken = default)
+	{
+		throw new NotSupportedException();
+	}
+
+	public Task<Result<RegistryRefreshError>> Refresh(
+		StoreRegistryRefreshTrigger trigger,
+		bool force,
 		CancellationToken cancellationToken = default)
 	{
 		throw new NotSupportedException();

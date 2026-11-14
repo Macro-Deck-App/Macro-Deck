@@ -242,6 +242,27 @@ public class ActionExecutionCoordinatorTests
 	}
 
 	[Test]
+	public async Task An_unbounded_run_without_a_caller_token_ends_when_the_application_stops()
+	{
+		using var lifetime = new StoppableLifetime();
+		var flow = new RunsUntilCancelledFlowExecutor();
+		await using var services = new ServiceCollection().AddSingleton<IFlowExecutor>(flow).BuildServiceProvider();
+		var coordinator = new ActionExecutionCoordinator(services.GetRequiredService<IServiceScopeFactory>(),
+			_transport,
+			lifetime,
+			Log.Logger);
+
+		var dispatch = coordinator.RunBoundedAsync(Request(), Timeout.InfiniteTimeSpan, CancellationToken.None);
+		await flow.Started.WaitAsync(TimeSpan.FromSeconds(2));
+		Assert.That(dispatch.IsCompleted, Is.False, "the run waits for its flow");
+
+		lifetime.Stop();
+
+		await dispatch.WaitAsync(TimeSpan.FromSeconds(2));
+		Assert.That(flow.Cancelled, Is.True);
+	}
+
+	[Test]
 	public async Task Delegate_runs_count_towards_the_same_in_flight_cap()
 	{
 		var never = new TaskCompletionSource<FlowExecutionResult>();
@@ -275,6 +296,33 @@ public class ActionExecutionCoordinatorTests
 			Status = FlowExecutionStatus.Succeeded,
 			MatchedFlows = 1
 		};
+	}
+
+	private sealed class RunsUntilCancelledFlowExecutor : IFlowExecutor
+	{
+		private readonly TaskCompletionSource _started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public Task Started => _started.Task;
+
+		public bool Cancelled { get; private set; }
+
+		public async Task<FlowExecutionResult> ExecuteAsync(
+			FlowExecutionRequest request,
+			CancellationToken cancellationToken)
+		{
+			_started.SetResult();
+			try
+			{
+				await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+			}
+			catch (OperationCanceledException)
+			{
+				Cancelled = true;
+			}
+
+			return new FlowExecutionResult
+				{ ExecutionId = request.ExecutionId, Status = FlowExecutionStatus.Cancelled };
+		}
 	}
 
 	private sealed class GatedFlowExecutor : IFlowExecutor

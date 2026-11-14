@@ -46,13 +46,16 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{
-		// A device session validates against its own profile's folders instead: the folder cache holds
-		// no virtual profile's folders, and a device assigned one must still be able to navigate it.
+		// The folder cache holds no virtual profile's folders, so those validate against the session's own
+		// profile; a stored folder names its profile, which lets the session switch to it.
 		if (DeviceOrigin.TryParse(originClientId, out var deviceId))
 		{
+			var profileId = Guid.TryParse(folderId, out var storedId)
+				? _folderCache.GetFolderById(storedId)?.ProfileId.ToString()
+				: null;
 			return _deviceSurfaces()
 				.NavigateAsync(deviceId,
-					DeckNavigationCommand.ChangeTo(folderId, null),
+					DeckNavigationCommand.ChangeTo(folderId, profileId),
 					cancellationToken);
 		}
 
@@ -182,7 +185,10 @@ public sealed class DeckNavigator : IDeckNavigator, IDeviceDeckNavigator
 				Id = folder.Id.ToString(),
 				Label = multipleProfiles && profileNames.TryGetValue(folder.ProfileId, out var profileName)
 					? $"{profileName} / {folder.Name}"
-					: folder.Name
+					: folder.Name,
+				ProfileId = folder.ProfileId.ToString(),
+				ParentId = folder.ParentId?.ToString(),
+				Order = folder.Order
 			})
 			.OrderBy(folder => folder.Label, StringComparer.OrdinalIgnoreCase)
 			.ToList();

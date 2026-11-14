@@ -84,9 +84,9 @@ public class StoreController : ControllerBase
 	}
 
 	[HttpPost("registry/refresh")]
-	public async Task<RefreshStoreRegistryResponse> RefreshRegistry(CancellationToken ct)
+	public async Task<RefreshStoreRegistryResponse> RefreshRegistry([FromQuery] bool force, CancellationToken ct)
 	{
-		var result = await _refresher.Refresh(ct);
+		var result = await _refresher.Refresh(StoreRegistryRefreshTrigger.Manual, force, ct);
 
 		return new RefreshStoreRegistryResponse
 		{

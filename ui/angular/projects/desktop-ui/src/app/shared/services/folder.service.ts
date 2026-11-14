@@ -1330,6 +1330,32 @@ export class FolderService {
     }
   }
 
+  async copyWidgetStyle(widgetId: string): Promise<Result<string>> {
+    try {
+      const response = await this.api.copyWidgetStyle(widgetId);
+      return response.success && response.style
+        ? { success: true, data: response.style }
+        : { success: false, error: this.styleError(response.error) };
+    } catch (error) {
+      console.error('Failed to copy the widget style:', error);
+      return { success: false };
+    }
+  }
+
+  async pasteWidgetStyle(style: string, widgetIds: readonly string[]): Promise<Result> {
+    try {
+      const response = await this.api.pasteWidgetStyle({ widgetIds: [...widgetIds], style });
+      return { success: response.success, error: this.styleError(response.error) };
+    } catch (error) {
+      console.error('Failed to paste the widget style:', error);
+      return { success: false };
+    }
+  }
+
+  private styleError(error: Result['error']): Result['error'] {
+    return error && { ...error, message: resolveLocalizedText(error.message as LocalizedText, this.localization) };
+  }
+
   async updateWidget(widgetId: string, updates: Partial<GridWidget>): Promise<boolean> {
     const folderId = this.resolveFolderId(widgetId);
     if (!folderId) return false;

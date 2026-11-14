@@ -7,7 +7,8 @@ import { LocalizationService } from '../../localization';
 export type WidgetContextMenuMode = 'widget' | 'empty';
 
 export type WidgetContextMenuAction =
-  'edit' | 'run' | 'copy' | 'cut' | 'delete' | 'paste' | 'export' | 'import' | 'pin-profile' | 'pin-subtree' | 'unpin';
+  'edit' | 'run' | 'copy' | 'cut' | 'copy-style' | 'paste-style' | 'delete' | 'paste' | 'export' | 'import'
+  | 'pin-profile' | 'pin-subtree' | 'unpin';
 
 @Component({
   selector: 'shared-widget-context-menu',
@@ -31,6 +32,7 @@ export class WidgetContextMenuComponent {
   readonly y = input(0);
   readonly mode = input<WidgetContextMenuMode>('widget');
   readonly canPaste = input(false);
+  readonly canPasteStyle = input(false);
   readonly isPinned = input(false);
   readonly pinScope = input<PinScope | undefined>(undefined);
   readonly selectionCount = input(1);
@@ -54,6 +56,12 @@ export class WidgetContextMenuComponent {
     const pinned = this.isPinned();
     const scope = this.pinScope() ?? 'Profile';
     const count = this.selectionCount();
+    const pasteStyleItem: ContextMenuItem = {
+      id: 'paste-style',
+      label: t(AppStrings.Widgets.ContextMenu.PasteStyle),
+      icon: 'icon-paint-roller',
+      disabled: !this.canPasteStyle(),
+    };
 
     if (count > 1) {
       const batchPinItem: ContextMenuItem = {
@@ -70,6 +78,7 @@ export class WidgetContextMenuComponent {
       return [
         { id: 'copy', label: t(AppStrings.Widgets.ContextMenu.CopyCount, { count }), icon: 'icon-copy' },
         { id: 'cut', label: t(AppStrings.Widgets.ContextMenu.Cut), icon: 'icon-scissors' },
+        pasteStyleItem,
         batchPinItem,
         ...(pinned ? [{ id: 'unpin', label: t(AppStrings.Widgets.ContextMenu.UnpinWidgets), icon: 'icon-pin-off', dividerAfter: true } as ContextMenuItem] : []),
         { id: 'delete', label: t(AppStrings.Widgets.ContextMenu.DeleteCount, { count }), icon: 'icon-trash', danger: true },
@@ -92,6 +101,8 @@ export class WidgetContextMenuComponent {
       ...(this.canRun() ? [{ id: 'run', label: t(AppStrings.ActionBuilder.Toolbar.Run), icon: 'icon-play' } as ContextMenuItem] : []),
       { id: 'copy', label: t(AppStrings.Widgets.ContextMenu.Copy), icon: 'icon-copy' },
       ...(pinned ? [] : [{ id: 'cut', label: t(AppStrings.Widgets.ContextMenu.Cut), icon: 'icon-scissors' } as ContextMenuItem]),
+      { id: 'copy-style', label: t(AppStrings.Widgets.ContextMenu.CopyStyle), icon: 'icon-paintbrush' },
+      pasteStyleItem,
       pinItem,
       ...(pinned ? [{ id: 'unpin', label: t(AppStrings.Widgets.ContextMenu.UnpinWidget), icon: 'icon-pin-off', dividerAfter: true } as ContextMenuItem] : []),
       { id: 'export', label: t(AppStrings.Widgets.ContextMenu.Export), icon: 'icon-upload', dividerAfter: true },

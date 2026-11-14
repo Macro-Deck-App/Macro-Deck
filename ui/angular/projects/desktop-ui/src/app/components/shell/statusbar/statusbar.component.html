@@ -11,6 +11,15 @@
         {{ appStrings.Shell.Statusbar.DevelopmentBuild | translate }}
       </span>
     }
+    @if (hostSession.pluginsDisabledAtStartup()) {
+      <span
+        class="plugins-disabled-badge"
+        role="status"
+        [title]="appStrings.Shell.Statusbar.PluginsDisabledTooltip | translate"
+        [attr.aria-label]="appStrings.Shell.Statusbar.PluginsDisabledTooltip | translate">
+        {{ appStrings.Shell.Statusbar.PluginsDisabled | translate }}
+      </span>
+    }
   </div>
 
   <div class="statusbar-center" [attr.data-tauri-drag-region]="isShell ? '' : null">

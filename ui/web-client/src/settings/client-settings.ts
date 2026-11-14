@@ -10,7 +10,11 @@ import {
   createSettingsRow,
   createSettingsSection,
   createToggle,
+  type ButtonHandle,
+  type ButtonVariant,
+  type SegmentedControlHandle,
   type SegmentedOption,
+  type SettingsSectionHandle,
   type ToggleHandle,
 } from '../ui';
 import {
@@ -119,6 +123,7 @@ export interface ClientSettingsHandle {
   close(): void;
   isOpen(): boolean;
   setButtonHidden(hidden: boolean): void;
+  repaint(): void;
   destroy(): void;
 }
 
@@ -178,6 +183,7 @@ export function gearIcon(): SVGElement {
 function wakeLockStatusKey(status: WakeLockStatus): string | null {
   switch (status) {
     case 'active': return ClientAppStrings.WebClient.KeepAwake.Active;
+    case 'awaitingGesture': return ClientAppStrings.WebClient.KeepAwake.AwaitingTap;
     case 'suspended': return ClientAppStrings.WebClient.KeepAwake.Suspended;
     case 'denied': return ClientAppStrings.WebClient.KeepAwake.Denied;
     case 'unsupported': return ClientAppStrings.WebClient.KeepAwake.Unsupported;
@@ -187,12 +193,15 @@ function wakeLockStatusKey(status: WakeLockStatus): string | null {
   }
 }
 
+type Localize = (paint: () => void) => void;
+
 interface LicensesViewer {
   element: HTMLElement;
   back: HTMLButtonElement;
   loading: HTMLElement;
   notices: HTMLElement;
   failure: HTMLElement;
+  showFailure(): void;
   loaded: boolean;
   request: number;
 }
@@ -201,23 +210,27 @@ interface OpenModal {
   backdrop: HTMLElement;
   heading: HTMLElement;
   body: HTMLElement;
+  paints: Array<() => void>;
   licensesButton: HTMLButtonElement;
   licenses: LicensesViewer;
-  themeMode: { setValue(value: string | null): void };
-  renderMode: { setValue(value: string | null): void };
-  iconResolution: { setValue(value: string | null): void } | null;
+  themeMode: SegmentedControlHandle;
+  renderMode: SegmentedControlHandle;
+  iconResolution: SegmentedControlHandle | null;
   iconResolutionDescription: HTMLElement | null;
   wakeLockControl: HTMLElement;
+  wakeLockToggle: ToggleHandle | null;
   wakeLockStatus: HTMLElement;
   settingsButtonToggle: ToggleHandle | null;
   settingsButtonStatus: HTMLElement;
   installDescription: HTMLElement | null;
   installControl: HTMLElement;
+  installAction: ButtonHandle | null;
   installNote: HTMLElement;
   updateRow: HTMLElement;
   updateSlot: HTMLElement;
   updateDescription: HTMLElement | null;
   updateControl: HTMLElement;
+  updateAction: ButtonHandle | null;
 }
 
 export function createClientSettings(options: ClientSettingsOptions): ClientSettingsHandle | null {
@@ -229,7 +242,10 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
   const trigger = element('button', 'wc-client-settings-trigger');
   trigger.type = 'button';
-  trigger.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.OpenSettings));
+  const paintTrigger = (): void => {
+    trigger.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.OpenSettings));
+  };
+  paintTrigger();
   trigger.appendChild(gearIcon());
 
   let open: OpenModal | null = null;
@@ -278,49 +294,103 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     return row.querySelector<HTMLElement>('.wc-settings-row-desc');
   }
 
-  function legacySection(): HTMLElement {
-    const section = createSettingsSection({
-      heading: text(ClientAppStrings.WebClient.Legacy.SectionTitle),
+  function localizedParagraph(localized: Localize, className: string, key: string): HTMLElement {
+    const node = paragraph(className, text(key));
+    localized(() => {
+      node.textContent = text(key);
     });
+    return node;
+  }
+
+  function localizedButton(
+    localized: Localize,
+    key: string,
+    variant: ButtonVariant,
+    onClick: () => void,
+  ): ButtonHandle {
+    const button = createButton({ label: text(key), variant: variant, onClick: onClick });
+    localized(() => button.setLabel(text(key)));
+    return button;
+  }
+
+  function localizedRow(
+    localized: Localize,
+    labelKey: string,
+    control: HTMLElement,
+    describe?: () => string,
+  ): HTMLElement {
+    const row = createSettingsRow({
+      label: text(labelKey),
+      description: describe === undefined ? undefined : describe(),
+      control: control,
+    });
+    const label = row.querySelector<HTMLElement>('.wc-settings-row-label');
+    const detail = description(row);
+    localized(() => {
+      if (label !== null) label.textContent = text(labelKey);
+      if (detail !== null && describe !== undefined) detail.textContent = describe();
+    });
+    return row;
+  }
+
+  function localizedSection(
+    localized: Localize,
+    headingKey: string,
+    rows?: HTMLElement[],
+    descriptionKey?: string,
+  ): SettingsSectionHandle {
+    const section = createSettingsSection({
+      heading: text(headingKey),
+      description: descriptionKey === undefined ? undefined : text(descriptionKey),
+      rows: rows,
+    });
+    const heading = section.element.querySelector<HTMLElement>('.wc-settings-section-title');
+    const detail = section.element.querySelector<HTMLElement>('.wc-settings-section-desc');
+    localized(() => {
+      if (heading !== null) heading.textContent = text(headingKey);
+      if (detail !== null && descriptionKey !== undefined) detail.textContent = text(descriptionKey);
+    });
+    return section;
+  }
+
+  function legacySection(localized: Localize): HTMLElement {
+    const section = localizedSection(localized, ClientAppStrings.WebClient.Legacy.SectionTitle);
     section.body.appendChild(
-      paragraph('wc-client-settings-status', text(ClientAppStrings.WebClient.Legacy.Notice)));
+      localizedParagraph(localized, 'wc-client-settings-status', ClientAppStrings.WebClient.Legacy.Notice));
     section.body.appendChild(
-      paragraph('wc-client-settings-status', text(ClientAppStrings.WebClient.Legacy.InstallHint)));
+      localizedParagraph(localized, 'wc-client-settings-status', ClientAppStrings.WebClient.Legacy.InstallHint));
     return section.element;
   }
 
-  function deviceSetupSection(openWizard: () => void): HTMLElement {
-    const action = createButton({
-      label: text(ClientAppStrings.WebClient.DeviceSetup.OpenAction),
-      variant: 'secondary',
-      onClick: () => {
+  function deviceSetupSection(localized: Localize, openWizard: () => void): HTMLElement {
+    const action = localizedButton(
+      localized,
+      ClientAppStrings.WebClient.DeviceSetup.OpenAction,
+      'secondary',
+      () => {
         // The wizard is a dialog of its own, so this one gets out of its way first.
         close();
         openWizard();
-      },
-    });
-    const section = createSettingsSection({
-      heading: text(ClientAppStrings.WebClient.DeviceSetup.SectionTitle),
-      description: text(ClientAppStrings.WebClient.DeviceSetup.Description),
-    });
+      });
+    const section = localizedSection(
+      localized,
+      ClientAppStrings.WebClient.DeviceSetup.SectionTitle,
+      undefined,
+      ClientAppStrings.WebClient.DeviceSetup.Description);
     section.body.appendChild(action.element);
     return section.element;
   }
 
-  function licensesViewer(onBack: () => void): LicensesViewer {
+  function licensesViewer(localized: Localize, onBack: () => void, onRetry: () => void): LicensesViewer {
     const viewer = element('div', 'wc-client-settings-licenses');
     viewer.setAttribute('hidden', '');
 
-    const back = createButton({
-      label: text(Strings.Common.Back),
-      variant: 'ghost',
-      onClick: onBack,
-    });
+    const back = localizedButton(localized, Strings.Common.Back, 'ghost', onBack);
     const toolbar = element('div', 'wc-client-settings-licenses-toolbar');
     toolbar.appendChild(back.element);
     viewer.appendChild(toolbar);
 
-    const loading = paragraph('wc-client-settings-status', text(Strings.Common.Loading));
+    const loading = localizedParagraph(localized, 'wc-client-settings-status', Strings.Common.Loading);
     loading.setAttribute('role', 'status');
     viewer.appendChild(loading);
 
@@ -329,9 +399,28 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     show(failure, false);
     viewer.appendChild(failure);
 
+    const showFailure = (): void => {
+      if (failure.firstChild === null) {
+        failure.appendChild(localizedParagraph(
+          localized,
+          'wc-client-settings-status',
+          ClientAppStrings.WebClient.Settings.Licenses.LoadFailed));
+        failure.appendChild(localizedButton(localized, Strings.Common.Retry, 'secondary', () => {
+          // The retry button is hidden by the reload it starts, so focus moves somewhere that stays.
+          back.element.focus();
+          onRetry();
+        }).element);
+      }
+      show(failure, true);
+    };
+
     const notices = element('pre', 'wc-client-settings-licenses-text');
     notices.setAttribute('tabindex', '0');
-    notices.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.Licenses.Title));
+    const paintNotices = (): void => {
+      notices.setAttribute('aria-label', text(ClientAppStrings.WebClient.Settings.Licenses.Title));
+    };
+    paintNotices();
+    localized(paintNotices);
     show(notices, false);
     viewer.appendChild(notices);
 
@@ -341,12 +430,18 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       loading: loading,
       notices: notices,
       failure: failure,
+      showFailure: showFailure,
       loaded: false,
       request: 0,
     };
   }
 
   function build(): OpenModal {
+    const paints: Array<() => void> = [];
+    const localized: Localize = paint => {
+      paints.push(paint);
+    };
+
     const backdrop = element('div', 'wc-client-settings-backdrop');
     const dialog = element('div', 'wc-client-settings-dialog');
     dialog.setAttribute('role', 'dialog');
@@ -360,7 +455,11 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
     const closeButton = element('button', 'wc-client-settings-close');
     closeButton.type = 'button';
-    closeButton.setAttribute('aria-label', text(Strings.Common.Close));
+    const paintClose = (): void => {
+      closeButton.setAttribute('aria-label', text(Strings.Common.Close));
+    };
+    paintClose();
+    localized(paintClose);
     closeButton.textContent = '×';
     closeButton.addEventListener('click', () => close());
     header.appendChild(closeButton);
@@ -371,14 +470,22 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
     // A sibling of the settings body rather than a replacement for it: render() keeps updating the
     // controls in the body while the viewer is showing, so they must stay attached.
-    const licenses = licensesViewer(() => closeLicenses());
+    const licenses = licensesViewer(localized, () => closeLicenses(), () => {
+      const modal = open;
+      if (modal !== null) void loadLicenses(modal);
+    });
     dialog.appendChild(licenses.element);
+    localized(() => {
+      heading.textContent = licenses.element.hasAttribute('hidden')
+        ? text(Strings.Settings.Title)
+        : text(ClientAppStrings.WebClient.Settings.Licenses.Title);
+    });
 
-    if (options.legacyEntry === true) body.appendChild(legacySection());
+    if (options.legacyEntry === true) body.appendChild(legacySection(localized));
 
     const openWizard = options.openDeviceSetup;
     if (openWizard !== undefined && options.capabilities.deviceSetupPrompts) {
-      body.appendChild(deviceSetupSection(openWizard));
+      body.appendChild(deviceSetupSection(localized, openWizard));
     }
 
     const renderMode = createSegmentedControl({
@@ -386,6 +493,10 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       options: renderModeOptions(),
       value: options.renderingMode.get(),
       onChange: value => options.renderingMode.set(value as RenderingMode),
+    });
+    localized(() => {
+      renderMode.setAriaLabel(text(ClientAppStrings.WebClient.Rendering.Label));
+      renderMode.setOptions(renderModeOptions());
     });
 
     const iconSurface = options.iconResolution;
@@ -395,12 +506,22 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       value: String(iconSurface.get()),
       onChange: value => iconSurface.set(value === 'auto' ? 'auto' : Number(value) as IconResolution),
     });
+    if (iconResolution !== null) {
+      localized(() => {
+        iconResolution.setAriaLabel(text(ClientAppStrings.WebClient.IconResolution.Label));
+        iconResolution.setOptions(iconResolutionOptions());
+      });
+    }
 
     const themeMode = createSegmentedControl({
       ariaLabel: text(ClientAppStrings.Settings.Appearance.ThemeModeLabel),
       options: themeOptions(),
       value: options.appearance.themeMode(),
       onChange: value => options.appearance.setThemeMode(value as ThemeMode),
+    });
+    localized(() => {
+      themeMode.setAriaLabel(text(ClientAppStrings.Settings.Appearance.ThemeModeLabel));
+      themeMode.setOptions(themeOptions());
     });
 
     const wakeLockControl = element('div', 'wc-client-settings-control');
@@ -410,105 +531,94 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     // a switch that does nothing is precisely the dead control the capability list exists to remove.
     const displayRows = [];
     displayRows.push(
-        createSettingsRow({
-          label: text(ClientAppStrings.WebClient.Rendering.Label),
-          description: text(ClientAppStrings.WebClient.Rendering.Description),
-          control: renderMode.element,
-        }),
-        createSettingsRow({
-          label: text(ClientAppStrings.Settings.Appearance.ThemeModeLabel),
-          description: text(ClientAppStrings.Settings.Appearance.ThemeModeDescription),
-          control: themeMode.element,
-        }),
+        localizedRow(
+          localized,
+          ClientAppStrings.WebClient.Rendering.Label,
+          renderMode.element,
+          () => text(ClientAppStrings.WebClient.Rendering.Description)),
+        localizedRow(
+          localized,
+          ClientAppStrings.Settings.Appearance.ThemeModeLabel,
+          themeMode.element,
+          () => text(ClientAppStrings.Settings.Appearance.ThemeModeDescription)),
     );
 
     let iconResolutionRow: HTMLElement | null = null;
     if (iconSurface !== undefined && iconResolution !== null) {
-      iconResolutionRow = createSettingsRow({
-        label: text(ClientAppStrings.WebClient.IconResolution.Label),
-        description: iconResolutionText(iconSurface),
-        control: iconResolution.element,
-      });
+      iconResolutionRow = localizedRow(
+        localized,
+        ClientAppStrings.WebClient.IconResolution.Label,
+        iconResolution.element,
+        () => iconResolutionText(iconSurface));
       displayRows.push(iconResolutionRow);
     }
 
     const keepAwakeOffered = options.capabilities.wakeLock;
     if (keepAwakeOffered) {
-      displayRows.push(createSettingsRow({
-        label: text(ClientAppStrings.WebClient.KeepAwake.Label),
-        description: text(ClientAppStrings.WebClient.KeepAwake.Description),
-        control: wakeLockControl,
-      }));
+      displayRows.push(localizedRow(
+        localized,
+        ClientAppStrings.WebClient.KeepAwake.Label,
+        wakeLockControl,
+        () => text(ClientAppStrings.WebClient.KeepAwake.Description)));
     }
 
     const settingsButton = options.settingsButton;
     const settingsButtonStatus = paragraph('wc-client-settings-status', '');
     let settingsButtonToggle: ToggleHandle | null = null;
     if (settingsButton !== undefined && settingsButton.offered()) {
-      settingsButtonToggle = createToggle({
+      const toggle = createToggle({
         ariaLabel: text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Label),
         checked: settingsButton.get(),
         onChange: hidden => {
           void saveSettingsButton(settingsButton, hidden);
         },
       });
-      displayRows.push(createSettingsRow({
-        label: text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Label),
-        description: text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Description),
-        control: settingsButtonToggle.element,
-      }));
+      localized(() => toggle.setAriaLabel(text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Label)));
+      settingsButtonToggle = toggle;
+      displayRows.push(localizedRow(
+        localized,
+        ClientAppStrings.WebClient.Settings.HideSettingsButton.Label,
+        toggle.element,
+        () => text(ClientAppStrings.WebClient.Settings.HideSettingsButton.Description)));
     }
 
-    const display = createSettingsSection({
-      heading: text(ClientAppStrings.WebClient.Settings.DisplaySection),
-      rows: displayRows,
-    });
+    const display = localizedSection(localized, ClientAppStrings.WebClient.Settings.DisplaySection, displayRows);
     if (keepAwakeOffered) display.body.appendChild(wakeLockStatus);
     if (settingsButtonToggle !== null) display.body.appendChild(settingsButtonStatus);
     body.appendChild(display.element);
 
     const installControl = element('div', 'wc-client-settings-control');
-    const installRow = createSettingsRow({
-      label: text(ClientAppStrings.WebClient.Install.Label),
-      description: text(installStatusKey(options.install.availability())),
-      control: installControl,
-    });
+    const installRow = localizedRow(
+      localized,
+      ClientAppStrings.WebClient.Install.Label,
+      installControl,
+      () => text(installStatusKey(options.install.availability())));
     const installNote = paragraph('wc-client-settings-status', '');
 
     const updateControl = element('div', 'wc-client-settings-control');
-    const updateRow = createSettingsRow({
-      label: text(ClientAppStrings.WebClient.Install.UpdateLabel),
-      description: text(updateStatusKey(options.update.phase())),
-      control: updateControl,
-    });
+    const updateRow = localizedRow(
+      localized,
+      ClientAppStrings.WebClient.Install.UpdateLabel,
+      updateControl,
+      () => text(updateStatusKey(options.update.phase())));
 
-    const install = createSettingsSection({
-      heading: text(ClientAppStrings.WebClient.Install.SectionTitle),
-      rows: [installRow],
-    });
+    const install = localizedSection(localized, ClientAppStrings.WebClient.Install.SectionTitle, [installRow]);
     install.body.appendChild(installNote);
     body.appendChild(install.element);
 
-    const signOut = createButton({
-      label: text(ClientAppStrings.WebClient.Account.SignOut),
-      variant: 'secondary',
-      onClick: () => {
-        void options.client.signOut();
-      },
+    const signOut = localizedButton(localized, ClientAppStrings.WebClient.Account.SignOut, 'secondary', () => {
+      void options.client.signOut();
     });
-    body.appendChild(createSettingsSection({
-      heading: text(ClientAppStrings.WebClient.Account.SectionTitle),
-      rows: [createSettingsRow({
-        label: text(ClientAppStrings.WebClient.Account.SignedInLabel),
-        control: signOut.element,
-      })],
-    }).element);
+    body.appendChild(localizedSection(
+      localized,
+      ClientAppStrings.WebClient.Account.SectionTitle,
+      [localizedRow(localized, ClientAppStrings.WebClient.Account.SignedInLabel, signOut.element)]).element);
 
-    const licensesButton = createButton({
-      label: text(ClientAppStrings.WebClient.Settings.Licenses.Button),
-      variant: 'ghost',
-      onClick: () => openLicenses(),
-    });
+    const licensesButton = localizedButton(
+      localized,
+      ClientAppStrings.WebClient.Settings.Licenses.Button,
+      'ghost',
+      () => openLicenses());
     const licensesEntry = element('div', 'wc-client-settings-licenses-entry');
     licensesEntry.appendChild(licensesButton.element);
     body.appendChild(licensesEntry);
@@ -521,6 +631,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       backdrop: backdrop,
       heading: heading,
       body: body,
+      paints: paints,
       licensesButton: licensesButton.element,
       licenses: licenses,
       themeMode: themeMode,
@@ -528,27 +639,32 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       iconResolution: iconResolution,
       iconResolutionDescription: iconResolutionRow === null ? null : description(iconResolutionRow),
       wakeLockControl: wakeLockControl,
+      wakeLockToggle: null,
       wakeLockStatus: wakeLockStatus,
       settingsButtonToggle: settingsButtonToggle,
       settingsButtonStatus: settingsButtonStatus,
       installDescription: description(installRow),
       installControl: installControl,
+      installAction: null,
       installNote: installNote,
       updateRow: updateRow,
       updateSlot: install.body,
       updateDescription: description(updateRow),
       updateControl: updateControl,
+      updateAction: null,
     };
   }
 
   function renderWakeLock(modal: OpenModal): void {
     const status = options.wakeLock.currentStatus();
-    clear(modal.wakeLockControl);
 
     // A switch that can never be flipped is worse than no switch: it invites a tap and answers with
     // nothing. Both of these states are properties of the browser or the address, not something the
     // user can change from here, so the row keeps only its explanation.
-    if (status !== 'unsupported' && status !== 'insecureOrigin') {
+    if (status === 'unsupported' || status === 'insecureOrigin') {
+      clear(modal.wakeLockControl);
+      modal.wakeLockToggle = null;
+    } else if (modal.wakeLockToggle === null) {
       const toggle = createToggle({
         ariaLabel: text(ClientAppStrings.WebClient.KeepAwake.Label),
         checked: options.wakeLock.enabled(),
@@ -558,6 +674,11 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
         onChange: on => options.wakeLock.setEnabled(on),
       });
       modal.wakeLockControl.appendChild(toggle.element);
+      modal.wakeLockToggle = toggle;
+    } else {
+      modal.wakeLockToggle.setAriaLabel(text(ClientAppStrings.WebClient.KeepAwake.Label));
+      modal.wakeLockToggle.setChecked(options.wakeLock.enabled());
+      modal.wakeLockToggle.setBusy(status === 'pending');
     }
 
     const key = wakeLockStatusKey(status);
@@ -605,8 +726,10 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       modal.installDescription.textContent = text(installStatusKey(availability));
     }
 
-    clear(modal.installControl);
-    if (availability === 'promptable' && !dismissedHintVisible) {
+    if (availability !== 'promptable' || dismissedHintVisible) {
+      clear(modal.installControl);
+      modal.installAction = null;
+    } else if (modal.installAction === null) {
       const action = createButton({
         label: text(ClientAppStrings.WebClient.Install.InstallAction),
         variant: 'secondary',
@@ -615,6 +738,9 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
         },
       });
       modal.installControl.appendChild(action.element);
+      modal.installAction = action;
+    } else {
+      modal.installAction.setLabel(text(ClientAppStrings.WebClient.Install.InstallAction));
     }
 
     // Explanatory text belongs under the row, not in its control slot: the slot is laid out beside
@@ -645,9 +771,16 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       modal.updateDescription.textContent = text(updateStatusKey(phase));
     }
 
-    clear(modal.updateControl);
     const actionKey = updateActionKey(phase);
-    if (actionKey === null) return;
+    if (actionKey === null) {
+      clear(modal.updateControl);
+      modal.updateAction = null;
+      return;
+    }
+    if (modal.updateAction !== null) {
+      modal.updateAction.setLabel(text(actionKey));
+      return;
+    }
 
     const action = createButton({
       label: text(actionKey),
@@ -655,6 +788,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
       onClick: () => runUpdateAction(),
     });
     modal.updateControl.appendChild(action.element);
+    modal.updateAction = action;
   }
 
   function render(): void {
@@ -674,6 +808,14 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     renderSettingsButton(modal);
     renderInstall(modal);
     renderUpdate(modal);
+  }
+
+  function repaint(): void {
+    paintTrigger();
+    const modal = open;
+    if (modal === null) return;
+    for (let index = 0; index < modal.paints.length; index++) modal.paints[index]();
+    render();
   }
 
   function openLicenses(): void {
@@ -699,7 +841,6 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     const viewer = modal.licenses;
     const request = ++viewer.request;
     show(viewer.loading, true);
-    clear(viewer.failure);
     show(viewer.failure, false);
     show(viewer.notices, false);
 
@@ -713,18 +854,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
 
     show(viewer.loading, false);
     if (notices === null) {
-      viewer.failure.appendChild(
-        paragraph('wc-client-settings-status', text(ClientAppStrings.WebClient.Settings.Licenses.LoadFailed)));
-      viewer.failure.appendChild(createButton({
-        label: text(Strings.Common.Retry),
-        variant: 'secondary',
-        onClick: () => {
-          // The retry button is removed by the reload it starts, so focus moves somewhere that stays.
-          viewer.back.focus();
-          void loadLicenses(modal);
-        },
-      }).element);
-      show(viewer.failure, true);
+      viewer.showFailure();
       return;
     }
     viewer.notices.textContent = notices;
@@ -800,6 +930,7 @@ export function createClientSettings(options: ClientSettingsOptions): ClientSett
     close: () => close(),
     isOpen: () => open !== null,
     setButtonHidden: (hidden: boolean) => show(trigger, !hidden),
+    repaint: () => repaint(),
     destroy: () => {
       destroyed = true;
       close();

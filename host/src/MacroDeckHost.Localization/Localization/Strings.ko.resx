@@ -1486,6 +1486,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>앱을 추가할 수 없습니다</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>스타일을 복사하지 못했습니다</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>위젯 삭제</value>
     <comment>[plural]</comment>
@@ -1572,6 +1575,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>복사한 위젯을 이 덱의 어디에도 맞출 수 없습니다. 빈 셀을 마우스 오른쪽 버튼으로 클릭하면 그곳에 붙여넣을 수 있습니다.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>스타일을 붙여넣지 못했습니다</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>위젯을 고정하지 못했습니다</value>
@@ -2545,6 +2551,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>액션이 제때 응답하지 않았습니다</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>이 단계는 비밀 값을 사용하며 거부되어 실행되지 않습니다.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>이 단계는 비밀 값을 사용하며 승인을 기다리고 있습니다.</value>
   </data>
@@ -3305,6 +3314,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>위젯을 처리한 제공자가 없습니다</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>복사한 스타일이 올바르지 않습니다. 다시 복사하세요.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>선택한 항목에 스타일을 적용할 수 없습니다.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>즐겨찾기로 지정할 수 있는 위젯은 최대 {max}개입니다.</value>
@@ -5621,6 +5636,27 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>프로필 변경 대상</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>이동할 폴더이며, 선택한 순서대로 전환됩니다.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>폴더</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>사전순</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>사용자 지정</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>폴더 순서와 사전순은 열려 있는 프로필의 모든 폴더를 순서대로 이동합니다. 사용자 지정은 선택한 폴더만 이동합니다.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>폴더 순서</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>순서</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>선택 사항입니다. 이 기기만 탐색합니다. 비워 두면 액션을 실행한 기기를 탐색하며, 실행한 기기가 없으면 모든 기기를 탐색합니다.</value>
   </data>
@@ -5648,11 +5684,29 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>상위 폴더로 이동</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>선택한 순서에 따라 다음 폴더로 전환합니다.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>다음 폴더</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>선택한 순서에 따라 이전 폴더로 전환합니다.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>이전 폴더</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>전환할 프로필입니다.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>프로필</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>마지막 폴더 다음에는 첫 번째 폴더로, 첫 번째 폴더 이전에는 마지막 폴더로 이동합니다. 끄면 양 끝에서는 아무 동작도 하지 않습니다.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>순환</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>'{deviceId}' 기기가 연결되어 있지 않습니다.</value>
@@ -5668,6 +5722,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>선택한 프로필이 없습니다.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>열려 있는 폴더를 찾을 수 없습니다.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>'{profileId}' 프로필이 없습니다.</value>
@@ -7453,6 +7510,84 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} Google 로그인이 만료됨</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>JSON의 경로에 있는 배열 끝에 항목을 추가하고 결과를 변수에 저장합니다. 배열이 없으면 생성됩니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>JSON 배열에 추가</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>JSON의 경로에 있는 배열의 항목 수 또는 객체의 속성 수를 변수에 저장합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>JSON 항목 수 세기</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>속성과 배열 인덱스. 예: data.items[0].name 또는 문서 전체를 뜻하는 "$"만 입력합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>처리할 JSON입니다. 변수를 삽입하면 그 변수에 저장된 JSON을 사용합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>값</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>참 또는 거짓</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>JSON 조각</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>값 유형</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>숫자</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>텍스트</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>JSON의 경로에 있는 속성이나 배열 항목을 제거하고 결과를 변수에 저장합니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>JSON 값 제거</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>JSON의 경로에 값을 쓰고 결과를 변수에 저장합니다. 경로 중간에 없는 객체는 생성됩니다.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>JSON 값 설정</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON이 올바르지 않습니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>JSON 경로가 올바르지 않습니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>값이 선택한 값 유형과 맞지 않습니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>경로가 JSON과 맞지 않습니다. 그 위치에서 속성 이름에는 객체가, 인덱스에는 배열이 필요합니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>문서 전체는 제거할 수 없습니다. 문서 안의 경로를 선택하세요.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>해당 경로의 값이 배열이 아닙니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>해당 경로의 값이 배열이나 객체가 아닙니다.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON의 해당 경로에 값이 없습니다.</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Microsoft 로그인이 취소되었거나 완료되지 않았습니다. 계속을 눌러 다시 여세요.</value>
@@ -11627,6 +11762,118 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>알림을 표시할 수 없습니다.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>질문하기</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>플로를 일시 중지하고 덱에서 질문한 뒤 답변을 변수에 저장합니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>질문 유형</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>예 또는 아니요</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>목록에서 선택</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>텍스트 입력</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>질문</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>메시지</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>선택지</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>한 줄에 선택지 하나 또는 JSON 배열입니다. 변수를 넣으면 그 변수에서 목록을 가져옵니다. 선택지는 최대 50개, 각각 최대 100자입니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>자리 표시자</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>기본 텍스트</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>질문할 곳</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>위젯을 누른 기기</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>선택한 기기</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>연결된 모든 클라이언트</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>기기</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>시간 제한</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>질문이 답변을 기다리는 시간입니다. 최대 9분입니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>답변 변수</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>true 또는 false, 선택한 항목 또는 입력한 텍스트가 들어갑니다. 답변이 없으면 false 또는 빈 텍스트가 들어갑니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>위치 변수</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>선택한 항목의 위치가 0부터 들어갑니다. 답변이 없으면 -1입니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>결과 변수</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>answered, cancelled, timedOut, noClient 중 하나가 들어갑니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>{count}초 후 닫힙니다.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>{count}초 후 닫힙니다.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>{count}분 후 닫힙니다.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>{count}분 후 닫힙니다.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>아직 질문을 사용할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>질문을 표시하지 못했습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>선택지 목록이 비어 있습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>선택지가 {max}개를 넘습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>{max}자를 넘는 선택지가 있습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>선택지 목록이 너무 커서 표시할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>답변을 {variable}에 저장하지 못했습니다. 변수 유형을 확인하세요.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>선택한 오디오 장치의 볼륨을 특정 수준으로 설정합니다.</value>
   </data>
@@ -11918,6 +12165,66 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>포커스된 앱 번들 ID</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>모니터링 대상 앱</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck은 이 앱의 실행 여부, 프로세스 및 창 수, 창 표시 방식을 알려 줍니다.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>게임</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>앱</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>chrome 같은 실행 중인 프로세스 또는 프로그램 경로입니다.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>이 앱의 이름을 입력하세요.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>실행 중인 앱을 선택하거나 프로그램 경로를 입력하세요.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck은 최대 {count}개의 앱을 모니터링합니다. 다른 앱을 추가하려면 하나를 제거하세요.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>고유한 변수 이름을 만들 수 없습니다. 앱 이름을 바꾸고 다시 시도하세요.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>알 수 없는 설정 단계입니다.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>실행 중</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>실행 중인 프로세스</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>열린 창</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>창 상태</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>포커스된 앱 창 상태</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>포커스된 앱 프로세스</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>창 상태를 사용할 수 없음</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland에서는 Macro Deck이 다른 앱의 창을 읽을 수 없습니다. 모니터링 대상 앱은 계속 실행 여부와 프로세스 수를 알려 주지만 창 상태와 창 수는 사용할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck이 창 상태를 읽으려면 손쉬운 사용 접근 권한이 필요합니다. 시스템 설정 &gt; 개인정보 보호 및 보안 &gt; 손쉬운 사용에서 Macro Deck을 허용하세요. 허용하기 전까지는 모니터링 대상 앱의 창 상태와 창 수를 사용할 수 없습니다.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>접근 허용</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>액션을 수행할 연결된 Twitch 계정입니다.</value>
@@ -15824,6 +16131,12 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>변경됨</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>거부</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>단계를 거부할 수 없습니다.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>승인을 기다리는 단계가 없습니다</value>
   </data>
@@ -15831,7 +16144,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>비밀 값을 사용하는 모든 단계가 승인되었습니다.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>비밀 값을 사용하는 단계는 승인한 후에만 실행됩니다. 변경된 내용을 확인한 다음 승인하세요.</value>
+    <value>비밀 값을 사용하는 단계는 승인한 후에만 실행됩니다. 변경된 내용을 확인한 다음 승인하거나 거부하세요.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>승인 항목을 불러올 수 없습니다.</value>
@@ -16489,6 +16802,15 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>복구 키</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>새 복구 키를 만드시겠습니까?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>이전에 만든 백업에는 앞서 저장한 복구 키가 계속 필요하므로 그 키도 보관하세요. 다음 단계에서 새 키가 표시됩니다.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>새 복구 키 만들기</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>원격</value>
@@ -19186,6 +19508,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>예기치 않은 문제가 발생했습니다.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>강제 새로 고침</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>스토어 레지스트리 새로 고침</value>
   </data>
@@ -20289,6 +20614,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>디스플레이가 켜진 상태를 유지하고 있습니다.</value>
   </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>디스플레이 켜짐을 유지하려면 아무 곳이나 탭하세요.</value>
+  </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>브라우저나 운영체제가 디스플레이를 켜 둔 상태를 거부했습니다(예: 절전 모드).</value>
   </data>
@@ -21021,6 +21349,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>위젯 {count}개 복사</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>스타일 복사</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>잘라내기</value>
   </data>
@@ -21052,6 +21383,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>붙여넣기</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>스타일 붙여넣기</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>고정</value>
@@ -25586,5 +25920,336 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>비밀</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>온라인</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>지연 시간</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>패킷 손실</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>마지막 응답</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>대상 온라인</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Ping 대상이 오프라인 후 다시 응답할 때입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>대상 오프라인</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Ping 대상이 실패 임계값만큼 연속으로 응답하지 않을 때입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>대상</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>호스트</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>지연 시간(ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>알 수 없는 설정 단계입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>이 대상의 이름을 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>호스트 이름, IPv4 주소 또는 IPv6 주소를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum}에서 {maximum} 사이의 정수 초를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum}에서 {maximum} 사이의 정수 밀리초를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>시간 제한은 간격보다 짧아야 합니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum}에서 {maximum} 사이의 정수를 입력하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>호스트</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>Ping을 보낼 장치의 호스트 이름, IPv4 또는 IPv6 주소입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>간격(초)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>대상에 Ping을 보내는 빈도입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>시간 제한(밀리초)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>각 응답을 기다리는 시간입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>오프라인 판정 전 실패 횟수</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>대상이 오프라인으로 간주되기 전에 연속으로 실패해야 하는 Ping 횟수입니다. 패킷 하나가 손실되는 것은 무시됩니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping 대상</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck이 이 장치에 정기적으로 Ping을 보내고 응답 여부와 속도를 표시합니다.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>고유한 변수 이름을 만들 수 없습니다. 대상 이름을 바꾸고 다시 시도하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping이 허용되지 않음</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>이 시스템에서는 Macro Deck이 Ping 요청을 보낼 수 없으므로 Ping 대상을 확인할 수 없습니다. Linux에서는 net.ipv4.ping_group_range 설정으로 권한 없는 Ping을 허용하세요.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping 상태</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Ping 대상에 연결할 수 있는지와 응답 속도를 표시합니다.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Ping 대상 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>온라인</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>오프라인</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>응답 대기 중</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping 허용 안 됨</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>응답 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>연결할 수 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>이름을 찾을 수 없음</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping 실패</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency}ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>패킷 손실 {loss}%</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>대상</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>이 위젯에 표시되는 Ping 대상입니다.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>첫 번째 대상</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>표시 이름</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>대상 이름</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>지연 시간 표시</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>패킷 손실 표시</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>지연 시간 기록 표시</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>장치 깨우기</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>저장된 장치에 Wake on LAN 매직 패킷을 보냅니다. 패킷을 보냈다고 해서 장치가 켜졌다는 뜻은 아닙니다.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>장치</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>깨울 저장된 장치</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>장치 선택</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>장치 추가</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck에서 깨울 장치를 저장합니다. 장치의 펌웨어와 네트워크 어댑터 설정에서 Wake on LAN을 켜야 합니다.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>알 수 없는 설정 단계입니다. 처음부터 다시 시작하세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC 주소</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>장치 네트워크 어댑터의 하드웨어 주소</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>16진수 12자리로 된 MAC 주소를 입력하세요. 예: AA:BB:CC:DD:EE:FF</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>브로드캐스트 주소</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>이 네트워크에서는 255.255.255.255를 그대로 두거나, 장치가 있는 서브넷의 브로드캐스트 주소를 입력하세요. 예: 192.168.2.255</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>IPv4 주소를 입력하세요. 예: 192.168.1.255</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>포트</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>패킷을 보낼 UDP 포트입니다. 대부분의 장치는 포트 9에서 수신합니다.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1부터 65535 사이의 포트를 입력하세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>패킷 수</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>보낼 패킷 수입니다. 잘 깨어나지 않는 장치에는 두 개 이상 보내세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1부터 10 사이의 숫자를 입력하세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>패킷 간 지연 (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>두 패킷 사이에 기다리는 시간(밀리초)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0부터 10000밀리초 사이의 지연 시간을 입력하세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>깨울 장치를 선택하세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>선택한 장치가 더 이상 없습니다. 다른 장치를 선택하세요.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device}의 저장된 설정이 올바르지 않습니다. 장치를 편집하고 다시 저장하세요.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>{address}(으)로 패킷을 보내는 것이 허용되지 않았습니다. 브로드캐스트가 허용되는지, macOS에서는 Macro Deck에 로컬 네트워크 접근 권한이 있는지 확인하세요.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address}(으)로 가는 경로가 없습니다. 브로드캐스트 주소와, macOS에서는 Macro Deck에 로컬 네트워크 접근 권한이 있는지 확인하세요.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>{address}(으)로 패킷을 보낼 수 없습니다.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck 명령줄 옵션:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>이 도움말을 표시하고 종료합니다.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>설치된 Macro Deck 버전을 표시하고 종료합니다.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>설치된 플러그인을 시작하지 않고 목록을 표시한 후 종료합니다.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>설치된 플러그인을 시작하지 않고 Macro Deck을 시작합니다. 개발자 도구에서 플러그인을 하나씩 시작하세요. 이 세션에만 적용됩니다.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>실행 중인 Macro Deck을 종료합니다.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>채널: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>커밋: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>플러그인 폴더: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>플러그인 폴더를 읽을 수 없습니다: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>설치된 플러그인이 없습니다.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>이름: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>활성 버전: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>기타 설치된 버전: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>사용 가능한 활성 버전이 없습니다.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>버전 {version}의 매니페스트가 잘못되었습니다({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>버전 {version}에 매니페스트가 없습니다.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: 올바른 플러그인 폴더가 아닙니다.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Macro Deck 호스트를 찾을 수 없습니다. Macro Deck을 다시 설치하세요.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Macro Deck 호스트를 실행할 수 없습니다: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck이 이미 실행 중입니다. 먼저 Macro Deck을 종료한 다음 {option}(으)로 다시 시작하세요.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>플러그인 비활성화됨</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck이 --disable-plugins로 시작되었습니다. 이 세션에서는 설치된 플러그인이 자동으로 시작되지 않습니다. 개발자 도구에서 하나씩 시작하세요.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck이 --disable-plugins로 시작되어 설치된 플러그인이 자동으로 시작되지 않았습니다. 여기에서 하나씩 시작하세요. 여기에서 시작하거나 중지한 내용은 이 세션에만 적용됩니다.</value>
   </data>
 </root>

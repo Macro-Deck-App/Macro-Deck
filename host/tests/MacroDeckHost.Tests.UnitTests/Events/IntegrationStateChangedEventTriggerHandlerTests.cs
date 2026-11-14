@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Tests.UnitTests.Triggers;
@@ -145,6 +146,7 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 					services.AddSingleton(builtInRegistration);
 					services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 					services.AddScoped<IEventTriggerRunner>(_ => runner);
+					services.AddSingleton<IVariableEventAudience>(new VariableEventAudience(new VariableRegistry()));
 					services.AddHostedService<EventDispatchBackgroundService>();
 				})
 				.Build();

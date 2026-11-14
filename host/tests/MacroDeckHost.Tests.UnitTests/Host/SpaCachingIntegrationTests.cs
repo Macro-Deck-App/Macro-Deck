@@ -96,9 +96,9 @@ public class SpaCachingIntegrationTests
 	}
 
 	[Test]
-	public async Task Missing_chunk_falls_back_to_index_html_with_no_cache()
+	public async Task Unknown_route_falls_back_to_index_html_with_no_cache()
 	{
-		var response = await _client.GetAsync(new Uri("/chunk-DOESNOTEXIST.js", UriKind.Relative));
+		var response = await _client.GetAsync(new Uri("/some/route", UriKind.Relative));
 
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 		Assert.That(response.Content.Headers.ContentType?.MediaType, Is.EqualTo("text/html"));

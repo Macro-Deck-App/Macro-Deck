@@ -746,6 +746,33 @@ public class RemoteIntegrationContextTests
 		});
 	}
 
+	[Test]
+	public void RemoteDeckNavigator_exposes_where_each_pushed_folder_sits_in_its_profiles_tree()
+	{
+		var stateCache = new HostStateCache(new PluginConnectionState());
+		var deck = new RemoteDeckNavigator(new RecordingHostInvoker(),
+			stateCache,
+			new PluginConnectionState(),
+			Serilog.Core.Logger.None);
+
+		stateCache.Apply(StatePush(HostApis.Deck,
+			new DeckStateDto
+			{
+				Folders =
+				[
+					new DeckFolder { Id = "f2", Label = "Scenes", ProfileId = "p1", ParentId = "f1", Order = 3 }
+				]
+			}));
+
+		var folder = deck.GetFolders().Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(folder.ProfileId, Is.EqualTo("p1"));
+			Assert.That(folder.ParentId, Is.EqualTo("f1"));
+			Assert.That(folder.Order, Is.EqualTo(3));
+		});
+	}
+
 	private static readonly WidgetAppearanceProperty[] _pushedAppearanceProperties =
 	[
 		WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.LabelColor,
@@ -1007,6 +1034,23 @@ public class RemoteIntegrationContextTests
 	private static DeckClientDto Client(string clientId, string folderId, string profileId = "p1")
 	{
 		return new DeckClientDto { ClientId = clientId, ProfileId = profileId, FolderId = folderId };
+	}
+
+	[Test]
+	public void A_device_session_in_a_deck_push_is_told_apart_from_a_web_client()
+	{
+		var world = NewClientWorld();
+
+		world.Push(1,
+			Client("tab-1", "f1"),
+			Client("device:4f5b", "f1") with { DeviceId = "4f5b", IsDeviceSession = true });
+
+		var clients = world.Deck.GetClients().ToDictionary(client => client.ClientId, StringComparer.Ordinal);
+		Assert.Multiple(() =>
+		{
+			Assert.That(clients["tab-1"].IsDeviceSession, Is.False);
+			Assert.That(clients["device:4f5b"].IsDeviceSession, Is.True);
+		});
 	}
 
 	[Test]

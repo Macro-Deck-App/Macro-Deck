@@ -4,6 +4,7 @@ using System.Text.Json;
 using MacroDeck.Localization;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Paths;
+using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Enums;
@@ -100,10 +101,75 @@ public class BackupIntegrityTests
 			Assert.That(afterwards.GetProperty("keyId").GetString(),
 				Is.Not.EqualTo(exported.GetProperty("keyId").GetString()));
 			Assert.That(afterwards.TryGetProperty("exportedAt", out var exportedAt)
-					&& exportedAt.ValueKind == JsonValueKind.String,
+				&& exportedAt.ValueKind == JsonValueKind.String,
 				Is.False,
 				"the replacement key still reads as the one the user saved");
 		});
+	}
+
+	[Test]
+	public async Task An_unreadable_recovery_key_is_replaced_and_shown_once_when_a_new_one_is_requested()
+	{
+		var original = await CreateRecoveryKey();
+		await CorruptStoredRecoveryKey();
+		var missing = await RecoveryKeyState();
+
+		var replaced = await CreateRecoveryKey();
+		var again = await CreateRecoveryKey();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(missing.GetProperty("availability").GetString(), Is.EqualTo("Missing"));
+			Assert.That(replaced.GetProperty("success").GetBoolean(), Is.True, replaced.ToString());
+			Assert.That(replaced.GetProperty("availability").GetString(), Is.EqualTo("Available"));
+			Assert.That(KeyOf(replaced), Is.Not.Null.And.Not.EqualTo(KeyOf(original)));
+			Assert.That(replaced.GetProperty("keyId").GetString(),
+				Is.Not.EqualTo(original.GetProperty("keyId").GetString()));
+			Assert.That(KeyOf(again), Is.Null, "a key that exists must never be handed out a second time");
+		});
+	}
+
+	[Test]
+	public async Task A_key_a_backup_made_in_place_of_an_unreadable_one_is_not_replaced_by_a_new_request()
+	{
+		await CreateRecoveryKey();
+		await CorruptStoredRecoveryKey();
+		Assert.That((await CreateBackup()).GetProperty("success").GetBoolean(), Is.True);
+		var backupKeyId = (await RecoveryKeyState()).GetProperty("keyId").GetString();
+
+		var requested = await CreateRecoveryKey();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(KeyOf(requested), Is.Null);
+			Assert.That(requested.GetProperty("keyId").GetString(), Is.EqualTo(backupKeyId));
+		});
+	}
+
+	private async Task<JsonElement> CreateRecoveryKey()
+	{
+		return await InProcessHost.ReadJsonAsync(await _host.SendAsync(HttpMethod.Post,
+			"/api/backups/recovery-key",
+			new { },
+			loopback: true));
+	}
+
+	private static string? KeyOf(JsonElement response)
+	{
+		return response.TryGetProperty("key", out var key) && key.ValueKind == JsonValueKind.String
+			? key.GetString()
+			: null;
+	}
+
+	private async Task CorruptStoredRecoveryKey()
+	{
+		using var scope = _host.Services.CreateScope();
+		var preferences = scope.ServiceProvider.GetRequiredService<IAppPreferenceRepository>();
+		var secrets = scope.ServiceProvider.GetRequiredService<ISecretRepository>();
+		var preference = await preferences.GetByKey(AppPreferenceService.BackupRecoveryKeySecretIdKey);
+		var secret = (await secrets.GetById(Guid.Parse(preference!.Value)))!;
+		secret.EncryptedValue = "not-a-protected-payload";
+		await secrets.Update(secret);
 	}
 
 	private async Task<JsonElement> CreateBackup()
@@ -117,15 +183,17 @@ public class BackupIntegrityTests
 	private async Task<string> IncompleteTitle()
 	{
 		using var scope = _host.Services.CreateScope();
-		var culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization()).Culture;
+		var culture = (await scope.ServiceProvider.GetRequiredService<IAppPreferenceService>().GetLocalization())
+			.Culture;
 		return _host.Services.GetRequiredService<ILocalizationResolver>()
 			.Resolve(AppStrings.Notifications.Backup.Incomplete(), culture);
 	}
 
 	private async Task<JsonElement> RecoveryKeyState()
 	{
-		return await InProcessHost.ReadJsonAsync(
-			await _host.SendAsync(HttpMethod.Get, "/api/backups/recovery-key", loopback: true));
+		return await InProcessHost.ReadJsonAsync(await _host.SendAsync(HttpMethod.Get,
+			"/api/backups/recovery-key",
+			loopback: true));
 	}
 
 	private static IDisposable MakeUnreadable(string path)

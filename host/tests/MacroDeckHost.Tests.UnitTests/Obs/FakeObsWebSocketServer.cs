@@ -6,16 +6,32 @@ using System.Text.Json.Nodes;
 
 namespace MacroDeckHost.Tests.UnitTests.Obs;
 
+internal enum ObsServerFault
+{
+	None,
+	NoHello,
+	SilentAfterIdentified,
+	AbortMidMessage
+}
+
 internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 {
 	private readonly HttpListener _listener = new();
 	private readonly CancellationTokenSource _cts = new();
 	private readonly Func<string, int?> _statusFor;
+	private readonly ObsServerFault _fault;
+	private readonly Action<int>? _onSession;
 	private readonly Task _serving;
+	private int _sessions;
 
-	public FakeObsWebSocketServer(Func<string, int?> statusFor)
+	public FakeObsWebSocketServer(
+		Func<string, int?> statusFor,
+		ObsServerFault fault = ObsServerFault.None,
+		Action<int>? onSession = null)
 	{
 		_statusFor = statusFor;
+		_fault = fault;
+		_onSession = onSession;
 		Port = FreePort();
 		_listener.Prefixes.Add($"http://127.0.0.1:{Port}/");
 		_listener.Start();
@@ -43,14 +59,7 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 	{
 		await _cts.CancelAsync();
 		_listener.Close();
-		try
-		{
-			await _serving;
-		}
-		catch (Exception ex) when (ex is HttpListenerException or ObjectDisposedException or OperationCanceledException)
-		{
-		}
-
+		await _serving;
 		_cts.Dispose();
 	}
 
@@ -67,21 +76,41 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 	{
 		while (!_cts.IsCancellationRequested)
 		{
-			var context = await _listener.GetContextAsync();
-			if (!context.Request.IsWebSocketRequest)
+			try
 			{
-				context.Response.StatusCode = 400;
-				context.Response.Close();
-				continue;
+				await AcceptAsync();
 			}
-
-			var socket = (await context.AcceptWebSocketAsync(null)).WebSocket;
-			_ = Task.Run(() => SessionAsync(socket));
+			catch when (_cts.IsCancellationRequested)
+			{
+				// A client accepted while the listener closes can fail anywhere in HttpListener, NRE included.
+				return;
+			}
 		}
 	}
 
-	private async Task SessionAsync(WebSocket socket)
+	private async Task AcceptAsync()
 	{
+		var context = await _listener.GetContextAsync();
+		if (!context.Request.IsWebSocketRequest)
+		{
+			context.Response.StatusCode = 400;
+			context.Response.Close();
+			return;
+		}
+
+		_onSession?.Invoke(Interlocked.Increment(ref _sessions));
+		var socket = (await context.AcceptWebSocketAsync(null)).WebSocket;
+		_ = Task.Run(() => SessionAsync(context, socket));
+	}
+
+	private async Task SessionAsync(HttpListenerContext context, WebSocket socket)
+	{
+		if (_fault is ObsServerFault.NoHello)
+		{
+			await DrainAsync(socket);
+			return;
+		}
+
 		await SendAsync(socket,
 			new JsonObject
 			{
@@ -106,6 +135,23 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 						["op"] = 2,
 						["d"] = new JsonObject { ["negotiatedRpcVersion"] = 1 }
 					});
+
+				if (_fault is ObsServerFault.SilentAfterIdentified)
+				{
+					await DrainAsync(socket);
+					return;
+				}
+
+				if (_fault is ObsServerFault.AbortMidMessage)
+				{
+					// HttpListener exposes no raw stream, so a non-final fragment stands in for a cut frame.
+					await socket.SendAsync(Encoding.UTF8.GetBytes("""{"op":5,"d":{"eventType":"""),
+						WebSocketMessageType.Text,
+						false,
+						_cts.Token);
+					context.Response.Abort();
+					return;
+				}
 			}
 			else if (op == 6)
 			{
@@ -134,6 +180,25 @@ internal sealed class FakeObsWebSocketServer : IAsyncDisposable
 						}
 					});
 			}
+		}
+	}
+
+	private async Task DrainAsync(WebSocket socket)
+	{
+		var buffer = new byte[16 * 1024];
+		try
+		{
+			while (socket.State == WebSocketState.Open)
+			{
+				var result = await socket.ReceiveAsync(buffer, _cts.Token);
+				if (result.MessageType == WebSocketMessageType.Close)
+				{
+					return;
+				}
+			}
+		}
+		catch (Exception ex) when (ex is WebSocketException or OperationCanceledException or ObjectDisposedException)
+		{
 		}
 	}
 

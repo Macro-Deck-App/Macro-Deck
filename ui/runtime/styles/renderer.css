@@ -700,6 +700,10 @@
   touch-action: none;
 }
 
+.widget-segmented.widget-segmented-vertical {
+  touch-action: pan-y;
+}
+
 .widget-toggle-track {
   transition: background 120ms linear;
 }
@@ -719,7 +723,7 @@
 }
 
 .widget-segmented-face {
-  transition: left 120ms ease-out;
+  transition: left 120ms ease-out, top 120ms ease-out;
 }
 
 .widget-segmented-content {

@@ -18,6 +18,10 @@ export type BackupRecoveryKeyOutcome =
   | { status: 'success'; key: string; state: GetBackupRecoveryKeyStateResponse }
   | { status: 'error'; message: string };
 
+export type BackupRecoveryKeyCreateOutcome =
+  | BackupRecoveryKeyOutcome
+  | { status: 'exists'; state: GetBackupRecoveryKeyStateResponse };
+
 export type BackupDownloadOutcome =
   | { status: 'saved'; path?: string }
   | { status: 'canceled' }
@@ -336,9 +340,13 @@ export class BackupService {
     }
   }
 
-  async createRecoveryKey(): Promise<BackupRecoveryKeyOutcome> {
+  async createRecoveryKey(): Promise<BackupRecoveryKeyCreateOutcome> {
     try {
       const response = await this.api.createBackupRecoveryKey();
+      // The host hands a key out only when it mints one; a key that already exists answers without it.
+      if (response.success && !response.key) {
+        return { status: 'exists', state: this.applyRecoveryKeyResponse(response) };
+      }
       if (!response.success || !response.key) {
         return { status: 'error', message: response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Backup.RecoveryKeyCreateFailed) };
       }
