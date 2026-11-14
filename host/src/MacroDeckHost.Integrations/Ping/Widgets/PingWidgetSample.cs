@@ -10,10 +10,9 @@ internal static class PingWidgetSample
 		{
 			Reachability = PingReachability.Online,
 			LatencyMilliseconds = 4,
-			PacketLossPercent = 0,
-			LatencyHistory = [3, 4, 3, 5, 4, 6, 4, 3, 7, 4, 5, 4]
+			PacketLossPercent = 0
 		};
 
-		return PingViewStateResolver.Resolve(options, snapshot);
+		return PingViewStateResolver.Resolve(options, snapshot, [3, 4, 3, 5, 4, 6, 4, 3, 7, 4, 5, 4]);
 	}
 }

@@ -38,7 +38,7 @@ internal static class PingVariables
 	{
 		return
 		[
-			.. _slots.Select(slot => VariableDefinition.Eager($"ping_{key}_{slot.Name}",
+			.. _slots.Select(slot => VariableDefinition.Eager(Name(key, slot.Name),
 					slot.Type,
 					slot.DecimalPlaces,
 					_refreshInterval)
@@ -53,6 +53,11 @@ internal static class PingVariables
 						: null
 				})
 		];
+	}
+
+	public static string Name(string key, string slot)
+	{
+		return $"ping_{key}_{slot}";
 	}
 
 	public static bool TrySplit(string? definitionId, out Guid entryId, out string slot)

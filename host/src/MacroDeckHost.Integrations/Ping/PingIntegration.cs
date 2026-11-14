@@ -53,7 +53,7 @@ public sealed partial class PingIntegration
 	{
 		_prober = prober;
 		_time = time;
-		_ui = new PingUiProvider(_hub);
+		_ui = new PingUiProvider(_hub, () => _context);
 	}
 
 	public string Id => IntegrationId;

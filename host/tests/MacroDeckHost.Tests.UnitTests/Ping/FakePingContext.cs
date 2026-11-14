@@ -110,6 +110,19 @@ internal sealed class FakePingVariables : IVariableApi
 {
 	private readonly Lock _gate = new();
 	private readonly List<VariableHandle> _variables = [];
+	private readonly Dictionary<string, List<double?>> _samples = new(StringComparer.Ordinal);
+	private readonly List<HistoryWindow> _windows = [];
+
+	public IReadOnlyList<(string Name, int Capacity)> OpenWindows
+	{
+		get
+		{
+			lock (_gate)
+			{
+				return [.. _windows.Select(window => (window.Name, window.Capacity))];
+			}
+		}
+	}
 
 	public IReadOnlyList<VariableHandle> All
 	{
@@ -173,5 +186,77 @@ internal sealed class FakePingVariables : IVariableApi
 	public Task SetValueAsync(Guid variableId, object? value)
 	{
 		throw new NotSupportedException();
+	}
+
+	public Task<IVariableHistoryWindow> OpenHistoryAsync(
+		string name,
+		int capacity,
+		CancellationToken cancellationToken = default)
+	{
+		var window = new HistoryWindow(this, name, capacity);
+		lock (_gate)
+		{
+			_windows.Add(window);
+		}
+
+		return Task.FromResult<IVariableHistoryWindow>(window);
+	}
+
+	public void RecordSample(string name, double? value)
+	{
+		List<HistoryWindow> windows;
+		lock (_gate)
+		{
+			if (!_samples.TryGetValue(name, out var samples))
+			{
+				_samples[name] = samples = [];
+			}
+
+			samples.Add(value);
+			windows = [.. _windows.Where(window => window.Name == name)];
+		}
+
+		foreach (var window in windows)
+		{
+			window.Raise();
+		}
+	}
+
+	private IReadOnlyList<double?> Values(string name)
+	{
+		lock (_gate)
+		{
+			return _samples.TryGetValue(name, out var samples) ? [.. samples] : [];
+		}
+	}
+
+	private void Close(HistoryWindow window)
+	{
+		lock (_gate)
+		{
+			_windows.Remove(window);
+		}
+	}
+
+	private sealed class HistoryWindow(FakePingVariables owner, string name, int capacity) : IVariableHistoryWindow
+	{
+		public string Name => name;
+
+		public int Capacity => capacity;
+
+		public IReadOnlyList<double?> Values => owner.Values(name);
+
+		public event EventHandler? Changed;
+
+		public void Raise()
+		{
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			owner.Close(this);
+			return ValueTask.CompletedTask;
+		}
 	}
 }
