@@ -26,11 +26,13 @@ public partial class PluginWebSocketEndpointDispatchTests
 		{
 			Type = MessageTypes.LogPublish,
 			Id = id,
-			Payload = JsonSerializer.SerializeToElement(
-				new LogPublishPayload { Events = [NewLogEvent(message)] },
+			Payload = JsonSerializer.SerializeToElement(new LogPublishPayload { Events = [NewLogEvent(message)] },
 				PluginProtocolJson.Options)
 		};
-		await plugin.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(envelope), WebSocketMessageType.Text, true, Timeout());
+		await plugin.SendAsync(ProtocolEnvelopeWriter.WriteToUtf8Bytes(envelope),
+			WebSocketMessageType.Text,
+			true,
+			Timeout());
 	}
 
 	private static async Task<ProtocolEnvelope> ReceiveAnswerAsync(WebSocket plugin, string correlationId)
@@ -130,10 +132,29 @@ public partial class PluginWebSocketEndpointDispatchTests
 		await ingestor.FirstFailure.Task.WaitAsync(Timeout());
 		await SendLogPublishAsync(pair.Plugin, "second", "second batch");
 
-		using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-		var ingested = await ingestor.Ingested.Reader.ReadAsync(timeout.Token);
+		var ingested = await ingestor.Ingested.Reader.ReadAsync(Timeout());
 
-		Assert.That(ingested, Is.EqualTo("second batch"), "the log lane must continue after a failed batch");
+		await SendTextAsync(pair.Plugin, Ping("after"));
+		var errors = new List<ProtocolEnvelope>();
+		ProtocolEnvelope? pong = null;
+		while (pong is null && await ReceiveEnvelopeAsync(pair.Plugin) is { } envelope)
+		{
+			if (envelope.Type == MessageTypes.ProtocolError)
+			{
+				errors.Add(envelope);
+			}
+			else if (envelope is { Type: MessageTypes.SessionPong, CorrelationId: "after" })
+			{
+				pong = envelope;
+			}
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ingested, Is.EqualTo("second batch"), "the log lane must continue after a failed batch");
+			Assert.That(errors, Is.Empty, "a failed batch gets no answer");
+			Assert.That(pong, Is.Not.Null, "the session stays open");
+		});
 
 		await pair.Plugin.CloseAsync(WebSocketCloseStatus.NormalClosure, null, Timeout());
 		await running.WaitAsync(_closeTestTimeout);

@@ -1102,7 +1102,9 @@ public sealed class PluginWebSocketEndpoint
 				{
 					await HandleLogPublishAsync(connection, pluginId, sessionId, envelope, cancellationToken);
 				}
-				catch (Exception exception) when (exception is not (OperationCanceledException or WebSocketException or OutOfMemoryException))
+				catch (Exception exception) when (exception is not (OperationCanceledException
+					or WebSocketException
+					or OutOfMemoryException))
 				{
 					PluginWebSocketLog.LogPublishFailed(_logger, pluginId, exception);
 				}
@@ -1110,10 +1112,6 @@ public sealed class PluginWebSocketEndpoint
 		}
 		catch (Exception exception) when (exception is OperationCanceledException or WebSocketException)
 		{
-		}
-		catch (Exception exception) when (exception is not OutOfMemoryException)
-		{
-			PluginWebSocketLog.LogPublishFailed(_logger, pluginId, exception);
 		}
 	}
 
