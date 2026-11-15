@@ -21,24 +21,16 @@ public sealed class WidgetProviderAvailability : IWidgetProviderAvailability
 	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly IIntegrationRegistry _integrations;
 	private readonly IRemotePluginConnectionState _connections;
-	private readonly IPluginInstallationCatalog? _installationCatalog;
-	private readonly IPluginManifestReader? _manifestReader;
+	private readonly IPluginInstallationCatalog _installationCatalog;
+	private readonly IPluginManifestReader _manifestReader;
 	private readonly ConcurrentDictionary<string, LocalizedText> _lastKnownNames = new(StringComparer.Ordinal);
 
 	public WidgetProviderAvailability(
 		IWidgetTypeRegistry widgetTypes,
 		IIntegrationRegistry integrations,
-		IRemotePluginConnectionState connections)
-		: this(widgetTypes, integrations, connections, null, null)
-	{
-	}
-
-	public WidgetProviderAvailability(
-		IWidgetTypeRegistry widgetTypes,
-		IIntegrationRegistry integrations,
 		IRemotePluginConnectionState connections,
-		IPluginInstallationCatalog? installationCatalog,
-		IPluginManifestReader? manifestReader)
+		IPluginInstallationCatalog installationCatalog,
+		IPluginManifestReader manifestReader)
 	{
 		_widgetTypes = widgetTypes;
 		_integrations = integrations;
@@ -84,20 +76,24 @@ public sealed class WidgetProviderAvailability : IWidgetProviderAvailability
 			return integration.Name;
 		}
 
-		if (_installationCatalog is not null
-			&& _manifestReader is not null
-			&& _installationCatalog.Discover().FirstOrDefault(plugin =>
-				string.Equals(plugin.PluginId, owner, StringComparison.Ordinal)) is { ActiveVersion: { } active } installed)
+		if (ManifestNameOf(owner) is { } manifestName)
 		{
-			var result = _manifestReader.Read(active.ManifestPath, installed.PluginId, active.Version);
-			if (result.Success && !string.IsNullOrWhiteSpace(result.Manifest?.Name))
-			{
-				return LocalizedText.FromLiteral(result.Manifest.Name);
-			}
+			return LocalizedText.FromLiteral(manifestName);
 		}
 
 		return _lastKnownNames.TryGetValue(owner, out var lastKnownName)
 			? lastKnownName
 			: LocalizedText.FromLiteral(owner);
+	}
+
+	private string? ManifestNameOf(string pluginId)
+	{
+		if (!_installationCatalog.TryResolveActive(pluginId, out var active) || active is null)
+		{
+			return null;
+		}
+
+		var result = _manifestReader.Read(active.ManifestPath, pluginId, active.Version);
+		return result.Success ? result.Manifest!.Name : null;
 	}
 }

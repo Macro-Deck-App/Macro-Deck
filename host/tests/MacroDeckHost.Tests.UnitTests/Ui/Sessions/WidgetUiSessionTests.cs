@@ -23,6 +23,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
@@ -43,7 +44,6 @@ internal sealed class WidgetUiSessionTests
 	private WidgetTypeRegistry _widgetTypes = null!;
 	private StubIntegrationRegistry _integrations = null!;
 	private NoPluginConnections _connections = null!;
-	private WidgetProviderAvailability _availability = null!;
 	private UnavailableWidgetSessionRecovery _recovery = null!;
 	private ProfileRegistry _profiles = null!;
 
@@ -87,8 +87,12 @@ internal sealed class WidgetUiSessionTests
 			_profiles);
 
 		_connections = new NoPluginConnections();
-		_availability = new WidgetProviderAvailability(_widgetTypes, _integrations, _connections);
-		_recovery = new UnavailableWidgetSessionRecovery(_registry, _availability, _integrations);
+		var availability = new WidgetProviderAvailability(_widgetTypes,
+			_integrations,
+			_connections,
+			new FakePluginInstallationCatalog(),
+			new FakePluginManifestReader());
+		_recovery = new UnavailableWidgetSessionRecovery(_registry, availability, _integrations);
 
 		_opener = new WidgetUiSessionOpener(_folders,
 			new EmptyProfileCache(),
@@ -96,7 +100,7 @@ internal sealed class WidgetUiSessionTests
 			_widgetTypes,
 			_registry,
 			_broker,
-			_availability,
+			availability,
 			_recovery,
 			TestColors.None,
 			profiles: _profiles);
@@ -582,15 +586,30 @@ internal sealed class WidgetUiSessionTests
 	private const string GaugeType = GaugeOwner + "::gauge";
 
 	[Test]
-	public async Task A_widget_whose_plugin_stops_keeps_its_last_known_integration_name()
+	public async Task A_widget_whose_plugin_is_gone_is_served_a_placeholder_naming_the_plugin_id()
 	{
-		_integrations.Add(new FakeIntegration { Id = GaugeOwner });
-		_availability.Check(GaugeType);
-		await _integrations.UnregisterAsync(GaugeOwner);
-
 		var widget = AddWidget(GaugeType, "{}");
 
 		var ticket = OpenLive(widget, DeviceA);
+		var tree = await TreeOf(ticket);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.True, ticket.Message);
+			Assert.That(tree, Does.Contain("Deck.UnavailableWidget.Tile"));
+			Assert.That(tree, Does.Contain(GaugeOwner));
+		});
+	}
+
+	[Test]
+	public async Task A_widget_whose_plugin_stops_keeps_its_last_known_integration_name()
+	{
+		_integrations.Add(new FakeIntegration { Id = GaugeOwner });
+		var widget = AddWidget(GaugeType, "{}");
+		await TreeOf(OpenLive(widget, DeviceA));
+		await _integrations.UnregisterAsync(GaugeOwner);
+
+		var ticket = OpenLive(widget, DeviceB);
 		var tree = await TreeOf(ticket);
 
 		Assert.Multiple(() =>
@@ -774,7 +793,11 @@ internal sealed class WidgetUiSessionTests
 			_widgetTypes,
 			_registry,
 			_broker,
-			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
+			new WidgetProviderAvailability(_widgetTypes,
+				_integrations,
+				_connections,
+				new FakePluginInstallationCatalog(),
+				new FakePluginManifestReader()),
 			_recovery,
 			new ColorReferenceResolver(variables));
 		const string data = """{"backgroundColor":"{{ vars.primary | color | color_opacity: 50 }}"}""";
@@ -813,7 +836,11 @@ internal sealed class WidgetUiSessionTests
 			_widgetTypes,
 			_registry,
 			_broker,
-			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
+			new WidgetProviderAvailability(_widgetTypes,
+				_integrations,
+				_connections,
+				new FakePluginInstallationCatalog(),
+				new FakePluginManifestReader()),
 			_recovery,
 			TestColors.None,
 			culture);

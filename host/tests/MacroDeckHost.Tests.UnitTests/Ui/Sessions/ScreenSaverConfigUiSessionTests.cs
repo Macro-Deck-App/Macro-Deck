@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
@@ -30,7 +31,11 @@ internal sealed class ScreenSaverConfigUiSessionTests
 		(_screenSavers, _screenSaverId) = TestScreenSaverProviders.WithScreenSaver(ProviderId, hasConfiguration: true);
 		var integrations = new StubIntegrationRegistry();
 		var widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
-		var availability = new WidgetProviderAvailability(widgetTypes, integrations, new NoPluginConnections());
+		var availability = new WidgetProviderAvailability(widgetTypes,
+			integrations,
+			new NoPluginConnections(),
+			new FakePluginInstallationCatalog(),
+			new FakePluginManifestReader());
 
 		_broker = new UiSessionBroker(new AcceptingResolver(ProviderId),
 			new RecordingUiSessionTransport(),

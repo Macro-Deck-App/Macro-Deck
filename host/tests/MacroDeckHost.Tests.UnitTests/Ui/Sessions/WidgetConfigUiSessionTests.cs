@@ -13,6 +13,7 @@ using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
@@ -333,7 +334,11 @@ internal sealed class WidgetConfigUiSessionTests
 	private ConfigUiSessionOpener NewOpener(IWidgetTypeRegistry widgetTypes)
 	{
 		var integrations = new StubIntegrationRegistry();
-		var availability = new WidgetProviderAvailability(widgetTypes, integrations, new NoPluginConnections());
+		var availability = new WidgetProviderAvailability(widgetTypes,
+			integrations,
+			new NoPluginConnections(),
+			new FakePluginInstallationCatalog(),
+			new FakePluginManifestReader());
 
 		return new ConfigUiSessionOpener(integrations,
 			new ThrowingConfigFlowManager(),

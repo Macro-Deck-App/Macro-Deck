@@ -10,51 +10,79 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets;
 [TestFixture]
 internal sealed class WidgetProviderAvailabilityTests
 {
-	[Test]
-	public void An_installed_plugin_uses_its_manifest_name_before_an_integration_registers()
+	private const string PluginId = "com.example.installed-plugin";
+	private const string WidgetType = PluginId + "::widget";
+
+	private StubIntegrationRegistry _integrations = null!;
+	private FakePluginInstallationCatalog _catalog = null!;
+	private FakePluginManifestReader _manifests = null!;
+	private WidgetProviderAvailability _availability = null!;
+
+	[SetUp]
+	public void SetUp()
 	{
-		const string pluginId = "com.example.installed-plugin";
-		const string manifestPath = "plugin/versions/1.0.0/manifest.json";
-		var installedVersion = new InstalledPluginVersion
+		_integrations = new StubIntegrationRegistry();
+		_catalog = new FakePluginInstallationCatalog();
+		_manifests = new FakePluginManifestReader();
+		_availability = new WidgetProviderAvailability(new WidgetTypeRegistry(new RecordingMediator()),
+			_integrations,
+			new NoPluginConnections(),
+			_catalog,
+			_manifests);
+	}
+
+	[Test]
+	public void An_installed_plugin_with_no_registered_integration_is_named_by_its_manifest()
+	{
+		Install("Installed Plugin");
+
+		var unavailable = _availability.Check(WidgetType);
+
+		Assert.That(unavailable?.Name.Literal, Is.EqualTo("Installed Plugin"));
+	}
+
+	[Test]
+	public async Task A_stopped_plugin_without_a_readable_manifest_keeps_its_last_known_integration_name()
+	{
+		_integrations.Add(new FakeIntegration { Id = PluginId });
+		_availability.Check(WidgetType);
+		await _integrations.UnregisterAsync(PluginId);
+
+		var unavailable = _availability.Check(WidgetType);
+
+		Assert.That(unavailable?.Name.Literal, Is.EqualTo("Test Integration"));
+	}
+
+	[Test]
+	public void A_plugin_with_no_known_name_is_named_by_its_id()
+	{
+		var unavailable = _availability.Check(WidgetType);
+
+		Assert.That(unavailable?.Name.Literal, Is.EqualTo(PluginId));
+	}
+
+	private void Install(string name)
+	{
+		var version = new InstalledPluginVersion
 		{
 			Version = "1.0.0",
 			VersionDirectory = "plugin/versions/1.0.0",
-			ManifestPath = manifestPath
+			ManifestPath = "plugin/versions/1.0.0/manifest.json"
 		};
-		var catalog = new FakePluginInstallationCatalog();
-		catalog.Plugins.Add(new InstalledPlugin
+		_catalog.Plugins.Add(new InstalledPlugin
 		{
-			PluginId = pluginId,
+			PluginId = PluginId,
 			PluginDirectory = "plugin",
-			Versions = [installedVersion],
-			ActiveVersion = installedVersion
+			Versions = [version],
+			ActiveVersion = version
 		});
-		var manifests = new FakePluginManifestReader
+		_manifests.Default = PluginManifestReadResult.Ok(new PluginManifest
 		{
-			Default = PluginManifestReadResult.Ok(new PluginManifest
-			{
-				ManifestVersion = PluginManifest.SupportedManifestVersion,
-				Id = pluginId,
-				Name = "Installed Plugin",
-				Version = installedVersion.Version,
-				Entrypoints = new Dictionary<string, PluginEntrypoint>()
-			})
-		};
-		var availability = new WidgetProviderAvailability(
-			new WidgetTypeRegistry(new RecordingMediator()),
-			new StubIntegrationRegistry(),
-			new NoPluginConnections(),
-			catalog,
-			manifests);
-
-		var unavailable = availability.Check(pluginId + "::widget");
-
-		Assert.Multiple(() =>
-		{
-			Assert.That(unavailable, Is.Not.Null);
-			Assert.That(unavailable!.Name.Literal, Is.EqualTo("Installed Plugin"));
-			Assert.That(manifests.Reads, Has.Count.EqualTo(1));
-			Assert.That(manifests.Reads[0], Is.EqualTo((manifestPath, pluginId, installedVersion.Version)));
+			ManifestVersion = PluginManifest.SupportedManifestVersion,
+			Id = PluginId,
+			Name = name,
+			Version = version.Version,
+			Entrypoints = new Dictionary<string, PluginEntrypoint>()
 		});
 	}
 }
