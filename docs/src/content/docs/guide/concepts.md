@@ -1221,6 +1221,11 @@ settings button. The swipe can start a little in from the edge, which helps wher
 swipe from the left edge for Back, such as Android gesture navigation or a Safari tab. Hiding the button
 is not a lock: anyone at the device can still swipe.
 
+A deck in a browser shows the theme and accent color set under **Settings > Appearance** in Macro Deck.
+Pick a **Theme mode** in the deck's own settings to give that browser a theme of its own: it keeps it,
+**System** included, and later theme changes in Macro Deck no longer change it there. Picking a theme on a
+deck changes only that browser, never Macro Deck or other devices.
+
 When you are signed in under **Settings > Account**, a Companion app license this computer got from a
 purchase is saved to your Macro Deck account, and your other computers signed in to it that have no
 license yet receive it within about a minute (see

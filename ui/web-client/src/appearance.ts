@@ -6,6 +6,8 @@ export type ResolvedTheme = 'light' | 'dark';
 const STORAGE_KEY_MODE = 'md.appearance.themeMode';
 const STORAGE_KEY_ACCENT = 'md.appearance.accentColor';
 const STORAGE_KEY_FONT = 'md.appearance.fontFamily';
+const STORAGE_KEY_DEVICE_MODE = 'macro-deck.theme-mode';
+const STORAGE_KEY_DEVICE_ACCENT = 'macro-deck.accent-color';
 
 export const DEFAULT_THEME_MODE: ThemeMode = 'system';
 export const DEFAULT_ACCENT_COLOR = '#2196F3';
@@ -53,13 +55,26 @@ function withAlpha(hex: string, alpha: number): string {
   return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
 
+function parseThemeMode(value: string | null): ThemeMode | null {
+  return value === 'light' || value === 'dark' || value === 'system' ? value : null;
+}
+
+function store(key: string, value: string): void {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Storage refused; the choice still applies until this page is reloaded.
+  }
+}
+
 export class Appearance {
-  private mode: ThemeMode = DEFAULT_THEME_MODE;
-  private accent = DEFAULT_ACCENT_COLOR;
+  private hostMode: ThemeMode = DEFAULT_THEME_MODE;
+  private hostAccent = DEFAULT_ACCENT_COLOR;
+  private deviceMode: ThemeMode | null = null;
+  private deviceAccent: string | null = null;
   private font = '';
   private systemPrefersDark = true;
   private readonly listeners: Array<() => void> = [];
-  private persist: ((mode: ThemeMode, accent: string) => void) | null = null;
   private uiFont: UiFont | null = null;
   private fontFaces: readonly SystemFontFace[] | null = null;
   private loadFontFaces: (() => Promise<readonly SystemFontFace[]>) | null = null;
@@ -86,21 +101,18 @@ export class Appearance {
     return this.font;
   }
 
-  setPersistence(persist: (mode: ThemeMode, accent: string) => void): void {
-    this.persist = persist;
-  }
-
   themeMode(): ThemeMode {
-    return this.mode;
+    return this.deviceMode ?? this.hostMode;
   }
 
   accentColor(): string {
-    return this.accent;
+    return this.deviceAccent ?? this.hostAccent;
   }
 
   resolvedTheme(): ResolvedTheme {
-    if (this.mode === 'system') return this.systemPrefersDark ? 'dark' : 'light';
-    return this.mode;
+    const mode = this.themeMode();
+    if (mode === 'system') return this.systemPrefersDark ? 'dark' : 'light';
+    return mode;
   }
 
   onChange(listener: () => void): () => void {
@@ -112,22 +124,20 @@ export class Appearance {
   }
 
   setThemeMode(mode: ThemeMode): void {
-    this.mode = mode;
-    this.cache();
+    this.deviceMode = mode;
+    store(STORAGE_KEY_DEVICE_MODE, mode);
     this.applyToDom();
-    this.persist?.(this.mode, this.accent);
   }
 
   setAccentColor(color: string): void {
-    this.accent = color;
-    this.cache();
+    this.deviceAccent = color;
+    store(STORAGE_KEY_DEVICE_ACCENT, color);
     this.applyToDom();
-    this.persist?.(this.mode, this.accent);
   }
 
   applyFromHost(mode: ThemeMode | undefined, accent: string | undefined, fontFamily?: string): void {
-    this.mode = mode ?? DEFAULT_THEME_MODE;
-    this.accent = accent ?? DEFAULT_ACCENT_COLOR;
+    this.hostMode = mode ?? DEFAULT_THEME_MODE;
+    this.hostAccent = accent ?? DEFAULT_ACCENT_COLOR;
     if (fontFamily !== undefined) this.font = fontFamily;
     this.cache();
     this.applyToDom();
@@ -154,8 +164,8 @@ export class Appearance {
 
   private cache(): void {
     try {
-      window.localStorage.setItem(STORAGE_KEY_MODE, this.mode);
-      window.localStorage.setItem(STORAGE_KEY_ACCENT, this.accent);
+      window.localStorage.setItem(STORAGE_KEY_MODE, this.hostMode);
+      window.localStorage.setItem(STORAGE_KEY_ACCENT, this.hostAccent);
       window.localStorage.setItem(STORAGE_KEY_FONT, this.font);
     } catch {
       // Storage refused; the theme still applies, it is just re-fetched on the next load.
@@ -164,13 +174,11 @@ export class Appearance {
 
   private restoreFromCache(): void {
     try {
-      const cachedMode = window.localStorage.getItem(STORAGE_KEY_MODE);
-      if (cachedMode === 'light' || cachedMode === 'dark' || cachedMode === 'system') {
-        this.mode = cachedMode;
-      }
-      const cachedAccent = window.localStorage.getItem(STORAGE_KEY_ACCENT);
-      if (cachedAccent) this.accent = cachedAccent;
+      this.hostMode = parseThemeMode(window.localStorage.getItem(STORAGE_KEY_MODE)) ?? this.hostMode;
+      this.hostAccent = window.localStorage.getItem(STORAGE_KEY_ACCENT) || this.hostAccent;
       this.font = window.localStorage.getItem(STORAGE_KEY_FONT) ?? '';
+      this.deviceMode = parseThemeMode(window.localStorage.getItem(STORAGE_KEY_DEVICE_MODE));
+      this.deviceAccent = window.localStorage.getItem(STORAGE_KEY_DEVICE_ACCENT) || null;
     } catch {
       // No cache; the first paint uses the defaults and the host corrects it.
     }
@@ -183,7 +191,7 @@ export class Appearance {
 
     const onChange = () => {
       this.systemPrefersDark = query.matches;
-      if (this.mode === 'system') this.applyToDom();
+      if (this.themeMode() === 'system') this.applyToDom();
     };
 
     // `addEventListener` on a MediaQueryList is Safari 14; the deprecated `addListener` is the one
@@ -198,10 +206,11 @@ export class Appearance {
     root.classList.remove('light');
     root.classList.remove('dark');
     root.classList.add(theme);
+    const accent = this.accentColor();
     const colors = {
-      accent: this.accent,
-      hover: darken(this.accent, 0.2),
-      muted: withAlpha(this.accent, 0.15),
+      accent,
+      hover: darken(accent, 0.2),
+      muted: withAlpha(accent, 0.15),
     };
     root.style.setProperty('--color-accent', colors.accent);
     root.style.setProperty('--color-accent-hover', colors.hover);
