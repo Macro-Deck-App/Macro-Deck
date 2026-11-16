@@ -196,6 +196,21 @@ describe('UpdateCheckComponent', () => {
     expect(text).not.toContain('website');
   });
 
+  it('tells a portable copy to replace its program files and keep its Data folder', async () => {
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ phase: 'available', version: '3.1.0', installStrategy: 'portable' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Version 3.1.0 is available');
+    expect(text).toContain('portable ZIP');
+    expect(text).toContain('Data folder');
+    expect(text).not.toContain('AppImage');
+  });
+
   it('opens the update modal from "View details"', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(makeState({ phase: 'available', version: '3.1.0' })),

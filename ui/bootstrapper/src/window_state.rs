@@ -112,9 +112,7 @@ fn read_legacy(dir: &Path, label: &str) -> Option<LegacyWindowState> {
 }
 
 fn config_dir(app: &AppHandle) -> PathBuf {
-    app.path()
-        .app_config_dir()
-        .unwrap_or_else(|_| Path::new(".").to_path_buf())
+    crate::portable::app_config_dir(app).unwrap_or_else(|_| Path::new(".").to_path_buf())
 }
 
 fn frame_insets(window: &WebviewWindow) -> (u32, u32) {

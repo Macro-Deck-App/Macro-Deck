@@ -1220,6 +1220,14 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
     <value>Kon de updatefeeds van {names} niet controleren.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} is beschikbaar.
+
+Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de Macro Deck-website en vervang de programmabestanden. Bewaar de map Data. Macro Deck blijft draaien.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Deze draagbare kopie van Macro Deck installeert updates niet zelf. Download de nieuwe draagbare ZIP van {downloadPageUrl}, sluit Macro Deck af en vervang de programmabestanden. Bewaar de map Data.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Download annuleren</value>
   </data>
@@ -18176,6 +18184,10 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Versie {version} is beschikbaar.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Versie {version} is beschikbaar. Download de draagbare ZIP van de Macro Deck-website en vervang de programmabestanden. Bewaar de map Data.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

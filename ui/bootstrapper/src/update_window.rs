@@ -257,7 +257,7 @@ fn offer_actions(strategy: UpdateInstallStrategy) -> Vec<WindowAction> {
             later,
             action(ActionId::Install, keys::UPDATE_DOWNLOAD_AND_INSTALL, true),
         ],
-        UpdateInstallStrategy::ExternalDownload => vec![
+        UpdateInstallStrategy::ExternalDownload | UpdateInstallStrategy::Portable => vec![
             later,
             action(
                 ActionId::DownloadPage,
@@ -274,6 +274,7 @@ fn offer_status(strategy: UpdateInstallStrategy, version: Option<&str>) -> Optio
         UpdateInstallStrategy::InApp => return None,
         UpdateInstallStrategy::ExternalDownload => keys::UPDATE_EXTERNAL_AVAILABLE,
         UpdateInstallStrategy::Apt => keys::UPDATE_APT_AVAILABLE,
+        UpdateInstallStrategy::Portable => keys::UPDATE_PORTABLE_AVAILABLE,
     };
     version
         .map(|version| localization::t_args(key, &[("version", version)]))
@@ -589,24 +590,27 @@ fn open(app: &AppHandle, opening: Opening) {
 
 fn build(app: &AppHandle, opening: Opening) -> bool {
     let opener = app.clone();
-    let builder =
-        WebviewWindowBuilder::new(app, UPDATE_WINDOW, WebviewUrl::CustomProtocol(page_url()))
-            .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
-            .inner_size(560.0, 640.0)
-            .min_inner_size(420.0, 420.0)
-            .center()
-            .focused(opening == Opening::Deliberate)
-            .zoom_hotkeys_enabled(false)
-            // Release-note links must open in the browser, never inside this window.
-            .on_navigation(move |url| {
-                if is_own_page(url) {
-                    return true;
-                }
-                if url.scheme() == "https" {
-                    let _ = crate::external_url::open(&opener, url.as_str());
-                }
-                false
-            });
+    let builder = crate::portable::with_webview_data(WebviewWindowBuilder::new(
+        app,
+        UPDATE_WINDOW,
+        WebviewUrl::CustomProtocol(page_url()),
+    ))
+    .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
+    .inner_size(560.0, 640.0)
+    .min_inner_size(420.0, 420.0)
+    .center()
+    .focused(opening == Opening::Deliberate)
+    .zoom_hotkeys_enabled(false)
+    // Release-note links must open in the browser, never inside this window.
+    .on_navigation(move |url| {
+        if is_own_page(url) {
+            return true;
+        }
+        if url.scheme() == "https" {
+            let _ = crate::external_url::open(&opener, url.as_str());
+        }
+        false
+    });
 
     let theme = window_theme(&appearance::current(app));
     let builder = match theme {
@@ -1103,6 +1107,23 @@ mod tests {
         let apt = view(&state(UpdateInstallStrategy::Apt).snapshot(), None);
         assert_eq!(action_ids(&apt), [ActionId::Later]);
         assert!(apt.status.unwrap().text.contains("apt"));
+    }
+
+    #[test]
+    fn a_portable_copy_points_to_the_download_page_with_its_own_wording() {
+        let portable = view(&state(UpdateInstallStrategy::Portable).snapshot(), None);
+
+        assert_eq!(
+            action_ids(&portable),
+            [ActionId::Later, ActionId::DownloadPage]
+        );
+        assert_eq!(primary(&portable), Some(ActionId::DownloadPage));
+        let status = portable
+            .status
+            .expect("a portable copy explains the manual update");
+        assert!(status.text.contains("3.1.0"));
+        assert!(status.text.contains("Data"));
+        assert!(!status.text.contains("AppImage"));
     }
 
     #[test]

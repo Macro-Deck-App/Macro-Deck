@@ -1220,6 +1220,14 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>無法檢查 {names} 的更新來源。</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} 已可使用。
+
+此可攜式版本不會自動更新。請從 Macro Deck 網站下載可攜式 ZIP 並取代程式檔案，保留 Data 資料夾。Macro Deck 會繼續執行。</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>此 Macro Deck 可攜式版本不會自行安裝更新。請從 {downloadPageUrl} 下載新的可攜式 ZIP，結束 Macro Deck 並取代程式檔案，保留 Data 資料夾。</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>取消下載</value>
   </data>
@@ -18176,6 +18184,10 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>版本 {version} 已可用。</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>版本 {version} 已可使用。請從 Macro Deck 網站下載可攜式 ZIP 並取代程式檔案，保留 Data 資料夾。</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

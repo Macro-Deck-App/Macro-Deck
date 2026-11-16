@@ -14,6 +14,7 @@ const FILE_PREFIX: &str = "bootstrapper-";
 pub struct LoggerContext {
     pub override_dir: Option<String>,
     pub portable: bool,
+    pub portable_data_dir: Option<PathBuf>,
     pub packaged: bool,
     pub development: bool,
     pub data_root_directory_name: &'static str,
@@ -37,6 +38,9 @@ pub fn resolve_logs_dir(ctx: &LoggerContext) -> PathBuf {
             .working_directory
             .join(ctx.data_root_directory_name)
             .join("logs");
+    }
+    if let Some(dir) = ctx.portable_data_dir.as_deref() {
+        return dir.join("logs");
     }
     if ctx.packaged {
         return ctx
@@ -214,6 +218,7 @@ mod tests {
         LoggerContext {
             override_dir: override_dir.map(str::to_string),
             portable,
+            portable_data_dir: None,
             packaged,
             development,
             data_root_directory_name: if development { ".data" } else { "MacroDeck" },
@@ -239,6 +244,14 @@ mod tests {
     fn portable_logs_next_to_binary() {
         let dir = resolve_logs_dir(&ctx(None, true, true, true));
         assert_eq!(dir, PathBuf::from("/opt/macro-deck/logs"));
+    }
+
+    #[test]
+    fn portable_marker_logs_into_the_portable_data_folder_of_a_packaged_app() {
+        let mut context = ctx(None, false, true, false);
+        context.portable_data_dir = Some(PathBuf::from("/media/stick/Macro Deck/Data"));
+        let dir = resolve_logs_dir(&context);
+        assert_eq!(dir, PathBuf::from("/media/stick/Macro Deck/Data/logs"));
     }
 
     #[test]

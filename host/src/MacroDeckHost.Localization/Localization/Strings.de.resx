@@ -1220,6 +1220,14 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
     <value>Die Update-Feeds {names} konnten nicht geprüft werden.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} ist verfügbar.
+
+Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei von der Macro-Deck-Website herunter und ersetze die Programmdateien. Behalte den Ordner Data. Macro Deck läuft währenddessen weiter.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Diese portable Kopie von Macro Deck installiert Updates nicht selbst. Lade die neue portable ZIP-Datei von {downloadPageUrl} herunter, beende Macro Deck und ersetze die Programmdateien. Behalte den Ordner Data.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Download abbrechen</value>
   </data>
@@ -18173,6 +18181,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Version {version} ist verfügbar.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Version {version} ist verfügbar. Lade die portable ZIP-Datei von der Macro-Deck-Website herunter und ersetze die Programmdateien. Behalte den Ordner Data.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

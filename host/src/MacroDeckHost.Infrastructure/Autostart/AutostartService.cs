@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
@@ -8,21 +9,31 @@ namespace MacroDeckHost.Infrastructure.Autostart;
 
 public class AutostartService : IAutostartService
 {
-	public const string ShellExecutableEnvironmentVariable = "MACRODECK_SHELL_EXECUTABLE";
+	public const string ShellExecutableEnvironmentVariable
+		= MacroDeckDataRootResolver.ShellExecutableEnvironmentVariable;
 
 	private readonly ILogger _logger = Log.ForContext<AutostartService>();
+	private readonly bool _portable;
 	private readonly IAutostartRegistrar _registrar;
 	private readonly string? _shellExecutable;
 
 	public AutostartService(IAutostartRegistrar registrar)
-		: this(registrar, ResolveShellExecutable())
+		: this(registrar,
+			ResolveShellExecutable(),
+			MacroDeckDataRootResolver.IsPortable(DataRootEnvironment.Current()))
 	{
 	}
 
 	public AutostartService(IAutostartRegistrar registrar, string? shellExecutable)
+		: this(registrar, shellExecutable, false)
+	{
+	}
+
+	public AutostartService(IAutostartRegistrar registrar, string? shellExecutable, bool portable)
 	{
 		_registrar = registrar;
 		_shellExecutable = shellExecutable;
+		_portable = portable;
 	}
 
 	private bool Supported => _registrar.IsSupported && _shellExecutable is not null;
@@ -34,7 +45,7 @@ public class AutostartService : IAutostartService
 			return new AutostartSettings(false, false, false);
 		}
 
-		var registration = TryRead();
+		var registration = ReadOwnRegistration();
 		return new AutostartSettings(true, registration is not null, registration?.OpenMinimized ?? false);
 	}
 
@@ -52,7 +63,7 @@ public class AutostartService : IAutostartService
 			{
 				_registrar.Write(new AutostartRegistration(_shellExecutable!, openMinimized));
 			}
-			else
+			else if (!_portable || ReadOwnRegistration() is not null)
 			{
 				_registrar.Remove();
 			}
@@ -69,7 +80,9 @@ public class AutostartService : IAutostartService
 
 	public void RefreshRegistration()
 	{
-		if (!Supported)
+		// The login item is one per user account, so a portable copy taking it over on start would
+		// leave an installed copy starting from a removable drive.
+		if (!Supported || _portable)
 		{
 			return;
 		}
@@ -84,6 +97,12 @@ public class AutostartService : IAutostartService
 			registration.ExecutablePath,
 			_shellExecutable);
 		Update(true, registration.OpenMinimized);
+	}
+
+	private AutostartRegistration? ReadOwnRegistration()
+	{
+		var registration = TryRead();
+		return _portable && registration?.ExecutablePath != _shellExecutable ? null : registration;
 	}
 
 	private AutostartRegistration? TryRead()

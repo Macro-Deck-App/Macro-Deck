@@ -118,6 +118,9 @@ type Environment<'a> = &'a dyn Fn(&str) -> Option<OsString>;
 // Mirrors Tauri's app_config_dir. Claude Desktop starts the bridge with only a few variables
 // (HOME, PATH and the like, no TMPDIR), so nothing here may depend on the temp directory.
 pub fn config_dir(build_channel: &str, environment: Environment) -> Option<PathBuf> {
+    if let Some(data_dir) = crate::portable::data_dir() {
+        return Some(crate::portable::config_dir_in(&data_dir));
+    }
     base_config_dir(environment).map(|base| base.join(identifier(build_channel)))
 }
 

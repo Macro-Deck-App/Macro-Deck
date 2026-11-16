@@ -102,6 +102,7 @@ pub enum UpdateInstallStrategy {
     InApp,
     ExternalDownload,
     Apt,
+    Portable,
 }
 
 impl UpdateInstallStrategy {
@@ -112,7 +113,14 @@ impl UpdateInstallStrategy {
 
 const APT_REPOSITORY_HOST: &str = "packages.macro-deck.app";
 
-fn install_strategy_for(target_os: &str, apt_managed: bool) -> UpdateInstallStrategy {
+fn install_strategy_for(
+    target_os: &str,
+    apt_managed: bool,
+    portable: bool,
+) -> UpdateInstallStrategy {
+    if portable {
+        return UpdateInstallStrategy::Portable;
+    }
     match target_os {
         "linux" if apt_managed => UpdateInstallStrategy::Apt,
         "linux" => UpdateInstallStrategy::ExternalDownload,
@@ -122,7 +130,11 @@ fn install_strategy_for(target_os: &str, apt_managed: bool) -> UpdateInstallStra
 
 pub(crate) fn install_strategy() -> UpdateInstallStrategy {
     let os = std::env::consts::OS;
-    install_strategy_for(os, os == "linux" && installed_from_apt_repository())
+    install_strategy_for(
+        os,
+        os == "linux" && installed_from_apt_repository(),
+        crate::portable::data_dir().is_some(),
+    )
 }
 
 fn installed_from_apt_repository() -> bool {
@@ -202,7 +214,9 @@ pub(crate) fn periodic_action(mode: UpdateMode, strategy: UpdateInstallStrategy)
         (UpdateMode::Off, _) => PeriodicAction::Skip,
         (
             UpdateMode::NotifyOnly | UpdateMode::Automatic,
-            UpdateInstallStrategy::ExternalDownload | UpdateInstallStrategy::Apt,
+            UpdateInstallStrategy::ExternalDownload
+            | UpdateInstallStrategy::Apt
+            | UpdateInstallStrategy::Portable,
         ) => PeriodicAction::Check(CheckAction::ExternalNotify),
         (UpdateMode::NotifyOnly, UpdateInstallStrategy::InApp) => {
             PeriodicAction::Check(CheckAction::ConfirmThenInstall)
@@ -228,6 +242,10 @@ fn external_download_refusal(strategy: UpdateInstallStrategy) -> Option<String> 
             &[("downloadPageUrl", DOWNLOAD_PAGE_URL)],
         )),
         UpdateInstallStrategy::Apt => Some(localization::t(keys::UPDATE_APT_MANAGED)),
+        UpdateInstallStrategy::Portable => Some(localization::t_args(
+            keys::UPDATE_PORTABLE_NOT_SUPPORTED,
+            &[("downloadPageUrl", DOWNLOAD_PAGE_URL)],
+        )),
     }
 }
 
@@ -1286,10 +1304,15 @@ fn notify_external_download(app: &AppHandle, update: &Update) {
             .blocking_show();
         return;
     }
+    let message = if install_strategy() == UpdateInstallStrategy::Portable {
+        keys::UPDATE_PORTABLE_AVAILABLE
+    } else {
+        keys::UPDATE_EXTERNAL_AVAILABLE
+    };
     let open = app
         .dialog()
         .message(localization::t_args(
-            keys::UPDATE_EXTERNAL_AVAILABLE,
+            message,
             &[("version", &update.version)],
         ))
         .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
@@ -1571,7 +1594,7 @@ mod tests {
     #[test]
     fn install_strategy_is_external_download_on_linux() {
         assert_eq!(
-            install_strategy_for("linux", false),
+            install_strategy_for("linux", false, false),
             UpdateInstallStrategy::ExternalDownload
         );
     }
@@ -1579,7 +1602,7 @@ mod tests {
     #[test]
     fn install_strategy_is_apt_on_linux_installed_from_the_apt_repository() {
         assert_eq!(
-            install_strategy_for("linux", true),
+            install_strategy_for("linux", true, false),
             UpdateInstallStrategy::Apt
         );
     }
@@ -1587,11 +1610,11 @@ mod tests {
     #[test]
     fn install_strategy_is_in_app_on_windows_and_macos() {
         assert_eq!(
-            install_strategy_for("windows", false),
+            install_strategy_for("windows", false, false),
             UpdateInstallStrategy::InApp
         );
         assert_eq!(
-            install_strategy_for("macos", true),
+            install_strategy_for("macos", true, false),
             UpdateInstallStrategy::InApp
         );
     }
@@ -1599,9 +1622,19 @@ mod tests {
     #[test]
     fn an_unknown_target_keeps_the_in_app_strategy() {
         assert_eq!(
-            install_strategy_for("freebsd", false),
+            install_strategy_for("freebsd", false, false),
             UpdateInstallStrategy::InApp
         );
+    }
+
+    #[test]
+    fn a_portable_copy_never_installs_in_app_on_any_platform() {
+        for os in ["windows", "macos", "linux"] {
+            assert_eq!(
+                install_strategy_for(os, true, true),
+                UpdateInstallStrategy::Portable
+            );
+        }
     }
 
     #[test]
@@ -1609,6 +1642,7 @@ mod tests {
         assert!(UpdateInstallStrategy::InApp.installs_in_app());
         assert!(!UpdateInstallStrategy::ExternalDownload.installs_in_app());
         assert!(!UpdateInstallStrategy::Apt.installs_in_app());
+        assert!(!UpdateInstallStrategy::Portable.installs_in_app());
     }
 
     const README_SOURCE: &str = "Types: deb\nURIs: https://packages.macro-deck.app\nSuites: stable\nComponents: main\nArchitectures: amd64\nSigned-By: /etc/apt/keyrings/macro-deck.asc\n";
@@ -1686,6 +1720,28 @@ mod tests {
     }
 
     #[test]
+    fn a_portable_copy_refuses_the_in_app_install_and_names_the_download_page() {
+        let reason = external_download_refusal(UpdateInstallStrategy::Portable)
+            .expect("a portable copy must refuse the in-app install");
+        assert!(reason.contains(DOWNLOAD_PAGE_URL));
+        assert!(!reason.contains("AppImage"));
+    }
+
+    #[test]
+    fn a_portable_copy_still_checks_and_notifies_unless_updates_are_off() {
+        for mode in [UpdateMode::NotifyOnly, UpdateMode::Automatic] {
+            assert_eq!(
+                periodic_action(mode, UpdateInstallStrategy::Portable),
+                PeriodicAction::Check(CheckAction::ExternalNotify)
+            );
+        }
+        assert_eq!(
+            periodic_action(UpdateMode::Off, UpdateInstallStrategy::Portable),
+            PeriodicAction::Skip
+        );
+    }
+
+    #[test]
     fn in_app_install_has_no_refusal() {
         assert!(external_download_refusal(UpdateInstallStrategy::InApp).is_none());
     }
@@ -1725,6 +1781,10 @@ mod tests {
         assert_eq!(
             serde_json::to_value(UpdateInstallStrategy::Apt).unwrap(),
             "apt"
+        );
+        assert_eq!(
+            serde_json::to_value(UpdateInstallStrategy::Portable).unwrap(),
+            "portable"
         );
     }
 

@@ -267,6 +267,25 @@ describe('UpdateModalComponent', () => {
     expect(openExternal).toHaveBeenCalledWith('https://macro-deck.app/download');
   });
 
+  it('offers a portable copy the download page instead of installing over another copy', async () => {
+    const openExternal = jasmine.createSpy('openExternal').and.resolveTo(true);
+    setShell({
+      getUpdateState: () => Promise.resolve(makeState({ installStrategy: 'portable', downloadUrl: 'https://macro-deck.app/download' })),
+      onUpdateState: () => Promise.resolve(() => {}),
+      openExternal,
+    });
+
+    const fixture = await createFixture();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).not.toContain('Download & install');
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    buttons.find(b => b.textContent?.includes('Open download page'))?.click();
+
+    expect(openExternal).toHaveBeenCalledWith('https://macro-deck.app/download');
+  });
+
   it('points an APT install to apt, with neither Install nor the download page', async () => {
     setShell({
       getUpdateState: () => Promise.resolve(makeState({ installStrategy: 'apt' })),

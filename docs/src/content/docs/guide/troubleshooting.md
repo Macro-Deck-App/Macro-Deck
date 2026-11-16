@@ -17,6 +17,7 @@ Macro Deck writes its logs to the `logs` folder inside its data folder:
 | Windows | `%APPDATA%\MacroDeck` |
 | macOS | `~/Library/Application Support/MacroDeck` |
 | Linux | `~/.local/share/MacroDeck`, or `$XDG_DATA_HOME/MacroDeck` if that is set |
+| [Portable mode](/guide/installation/#portable-mode-windows) | The `Data` folder next to `MacroDeck.exe` |
 
 ## An exported profile, folder or button will not import
 

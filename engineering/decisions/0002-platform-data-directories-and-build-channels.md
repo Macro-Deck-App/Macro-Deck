@@ -52,10 +52,14 @@ its inputs are the environment and a marker on disk rather than a setting. Prece
 1. `MACRO_DECK_DATA_DIRECTORY`, the explicit override (`MACRODECK_DATA_DIR` is the legacy spelling).
 2. `MACRODECK_PORTABLE=1`, forcing the base directory.
 3. `BuildChannel=Development`, giving `<working directory>/.data`.
-4. The `.macro-deck-packaged` marker written into every published Production build, selecting the
+4. A `portable` file next to the desktop app's executable (the folder of `MACRODECK_SHELL_EXECUTABLE`, else
+   the parent of the host's base directory), giving `Data` beside it. The bootstrapper anchors on the same
+   executable and keeps its own state, WebView data and logs in that folder too, so a portable copy writes
+   nothing to the user profile it does not have to.
+5. The `.macro-deck-packaged` marker written into every published Production build, selecting the
    platform user-data directory: `%APPDATA%` on Windows, `~/Library/Application Support` on macOS,
    `$XDG_DATA_HOME` (else `~/.local/share`) on Linux, each plus `MacroDeck`.
-5. Otherwise the base directory, preserving portable behaviour for an unzipped build.
+6. Otherwise the base directory, preserving portable behaviour for an unzipped build.
 
 `MacroDeckPaths` hangs every writable location off that root. `DatabaseMigrationsDirectory` stays
 install-relative, because the Evolve scripts are shipped read-only assets rather than user data.

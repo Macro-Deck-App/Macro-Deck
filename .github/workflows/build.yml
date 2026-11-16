@@ -797,6 +797,38 @@ jobs:
           test -n "$manifest" || { echo "error: no install manifest in $installer" >&2; exit 1; }
           node ci/scripts/make-install-manifest.mjs verify "$(dirname "$manifest")" --pubkey ui/bootstrapper/tauri.conf.json
 
+      # Reuses the executable and host the installer carries, already signed, so the portable copy
+      # spends no further eSigner signature.
+      - name: Package portable ZIP
+        shell: pwsh
+        env:
+          SIGN_WINDOWS: ${{ inputs.sign_windows }}
+        run: |
+          $installer = Get-ChildItem ui/bootstrapper/target/release/bundle/nsis -Filter '*-setup.exe' | Select-Object -First 1
+          if (-not $installer) {
+            throw 'No NSIS installer found to name the portable ZIP after'
+          }
+          $root = Join-Path $env:RUNNER_TEMP 'macro-deck-portable'
+          $stage = Join-Path $root 'Macro Deck'
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item ui/bootstrapper/target/release/MacroDeck.exe $stage
+          Copy-Item ui/bootstrapper/host-publish (Join-Path $stage 'host') -Recurse
+          New-Item -ItemType File -Path (Join-Path $stage 'portable') | Out-Null
+          if ($env:SIGN_WINDOWS -eq 'true') {
+            $signature = Get-AuthenticodeSignature (Join-Path $stage 'MacroDeck.exe')
+            if ($signature.Status -ne 'Valid') {
+              throw "MacroDeck.exe in the portable ZIP is not validly signed: $($signature.Status)"
+            }
+          }
+          if ($env:HAS_UPDATER_KEY -eq 'true') {
+            node ci/scripts/make-install-manifest.mjs verify (Join-Path $stage 'host') --pubkey ui/bootstrapper/tauri.conf.json
+            if ($LASTEXITCODE -ne 0) {
+              throw 'The install manifest in the portable ZIP does not verify'
+            }
+          }
+          $zip = Join-Path $installer.DirectoryName ($installer.Name -replace '-setup\.exe$', '-portable.zip')
+          Compress-Archive -Path (Join-Path $root '*') -DestinationPath $zip
+
       - name: Record unsigned Windows build
         if: ${{ ! inputs.sign_windows }}
         shell: bash
@@ -821,6 +853,7 @@ jobs:
           name: staging-macro-deck-windows
           path: |
             ui/bootstrapper/target/release/bundle/nsis/*.exe
+            ui/bootstrapper/target/release/bundle/nsis/*-portable.zip
             ui/bootstrapper/target/release/bundle/latest-windows.json
             ui/bootstrapper/target/release/bundle/beta-windows.json
           retention-days: 1

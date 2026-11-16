@@ -12,6 +12,10 @@ Choose how Macro Deck handles new versions in **Settings > About**, under **Upda
 | **Notify only** | Macro Deck tells you and asks before it downloads and installs anything. This is the default. |
 | **Automatic** | Macro Deck downloads the update in the background and installs it when you quit Macro Deck. Windows and macOS only. |
 
+A [portable copy](/guide/installation/#portable-mode-windows) of Macro Deck never installs updates itself and
+has no **Automatic** mode: when a new version is out, it points you to the download page. Download the new
+portable `.zip`, quit Macro Deck, replace the program files and keep the `Data` folder.
+
 If Macro Deck cannot reach the update server, for example while you are offline, a notification says it could
 not check for updates. You see it once: while checks keep failing, Macro Deck does not warn again until a check
 succeeds or Macro Deck restarts. **Check for updates** tries again right away.
