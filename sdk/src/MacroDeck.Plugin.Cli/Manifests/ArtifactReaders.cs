@@ -12,5 +12,5 @@ internal static class ArtifactReaders
 	public static readonly IPluginManifestReader ManifestReader = new PluginManifestReader();
 
 	public static readonly IPluginArtifactReader ArtifactReader =
-		new PluginArtifactReader(ManifestReader, Logger.None);
+		new CliArtifactReader(new PluginArtifactReader(ManifestReader, Logger.None));
 }

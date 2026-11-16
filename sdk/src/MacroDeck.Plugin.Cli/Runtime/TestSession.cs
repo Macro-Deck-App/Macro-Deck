@@ -1,4 +1,5 @@
 using MacroDeck.Plugin.Cli.Commands;
+using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Testing;
 using MacroDeck.Plugin.Testing.Conformance;
 
@@ -71,6 +72,11 @@ internal static class TestSession
 				// see its own remarks. That is an input problem (a bad artifact, an executable that will
 				// not launch), not a verdict about the plugin's conformance.
 				console.WriteError("subject-launch-failed", $"The subject could not be launched: {ex.Message}");
+				return ExitCode.InputUnreadable;
+			}
+			catch (InvalidDataException ex) when (options.Artifact is { } artifact)
+			{
+				console.WriteError("subject-launch-failed", ArtifactErrorText.CorruptArtifact(artifact, ex.Message));
 				return ExitCode.InputUnreadable;
 			}
 

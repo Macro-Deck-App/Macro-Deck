@@ -2,6 +2,9 @@ using System.IO.Compression;
 using System.Text.Json.Nodes;
 using MacroDeck.Plugin.Cli.Building;
 using MacroDeck.Plugin.Cli.Manifests;
+using MacroDeck.Plugin.Cli.Merging;
+using MacroDeck.Plugin.Cli.Tests.UnitTests.Support;
+using MacroDeck.Plugin.Packaging.Artifacts;
 
 namespace MacroDeck.Plugin.Cli.Tests.UnitTests;
 
@@ -147,6 +150,41 @@ public class PluginMergeTests
 			var result = await CliRunner.Run("merge", first, second, "--output", Path.Combine(_work, "merged"));
 
 			AssertRefused(result, "hash-mismatch");
+		}
+		finally
+		{
+			Directory.Delete(project, true);
+		}
+	}
+
+	[Test]
+	public async Task A_package_with_a_corrupt_entry_is_refused_and_nothing_extracted_is_left_behind()
+	{
+		var rids = ManifestFixtures.PickForeignRids(2);
+		var project = BuildFixtures.WriteProject(rids);
+		var staging = Path.Combine(_work, "staging");
+		Directory.CreateDirectory(staging);
+
+		try
+		{
+			var first = await BuildAsync(project, rids, rids[0], Path.Combine(_work, "a"));
+			var second = await BuildAsync(project, rids, rids[1], Path.Combine(_work, "b"));
+			await CorruptArtifacts.CorruptFirstEntryAsync(second);
+
+			var merge = await PluginMerger.MergeAsync([first, second], Path.Combine(_work, "merged"), false, staging);
+			var result = await CliRunner.Run("merge", first, second, "--output", Path.Combine(_work, "merged"));
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(merge.ArtifactError, Is.EqualTo(PluginInstallError.InvalidArchive));
+				Assert.That(Directory.EnumerateFileSystemEntries(staging), Is.Empty);
+				Assert.That(result.ExitCode, Is.EqualTo(ExitCode.InputUnreadable), result.Error);
+				Assert.That(result.Error,
+					Does.Contain($"error not-an-artifact: '{second}' is not a readable .macroDeckPlugin artifact: "
+						+ "an entry is corrupt ("));
+				Assert.That(result.Error, Does.Not.Contain("internal-error"));
+				Assert.That(Directory.Exists(Path.Combine(_work, "merged")), Is.False);
+			});
 		}
 		finally
 		{
