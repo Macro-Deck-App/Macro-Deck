@@ -1,6 +1,7 @@
 using MacroDeckHost.Infrastructure.MusicPlayer;
 using Serilog;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace MacroDeckHost.Tests.UnitTests.MusicPlayer;
@@ -19,7 +20,7 @@ public class ImageSharpArtworkProcessorTests
 	}
 
 	[Test]
-	public async Task Process_Jpeg_ProducesWebpMasterAndVariants()
+	public async Task Process_Jpeg_ProducesJpegMasterAndVariantsEveryClientDraws()
 	{
 		var jpeg = await CreateImage(600, 600, (image, stream) => image.SaveAsJpegAsync(stream));
 
@@ -28,15 +29,66 @@ public class ImageSharpArtworkProcessorTests
 		Assert.That(result, Is.Not.Null);
 		Assert.That(result.Variants.Keys, Is.EquivalentTo(_allVariantSizes));
 
-		using var master = Image.Load(result.MasterWebp);
+		using var master = Image.Load(result.Master);
+		using var variant = Image.Load(result.Variants[128]);
 		Assert.Multiple(() =>
 		{
-			Assert.That(master.Metadata.DecodedImageFormat?.Name, Is.EqualTo("Webp"));
+			Assert.That(result.ContentType, Is.EqualTo("image/jpeg"));
+			Assert.That(master.Metadata.DecodedImageFormat?.Name, Is.EqualTo("JPEG"));
+			Assert.That(variant.Metadata.DecodedImageFormat?.Name, Is.EqualTo("JPEG"));
 			Assert.That(master.Width, Is.EqualTo(600));
+			Assert.That(Math.Max(variant.Width, variant.Height), Is.EqualTo(128));
 		});
+	}
 
+	[Test]
+	public async Task Process_TransparentImage_ProducesPngThatKeepsTheTransparency()
+	{
+		byte[] png;
+		using (var image = new Image<Rgba32>(300, 300, new Rgba32(0, 128, 255, 0)))
+		{
+			using var stream = new MemoryStream();
+			await image.SaveAsPngAsync(stream);
+			png = stream.ToArray();
+		}
+
+		var result = await _processor.Process(png, CancellationToken.None);
+
+		Assert.That(result, Is.Not.Null);
+		using var master = Image.Load<Rgba32>(result.Master);
 		using var variant = Image.Load(result.Variants[128]);
-		Assert.That(Math.Max(variant.Width, variant.Height), Is.EqualTo(128));
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.ContentType, Is.EqualTo("image/png"));
+			Assert.That(master.Metadata.DecodedImageFormat?.Name, Is.EqualTo("PNG"));
+			Assert.That(variant.Metadata.DecodedImageFormat?.Name, Is.EqualTo("PNG"));
+			Assert.That(master[10, 10].A, Is.EqualTo(0));
+		});
+	}
+
+	[Test]
+	public async Task Process_ExifRotatedJpeg_IsDrawnUprightWithoutRelyingOnTheOrientationTag()
+	{
+		byte[] jpeg;
+		using (var image = new Image<Rgba32>(400, 200, new Rgba32(0, 128, 255)))
+		{
+			image.Metadata.ExifProfile = new ExifProfile();
+			image.Metadata.ExifProfile.SetValue(ExifTag.Orientation, (ushort)6);
+			using var stream = new MemoryStream();
+			await image.SaveAsJpegAsync(stream);
+			jpeg = stream.ToArray();
+		}
+
+		var result = await _processor.Process(jpeg, CancellationToken.None);
+
+		Assert.That(result, Is.Not.Null);
+		using var master = Image.Load(result.Master);
+		Assert.Multiple(() =>
+		{
+			Assert.That(master.Width, Is.EqualTo(200));
+			Assert.That(master.Height, Is.EqualTo(400));
+			Assert.That(master.Metadata.ExifProfile?.TryGetValue(ExifTag.Orientation, out _) ?? false, Is.False);
+		});
 	}
 
 	[Test]
@@ -49,7 +101,7 @@ public class ImageSharpArtworkProcessorTests
 		Assert.That(result, Is.Not.Null);
 		Assert.That(result.Variants, Is.Empty);
 
-		using var master = Image.Load(result.MasterWebp);
+		using var master = Image.Load(result.Master);
 		Assert.That(master.Width, Is.EqualTo(100));
 	}
 
@@ -61,7 +113,7 @@ public class ImageSharpArtworkProcessorTests
 		var result = await _processor.Process(png, CancellationToken.None);
 
 		Assert.That(result, Is.Not.Null);
-		using var master = Image.Load(result.MasterWebp);
+		using var master = Image.Load(result.Master);
 		Assert.Multiple(() =>
 		{
 			Assert.That(master.Width, Is.EqualTo(640));
@@ -88,7 +140,7 @@ public class ImageSharpArtworkProcessorTests
 		var result = await _processor.Process(gif, CancellationToken.None);
 
 		Assert.That(result, Is.Not.Null);
-		using var master = Image.Load(result.MasterWebp);
+		using var master = Image.Load(result.Master);
 		Assert.That(master.Frames.Count, Is.EqualTo(1));
 	}
 
