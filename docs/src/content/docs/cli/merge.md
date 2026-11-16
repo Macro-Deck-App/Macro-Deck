@@ -55,7 +55,7 @@ Like `build`, `merge` never signs: any `signature` is dropped and `files[]` is r
 | 0 | The artifact was written. |
 | 1 | A package is invalid or the packages do not belong together. |
 | 2 | Bad arguments, or an artifact that already exists without `--force`. |
-| 3 | A package could not be found or is not a ZIP archive. |
+| 3 | A package could not be found, is not a ZIP archive, or has a corrupt entry. |
 | 4 | Cancelled (Ctrl-C). |
 | 70 | Staging failed. |
 

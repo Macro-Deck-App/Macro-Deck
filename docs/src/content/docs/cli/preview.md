@@ -104,7 +104,7 @@ on your computer. Render on the same kind of machine every time when the images 
 | 0 | Every selected preview was rendered or skipped, or the plugin declares no previews. |
 | 1 | A scenario could not be built or drawn. The other images are still written. |
 | 2 | Usage error: a bad size, scale, radius, background, theme or `--video-stream-image`, no or several subject selectors, or an unknown `--preview`. |
-| 3 | The plugin could not be launched or built, or no browser was found. |
+| 3 | The plugin could not be launched or built, an `--artifact` could not be read or has no entrypoint for this machine (`artifact-unreadable`), or no browser was found. |
 | 4 | Cancelled (Ctrl-C). |
 
 ## See also

@@ -159,7 +159,7 @@ exist yet.
 | `publication-metadata-missing` | A `publication`-required field is missing or blank (warning at `package`, error at `publication`). |
 | `generated-field-authored` | `files` or `signature` in a manifest that has not been built or packed yet (warning, unbuilt source tree only). |
 | `source-directory` | The manifest sits next to a project file with no built entrypoint - validate the build output instead. |
-| `not-an-artifact` | `--artifact` is not a ZIP; adds `Did you mean validate --manifest?` when the file is named `manifest.json`. |
+| `not-an-artifact` | `--artifact` is not a ZIP; adds `Did you mean validate --manifest?` when the file is named `manifest.json`. A ZIP with a corrupt entry reports `is not a readable .macroDeckPlugin artifact: an entry is corrupt (...)` under the same code. |
 | `manifest-not-found`, `artifact-not-found` | The input does not exist. |
 
 Other manifest reader failures are reported under their own kebab-case code, e.g. `entrypoint-missing`.
