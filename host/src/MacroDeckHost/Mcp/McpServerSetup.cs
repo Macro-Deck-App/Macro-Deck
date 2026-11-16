@@ -17,6 +17,7 @@ public static class McpServerSetup
 		services.AddHttpContextAccessor();
 		services.AddSingleton<McpConnectionRegistry>();
 		services.AddSingleton<IMcpConnections>(provider => provider.GetRequiredService<McpConnectionRegistry>());
+		services.AddSingleton<IMcpNetworkAccess, McpNetworkAccess>();
 		services.AddScoped<McpTextResolver>();
 		services.AddScoped<McpConfirmationText>();
 		services.AddScoped<McpConfirmationGate>();
@@ -81,7 +82,12 @@ public static class McpServerSetup
 		}
 		else
 		{
-			registry.TouchStateless(tokenId, name, version);
+			var request = services?.GetService<IHttpContextAccessor>()?.HttpContext;
+			var remote = request is null || !LoopbackConnection.IsLocalRequest(request);
+			if (!remote || services?.GetService<IMcpNetworkAccess>()?.Allowed == true)
+			{
+				registry.TouchStateless(tokenId, remote, name, version);
+			}
 		}
 	}
 

@@ -42,7 +42,16 @@ public record McpConnectionBody(
 
 public record GetMcpConnectionsResponse(IReadOnlyList<McpConnectionBody> Connections);
 
-public record GetMcpEndpointResponse(bool Available, string? Url, string ContractVersion, bool ExtensionAvailable);
+public record GetMcpEndpointResponse(
+	bool Available,
+	string? Url,
+	string ContractVersion,
+	bool ExtensionAvailable,
+	bool NetworkClientsAllowed);
+
+public record SetMcpNetworkAccessBody(bool Allowed);
+
+public record McpNetworkAccessResponse(bool Allowed);
 
 public record DownloadClaudeDesktopExtensionBody(string? Token);
 
@@ -79,6 +88,7 @@ public class McpController : ControllerBase
 	private readonly IIntegrationRegistry _integrations;
 	private readonly McpTextResolver _text;
 	private readonly IMcpConfirmationStore _confirmations;
+	private readonly IMcpNetworkAccess _networkAccess;
 
 	public McpController(
 		IMcpTokenService tokenService,
@@ -86,7 +96,8 @@ public class McpController : ControllerBase
 		IMcpRiskPolicy policy,
 		IIntegrationRegistry integrations,
 		McpTextResolver text,
-		IMcpConfirmationStore confirmations)
+		IMcpConfirmationStore confirmations,
+		IMcpNetworkAccess networkAccess)
 	{
 		_tokenService = tokenService;
 		_connections = connections;
@@ -94,6 +105,7 @@ public class McpController : ControllerBase
 		_integrations = integrations;
 		_text = text;
 		_confirmations = confirmations;
+		_networkAccess = networkAccess;
 	}
 
 	[HttpGet("policy")]
@@ -131,7 +143,14 @@ public class McpController : ControllerBase
 		return new GetMcpEndpointResponse(true,
 			$"http://127.0.0.1:{HostEndpoints.PublicPort}{McpPaths.Endpoint}",
 			McpContract.Version,
-			ClaudeDesktopExtension.IsAvailable());
+			ClaudeDesktopExtension.IsAvailable(),
+			_networkAccess.Allowed);
+	}
+
+	[HttpPut("network-access")]
+	public async Task<McpNetworkAccessResponse> SetNetworkAccess(SetMcpNetworkAccessBody body)
+	{
+		return new McpNetworkAccessResponse(await _networkAccess.Change(body.Allowed));
 	}
 
 	[HttpPost("tokens/{id:guid}/claude-desktop-extension")]

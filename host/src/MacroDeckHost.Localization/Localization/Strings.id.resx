@@ -17628,6 +17628,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Gunakan alamat ini di komputer ini. Di komputer lain dalam jaringan, ganti 127.0.0.1 dengan alamat jaringan komputer ini. Setiap koneksi memerlukan token akses.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Gunakan alamat ini di komputer ini. Setiap koneksi memerlukan token akses. Untuk menghubungkan klien AI di komputer lain, izinkan klien AI di perangkat lain.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Alamat server</value>
   </data>
@@ -17639,6 +17642,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Pengaturan klien AI tidak dapat dimuat</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Jika nonaktif, hanya klien AI di komputer ini yang dapat terhubung. Koneksi jaringan tidak dienkripsi selama HTTPS belum diaktifkan, sehingga di jaringan yang tidak tepercaya token akses dan rahasia yang diketik untuk klien AI dapat dibaca.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Izinkan klien AI di perangkat lain</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Belum pernah</value>

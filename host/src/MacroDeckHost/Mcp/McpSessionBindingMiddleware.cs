@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MacroDeckHost.Application.Mcp;
+using MacroDeckHost.Auth;
 
 namespace MacroDeckHost.Mcp;
 
@@ -30,6 +31,12 @@ public sealed class McpSessionBindingMiddleware
 			return;
 		}
 
+		if (sessionId.Length > 0 && _registry.IsTerminated(sessionId))
+		{
+			context.Response.StatusCode = StatusCodes.Status404NotFound;
+			return;
+		}
+
 		if (sessionId.Length == 0)
 		{
 			context.Response.OnStarting(() =>
@@ -37,7 +44,7 @@ public sealed class McpSessionBindingMiddleware
 				var created = context.Response.Headers[McpPaths.SessionHeader].ToString();
 				if (created.Length > 0)
 				{
-					_registry.Bind(created, tokenId);
+					_registry.Bind(created, tokenId, !LoopbackConnection.IsLocalRequest(context));
 				}
 
 				return Task.CompletedTask;

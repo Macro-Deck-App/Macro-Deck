@@ -17625,6 +17625,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Auf diesem Computer verwendest du diese Adresse. Auf einem anderen Computer in deinem Netzwerk ersetzt du 127.0.0.1 durch die Netzwerkadresse dieses Computers. Jede Verbindung braucht ein Zugriffstoken.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Auf diesem Computer verwendest du diese Adresse. Jede Verbindung braucht ein Zugriffstoken. Um einen KI-Client auf einem anderen Computer zu verbinden, erlaube KI-Clients auf anderen Geräten.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Serveradresse</value>
   </data>
@@ -17636,6 +17639,12 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Die Einstellungen für KI-Clients konnten nicht geladen werden</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Ist das aus, können sich nur KI-Clients auf diesem Computer verbinden. Verbindungen über das Netzwerk sind unverschlüsselt, solange HTTPS nicht eingeschaltet ist. In einem nicht vertrauenswürdigen Netzwerk können das Zugriffstoken und Geheimnisse, die du für einen KI-Client eingibst, mitgelesen werden.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>KI-Clients auf anderen Geräten erlauben</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Nie</value>

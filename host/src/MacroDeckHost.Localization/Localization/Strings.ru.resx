@@ -17628,6 +17628,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>На этом компьютере используйте этот адрес. На другом компьютере в сети замените 127.0.0.1 сетевым адресом этого компьютера. Для каждого подключения нужен токен доступа.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>На этом компьютере используйте этот адрес. Для каждого подключения нужен токен доступа. Чтобы подключить ИИ-клиент на другом компьютере, разрешите ИИ-клиенты на других устройствах.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Адрес сервера</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Не удалось загрузить настройки ИИ-клиентов</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Если параметр выключен, подключаться могут только ИИ-клиенты на этом компьютере. Пока HTTPS не включён, сетевые подключения не шифруются, поэтому в ненадёжной сети токен доступа и секреты, введённые для ИИ-клиента, могут быть перехвачены.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Разрешить ИИ-клиенты на других устройствах</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Никогда</value>

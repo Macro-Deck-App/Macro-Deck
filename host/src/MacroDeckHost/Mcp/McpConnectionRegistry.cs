@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeckHost.Application.Mcp;
+using MacroDeckHost.Auth;
 
 namespace MacroDeckHost.Mcp;
 
@@ -55,15 +56,45 @@ public sealed class McpConnectionRegistry : IMcpConnections
 		return terminated;
 	}
 
+	public int TerminateRemote()
+	{
+		var terminated = 0;
+		foreach (var entry in _sessions.Where(entry => entry.Value.Remote && !entry.Value.Terminated).ToList())
+		{
+			if (entry.Value.Stateless)
+			{
+				_sessions.TryRemove(entry.Key, out _);
+			}
+			else
+			{
+				entry.Value.Terminated = true;
+			}
+
+			terminated++;
+		}
+
+		foreach (var request in _inFlight.Keys.Where(request => !LoopbackConnection.IsLocalRequest(request)).ToList())
+		{
+			request.Abort();
+		}
+
+		return terminated;
+	}
+
 	public bool IsBoundToOtherToken(string sessionId, Guid tokenId)
 	{
 		return _sessions.TryGetValue(sessionId, out var session) && session.TokenId != tokenId;
 	}
 
-	public void Bind(string sessionId, Guid tokenId)
+	public bool IsTerminated(string sessionId)
+	{
+		return _sessions.TryGetValue(sessionId, out var session) && session.Terminated;
+	}
+
+	public void Bind(string sessionId, Guid tokenId, bool remote)
 	{
 		var now = Now();
-		_sessions.TryAdd(sessionId, new Session(tokenId, now) { LastSeenAt = now });
+		_sessions.TryAdd(sessionId, new Session(tokenId, now) { LastSeenAt = now, Remote = remote });
 	}
 
 	public void Touch(string sessionId, string? clientName, string? clientVersion)
@@ -77,10 +108,11 @@ public sealed class McpConnectionRegistry : IMcpConnections
 	}
 
 	// Clients on the 2026-07-28 revision have no session, so they are listed once per token instead.
-	public void TouchStateless(Guid tokenId, string? clientName, string? clientVersion)
+	public void TouchStateless(Guid tokenId, bool remote, string? clientName, string? clientVersion)
 	{
 		var now = Now();
-		var session = _sessions.GetOrAdd(StatelessKey(tokenId), _ => new Session(tokenId, now));
+		var session = _sessions.GetOrAdd(StatelessKey(tokenId, remote),
+			_ => new Session(tokenId, now) { Remote = remote, Stateless = true });
 		session.LastSeenAt = now;
 		session.ClientName = clientName ?? session.ClientName;
 		session.ClientVersion = clientVersion ?? session.ClientVersion;
@@ -101,9 +133,9 @@ public sealed class McpConnectionRegistry : IMcpConnections
 		_inFlight.TryRemove(context, out _);
 	}
 
-	private static string StatelessKey(Guid tokenId)
+	private static string StatelessKey(Guid tokenId, bool remote)
 	{
-		return "stateless:" + tokenId.ToString("N");
+		return "stateless:" + tokenId.ToString("N") + (remote ? ":remote" : string.Empty);
 	}
 
 	private DateTime Now()
@@ -130,5 +162,9 @@ public sealed class McpConnectionRegistry : IMcpConnections
 		public string? ClientVersion { get; set; }
 
 		public bool Terminated { get; set; }
+
+		public bool Remote { get; init; }
+
+		public bool Stateless { get; init; }
 	}
 }

@@ -17628,6 +17628,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>在此电脑上使用此地址。在网络中的其他电脑上，将 127.0.0.1 替换为此电脑的网络地址。每个连接都需要访问令牌。</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>在此电脑上使用此地址。每个连接都需要访问令牌。要连接其他电脑上的 AI 客户端，请允许其他设备上的 AI 客户端。</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>服务器地址</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>无法加载 AI 客户端设置</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>关闭后，只有此电脑上的 AI 客户端可以连接。未开启 HTTPS 时，网络连接不加密，因此在不受信任的网络中，访问令牌以及为 AI 客户端输入的密钥可能被读取。</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>允许其他设备上的 AI 客户端</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>从未</value>

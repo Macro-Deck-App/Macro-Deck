@@ -160,12 +160,28 @@ public partial class McpEndpointTests
 		var foreignOrigin = await PostInitialize(token.Plaintext, origin: "http://evil.example");
 		var crossSite = await PostInitialize(token.Plaintext, secFetchSite: "cross-site");
 		var rebound = await PostInitialize(token.Plaintext, host: "rebind.example");
-		var publicCrossSite = await PostInitialize(token.Plaintext,
-			FakeConnectionShape.PublicLan,
-			secFetchSite: "cross-site");
-		var publicForeignOrigin = await PostInitialize(token.Plaintext,
-			FakeConnectionShape.PublicLan,
-			"http://evil.example");
+		await SetNetworkAccess(true);
+		HttpResponseMessage publicCrossSite;
+		HttpResponseMessage publicForeignOrigin;
+		HttpResponseMessage confirmation;
+		try
+		{
+			publicCrossSite = await PostInitialize(token.Plaintext,
+				FakeConnectionShape.PublicLan,
+				secFetchSite: "cross-site");
+			publicForeignOrigin = await PostInitialize(token.Plaintext,
+				FakeConnectionShape.PublicLan,
+				"http://evil.example");
+			confirmation = await Send(HttpMethod.Post,
+				"/mcp/confirm/0123456789abcdef0123456789abcdef",
+				FakeConnectionShape.PublicLan,
+				origin: "http://evil.example");
+		}
+		finally
+		{
+			await SetNetworkAccess(false);
+		}
+
 		var lanOnPrivatePort = await PostInitialize(token.Plaintext, FakeConnectionShape.LanOnPrivatePort);
 		using var preflightRequest = new HttpRequestMessage(HttpMethod.Options, "/mcp");
 		preflightRequest.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, nameof(FakeConnectionShape.PublicLan));
@@ -176,10 +192,6 @@ public partial class McpEndpointTests
 		var page = await Send(HttpMethod.Get,
 			"/mcp/secret-entry/0123456789abcdef0123456789abcdef",
 			FakeConnectionShape.LoopbackWithoutCredential,
-			origin: "http://evil.example");
-		var confirmation = await Send(HttpMethod.Post,
-			"/mcp/confirm/0123456789abcdef0123456789abcdef",
-			FakeConnectionShape.PublicLan,
 			origin: "http://evil.example");
 
 		await Assert.MultipleAsync(() =>
@@ -202,8 +214,19 @@ public partial class McpEndpointTests
 	{
 		var token = await CreateToken();
 
-		var withToken = await PostInitialize(token.Plaintext, FakeConnectionShape.PublicLan, host: "192.168.1.20:8191");
-		var withoutToken = await PostInitialize(null, FakeConnectionShape.PublicLan, host: "192.168.1.20:8191");
+		await SetNetworkAccess(true);
+		HttpResponseMessage withToken;
+		HttpResponseMessage withoutToken;
+		try
+		{
+			withToken = await PostInitialize(token.Plaintext, FakeConnectionShape.PublicLan, host: "192.168.1.20:8191");
+			withoutToken = await PostInitialize(null, FakeConnectionShape.PublicLan, host: "192.168.1.20:8191");
+		}
+		finally
+		{
+			await SetNetworkAccess(false);
+		}
+
 		var endpoint = await Send(HttpMethod.Get, "/api/mcp/endpoint", FakeConnectionShape.Loopback);
 		var url = (await endpoint.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("url").GetString();
 
@@ -509,9 +532,10 @@ public partial class McpEndpointTests
 		string token,
 		string? protocolVersion,
 		Func<ElicitRequestParams?, CancellationToken, ValueTask<ElicitResult>>? elicitation = null,
-		ElicitationCapability? capability = null)
+		ElicitationCapability? capability = null,
+		FakeConnectionShape shape = FakeConnectionShape.LoopbackWithoutCredential)
 	{
-		var http = new HttpClient(new ShapeHandler(_host.GetTestServer().CreateHandler()))
+		var http = new HttpClient(new ShapeHandler(_host.GetTestServer().CreateHandler(), shape))
 		{
 			BaseAddress = new Uri("http://localhost")
 		};
@@ -671,9 +695,12 @@ public partial class McpEndpointTests
 
 	private sealed class ShapeHandler : DelegatingHandler
 	{
-		public ShapeHandler(HttpMessageHandler inner)
+		private readonly FakeConnectionShape _shape;
+
+		public ShapeHandler(HttpMessageHandler inner, FakeConnectionShape shape)
 			: base(inner)
 		{
+			_shape = shape;
 		}
 
 		protected override Task<HttpResponseMessage> SendAsync(
@@ -681,8 +708,7 @@ public partial class McpEndpointTests
 			CancellationToken cancellationToken)
 		{
 			request.Headers.Remove(FakeConnectionStartupFilter.ShapeHeader);
-			request.Headers.Add(FakeConnectionStartupFilter.ShapeHeader,
-				nameof(FakeConnectionShape.LoopbackWithoutCredential));
+			request.Headers.Add(FakeConnectionStartupFilter.ShapeHeader, _shape.ToString());
 			return base.SendAsync(request, cancellationToken);
 		}
 	}

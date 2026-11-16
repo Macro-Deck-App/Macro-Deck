@@ -24,7 +24,7 @@ Accept: application/json, text/event-stream
 | | |
 | --- | --- |
 | Transport | Streamable HTTP at `/mcp` |
-| Listeners | The public listener (the port in **Settings > Network**, reachable from the local network) and the private loopback listener the desktop app and the Claude Desktop extension use |
+| Listeners | The public listener (the port in **Settings > Network**; reachable from the local network only while **Allow AI clients on other devices** is on) and the private loopback listener the desktop app and the Claude Desktop extension use |
 | Protocol revisions | `2026-07-28` (stateless, elicitation as multi round-trip results) and `2025-11-25` and earlier (a session with `Mcp-Session-Id`) on the same endpoint |
 | Credential | An MCP access token the user creates in **Settings > AI clients** |
 | Contract | `macrodeck-mcp/1`, versioned in every tool's `_meta.contractVersion` |
@@ -34,6 +34,25 @@ computer, or the computer's network address instead of `127.0.0.1` from another 
 only changes when the user changes it. It is plain HTTP, so on an untrusted network a token can be read
 in transit; revoke it if that may have happened. When HTTPS is turned on for network connections, the
 HTTPS port serves `/mcp` as well.
+
+## Network access
+
+**Allow AI clients on other devices** in **Settings > AI clients** decides whether the public listener
+serves `/mcp` to other computers. It is one switch for every token, and `GET /api/mcp/endpoint` reports it
+as `networkClientsAllowed`.
+
+- A new install starts with it off. An install that already had a live (not revoked) MCP token when it
+  was updated to a version with this switch keeps it on, so existing network clients keep working.
+- While it is off, the public listener and its HTTPS port answer `/mcp`, the secret page and the
+  confirmation page only for a request from this computer: a loopback peer, a `Host` of `localhost` or a
+  loopback address, and no forwarding header (`Forwarded`, `X-Forwarded-For`, `X-Real-IP`). Everything
+  else gets `403`. A request a reverse proxy passes on is refused, trusted proxy or not, as long as the
+  proxy adds a forwarding header; a proxy on this computer that adds none looks like a local client.
+- Turning it off also ends what is already connected from elsewhere: requests in progress are aborted,
+  those clients disappear from the connection list, and their requests get `403`. Their old sessions stay
+  ended: once the switch is on again they answer `404` and the client initializes a new one. Clients on
+  this computer keep their sessions.
+- The loopback listener, and with it the Claude Desktop extension, is not affected.
 
 ## Access tokens
 
@@ -93,10 +112,12 @@ Every request to `/mcp`, the secret page and the confirmation page is refused un
 | On the loopback listener: it comes from a loopback address | `404` |
 | On the loopback listener: `Host` is `localhost` or a loopback address | `403` |
 | `Origin` is absent or the listener's own origin, and `Sec-Fetch-Site` is absent, `same-origin` or `none` | `403` |
+| On the public listener while [network access](#network-access) is off: it comes from this computer | `403` |
 
 Native MCP clients send no `Origin`, so they pass. A web page in a browser cannot reach the endpoint,
 neither through the network address nor through a hostname that resolves to this computer. On the
-public listener the MCP token is the only credential; nothing else limits which computer connects.
+public listener the MCP token is the only credential; while network access is on, nothing else limits
+which computer connects.
 
 While the host's key ring is locked, `/mcp` and the secret page are not mapped and answer `404`.
 

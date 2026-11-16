@@ -17628,6 +17628,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>На цьому комп'ютері використовуйте цю адресу. На іншому комп'ютері в мережі замініть 127.0.0.1 мережевою адресою цього комп'ютера. Для кожного підключення потрібен токен доступу.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>На цьому комп'ютері використовуйте цю адресу. Для кожного підключення потрібен токен доступу. Щоб підключити ШІ-клієнт на іншому комп'ютері, дозвольте ШІ-клієнти на інших пристроях.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Адреса сервера</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Не вдалося завантажити налаштування ШІ-клієнтів</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Якщо параметр вимкнено, підключатися можуть лише ШІ-клієнти на цьому комп'ютері. Поки HTTPS не ввімкнено, мережеві підключення не шифруються, тому в ненадійній мережі токен доступу та секрети, введені для ШІ-клієнта, можуть бути перехоплені.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Дозволити ШІ-клієнти на інших пристроях</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Ніколи</value>

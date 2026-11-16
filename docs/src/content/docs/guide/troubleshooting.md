@@ -621,9 +621,13 @@ for the case that fits.
   address** from **Settings > AI clients** into your client's configuration again. The Claude Desktop
   extension finds Macro Deck on its own. A request that was running while Macro Deck restarted can fail
   once; ask again.
-- **It runs on another computer and cannot reach Macro Deck.** Check that the configuration uses the
-  network address of the computer running Macro Deck instead of `127.0.0.1`, and go through the network
-  checks under [A device cannot connect](#a-device-cannot-connect).
+- **It runs on another computer and is refused (403 Forbidden), or cannot reach Macro Deck.** Turn on
+  **Allow AI clients on other devices** in **Settings > AI clients**. Check that the configuration uses
+  the network address of the computer running Macro Deck instead of `127.0.0.1`, and go through the
+  network checks under [A device cannot connect](#a-device-cannot-connect).
+- **It runs on this computer and is refused (403 Forbidden).** Its configuration uses this computer's
+  network address. Copy **Server address** from **Settings > AI clients**, which uses `127.0.0.1`, or turn
+  on **Allow AI clients on other devices**.
 - **It is rejected (401 Unauthorized), or the extension says the access token was rejected.** The token
   was revoked or removed. Create a new token in **Settings > AI clients** and update your client's
   configuration, or install the Claude Desktop extension again from a new download.
