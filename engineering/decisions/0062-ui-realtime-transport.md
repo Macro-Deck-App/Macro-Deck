@@ -84,7 +84,9 @@ watching, and the full snapshot stays available unpaged over REST.
   in a window is observable to clients. Paths that need immediacy have their own transports.
 - Per-recipient sends are individually isolated, so one slow client cannot halt the pump.
 - Plugin WebSocket compatibility remains governed by
-  [ADR 0026](0026-plugin-protocol-and-sdk-boundary.md); this transport is not public surface.
+  [ADR 0026](0026-plugin-protocol-and-sdk-boundary.md); this transport is not public surface. The installed
+  Companion is the exception: the part of it the Companion uses is frozen in the
+  [Companion wire contract](../api/companion-compatibility.md#wire-contract).
 
 ## References
 
