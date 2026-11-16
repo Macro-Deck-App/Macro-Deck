@@ -102,7 +102,7 @@ error unknown-command: 'pakc' is not a macrodeck-plugin command. Did you mean 'p
 | 0 | Success, or conformant. |
 | 1 | The subject is wrong: validation failed, or a required conformance check failed. |
 | 2 | Usage error: bad arguments, an unknown `--check`/`--category` token, or an output file that already exists without `--force`. |
-| 3 | The input could not be read: a missing file, something that is not a ZIP, or a permissions failure. |
+| 3 | The input could not be read: a missing file, something that is not a ZIP or has a corrupt entry, or a permissions failure. |
 | 4 | Cancelled (Ctrl-C). |
 | 70 | An error the command did not anticipate. |
 
