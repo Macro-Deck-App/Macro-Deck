@@ -17628,6 +17628,9 @@
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>استخدم هذا العنوان على هذا الكمبيوتر. على كمبيوتر آخر في شبكتك، استبدل 127.0.0.1 بعنوان هذا الكمبيوتر في الشبكة. يحتاج كل اتصال إلى رمز وصول.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>استخدم هذا العنوان على هذا الكمبيوتر. يحتاج كل اتصال إلى رمز وصول. لتوصيل عميل ذكاء اصطناعي على كمبيوتر آخر، اسمح لعملاء الذكاء الاصطناعي على أجهزة أخرى.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>عنوان الخادم</value>
   </data>
@@ -17639,6 +17642,12 @@
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>تعذر تحميل إعدادات عملاء الذكاء الاصطناعي</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>عند إيقاف هذا الخيار، لا يمكن الاتصال إلا لعملاء الذكاء الاصطناعي على هذا الكمبيوتر. اتصالات الشبكة غير مشفرة ما لم يتم تشغيل HTTPS، لذلك يمكن على شبكة غير موثوقة قراءة رمز الوصول والأسرار التي تُكتب لعميل ذكاء اصطناعي.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>السماح لعملاء الذكاء الاصطناعي على أجهزة أخرى</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>أبدًا</value>

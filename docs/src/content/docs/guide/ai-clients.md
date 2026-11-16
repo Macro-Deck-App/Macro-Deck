@@ -7,7 +7,8 @@ AI assistants such as Claude or VS Code can work with your Macro Deck setup thro
 Protocol (MCP): look at your profiles, folders, buttons, scripts and automations, build new ones, and run
 actions. They never see your secrets. Everything is set up in **Settings > AI clients**.
 
-Only apps on the same computer as Macro Deck can connect.
+By default only AI clients on the same computer as Macro Deck can connect. To use one on another
+computer, turn on **Allow AI clients on other devices**, as described [below](#use-an-ai-client-on-another-computer).
 
 ![The AI clients settings with the server address, an access token with an action it may always run, and the actions AI clients may run](../../../assets/guide/mcp-settings.png)
 
@@ -53,10 +54,21 @@ Macro Deck never edits a client's configuration for you.
 These configurations contain the address under **Server address**, which uses the port shown in
 **Settings > Network**. It stays the same until you change that port.
 
-To use an AI client on another computer in your network, replace `127.0.0.1` in the configuration with
-the network address of the computer running Macro Deck, and allow Macro Deck through its firewall as for
-your other devices. The access token is what keeps other people in your network out, so treat it like a
-password. On a network you do not trust, connect only clients on this computer.
+## Use an AI client on another computer
+
+1. In **Settings > AI clients**, turn on **Allow AI clients on other devices**.
+2. In the client's configuration, replace `127.0.0.1` with the network address of the computer running
+   Macro Deck, and allow Macro Deck through its firewall as for your other devices.
+
+While the switch is on, the access token is what keeps other people in your network out, so treat it
+like a password. Network connections are not encrypted unless HTTPS is turned on in **Settings >
+Network**, so on a network you do not trust the token and any secret you type in for the client can be
+read. Leave the switch off if all your AI clients run on this computer: then a token that gets out cannot
+be used from another device.
+
+Turning the switch off disconnects AI clients on other devices right away. If you had created an access
+token before this switch existed, it starts turned on after the update, so a client on another computer
+keeps working; turn it off if all your clients run on this computer.
 
 ## What an AI client can and cannot do
 

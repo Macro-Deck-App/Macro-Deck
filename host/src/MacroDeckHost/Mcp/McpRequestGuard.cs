@@ -1,3 +1,4 @@
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Auth;
 
 namespace MacroDeckHost.Mcp;
@@ -18,6 +19,14 @@ public static class McpRequestGuard
 
 		if (loopbackListener && !LoopbackConnection.HasLoopbackHost(context.Request)
 			|| LoopbackConnection.IsCrossOriginBrowserRequest(context.Request))
+		{
+			return StatusCodes.Status403Forbidden;
+		}
+
+		// A reverse proxy on this computer counts as another device: it forwards requests from elsewhere.
+		if (!loopbackListener
+			&& !context.RequestServices.GetRequiredService<IMcpNetworkAccess>().Allowed
+			&& !LoopbackConnection.IsLocalRequest(context))
 		{
 			return StatusCodes.Status403Forbidden;
 		}

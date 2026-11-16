@@ -17628,6 +17628,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>このコンピューターではこのアドレスを使います。ネットワーク内の別のコンピューターでは、127.0.0.1 をこのコンピューターのネットワークアドレスに置き換えてください。接続にはアクセス トークンが必要です。</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>このコンピューターではこのアドレスを使います。接続にはアクセス トークンが必要です。別のコンピューターの AI クライアントを接続するには、他のデバイスの AI クライアントを許可してください。</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>サーバー アドレス</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>AI クライアントの設定を読み込めませんでした</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>オフの場合、このコンピューター上の AI クライアントだけが接続できます。HTTPS をオンにしない限りネットワーク接続は暗号化されないため、信頼できないネットワークではアクセス トークンや AI クライアント用に入力したシークレットが読み取られる可能性があります。</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>他のデバイスの AI クライアントを許可</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>なし</value>

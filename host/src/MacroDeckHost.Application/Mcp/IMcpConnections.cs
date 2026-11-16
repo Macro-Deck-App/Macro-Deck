@@ -20,4 +20,6 @@ public interface IMcpConnections
 	IReadOnlyList<McpConnection> Snapshot();
 
 	int TerminateForToken(Guid tokenId);
+
+	int TerminateRemote();
 }

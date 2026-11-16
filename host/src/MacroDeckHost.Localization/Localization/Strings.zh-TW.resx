@@ -17628,6 +17628,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>在此電腦上使用此位址。在網路中的其他電腦上，請將 127.0.0.1 替換為此電腦的網路位址。每個連線都需要存取權杖。</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>在此電腦上使用此位址。每個連線都需要存取權杖。若要連線其他電腦上的 AI 用戶端，請允許其他裝置上的 AI 用戶端。</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>伺服器位址</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>無法載入 AI 用戶端設定</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>關閉後，只有此電腦上的 AI 用戶端可以連線。未開啟 HTTPS 時，網路連線不會加密，因此在不受信任的網路中，存取權杖以及為 AI 用戶端輸入的機密可能遭到讀取。</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>允許其他裝置上的 AI 用戶端</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>從未</value>

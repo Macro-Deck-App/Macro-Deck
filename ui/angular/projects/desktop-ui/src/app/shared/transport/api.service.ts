@@ -420,7 +420,9 @@ import {
   GetMcpPolicyResponse,
   GetMcpTokensResponse,
   McpEndpoint,
+  McpNetworkAccessResponse,
   McpTokenActionResponse,
+  SetMcpNetworkAccessRequest,
   SetMcpPolicyRequest,
 } from './mcp-messages';
 import { v4 as uuidv4 } from 'uuid';
@@ -910,6 +912,10 @@ export class ApiService {
 
   getMcpEndpoint(): Promise<McpEndpoint> {
     return this.http('GET', '/api/mcp/endpoint');
+  }
+
+  setMcpNetworkAccess(request: SetMcpNetworkAccessRequest): Promise<McpNetworkAccessResponse> {
+    return this.http('PUT', '/api/mcp/network-access', request);
   }
 
   getMcpTokens(): Promise<GetMcpTokensResponse> {

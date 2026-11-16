@@ -17628,6 +17628,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>इस कंप्यूटर पर यह पता इस्तेमाल करें। अपने नेटवर्क के किसी दूसरे कंप्यूटर पर 127.0.0.1 को इस कंप्यूटर के नेटवर्क पते से बदलें। हर कनेक्शन के लिए ऐक्सेस टोकन ज़रूरी है।</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>इस कंप्यूटर पर यह पता इस्तेमाल करें। हर कनेक्शन के लिए ऐक्सेस टोकन ज़रूरी है। किसी दूसरे कंप्यूटर के AI क्लाइंट को कनेक्ट करने के लिए दूसरे डिवाइस पर AI क्लाइंट की अनुमति दें।</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>सर्वर पता</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>AI क्लाइंट सेटिंग लोड नहीं हो सकीं</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>बंद होने पर केवल इस कंप्यूटर के AI क्लाइंट कनेक्ट हो सकते हैं। HTTPS चालू न होने तक नेटवर्क कनेक्शन एन्क्रिप्ट नहीं होते, इसलिए किसी अविश्वसनीय नेटवर्क पर ऐक्सेस टोकन और AI क्लाइंट के लिए डाले गए सीक्रेट पढ़े जा सकते हैं।</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>दूसरे डिवाइस पर AI क्लाइंट की अनुमति दें</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>कभी नहीं</value>

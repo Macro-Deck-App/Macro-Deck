@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Application.Logging;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Network.Tls;
@@ -311,6 +312,7 @@ public static class Program
 
 			await SeedLogLevelAsync(host, logLevelState);
 			await SeedHttpUserAgentAsync(host);
+			await SeedMcpNetworkAccessAsync(host);
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostVariableReader
@@ -414,6 +416,24 @@ public static class Program
 		catch (Exception e)
 		{
 			Log.Warning(e, "Could not seed the HTTP User-Agent; keeping the default");
+		}
+	}
+
+	private static async Task SeedMcpNetworkAccessAsync(IHost host)
+	{
+		if (KeyRingStartupState.IsLocked)
+		{
+			return;
+		}
+
+		try
+		{
+			await host.Services.GetRequiredService<IMcpNetworkAccess>().Seed();
+		}
+		catch (Exception e)
+		{
+			Log.Warning(e,
+				"Could not read whether AI clients on other devices are allowed; serving this computer only");
 		}
 	}
 

@@ -17627,6 +17627,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Na tomto počítači použijte tuto adresu. Na jiném počítači v síti nahraďte 127.0.0.1 síťovou adresou tohoto počítače. Každé připojení vyžaduje přístupový token.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Na tomto počítači použijte tuto adresu. Každé připojení vyžaduje přístupový token. Pro připojení klienta AI na jiném počítači povolte klienty AI na jiných zařízeních.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Adresa serveru</value>
   </data>
@@ -17638,6 +17641,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Nastavení klientů AI se nepodařilo načíst</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Když je tato možnost vypnutá, mohou se připojit jen klienti AI na tomto počítači. Síťová připojení nejsou šifrovaná, dokud není zapnuté HTTPS, takže v nedůvěryhodné síti lze přečíst přístupový token i tajné údaje zadané pro klienta AI.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Povolit klienty AI na jiných zařízeních</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Nikdy</value>

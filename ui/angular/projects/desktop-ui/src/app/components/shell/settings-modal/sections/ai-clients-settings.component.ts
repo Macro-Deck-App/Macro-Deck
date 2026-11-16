@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppStrings, resolveLocalizedText } from '@macro-deck/runtime';
-import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, SettingsSectionComponent, ToastService, TranslatePipe, dismissModal } from '@shared';
+import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, SettingsRowComponent, SettingsSectionComponent, ToastService, ToggleSwitchComponent, TranslatePipe, dismissModal } from '@shared';
 import { CopyValueComponent } from '../../../copy-value/copy-value.component';
 import { EmptyStateComponent } from '../../../feedback/empty-state/empty-state.component';
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
@@ -35,7 +35,9 @@ const EXTENSION_FILE_NAME = 'macro-deck.mcpb';
     InputComponent,
     ModalComponent,
     SelectComponent,
+    SettingsRowComponent,
     SettingsSectionComponent,
+    ToggleSwitchComponent,
     TranslatePipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +64,7 @@ export class AiClientsSettingsComponent {
   readonly creating = signal(false);
   readonly revealed = signal<RevealedToken | null>(null);
   readonly downloadingExtension = signal(false);
+  readonly networkAccessSaving = signal(false);
   readonly client = signal<McpClientKind>('claude-code');
   readonly revokeCandidate = signal<McpToken | null>(null);
   readonly removeCandidate = signal<McpToken | null>(null);
@@ -246,6 +249,17 @@ export class AiClientsSettingsComponent {
       { value: '', label: this.localization.translateKey(AppStrings.Settings.Mcp.PolicyDefault, { mode: defaultMode }) },
       ...modes,
     ];
+  }
+
+  async setNetworkAccess(allowed: boolean): Promise<void> {
+    this.networkAccessSaving.set(true);
+    try {
+      await this.mcp.setNetworkAccess(allowed);
+    } catch {
+      this.showError(undefined, AppStrings.Settings.Mcp.PolicySaveFailed);
+    } finally {
+      this.networkAccessSaving.set(false);
+    }
   }
 
   async changePolicy(provider: McpProviderPolicy, value: string): Promise<void> {

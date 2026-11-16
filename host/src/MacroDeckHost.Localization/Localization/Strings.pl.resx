@@ -17627,6 +17627,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Na tym komputerze użyj tego adresu. Na innym komputerze w sieci zastąp 127.0.0.1 adresem sieciowym tego komputera. Każde połączenie wymaga tokenu dostępu.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Na tym komputerze użyj tego adresu. Każde połączenie wymaga tokenu dostępu. Aby połączyć klienta AI na innym komputerze, zezwól na klientów AI na innych urządzeniach.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Adres serwera</value>
   </data>
@@ -17638,6 +17641,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Nie udało się wczytać ustawień klientów AI</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Gdy ta opcja jest wyłączona, połączyć mogą się tylko klienci AI na tym komputerze. Połączenia sieciowe nie są szyfrowane, dopóki nie zostanie włączony HTTPS, więc w niezaufanej sieci można odczytać token dostępu i sekrety wpisane dla klienta AI.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Zezwalaj na klientów AI na innych urządzeniach</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Nigdy</value>

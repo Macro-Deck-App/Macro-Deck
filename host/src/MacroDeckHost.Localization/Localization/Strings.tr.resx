@@ -17628,6 +17628,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Bu bilgisayarda bu adresi kullanın. Ağınızdaki başka bir bilgisayarda 127.0.0.1 yerine bu bilgisayarın ağ adresini yazın. Her bağlantı için bir erişim belirteci gerekir.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Bu bilgisayarda bu adresi kullanın. Her bağlantı için bir erişim belirteci gerekir. Başka bir bilgisayardaki yapay zekâ istemcisini bağlamak için diğer cihazlardaki yapay zekâ istemcilerine izin verin.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Sunucu adresi</value>
   </data>
@@ -17639,6 +17642,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Yapay zekâ istemcisi ayarları yüklenemedi</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Kapalıyken yalnızca bu bilgisayardaki yapay zekâ istemcileri bağlanabilir. HTTPS açılmadıkça ağ bağlantıları şifrelenmez; bu nedenle güvenilmeyen bir ağda erişim belirteci ve bir yapay zekâ istemcisi için girilen gizli değerler okunabilir.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Diğer cihazlardaki yapay zekâ istemcilerine izin ver</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Hiçbir zaman</value>

@@ -17627,6 +17627,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Usa questo indirizzo su questo computer. Su un altro computer della tua rete, sostituisci 127.0.0.1 con l'indirizzo di rete di questo computer. Ogni connessione richiede un token di accesso.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Usa questo indirizzo su questo computer. Ogni connessione richiede un token di accesso. Per connettere un client IA su un altro computer, consenti i client IA su altri dispositivi.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Indirizzo del server</value>
   </data>
@@ -17638,6 +17641,12 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Impossibile caricare le impostazioni dei client IA</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Se è disattivato, solo i client IA su questo computer possono connettersi. Le connessioni di rete non sono cifrate finché HTTPS non è attivo, quindi su una rete non affidabile il token di accesso e i segreti che inserisci per un client IA possono essere letti.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Consenti client IA su altri dispositivi</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Mai</value>

@@ -12,10 +12,27 @@
           data-testid="mcp-endpoint"
           [label]="'macrodeck.app:Settings.Mcp.EndpointLabel' | translate"
           [value]="endpoint.url" />
-        <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.EndpointHint' | translate }}</p>
+        @if (endpoint.networkClientsAllowed) {
+          <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.EndpointHint' | translate }}</p>
+        } @else {
+          <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.EndpointHintLocalOnly' | translate }}</p>
+        }
       } @else {
         <p class="ai-clients__hint">{{ 'macrodeck.app:Settings.Mcp.EndpointUnavailable' | translate }}</p>
       }
+
+      <shared-settings-row
+        class="ai-clients__network"
+        [label]="'macrodeck.app:Settings.Mcp.NetworkAccessLabel' | translate"
+        [description]="'macrodeck.app:Settings.Mcp.NetworkAccessDescription' | translate">
+        <shared-toggle-switch
+          data-testid="mcp-network-access"
+          [ariaLabel]="'macrodeck.app:Settings.Mcp.NetworkAccessLabel' | translate"
+          [disabled]="networkAccessSaving()"
+          [busy]="networkAccessSaving()"
+          [checked]="!!endpoint.networkClientsAllowed"
+          (changed)="setNetworkAccess($event)" />
+      </shared-settings-row>
     }
   </shared-settings-section>
 

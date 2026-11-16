@@ -17627,6 +17627,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Utilise cette adresse sur cet ordinateur. Sur un autre ordinateur de ton réseau, remplace 127.0.0.1 par l'adresse réseau de cet ordinateur. Chaque connexion nécessite un jeton d'accès.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Utilise cette adresse sur cet ordinateur. Chaque connexion nécessite un jeton d'accès. Pour connecter un client IA sur un autre ordinateur, autorise les clients IA sur d'autres appareils.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Adresse du serveur</value>
   </data>
@@ -17638,6 +17641,12 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Impossible de charger les réglages des clients IA</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Si c'est désactivé, seuls les clients IA de cet ordinateur peuvent se connecter. Les connexions réseau ne sont pas chiffrées tant que HTTPS n'est pas activé : sur un réseau non fiable, le jeton d'accès et les secrets que tu saisis pour un client IA peuvent être lus.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Autoriser les clients IA sur d'autres appareils</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Jamais</value>
