@@ -1,3 +1,4 @@
+using System.Globalization;
 using MacroDeck.Ui.Dsl;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Runtime;
@@ -25,6 +26,7 @@ internal static class ActionButtonWidgetView
 		UiState<ActionButtonWidgetData> config,
 		UiState<string?> activeState,
 		UiState<string?> labelText,
+		UiState<IReadOnlyList<string?>> extraLabelTexts,
 		UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>> iconResources,
 		UiState<WidgetIconResolution> iconProvider,
 		UiResource? imageResource,
@@ -34,76 +36,33 @@ internal static class ActionButtonWidgetView
 		ArgumentNullException.ThrowIfNull(config);
 		ArgumentNullException.ThrowIfNull(activeState);
 		ArgumentNullException.ThrowIfNull(labelText);
+		ArgumentNullException.ThrowIfNull(extraLabelTexts);
 		ArgumentNullException.ThrowIfNull(iconResources);
 		ArgumentNullException.ThrowIfNull(iconProvider);
 		ArgumentNullException.ThrowIfNull(events);
 
-		var label = new UiTextRun
-		{
-			Key = "label",
-			// The resolved text, never the raw stored label: a Liquid template must never reach the wire
-			// unrendered (host-side resolution is what gap 2 requires), and this is patched by the
-			// session's own label signal handling rather than recomputed here.
-			Text = UiText.Optional(() => labelText.Value is { } text ? UiText.Of(text) : UiText.None()),
-			Size = UiSize.From(() =>
-				UiLength.OfBasis(Appearance(config, activeState).FontSizePercent / 100.0)),
-			Align = UiValue.From(() => AlignFor(Appearance(config, activeState).TextAlign)),
-			Color = UiValue.From(() => Appearance(config, activeState).LabelColor),
-			FontFace = UiValue.Optional(() =>
-			{
-				var face = Appearance(config, activeState).FontFace;
+		var (label, labelRow) = LabelChain(string.Empty,
+			() => Appearance(config, activeState).PrimaryLabel,
+			() => labelText.Value,
+			false);
 
-				return face is null ? UiValue.None<string>() : UiValue.Of(face);
-			}),
-			// The retired ActionButtonWidgetComponent's label wrapped freely (white-space: pre-wrap;
-			// overflow-wrap: anywhere; no line clamp) rather than the renderer's single-line + ellipsis
-			// default - MaxLines is deliberately left unset so `wrap: true` alone resolves to the
-			// renderer's uncapped line count, matching that parity exactly.
-			Wrap = UiValue.Of(true),
-			Shadow = UiValue.Optional(() =>
-				Appearance(config, activeState).LabelShadow ? UiValue.None<bool>() : UiValue.Of(false)),
-			StrokeColor = UiValue.Optional(() =>
-				Appearance(config, activeState) is { HasLabelOutline: true } appearance
-					? UiValue.Of(appearance.LabelOutlineColor!)
-					: UiValue.None<string>()),
-			StrokeWidth = UiSize.Optional(() =>
-				Appearance(config, activeState) is { HasLabelOutline: true } appearance
-					? UiSize.FromBasis(appearance.LabelOutlineWidth / 100.0)
-					: UiSize.None())
-		};
-
-		var labelBox = new UiModifier
+		var labelLayer = new UiLayer
 		{
-			Key = "labelBox",
-			Padding = UiSize.From(() => UiLength.OfBasis(LabelBoxPadding(Appearance(config, activeState)))),
-			Background = UiValue.Optional(() =>
-				Appearance(config, activeState).LabelBoxColor is { } color
-					? UiValue.Of(UiBackground.Solid(color))
-					: UiValue.None<UiBackground>()),
-			Radius = UiSize.From(() => UiLength.OfBasis(
-				HasLabelBox(Appearance(config, activeState)) ? LabelBoxRadius : 0)),
-			BorderWidth = UiSize.Optional(() =>
-				Appearance(config, activeState) is { HasLabelBoxBorder: true } appearance
-					? UiSize.FromBasis(appearance.LabelBoxBorderWidth / 100.0)
-					: UiSize.None()),
-			BorderColor = UiValue.Optional(() =>
-				Appearance(config, activeState) is { HasLabelBoxBorder: true } appearance
-					? UiValue.Of(appearance.LabelBoxBorderColor!)
-					: UiValue.None<string>()),
-			Fill = UiValue.Optional(() =>
-				HasLabelBox(Appearance(config, activeState)) ? UiValue.None<bool>() : UiValue.Of(true)),
-			Child = label
-		};
-
-		var labelRow = new UiStack
-		{
-			Key = "labelRow",
-			Direction = UiComponentDirections.Horizontal,
-			Justify = UiValue.Optional(() =>
-				Appearance(config, activeState) is var appearance && HasLabelBox(appearance)
-					? UiValue.Of(JustifyForAlign(appearance.TextAlign))
-					: UiValue.None<string>()),
-			Children = [labelBox]
+			Key = "labels",
+			Fill = UiValue.Of(true),
+			Children =
+			[
+				LabelSlot("Primary", () => Appearance(config, activeState).PrimaryLabel, () => labelText.Value),
+				new UiRepeat<int>
+				{
+					Key = "extraLabels",
+					Items = UiValue.From(() =>
+						(IReadOnlyList<int>)Enumerable.Range(0, config.Value.ExtraLabelSlots).ToList()),
+					KeySelector = slot => slot.ToString(CultureInfo.InvariantCulture),
+					Template = (slot, _) => ExtraLabelSlot(slot, config, activeState, extraLabelTexts)
+				}
+			],
+			Fallback = labelRow
 		};
 
 		return new UiButton
@@ -161,7 +120,21 @@ internal static class ActionButtonWidgetView
 				return color is null ? UiValue.None<string>() : UiValue.Of(color);
 			}),
 			Events = events,
-			Children = [labelRow],
+			Children =
+			[
+				new UiWhen
+				{
+					Key = "labels-flat",
+					Condition = () => !config.Value.UsesLabelLayer,
+					Content = () => labelRow
+				},
+				new UiWhen
+				{
+					Key = "labels-layered",
+					Condition = () => config.Value.UsesLabelLayer,
+					Content = () => labelLayer
+				}
+			],
 			Fallback = new UiStack
 			{
 				Key = "actionButtonFallback",
@@ -178,20 +151,150 @@ internal static class ActionButtonWidgetView
 		};
 	}
 
-	private static bool HasLabelBox(ActionButtonResolvedAppearance appearance)
+	private static UiTransform ExtraLabelSlot(
+		int slot,
+		UiState<ActionButtonWidgetData> config,
+		UiState<string?> activeState,
+		UiState<IReadOnlyList<string?>> extraLabelTexts)
 	{
-		return appearance.LabelBoxColor is not null || appearance.HasLabelBoxBorder;
+		return LabelSlot(slot.ToString(CultureInfo.InvariantCulture), Resolved, Text);
+
+		ActionButtonResolvedLabel Resolved()
+		{
+			var labels = Appearance(config, activeState).ExtraLabels;
+
+			return slot < labels.Count ? labels[slot] : ActionButtonResolvedLabel.Empty;
+		}
+
+		string? Text()
+		{
+			var texts = extraLabelTexts.Value;
+
+			return slot < texts.Count ? texts[slot] : null;
+		}
+	}
+
+	// The outer transform moves the slot by a fraction of the content box and the pin inside the row moves
+	// the label back by the same fraction of its own size, so 0 is flush start and 1 is flush end.
+	private static UiTransform LabelSlot(string suffix, Func<ActionButtonResolvedLabel> resolved, Func<string?> text)
+	{
+		var (_, row) = LabelChain(suffix, resolved, text, true);
+
+		return new UiTransform
+		{
+			Key = $"labelSlot{suffix}",
+			OffsetX = Fraction(() => resolved().X / 100.0),
+			OffsetY = Fraction(() => resolved().Y / 100.0),
+			Children =
+			[
+				new UiStack
+				{
+					Key = $"labelAnchor{suffix}",
+					Justify = UiValue.Of(UiComponentJustify.Start),
+					Children = [row]
+				}
+			]
+		};
+	}
+
+	private static UiValue<double> Fraction(Func<double> fraction)
+	{
+		return UiValue.Optional(()
+			=> fraction() is var value && value != 0 ? UiValue.Of(value) : UiValue.None<double>());
+	}
+
+	private static (UiTextRun Label, UiStack Row) LabelChain(
+		string suffix,
+		Func<ActionButtonResolvedLabel> resolved,
+		Func<string?> text,
+		bool placed)
+	{
+		var label = new UiTextRun
+		{
+			Key = $"label{suffix}",
+			// The resolved text, never the raw stored label: a template must never reach the wire
+			// unrendered. The session patches it from its own label signal handling.
+			Text = UiText.Optional(() => text() is { } value ? UiText.Of(value) : UiText.None()),
+			Size = UiSize.From(() => UiLength.OfBasis(resolved().FontSizePercent / 100.0)),
+			Align = UiValue.From(() => AlignFor(resolved().TextAlign)),
+			Color = UiValue.From(() => resolved().Color),
+			FontFace = UiValue.Optional(() =>
+			{
+				var face = resolved().FontFace;
+
+				return face is null ? UiValue.None<string>() : UiValue.Of(face);
+			}),
+			Wrap = UiValue.Of(true),
+			Shadow = UiValue.Optional(() => resolved().Shadow ? UiValue.None<bool>() : UiValue.Of(false)),
+			StrokeColor = UiValue.Optional(() =>
+				resolved() is { HasOutline: true } outlined
+					? UiValue.Of(outlined.OutlineColor!)
+					: UiValue.None<string>()),
+			StrokeWidth = UiSize.Optional(() =>
+				resolved() is { HasOutline: true } outlined
+					? UiSize.FromBasis(outlined.OutlineWidth / 100.0)
+					: UiSize.None())
+		};
+
+		var labelBox = new UiModifier
+		{
+			Key = $"labelBox{suffix}",
+			Padding = UiSize.From(() => UiLength.OfBasis(LabelBoxPadding(resolved()))),
+			Background = UiValue.Optional(() =>
+				resolved().BoxColor is { } color
+					? UiValue.Of(UiBackground.Solid(color))
+					: UiValue.None<UiBackground>()),
+			Radius = UiSize.From(() => UiLength.OfBasis(resolved().HasBox ? LabelBoxRadius : 0)),
+			BorderWidth = UiSize.Optional(() =>
+				resolved() is { HasBoxBorder: true } bordered
+					? UiSize.FromBasis(bordered.BoxBorderWidth / 100.0)
+					: UiSize.None()),
+			BorderColor = UiValue.Optional(() =>
+				resolved() is { HasBoxBorder: true } bordered
+					? UiValue.Of(bordered.BoxBorderColor!)
+					: UiValue.None<string>()),
+			Fill = placed
+				? default
+				: UiValue.Optional(() => resolved().HasBox ? UiValue.None<bool>() : UiValue.Of(true)),
+			Child = label
+		};
+
+		var labelRow = new UiStack
+		{
+			Key = $"labelRow{suffix}",
+			Direction = UiComponentDirections.Horizontal,
+			Justify = placed
+				? UiValue.Of(UiComponentJustify.Start)
+				: UiValue.Optional(() =>
+					resolved() is { HasBox: true } boxed
+						? UiValue.Of(JustifyForAlign(boxed.TextAlign))
+						: UiValue.None<string>()),
+			Children =
+			[
+				placed
+					? new UiTransform
+					{
+						Key = $"labelPin{suffix}",
+						OffsetX = Fraction(() => -resolved().X / 100.0),
+						OffsetY = Fraction(() => -resolved().Y / 100.0),
+						Children = [labelBox]
+					}
+					: labelBox
+			]
+		};
+
+		return (label, labelRow);
 	}
 
 	// The modifier border is drawn inside the box edge, so the padding grows with it to keep it off the text.
-	private static double LabelBoxPadding(ActionButtonResolvedAppearance appearance)
+	private static double LabelBoxPadding(ActionButtonResolvedLabel label)
 	{
-		if (!HasLabelBox(appearance))
+		if (!label.HasBox)
 		{
 			return 0;
 		}
 
-		return BaseLabelBoxPadding + (appearance.HasLabelBoxBorder ? appearance.LabelBoxBorderWidth / 100.0 : 0);
+		return BaseLabelBoxPadding + (label.HasBoxBorder ? label.BoxBorderWidth / 100.0 : 0);
 	}
 
 	private static ActionButtonResolvedAppearance Appearance(

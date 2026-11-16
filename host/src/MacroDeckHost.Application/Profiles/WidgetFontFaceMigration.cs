@@ -28,7 +28,7 @@ public static class WidgetFontFaceMigration
 
 		var data = WidgetAppearanceJson.ParseDataBag(widget.Data);
 		var changed = MigrateNode(data, fontCatalog);
-		changed |= ResolveAlias(data, fontCatalog);
+		changed |= ResolveAliases(data, fontCatalog);
 
 		if (data["states"] is JsonObject states)
 		{
@@ -40,7 +40,7 @@ public static class WidgetFontFaceMigration
 		{
 			foreach (var entry in entries)
 			{
-				changed |= entry?["appearance"] is JsonObject appearance && ResolveAlias(appearance, fontCatalog);
+				changed |= entry?["appearance"] is JsonObject appearance && ResolveAliases(appearance, fontCatalog);
 			}
 		}
 
@@ -51,6 +51,17 @@ public static class WidgetFontFaceMigration
 
 		widget.Data = data.ToJsonString();
 		return true;
+	}
+
+	private static bool ResolveAliases(JsonObject appearance, IFontCatalog fontCatalog)
+	{
+		var changed = ResolveAlias(appearance, fontCatalog);
+		foreach (var label in ActionButtonLabelJson.ReadExtraLabels(appearance))
+		{
+			changed |= ResolveAlias(label, fontCatalog);
+		}
+
+		return changed;
 	}
 
 	private static bool ResolveAlias(JsonObject node, IFontCatalog fontCatalog)

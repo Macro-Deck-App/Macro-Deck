@@ -148,6 +148,30 @@ public sealed record DeviceSurfaceAppearanceDto
 
 	public string? LabelPosition { get; init; }
 
+	/// <summary>Optional and additive - see the SDK's <c>DeviceSurfaceAppearance.LabelX</c>.</summary>
+	public double? LabelX { get; init; }
+
+	/// <summary>Optional and additive - see the SDK's <c>DeviceSurfaceAppearance.LabelY</c>.</summary>
+	public double? LabelY { get; init; }
+
+	/// <summary>Optional and additive - see the SDK's <c>DeviceSurfaceAppearance.ExtraLabels</c>. A
+	/// provider that predates it ignores the field and draws the primary label only.</summary>
+	public IReadOnlyList<DeviceSurfaceLabelDto> ExtraLabels { get; init; } = [];
+
 	public IReadOnlyDictionary<string, string> Extra { get; init; }
 		= new Dictionary<string, string>(StringComparer.Ordinal);
+}
+
+/// <summary>Mirrors the SDK's <c>DeviceSurfaceLabel</c>.</summary>
+public sealed record DeviceSurfaceLabelDto
+{
+	public string? Text { get; init; }
+
+	public string? Color { get; init; }
+
+	public double? FontSize { get; init; }
+
+	public double X { get; init; } = 50;
+
+	public double Y { get; init; } = 50;
 }

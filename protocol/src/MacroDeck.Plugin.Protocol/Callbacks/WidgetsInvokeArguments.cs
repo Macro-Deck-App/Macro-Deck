@@ -94,6 +94,10 @@ public sealed record WidgetAppearancePatchDto
 
 	/// <summary>Optional and additive: a host that predates it ignores the field.</summary>
 	public string? IconAppearance { get; init; }
+
+	/// <summary>Optional and additive: a host that predates it ignores the field and changes the primary
+	/// label. See the SDK's <c>WidgetAppearancePatch.LabelNumber</c>.</summary>
+	public int? LabelNumber { get; init; }
 }
 
 /// <summary>

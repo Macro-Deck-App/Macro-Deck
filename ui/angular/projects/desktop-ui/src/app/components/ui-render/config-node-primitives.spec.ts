@@ -13,6 +13,7 @@ const VOCABULARY = [
   'tabs', 'tab', 'heading', 'prose', 'instructions', 'instruction', 'copy-value', 'link',
   'advanced-section', 'divider', 'banner', 'validation-message', 'busy', 'button', 'widget-configuration',
   'widget-properties', 'widget-editor', 'status', 'menu', 'dialog', 'split', 'list', 'list-item', 'empty-state',
+  'section',
 ];
 
 describe('shared-ui-node every configuration primitive', () => {

@@ -60,6 +60,25 @@ public sealed record DeviceSurfaceAppearance
 
 	public string? LabelPosition { get; init; }
 
+	/// <summary>
+	/// Where the primary label sits across the button's content box, in percent: <c>0</c> is flush left,
+	/// <c>50</c> centred and <c>100</c> flush right. Null when the widget stores no free position; the
+	/// label then sits where <see cref="TextAlign" /> says. When it is set, <see cref="TextAlign" /> names
+	/// the third of the box it falls in, which is what a provider built against an older SDK draws.
+	/// </summary>
+	public double? LabelX { get; init; }
+
+	/// <summary>The same down the content box, <c>0</c> flush top and <c>100</c> flush bottom, with
+	/// <see cref="LabelPosition" /> as its three-step counterpart.</summary>
+	public double? LabelY { get; init; }
+
+	/// <summary>
+	/// The labels an Action Button shows besides <see cref="Label" />, in drawing order: at most three,
+	/// and empty for every other widget and for a button that has none. A provider built against an older
+	/// SDK does not know this field and draws the primary label only.
+	/// </summary>
+	public IReadOnlyList<DeviceSurfaceLabel> ExtraLabels { get; init; } = [];
+
 	/// <summary>Forward-compatible escape hatch for appearance data not yet promoted to a named property.</summary>
 	public IReadOnlyDictionary<string, string> Extra { get; init; }
 		= new Dictionary<string, string>(StringComparer.Ordinal);

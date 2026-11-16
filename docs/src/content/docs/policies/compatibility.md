@@ -220,6 +220,14 @@ What did **not** need a major:
   host ignores the field, so a patch carrying only it applies nothing there and `ApplyAsync` returns
   `false`. While a Slider's or History Graph's colour thresholds are on, a stored accent has no visible
   effect.
+- An Action Button can carry up to four labels. `WidgetAppearancePatch.LabelNumber` and an optional
+  `labelNumber` field on the wire patch name the label a patch changes, `1` being the primary one, and
+  `DeviceSurfaceAppearance` gained `LabelX`, `LabelY` and `ExtraLabels`, mirrored as optional
+  fields on the wire. An older host ignores `labelNumber` and **changes the primary label**, so a plugin
+  that must not touch it there has no way to tell and should not send a numbered patch to a host it has
+  not been tested against. An older device provider ignores the new surface fields and draws the primary
+  label only, at the third of the button `TextAlign` and `LabelPosition` name. A patch's `TextAlign` or
+  `LabelPosition` now also replaces a free position the user set on that axis.
 - [Video streams](/features/video-streams/) added a capability kind, `video-stream-provider`, a host API,
   `video-streams`, and `video_stream_` error reasons under the existing `CAPABILITY_UNAVAILABLE` code, all
   within major `3`. An older host rejects the kind non-fatally, and a plugin that does not implement
@@ -556,6 +564,11 @@ the value vocabularies `UiButtonVariants`, `UiStackAlignments`, `UiStackGaps` an
 `UiModelVersions` did not move. An older reader declines the new types and draws each node's explicit
 fallback, and ignores the new properties, drawing an ordinary button, a plain stack and a heading without a
 badge.
+
+[Collapsible sections](/ui/views/configuration/#collapsible-sections) added the configuration type `section`
+(`UiConfigSection`), the properties `modified` and `memoryKey`, and the `reset` config event
+(`UiConfigEvents.Reset`); `UiModelVersions` did not move. An older reader declines the type and draws the
+node's explicit fallback, and never sends `reset`.
 
 ### What "maintained per major" means in practice
 

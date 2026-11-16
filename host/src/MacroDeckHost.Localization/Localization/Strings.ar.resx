@@ -14411,6 +14411,12 @@
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>التسمية</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>التسمية التي يتم تغييرها. التسمية 1 هي التسمية الرئيسية، وتُضاف التسمية غير الموجودة بعد.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>التسمية المراد تغييرها</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>تسمية الزر</value>
   </data>
@@ -20005,6 +20011,9 @@
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>إعادة تحميل الخيارات</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>مختلف عن الافتراضي</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>هذا الحقل غير مدعوم في هذا الإصدار من Macro Deck</value>
   </data>
@@ -21454,6 +21463,9 @@
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>موضع مؤشر الفأرة على الشاشة</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>إضافة تسمية</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>إضافة قاعدة</value>
   </data>
@@ -21513,6 +21525,33 @@
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>هذا الإعداد أكبر من أن يتعامل معه المحرر المرئي. احذف إجراءات أو أحداثًا في وضع JSON لتتمكن من تحريره هنا مجددًا.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>التسمية {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>التسمية قيد التعديل</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>النص</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>الطباعة</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>الموضع الأفقي (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>الموضع الرأسي (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>إدارة هذه التسمية</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>لصق كتسمية جديدة</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>استبدال بالتسمية المنسوخة</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>استعادة آخر إصدار عامل</value>

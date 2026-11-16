@@ -214,6 +214,45 @@ internal sealed class WidgetStateCompatibilityContractTests
 	}
 
 	[Test]
+	public async Task LabelNumberField_ChangesTheAddressedLabelOnBothWireShapes()
+	{
+		var v1 = new Fixture("""{"label":"Main"}""", 1);
+		var v1Applied = await v1.InvokeV1(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"Second","labelNumber":2},"state":{{SelectorCurrent}},"clearProperties":[]}""");
+
+		var v2 = new Fixture("""{"label":"Main"}""", 2);
+		var v2Applied = await v2.InvokeV2(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"Second","labelNumber":2},"stateIds":["{{WidgetStates.Current}}"],"clearProperties":[]}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(v1Applied, Is.True);
+			Assert.That(v1.StoredString("label"), Is.EqualTo("Main"));
+			Assert.That(v1.StoredExtraLabel(0)?["label"]?.GetValue<string>(), Is.EqualTo("Second"));
+			Assert.That(v2Applied, Is.True);
+			Assert.That(v2.StoredString("label"), Is.EqualTo("Main"));
+			Assert.That(v2.StoredExtraLabel(0)?["label"]?.GetValue<string>(), Is.EqualTo("Second"));
+		});
+	}
+
+	[Test]
+	public async Task APatchFromAPluginThatPredatesLabelNumbers_ChangesThePrimaryLabelAndLeavesTheExtraLabels()
+	{
+		var fixture = new Fixture("""{"label":"Main","extraLabels":[{"id":"a","label":"Second"}]}""", 1);
+
+		var applied = await fixture.InvokeV1(
+			$$"""{"widgetId":"{{Fixture.WidgetId}}","patch":{"label":"Changed","labelColor":"#ff0000"},"state":{{SelectorCurrent}},"clearProperties":[]}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(applied, Is.True);
+			Assert.That(fixture.StoredString("label"), Is.EqualTo("Changed"));
+			Assert.That(fixture.StoredExtraLabel(0)?["label"]?.GetValue<string>(), Is.EqualTo("Second"));
+			Assert.That(fixture.StoredExtraLabel(0)?["labelColor"], Is.Null);
+		});
+	}
+
+	[Test]
 	public async Task IconAppearanceField_PinsTheIcon_AndClearingItByOrdinalReturnsToAutomatic()
 	{
 		var pinned = new Fixture("""{"icon":{"type":"icon-pack","reference":"i1"}}""", 2);
@@ -384,6 +423,13 @@ internal sealed class WidgetStateCompatibilityContractTests
 		public string? StoredString(string key)
 		{
 			return JsonNode.Parse(Widget.Data!)![key]?.GetValue<string>();
+		}
+
+		public JsonObject? StoredExtraLabel(int index)
+		{
+			return JsonNode.Parse(Widget.Data!)!["extraLabels"] is JsonArray labels && index < labels.Count
+				? labels[index] as JsonObject
+				: null;
 		}
 
 		public JsonObject? StoredIcon()

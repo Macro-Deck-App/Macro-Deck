@@ -38,7 +38,21 @@ public class LabelRenderFailureLogTests
 
 		for (var attempt = 0; attempt < 10; attempt++)
 		{
-			_log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert"));
+			_log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert"));
+		}
+
+		Assert.That(_warnings, Has.Count.EqualTo(1));
+	}
+
+	[Test]
+	public void An_extra_label_that_keeps_failing_beside_a_healthy_primary_label_is_logged_once()
+	{
+		var widgetId = Guid.NewGuid();
+
+		for (var attempt = 0; attempt < 10; attempt++)
+		{
+			_log.Succeeded(widgetId, "off", 1);
+			_log.Failed(widgetId, "off", 2, Template, new InvalidOperationException("Unable to convert"));
 		}
 
 		Assert.That(_warnings, Has.Count.EqualTo(1));
@@ -49,10 +63,10 @@ public class LabelRenderFailureLogTests
 	{
 		var widgetId = Guid.NewGuid();
 
-		_log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert"));
-		_log.Failed(widgetId, "off", "{{ vars.cpu }", new InvalidOperationException("Parse error"));
-		_log.Succeeded(widgetId, "off");
-		_log.Failed(widgetId, "off", "{{ vars.cpu }", new InvalidOperationException("Parse error"));
+		_log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert"));
+		_log.Failed(widgetId, "off", 1, "{{ vars.cpu }", new InvalidOperationException("Parse error"));
+		_log.Succeeded(widgetId, "off", 1);
+		_log.Failed(widgetId, "off", 1, "{{ vars.cpu }", new InvalidOperationException("Parse error"));
 
 		Assert.That(_warnings, Has.Count.EqualTo(3));
 	}
@@ -65,7 +79,7 @@ public class LabelRenderFailureLogTests
 		Parallel.For(0,
 			2000,
 			new ParallelOptions { MaxDegreeOfParallelism = 8 },
-			_ => _log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert")));
+			_ => _log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert")));
 
 		Assert.That(_warnings, Has.Count.EqualTo(1));
 	}
@@ -82,18 +96,18 @@ public class LabelRenderFailureLogTests
 			{
 				if (attempt % 2 == 0)
 				{
-					_log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert"));
+					_log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert"));
 				}
 				else
 				{
-					_log.Succeeded(widgetId, "off");
+					_log.Succeeded(widgetId, "off", 1);
 				}
 			});
-		_log.Succeeded(widgetId, "off");
+		_log.Succeeded(widgetId, "off", 1);
 		var before = _warnings.Count;
 
-		_log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert"));
-		_log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert"));
+		_log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert"));
+		_log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert"));
 
 		Assert.That(_warnings, Has.Count.EqualTo(before + 1));
 	}
@@ -109,8 +123,8 @@ public class LabelRenderFailureLogTests
 			new ParallelOptions { MaxDegreeOfParallelism = 8 },
 			widgetId =>
 			{
-				_log.Failed(widgetId, "off", Template, new InvalidOperationException("Unable to convert"));
-				_log.Succeeded(Guid.NewGuid(), "off");
+				_log.Failed(widgetId, "off", 1, Template, new InvalidOperationException("Unable to convert"));
+				_log.Succeeded(Guid.NewGuid(), "off", 1);
 			});
 
 		var logged = _warnings.Select(warning => warning.Properties["WidgetId"].ToString()).ToHashSet();

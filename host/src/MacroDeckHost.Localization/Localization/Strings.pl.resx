@@ -14410,6 +14410,12 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Etykieta</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Która etykieta zostanie zmieniona. Etykieta 1 jest główna; etykieta, której jeszcze nie ma, zostanie dodana.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Zmieniana etykieta</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Etykieta przycisku</value>
   </data>
@@ -20004,6 +20010,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Wczytaj opcje ponownie</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Różni się od domyślnego</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>To pole nie jest obsługiwane w tej wersji Macro Deck</value>
   </data>
@@ -21435,6 +21444,9 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Pozycja kursora na ekranie</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Dodaj etykietę</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Dodaj regułę</value>
   </data>
@@ -21494,6 +21506,33 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Ta konfiguracja jest zbyt duża dla edytora wizualnego. Usuń akcje albo zdarzenia w trybie JSON, aby ponownie edytować ją tutaj.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Etykieta {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Edytowana etykieta</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Typografia</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Położenie w poziomie (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Położenie w pionie (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Zarządzaj tą etykietą</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Wklej jako nową etykietę</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Zastąp skopiowaną etykietą</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Przywróć ostatnią działającą wersję</value>

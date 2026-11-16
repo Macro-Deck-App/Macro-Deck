@@ -58,6 +58,9 @@ internal static class DeviceSurfaceComparison
 			&& left.FontSize == right.FontSize
 			&& string.Equals(left.TextAlign, right.TextAlign, StringComparison.Ordinal)
 			&& string.Equals(left.LabelPosition, right.LabelPosition, StringComparison.Ordinal)
+			&& left.LabelX == right.LabelX
+			&& left.LabelY == right.LabelY
+			&& left.ExtraLabels.SequenceEqual(right.ExtraLabels)
 			&& SameExtra(left.Extra, right.Extra);
 	}
 

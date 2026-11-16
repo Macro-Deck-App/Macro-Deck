@@ -395,6 +395,50 @@ public class WidgetActionTargetTests
 		Assert.That(color.SupportsReset, Is.True);
 	}
 
+	[TestCase("set-label", "label", "Live")]
+	[TestCase("set-label-color", "color", "#ff0000")]
+	[TestCase("set-font", "labelPosition", "top")]
+	public async Task The_label_parameter_picks_which_label_the_action_changes(
+		string actionId,
+		string parameter,
+		string value)
+	{
+		await Execute(actionId,
+			new Dictionary<string, object> { ["widget"] = OtherWidget, [parameter] = value, ["labelNumber"] = "3" },
+			SelfWidget);
+
+		Assert.That(_widgets.Applied.Single().Patch.LabelNumber, Is.EqualTo(3));
+	}
+
+	[TestCase(null)]
+	[TestCase("1")]
+	public async Task A_flow_without_the_label_parameter_changes_the_primary_label(string? labelNumber)
+	{
+		var parameters = new Dictionary<string, object> { ["widget"] = OtherWidget, ["label"] = "Live" };
+		if (labelNumber is not null)
+		{
+			parameters["labelNumber"] = labelNumber;
+		}
+
+		await Execute("set-label", parameters, SelfWidget);
+
+		Assert.That(_widgets.Applied.Single().Patch.LabelNumber, Is.Null);
+	}
+
+	[Test]
+	public void The_label_parameter_offers_every_label_a_button_can_have_and_starts_at_the_primary_one()
+	{
+		var parameter = _integration.Actions.Single(action => action.Id == "set-label")
+			.Parameters.Single(candidate => candidate.Name == "labelNumber");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(parameter.Options!.Select(option => option.Value), Is.EqualTo(new[] { "1", "2", "3", "4" }));
+			Assert.That(parameter.DefaultValue, Is.EqualTo("1"));
+			Assert.That(parameter.Required, Is.False);
+		});
+	}
+
 	[Test]
 	public async Task EmptyLabel_ClearsIt()
 	{

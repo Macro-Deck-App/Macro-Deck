@@ -14411,6 +14411,12 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Мітка</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Яку мітку буде змінено. Мітка 1 є основною; мітку, якої ще немає, буде додано.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Змінювана мітка</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Мітка кнопки</value>
   </data>
@@ -20005,6 +20011,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Перезавантажити параметри</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Відрізняється від типового значення</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Це поле не підтримується цією версією Macro Deck</value>
   </data>
@@ -21454,6 +21463,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Положення миші на екрані</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Додати мітку</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Додати правило</value>
   </data>
@@ -21513,6 +21525,33 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Ця конфігурація завелика для візуального редактора. Видаліть дії чи події в режимі JSON, щоб знову редагувати її тут.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Мітка {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Редагована мітка</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Типографіка</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Положення по горизонталі (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Положення по вертикалі (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Керувати цією міткою</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Вставити як нову мітку</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Замінити скопійованою міткою</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Відновити останню робочу версію</value>

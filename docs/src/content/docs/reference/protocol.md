@@ -212,6 +212,16 @@ are listed in the descriptor's `capabilityKinds`:
   is declarative: declaring it asks the host to keep one configuration entry of the plugin per Companion
   device, and its only operation, `describe`, answers without data. A host that predates it rejects the
   declaration non-fatally. See [Companion devices](/features/companion-devices/#a-configuration-entry-per-device).
+- The `widgets` host API's appearance patch gained the optional `labelNumber`
+  (`WidgetAppearancePatch.LabelNumber`), additively in major `3`: which label of an Action Button the
+  patch's label fields change, `1` to `4`, absent meaning `1`. A host that predates it ignores the field
+  and changes the primary label; a host that knows it rejects a number outside the range.
+- The `devices` surface appearance gained the optional `labelX`, `labelY` and `extraLabels`
+  (`DeviceSurfaceAppearance.LabelX`, `LabelY`, `ExtraLabels`), additively in major `3` and within the
+  capability's version: the primary label's free position in percent of the content box and up to three
+  more labels of an Action Button. `textAlign` and `labelPosition` keep naming the third of the box the
+  label sits in, so a provider that predates the fields ignores them and draws the primary label there.
+  See [Devices](/features/devices/).
 
 - `ui` `describe` gained the optional `pages`, additively in major `3` and within capability version `1`:
   the [integration pages](/ui/views/page/) the plugin declares, each with `id`, `title` and an optional

@@ -14411,6 +14411,12 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Label</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Welk label wordt gewijzigd. Label 1 is het hoofdlabel; een label dat nog niet bestaat, wordt toegevoegd.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Label dat wordt gewijzigd</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Knoplabel</value>
   </data>
@@ -20005,6 +20011,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Opties opnieuw laden</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Wijkt af van de standaard</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Dit veld wordt niet ondersteund door deze versie van Macro Deck</value>
   </data>
@@ -21454,6 +21463,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Muispositie op het scherm</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Label toevoegen</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Regel toevoegen</value>
   </data>
@@ -21513,6 +21525,33 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Deze configuratie is te groot voor de visuele editor. Verwijder acties of gebeurtenissen in de JSON-modus om haar hier weer te bewerken.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Label {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Label dat je bewerkt</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Typografie</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Horizontale positie (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Verticale positie (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Dit label beheren</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Plakken als nieuw label</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Vervangen door gekopieerd label</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Laatste werkende versie terugzetten</value>

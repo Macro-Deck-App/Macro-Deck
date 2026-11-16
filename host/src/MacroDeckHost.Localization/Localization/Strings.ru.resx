@@ -14411,6 +14411,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Подпись</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Какая подпись будет изменена. Подпись 1 является основной; подпись, которой ещё нет, будет добавлена.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Изменяемая подпись</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Подпись кнопки</value>
   </data>
@@ -20005,6 +20011,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Перезагрузить параметры</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Отличается от значения по умолчанию</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Это поле не поддерживается этой версией Macro Deck</value>
   </data>
@@ -21454,6 +21463,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Положение указателя мыши на экране</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Добавить подпись</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Добавить правило</value>
   </data>
@@ -21513,6 +21525,33 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Эта конфигурация слишком велика для визуального редактора. Удалите действия или события в режиме JSON, чтобы снова редактировать её здесь.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Подпись {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Редактируемая подпись</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Типографика</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Положение по горизонтали (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Положение по вертикали (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Управлять этой подписью</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Вставить как новую подпись</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Заменить скопированной подписью</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Восстановить последнюю рабочую версию</value>

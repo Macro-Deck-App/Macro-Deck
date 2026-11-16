@@ -12,6 +12,8 @@ namespace MacroDeckHost.Application.Rendering;
 
 public sealed class LabelTextService : ILabelTextService
 {
+	private const int PrimaryLabelNumber = 1;
+
 	private readonly IFolderCache _folderCache;
 	private readonly IVariableTemplateRenderer _templateRenderer;
 	private readonly StartupReadiness _readiness;
@@ -29,7 +31,10 @@ public sealed class LabelTextService : ILabelTextService
 		_failures = failures;
 	}
 
-	public async Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
+	public async Task<LabelTexts> ResolveTexts(
+		Guid widgetId,
+		string state,
+		CancellationToken cancellationToken = default)
 	{
 		await _readiness.WhenReady.WaitAsync(cancellationToken);
 
@@ -38,7 +43,7 @@ public sealed class LabelTextService : ILabelTextService
 		var widget = FindWidget(widgetId);
 		if (widget is null || widget.Type != WidgetTypeIds.ActionButton)
 		{
-			return null;
+			return LabelTexts.None;
 		}
 
 		var model = ActionButtonStateModel.Read(widget.Data);
@@ -48,7 +53,24 @@ public sealed class LabelTextService : ILabelTextService
 		// fallback a state with no label of its own uses.
 		var stateLabel = model.StateMode ? ReadString(model.FindState(state)?.Appearance, "label") : null;
 		var labelText = !string.IsNullOrEmpty(stateLabel) ? stateLabel : rootLabel;
-		if (string.IsNullOrEmpty(labelText))
+		var primary = await Render(widgetId, state, PrimaryLabelNumber, labelText);
+
+		var extraLabels = ActionButtonLabelJson.ActiveExtraLabels(model, state);
+		var extras = new List<string?>(extraLabels.Count);
+		foreach (var extraLabel in extraLabels)
+		{
+			extras.Add(await Render(widgetId,
+				state,
+				PrimaryLabelNumber + 1 + extras.Count,
+				ReadString(extraLabel, "label")));
+		}
+
+		return new LabelTexts(primary, extras);
+	}
+
+	private async Task<string?> Render(Guid widgetId, string state, int label, string? template)
+	{
+		if (string.IsNullOrEmpty(template))
 		{
 			return null;
 		}
@@ -56,15 +78,15 @@ public sealed class LabelTextService : ILabelTextService
 		string resolved;
 		try
 		{
-			resolved = await _templateRenderer.RenderAsync(labelText, VariableScope.Widget, widgetId.ToString());
+			resolved = await _templateRenderer.RenderAsync(template, VariableScope.Widget, widgetId.ToString());
 		}
 		catch (Exception exception) when (exception is not OperationCanceledException)
 		{
-			_failures.Failed(widgetId, state, labelText, exception);
+			_failures.Failed(widgetId, state, label, template, exception);
 			return VariableTemplateRenderer.UnavailablePlaceholder;
 		}
 
-		_failures.Succeeded(widgetId, state);
+		_failures.Succeeded(widgetId, state, label);
 		return string.IsNullOrEmpty(resolved) ? null : resolved;
 	}
 

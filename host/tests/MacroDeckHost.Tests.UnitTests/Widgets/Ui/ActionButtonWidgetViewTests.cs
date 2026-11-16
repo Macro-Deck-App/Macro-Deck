@@ -13,6 +13,9 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 [TestFixture]
 public class ActionButtonWidgetViewTests
 {
+	private const string FirstExtraLabel =
+		"actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0";
+
 	[Test]
 	public void A_bare_button_carries_no_background_source_border_or_framing_keys()
 	{
@@ -516,9 +519,140 @@ public class ActionButtonWidgetViewTests
 		Assert.That(button.Property("source")!.Value.GetProperty("resourceId").GetString(), Is.EqualTo("res-1"));
 	}
 
+	[Test]
+	public void A_button_whose_label_sits_on_a_preset_keeps_the_single_label_tree()
+	{
+		var host = Render(new { label = "Main", labelX = 0, labelY = 100, extraLabels = Array.Empty<object>() });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ByType(UiComponents.Layer), Is.Empty);
+			Assert.That(host.ByType(UiComponents.Transform), Is.Empty);
+			Assert.That(host.ById("actionButton").Text("justify"), Is.EqualTo(UiComponentJustify.End));
+			Assert.That(host.ById("actionButton.labelRow.labelBox.label").Text("align"),
+				Is.EqualTo(UiComponentAlignments.Start));
+			Assert.That(host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Main"));
+		});
+	}
+
+	[Test]
+	public void A_free_position_places_the_label_by_a_fraction_of_the_space_and_keeps_it_inside_the_button()
+	{
+		var host = Render(new { label = "Main", labelX = 20, labelY = 75 });
+		var slot = host.ById("actionButton.labels.labelSlotPrimary");
+		var pin = host.ById("actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("actionButton.labels").Flag("fill"), Is.True);
+			Assert.That(slot.Number("offsetX"), Is.EqualTo(0.2).Within(1e-9));
+			Assert.That(slot.Number("offsetY"), Is.EqualTo(0.75).Within(1e-9));
+			Assert.That(pin.Number("offsetX"), Is.EqualTo(-0.2).Within(1e-9));
+			Assert.That(pin.Number("offsetY"), Is.EqualTo(-0.75).Within(1e-9));
+			Assert.That(pin.Children.Single().HasProperty("fill"), Is.False, "the label hugs its text");
+			Assert.That(pin.Children.Single().Children.Single().Text("text"), Is.EqualTo("Main"));
+		});
+	}
+
+	[Test]
+	public void Each_extra_label_is_drawn_over_the_button_with_its_own_text_style_and_position()
+	{
+		var host = Render(new
+		{
+			label = "Main",
+			extraLabels = new object[]
+			{
+				new { id = "a", label = "Top", labelColor = "#ff0000", fontSize = 20, labelX = 0, labelY = 10 },
+				new { id = "b", label = "Low", labelPosition = "bottom" }
+			}
+		});
+		const string firstPin = "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0";
+		const string secondPin = "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1";
+		var first = host.ById($"{firstPin}.labelBox0.label0");
+		var second = host.ById($"{secondPin}.labelBox1.label1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first.Text("text"), Is.EqualTo("Top"));
+			Assert.That(first.Text("color"), Is.EqualTo("#ff0000"));
+			Assert.That(first.Text("align"), Is.EqualTo(UiComponentAlignments.Start));
+			Assert.That(first.Property("size")!.Value.GetProperty("basis").GetDouble(), Is.EqualTo(0.2).Within(1e-9));
+			Assert.That(host.ById("actionButton.labels.labelSlot0").HasProperty("offsetX"), Is.False);
+			Assert.That(host.ById("actionButton.labels.labelSlot0").Number("offsetY"), Is.EqualTo(0.1).Within(1e-9));
+			Assert.That(second.Text("text"), Is.EqualTo("Low"));
+			Assert.That(second.Text("color"), Is.EqualTo("#ffffff"));
+			Assert.That(host.ById("actionButton.labels.labelSlot1").Number("offsetX"), Is.EqualTo(0.5).Within(1e-9));
+			Assert.That(host.ById("actionButton.labels.labelSlot1").Number("offsetY"), Is.EqualTo(1).Within(1e-9));
+			Assert.That(host.ById(secondPin).Number("offsetY"), Is.EqualTo(-1).Within(1e-9));
+		});
+	}
+
+	[Test]
+	public void A_reader_without_the_label_layer_falls_back_to_the_primary_label_alone()
+	{
+		var host = Render(new { label = "Main", extraLabels = new object[] { new { id = "a", label = "Top" } } });
+		var fallback = host.ById("actionButton.labels").Fallback;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fallback, Is.Not.Null);
+			Assert.That(TextsUnder(fallback!), Is.EqualTo(new[] { "Main" }));
+		});
+	}
+
+	[Test]
+	public void A_state_shows_only_its_own_extra_labels_while_the_tree_keeps_the_same_slots()
+	{
+		var data = new
+		{
+			stateMode = true,
+			extraLabels = new object[] { new { id = "root", label = "Button level" } },
+			states = new object[]
+			{
+				new
+				{
+					id = "off",
+					label = "Off",
+					appearance = new { label = "Off", extraLabels = new object[] { new { id = "a", label = "Idle" } } }
+				},
+				new { id = "on", label = "On", appearance = new { label = "On" } }
+			}
+		};
+		var off = Render(data, activeStateId: "off");
+		var on = Render(data, activeStateId: "on");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(off.ByType(UiComponents.Layer).Single().Children, Has.Count.EqualTo(2));
+			Assert.That(on.ByType(UiComponents.Layer).Single().Children, Has.Count.EqualTo(2));
+			Assert.That(off.ById(FirstExtraLabel).Text("text"),
+				Is.EqualTo("Idle"));
+			Assert.That(on.ById(FirstExtraLabel)
+					.HasProperty("text"),
+				Is.False);
+			Assert.That(off.Describe(), Does.Not.Contain("Button level"));
+		});
+	}
+
 	private static UiResource Icon()
 	{
 		return new UiResource { ResourceId = "res-1" };
+	}
+
+	private static List<string?> TextsUnder(UiTestNode node)
+	{
+		var texts = new List<string?>();
+		if (node.Type == UiComponents.Text)
+		{
+			texts.Add(node.Text("text"));
+		}
+
+		foreach (var child in node.Children)
+		{
+			texts.AddRange(TextsUnder(child));
+		}
+
+		return texts;
 	}
 
 	private static double BoxPadding(UiTestNode box)
@@ -548,6 +682,9 @@ public class ActionButtonWidgetViewTests
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
 			labelText,
+			new UiState<IReadOnlyList<string?>>(config.Resolve(activeState.Peek())
+				.ExtraLabels.Select(label => label.Text)
+				.ToList()),
 			new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(icons
 				?? new Dictionary<WidgetIconReference, UiResource>()),
 			new UiState<WidgetIconResolution>(iconProvider ?? WidgetIconResolution.Inactive),

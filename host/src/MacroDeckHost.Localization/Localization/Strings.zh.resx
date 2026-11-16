@@ -14411,6 +14411,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>标签</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>要更改哪个标签。标签 1 是主标签；尚不存在的标签会被添加。</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>要更改的标签</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>按钮标签</value>
   </data>
@@ -20005,6 +20011,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>重新加载选项</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>与默认值不同</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>此版本的 Macro Deck 不支持该字段</value>
   </data>
@@ -21436,6 +21445,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>鼠标在屏幕上的位置</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>添加标签</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>添加规则</value>
   </data>
@@ -21495,6 +21507,33 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>此配置对于可视化编辑器来说过大。请在 JSON 模式中删除一些操作或事件，以便再次在此处编辑。</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>标签 {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>正在编辑的标签</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>文本</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>字体排版</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>水平位置 (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>垂直位置 (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>管理此标签</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>粘贴为新标签</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>替换为已复制的标签</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>恢复上一个可用版本</value>

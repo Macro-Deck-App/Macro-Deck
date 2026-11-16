@@ -158,6 +158,7 @@ export default defineConfig({
 										'features/actions',
 										'features/button-states',
 										'features/button-icons',
+										'features/button-labels',
 										'features/variables',
 										'features/events',
 										{ label: 'Messaging between plugins', slug: 'features/messaging' },

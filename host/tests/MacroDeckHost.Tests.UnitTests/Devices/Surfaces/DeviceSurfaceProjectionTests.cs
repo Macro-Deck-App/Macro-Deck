@@ -69,6 +69,94 @@ internal sealed class DeviceSurfaceProjectionTests
 	}
 
 	[Test]
+	public async Task A_button_reaches_a_provider_with_its_label_position_and_its_extra_labels()
+	{
+		var plain = DeviceSurfaceFixture.Button("plain", 0, 0, label: "Plain");
+		var rich = DeviceSurfaceFixture.Button("rich", 1, 0, label: "Main");
+		rich.Data = """
+					{"label":"Main","labelX":10,"labelY":80,
+					 "extraLabels":[{"id":"a","label":"Top","labelColor":"#ff0000","fontSize":22.5,"textAlign":"left",
+					                 "labelY":5},
+					                {"id":"b","label":"Low","labelPosition":"bottom"}]}
+					""";
+		_fixture.Home.Widgets.AddRange([plain, rich]);
+
+		var deviceId = await _fixture.OpenDeviceAsync();
+
+		var widgets = _fixture.Provider.Latest(deviceId).Widgets.ToDictionary(widget => widget.Id);
+		var appearance = widgets["rich"].Appearance!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(widgets["plain"].Appearance!.ExtraLabels, Is.Empty);
+			Assert.That(widgets["plain"].Appearance!.LabelX, Is.Null);
+			Assert.That(appearance.Label, Is.EqualTo("Main"));
+			Assert.That(appearance.LabelX, Is.EqualTo(10));
+			Assert.That(appearance.LabelY, Is.EqualTo(80));
+			Assert.That(appearance.TextAlign, Is.EqualTo("left"), "the third of the box an older provider draws at");
+			Assert.That(appearance.LabelPosition, Is.EqualTo("bottom"));
+			Assert.That(appearance.ExtraLabels,
+				Is.EqualTo(new[]
+				{
+					new DeviceSurfaceLabel
+					{
+						Text = "Top",
+						Color = "#ff0000",
+						FontSize = 22.5,
+						X = 0,
+						Y = 5
+					},
+					new DeviceSurfaceLabel { Text = "Low", X = 50, Y = 100 }
+				}));
+		});
+	}
+
+	[Test]
+	public async Task A_widget_of_another_type_keeps_its_own_keys_named_like_label_positions_to_itself()
+	{
+		var other = DeviceSurfaceFixture.Button("other", 0, 0, label: "Gauge");
+		other.Type = "acme.gauge";
+		other.Data = """
+					 {"label":"Gauge","textAlign":"justify","labelPosition":"below","labelX":3,"labelY":4,
+					  "extraLabels":[{"id":"a","label":"Not a label"}]}
+					 """;
+		_fixture.Home.Widgets.Add(other);
+
+		var deviceId = await _fixture.OpenDeviceAsync();
+
+		var appearance = _fixture.Provider.Latest(deviceId).Widgets.Single().Appearance!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(appearance.TextAlign, Is.EqualTo("justify"));
+			Assert.That(appearance.LabelPosition, Is.EqualTo("below"));
+			Assert.That(appearance.LabelX, Is.Null);
+			Assert.That(appearance.LabelY, Is.Null);
+			Assert.That(appearance.ExtraLabels, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task An_extra_label_reaches_a_provider_with_its_template_already_rendered()
+	{
+		var id = Guid.NewGuid();
+		var button = DeviceSurfaceFixture.Button(id.ToString(), 0, 0, label: "Main");
+		button.Data = """{"label":"Main","extraLabels":[{"id":"a","label":"{{ vars.cpu }} %"}]}""";
+		_fixture.Home.Widgets.Add(button);
+		_fixture.Labels.Set(id, string.Empty, "Main");
+		_fixture.Labels.SetExtras(id, string.Empty, "42 %");
+
+		var deviceId = await _fixture.OpenDeviceAsync();
+
+		var appearance = _fixture.Provider.Latest(deviceId).Widgets.Single().Appearance!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(appearance.Label, Is.EqualTo("Main"));
+			Assert.That(appearance.ExtraLabels.Single().Text, Is.EqualTo("42 %"));
+		});
+	}
+
+	[Test]
 	public async Task A_transparent_widget_background_reaches_a_provider_as_no_colour_while_a_colour_passes_through()
 	{
 		_fixture.Home.Widgets.AddRange([

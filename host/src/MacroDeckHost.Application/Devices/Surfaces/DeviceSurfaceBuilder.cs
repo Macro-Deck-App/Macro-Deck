@@ -331,8 +331,20 @@ public sealed class DeviceSurfaceBuilder
 		var state = model.StateMode ? model.FindState(stateId)?.Appearance : null;
 		var iconDisplay = state?["iconDisplay"] as JsonObject ?? root["iconDisplay"] as JsonObject;
 
-		var label = isPersisted
-			? await _labelText.ResolveText(widgetId, stateId ?? string.Empty, cancellationToken)
+		var texts = isPersisted
+			? await _labelText.ResolveTexts(widgetId, stateId ?? string.Empty, cancellationToken)
+			: LabelTexts.None;
+		var label = texts.Primary;
+
+		// Free positions and extra labels are Action Button keys: another type may own keys of the same name.
+		var isActionButton = string.Equals(widget.Type, WidgetTypeIds.ActionButton, StringComparison.Ordinal);
+		var extraLabels
+			= isActionButton ? ActionButtonLabelJson.ActiveExtraLabels(model, stateId) : [];
+		var labelX = isActionButton
+			? ActionButtonLabelJson.ReadX(state) ?? ActionButtonLabelJson.ReadX(root)
+			: null;
+		var labelY = isActionButton
+			? ActionButtonLabelJson.ReadY(state) ?? ActionButtonLabelJson.ReadY(root)
 			: null;
 
 		// An active icon provider is authoritative for the whole button (issue #425 decision 1) and is
@@ -365,9 +377,42 @@ public sealed class DeviceSurfaceBuilder
 			IconOffsetX = ReadDouble(iconDisplay, "offsetX"),
 			IconOffsetY = ReadDouble(iconDisplay, "offsetY"),
 			FontSize = ReadInt(state, "fontSize") ?? ReadInt(root, "fontSize"),
-			TextAlign = Pick(state, root, "textAlign"),
-			LabelPosition = Pick(state, root, "labelPosition")
+			TextAlign = !isActionButton ? Pick(state, root, "textAlign")
+				: labelX is { } x ? ActionButtonLabelJson.TextAlignOf(x)
+				: null,
+			LabelPosition = !isActionButton ? Pick(state, root, "labelPosition")
+				: labelY is { } y ? ActionButtonLabelJson.LabelPositionOf(y)
+				: null,
+			LabelX = isActionButton && HasPosition(state, root, ActionButtonLabelJson.XKey) ? labelX : null,
+			LabelY = isActionButton && HasPosition(state, root, ActionButtonLabelJson.YKey) ? labelY : null,
+			ExtraLabels =
+			[
+				.. extraLabels.Select((extra, index) => new DeviceSurfaceLabel
+				{
+					Text = index < texts.Extras.Count ? texts.Extras[index] : ReadString(extra, "label"),
+					Color = DeviceColor(ReadString(extra, "labelColor"), isPersisted ? widgetId : null),
+					FontSize = ReadDouble(extra, "fontSize"),
+					X = ExtraX(extra),
+					Y = ExtraY(extra)
+				})
+			]
 		};
+	}
+
+	private static bool HasPosition(JsonObject? state, JsonObject root, string key)
+	{
+		return (ActionButtonLabelJson.ReadPosition(state, key) ?? ActionButtonLabelJson.ReadPosition(root, key)) is not
+			null;
+	}
+
+	private static double ExtraX(JsonObject label)
+	{
+		return ActionButtonLabelJson.ReadX(label) ?? ActionButtonLabelJson.Center;
+	}
+
+	private static double ExtraY(JsonObject label)
+	{
+		return ActionButtonLabelJson.ReadY(label) ?? ActionButtonLabelJson.Center;
 	}
 
 	private (string? IconId, string? Version) ResolveDeviceIcon(

@@ -167,6 +167,20 @@ device stays registration-only forever.
   byte for byte.
 - **`Widgets`** holds every widget in the folder plus any foreign pinned widget whose scope reaches it, each
   once. Labels are already resolved and localized - render them as-is.
+- **An Action Button can carry up to three more labels.** `Appearance.Label` is its primary label and
+  `Appearance.ExtraLabels` holds the others in drawing order, each a `DeviceSurfaceLabel` with its own
+  resolved `Text`, `Color`, `FontSize` and position `X`/`Y`. `Appearance.LabelX`/`LabelY` carry the
+  primary label's position once the widget stores one, which is the case after any save in the editor,
+  and are null for a widget that only stores an alignment.
+  - A position is a percentage of the button's content box: `0` is flush left or top, `50` centered,
+    `100` flush right or bottom. At `X = 25` a quarter of the free space is left of the label, so a label
+    never leaves the box.
+  - For the primary label, `TextAlign` and `LabelPosition` always name the third of the box the position
+    falls in (`left`, `center`, `right` and `top`, `center`, `bottom`), so a provider that draws it at nine
+    places only can keep using them. An extra label carries `X`/`Y` alone.
+  - The list is empty for every other widget and for a button without extra labels. A provider built
+    against an SDK that predates these members never sees them and draws the primary label at
+    `TextAlign`/`LabelPosition`, as before; nothing else about the surface changes.
 - **A widget with a transparent background arrives without one.** When the user makes a widget's
   background transparent, its `Appearance.BackgroundColor` is null, the same as a widget with no colour of
   its own: draw the folder background behind that key, or your own default where there is none.

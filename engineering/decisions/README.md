@@ -43,6 +43,7 @@ code, protocol schemas, issue discussions or exhaustive option lists.
 - [0081 - Variables come from one provider catalog and carry attributes and a write capability](0081-variables-carry-attributes-and-a-write-capability.md)
 - [0103 - Icon appearances are trait-tagged assets of one icon](0103-icon-appearances-are-trait-tagged-assets-of-one-icon.md)
 - [0104 - Keyboard key names mean labels for letters and positions for punctuation](0104-keyboard-key-names-mean-labels-for-letters-and-positions-for-punctuation.md)
+- [0114 - Action Button labels are a capped list whose first entry is the legacy label](0114-action-button-labels-are-a-capped-list-whose-first-entry-is-the-legacy-label.md)
 
 ## Plugins
 

@@ -7,7 +7,7 @@ public sealed class LabelRenderFailureLog
 {
 	internal const int MaxTrackedLabels = 1024;
 
-	private readonly ConcurrentDictionary<(Guid WidgetId, string State), string> _lastLogged = new();
+	private readonly ConcurrentDictionary<(Guid WidgetId, string State, int Label), string> _lastLogged = new();
 	private readonly ILogger _logger;
 
 	public LabelRenderFailureLog(ILogger logger)
@@ -15,23 +15,24 @@ public sealed class LabelRenderFailureLog
 		_logger = logger;
 	}
 
-	public void Failed(Guid widgetId, string state, string template, Exception exception)
+	public void Failed(Guid widgetId, string state, int label, string template, Exception exception)
 	{
-		if (!ShouldLog((widgetId, state), template + "\n" + exception.Message))
+		if (!ShouldLog((widgetId, state, label), template + "\n" + exception.Message))
 		{
 			return;
 		}
 
 		_logger.Warning(exception,
-			"Label of widget {WidgetId} (state {State}) failed to render and shows a placeholder: {Error}",
+			"Label {Label} of widget {WidgetId} (state {State}) failed to render and shows a placeholder: {Error}",
+			label,
 			widgetId,
 			state,
 			exception.Message);
 	}
 
-	public void Succeeded(Guid widgetId, string state)
+	public void Succeeded(Guid widgetId, string state, int label)
 	{
-		_lastLogged.TryRemove((widgetId, state), out _);
+		_lastLogged.TryRemove((widgetId, state, label), out _);
 	}
 
 	public void PreviewFailed(Exception exception)
@@ -39,7 +40,7 @@ public sealed class LabelRenderFailureLog
 		_logger.Debug(exception, "Label preview failed to render: {Error}", exception.Message);
 	}
 
-	private bool ShouldLog((Guid WidgetId, string State) key, string signature)
+	private bool ShouldLog((Guid WidgetId, string State, int Label) key, string signature)
 	{
 		if (_lastLogged.Count >= MaxTrackedLabels)
 		{

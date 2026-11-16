@@ -64,6 +64,19 @@ public static class DeviceSurfaceMapper
 					FontSize = appearance.FontSize,
 					TextAlign = appearance.TextAlign,
 					LabelPosition = appearance.LabelPosition,
+					LabelX = appearance.LabelX,
+					LabelY = appearance.LabelY,
+					ExtraLabels =
+					[
+						.. appearance.ExtraLabels.Select(label => new DeviceSurfaceLabelDto
+						{
+							Text = label.Text,
+							Color = label.Color,
+							FontSize = label.FontSize,
+							X = label.X,
+							Y = label.Y
+						})
+					],
 					Extra = appearance.Extra
 				}
 				: null,

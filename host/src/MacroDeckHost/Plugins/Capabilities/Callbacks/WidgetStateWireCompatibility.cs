@@ -127,7 +127,8 @@ internal static class WidgetStateWireCompatibility
 			BorderStyle = dto.BorderStyle,
 			BorderColor = dto.BorderColor,
 			AccentColor = dto.AccentColor,
-			IconAppearance = dto.IconAppearance
+			IconAppearance = dto.IconAppearance,
+			LabelNumber = dto.LabelNumber
 		};
 	}
 

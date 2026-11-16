@@ -14410,6 +14410,12 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Popisek</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Který popisek se změní. Popisek 1 je hlavní; popisek, který ještě neexistuje, se přidá.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Měněný popisek</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Popisek tlačítka</value>
   </data>
@@ -20004,6 +20010,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Znovu načíst možnosti</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Liší se od výchozího</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Toto pole není v této verzi Macro Deck podporováno</value>
   </data>
@@ -21435,6 +21444,9 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Pozice myši na obrazovce</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Přidat popisek</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Přidat pravidlo</value>
   </data>
@@ -21494,6 +21506,33 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Tato konfigurace je pro vizuální editor příliš velká. Pro další úpravy zde odeberte akce či události v režimu JSON.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Popisek {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Upravovaný popisek</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Typografie</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Vodorovná pozice (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Svislá pozice (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Spravovat tento popisek</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Vložit jako nový popisek</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Nahradit zkopírovaným popiskem</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Obnovit poslední funkční verzi</value>

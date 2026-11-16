@@ -14411,6 +14411,12 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Label</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Label mana yang diubah. Label 1 adalah label utama; label yang belum ada akan ditambahkan.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Label yang diubah</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Label tombol</value>
   </data>
@@ -20005,6 +20011,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Muat ulang opsi</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Berbeda dari bawaan</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Kolom ini tidak didukung oleh versi Macro Deck ini</value>
   </data>
@@ -21454,6 +21463,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Posisi kursor mouse di layar</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Tambah label</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Tambah aturan</value>
   </data>
@@ -21513,6 +21525,33 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Konfigurasi ini terlalu besar untuk editor visual. Hapus aksi atau peristiwa di mode JSON agar dapat diedit lagi di sini.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Label {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Label yang sedang diedit</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Teks</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Tipografi</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Posisi horizontal (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Posisi vertikal (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Kelola label ini</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Tempel sebagai label baru</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Ganti dengan label yang disalin</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Pulihkan versi terakhir yang berfungsi</value>

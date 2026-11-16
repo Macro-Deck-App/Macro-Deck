@@ -14411,6 +14411,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Etiket</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Hangi etiketin değiştirileceği. Etiket 1 ana etikettir; henüz olmayan bir etiket eklenir.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Değiştirilecek etiket</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Düğme etiketi</value>
   </data>
@@ -20005,6 +20011,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Seçenekleri yeniden yükle</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Varsayılandan farklı</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Bu alan, bu Macro Deck sürümünde desteklenmiyor</value>
   </data>
@@ -21454,6 +21463,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Ekrandaki fare konumu</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Etiket ekle</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Kural ekle</value>
   </data>
@@ -21513,6 +21525,33 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Bu yapılandırma görsel düzenleyici için fazla büyük. Burada yeniden düzenlemek için JSON modunda eylem ya da olayları kaldırın.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Etiket {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Düzenlenen etiket</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Metin</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Tipografi</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Yatay konum (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Dikey konum (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Bu etiketi yönetin</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Yeni etiket olarak yapıştırın</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Kopyalanan etiketle değiştirin</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Son çalışan sürümü geri yükle</value>

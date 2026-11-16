@@ -89,6 +89,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetLabelDescription(),
 			WidgetAppearanceProperty.Label,
 			[
+				WidgetActionParameters.LabelNumberParameter(),
 				ActionParameter.MultilineText("label",
 					AppStrings.Integrations.Widgets.Actions.LabelLabel(),
 					AppStrings.Integrations.Widgets.Actions.LabelDescription(),
@@ -97,7 +98,11 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			() => _widgets,
 			// Empty is meaningful here: a label is text, and clearing it is a thing to want. Every
 			// other property reads empty as "unchanged", because there is no useful empty color.
-			context => new WidgetAppearancePatch { Label = ReadText(context, "label") });
+			context => new WidgetAppearancePatch
+			{
+				Label = ReadText(context, "label"),
+				LabelNumber = WidgetActionParameters.ReadLabelNumber(context)
+			});
 	}
 
 	private WidgetAppearanceActionDefinition SetBackgroundColor()
@@ -128,6 +133,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetLabelColorDescription(),
 			WidgetAppearanceProperty.LabelColor,
 			[
+				WidgetActionParameters.LabelNumberParameter(),
 				AlphaColor(AppStrings.Integrations.Widgets.Actions.ColorLabel())
 			],
 			() => _widgets,
@@ -135,7 +141,8 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			{
 				LabelColor = WidgetActionParameters.IsReset(context, "color")
 					? null
-					: WidgetActionParameters.ReadOptional(context, "color")
+					: WidgetActionParameters.ReadOptional(context, "color"),
+				LabelNumber = WidgetActionParameters.ReadLabelNumber(context)
 			},
 			context => WidgetActionParameters.IsReset(context, "color")
 				? [WidgetAppearanceProperty.LabelColor]
@@ -315,6 +322,7 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 			AppStrings.Integrations.Widgets.Actions.SetFontDescription(),
 			WidgetAppearanceProperty.Font,
 			[
+				WidgetActionParameters.LabelNumberParameter(),
 				ActionParameter.Autocomplete("fontFaceId",
 					AppStrings.Integrations.Widgets.Actions.FontLabel(),
 					optionsSourceId: WidgetOptionsSources.Fonts,
@@ -355,7 +363,8 @@ public sealed class WidgetIntegration : IIntegration, ISystemIntegration
 				FontFaceId = WidgetActionParameters.ReadOptional(context, "fontFaceId"),
 				FontSize = WidgetActionParameters.ReadNumber(context, "fontSize") is > 0 and var size ? size : null,
 				TextAlign = WidgetActionParameters.ReadOptional(context, "textAlign"),
-				LabelPosition = WidgetActionParameters.ReadOptional(context, "labelPosition")
+				LabelPosition = WidgetActionParameters.ReadOptional(context, "labelPosition"),
+				LabelNumber = WidgetActionParameters.ReadLabelNumber(context)
 			});
 	}
 
