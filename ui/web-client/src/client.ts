@@ -685,14 +685,6 @@ export class Client {
     }
   }
 
-  async saveAppearance(mode: ThemeMode, accent: string): Promise<void> {
-    try {
-      await this.http.put('/api/settings/appearance', { themeMode: mode, accentColor: accent });
-    } catch {
-      // The choice still applies here; the host simply did not take it.
-    }
-  }
-
   // A widget's or plugin's text has no bundled fallback (#833's slice), so a failed fetch here leaves
   // it painting `[[scope:key]]` until a retry catches up; the first attempt still returns promptly so
   // start()/signIn() never block on it.
