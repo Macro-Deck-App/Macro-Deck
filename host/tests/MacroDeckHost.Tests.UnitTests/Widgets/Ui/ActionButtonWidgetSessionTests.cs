@@ -27,6 +27,12 @@ namespace MacroDeckHost.Tests.UnitTests.Widgets.Ui;
 [TestFixture]
 public class ActionButtonWidgetSessionTests
 {
+	private const string PrimaryPlaced =
+		"actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary";
+
+	private const string FirstExtraLabel =
+		"actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0";
+
 	private static readonly Guid _widgetId = Guid.NewGuid();
 
 	private const string TwoStateData =
@@ -802,6 +808,88 @@ public class ActionButtonWidgetSessionTests
 	}
 
 	[Test]
+	public async Task An_open_tile_shows_an_extra_label_that_was_added_to_the_button_after_it_opened()
+	{
+		var fixture = Build("{\"label\":\"Main\",\"stateMode\":false}", true);
+
+		fixture.Signals.RaiseDataChanged(new WidgetEntity
+		{
+			Id = _widgetId,
+			Type = WidgetTypeIds.ActionButton,
+			Data = """{"label":"Main","stateMode":false,"extraLabels":[{"id":"a","label":"Second"}]}"""
+		});
+		await fixture.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Host.ById(FirstExtraLabel)
+					.Text("text"),
+				Is.EqualTo("Second"));
+			Assert.That(fixture.Host
+					.ById(PrimaryPlaced)
+					.Text("text"),
+				Is.EqualTo("Main"));
+		});
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_state_change_swaps_the_extra_labels_without_rebuilding_the_tile()
+	{
+		const string data = """
+							{"stateMode":true,"activeStateId":"a",
+							 "states":[{"id":"a","label":"A","appearance":{"label":"A","extraLabels":[{"id":"x","label":"Idle"}]}},
+							           {"id":"b","label":"B","appearance":{"label":"B","extraLabels":[{"id":"y","label":"Busy"}]}}]}
+							""";
+		var fixture = Build(data, true);
+
+		fixture.Host.ClearPatches();
+		fixture.Signals.RaiseStateChanged(
+			new WidgetStateUpdatedEvent { WidgetId = _widgetId.ToString(), StateId = "b" });
+		await fixture.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Host.ById(FirstExtraLabel)
+					.Text("text"),
+				Is.EqualTo("Busy"));
+			Assert.That(fixture.Host.Patches.SelectMany(p => p.Operations).Select(o => o.Op),
+				Has.All.EqualTo(UiPatchOperations.SetProperties));
+		});
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
+	public async Task A_template_in_an_extra_label_is_shown_rendered_once_its_text_arrives()
+	{
+		const string data = """
+							{"stateMode":false,"label":"Main","extraLabels":[{"id":"a","label":"{{ vars.cpu }} %"}]}
+							""";
+		var fixture = Build(data, true);
+
+		fixture.Signals.RaiseLabelChanged(new LabelTextUpdatedEvent
+		{
+			WidgetId = _widgetId.ToString(),
+			State = "off",
+			Text = "Main",
+			ExtraTexts = ["42 %"]
+		});
+		await fixture.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.LabelSubscriptions.HasSubscribers(_widgetId.ToString(), "off"), Is.True);
+			Assert.That(fixture.Host.ById(FirstExtraLabel)
+					.Text("text"),
+				Is.EqualTo("42 %"));
+		});
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
 	public async Task A_press_on_a_widget_that_is_no_longer_stored_runs_nothing()
 	{
 		var fixture = Build(FlowData("original"), true);
@@ -841,6 +929,9 @@ public class ActionButtonWidgetSessionTests
 		var configState = new UiState<ActionButtonWidgetData>(config);
 		var activeState = new UiState<string?>(config.InitialStateId);
 		var labelText = new UiState<string?>(initialLabel ?? config.Resolve(activeState.Peek()).Label);
+		var extraLabelTexts = new UiState<IReadOnlyList<string?>>(config.Resolve(activeState.Peek())
+			.ExtraLabels.Select(label => label.Text)
+			.ToList());
 		var iconResourcesState
 			= new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(
 				new Dictionary<WidgetIconReference, UiResource>());
@@ -866,6 +957,7 @@ public class ActionButtonWidgetSessionTests
 		var session = new ActionButtonWidgetSession(configState,
 			activeState,
 			labelText,
+			extraLabelTexts,
 			iconResourcesState,
 			iconProviderState,
 			widget,
@@ -885,6 +977,7 @@ public class ActionButtonWidgetSessionTests
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
 			labelText,
+			extraLabelTexts,
 			iconResourcesState,
 			iconProviderState,
 			imageResource,

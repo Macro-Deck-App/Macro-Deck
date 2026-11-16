@@ -1,9 +1,10 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
 
-import { ActionBlock, WIDGET_APPEARANCE_RESET } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, WIDGET_APPEARANCE_RESET } from '@macro-deck/runtime';
 import { ApiService, IconImageService } from '@shared';
 import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
 import { SelectComponent } from '../../../forms/select/select.component';
@@ -385,6 +386,57 @@ describe('WidgetAppearanceActionFieldsComponent', () => {
       ['action-1', 'iconOffsetY', ''],
       ['action-1', 'iconOpacity', ''],
     ]);
+  });
+
+  const labelNumberParameter = (value: string): ActionBlockParameter => ({
+    name: 'labelNumber', type: 'choice', label: 'Label to change', value,
+    options: [1, 2, 3, 4].map(number => ({ value: `${number}`, label: `Label ${number}` })),
+  });
+
+  it('offers the label to change on the label actions, starting at the primary label, and writes the picked one', async () => {
+    const setLabel = block('set-label');
+    setLabel.parameters = [...(setLabel.parameters ?? []), labelNumberParameter('')];
+    fixture.componentRef.setInput('block', setLabel);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const select = fixture.debugElement.query(By.directive(SelectComponent));
+    expect((select.componentInstance as SelectComponent).options.map(option => option.label))
+      .toEqual(['Label 1', 'Label 2', 'Label 3', 'Label 4']);
+    expect(select.injector.get(NgModel).model).toBe('1');
+
+    select.triggerEventHandler('ngModelChange', '3');
+
+    expect(updateParam.calls.mostRecent().args).toEqual(['action-1', 'labelNumber', '3']);
+  });
+
+  it('hides the label to change for a widget that has only the one label, and keeps it for an Action Button', async () => {
+    const render = async (type: string) => {
+      options.getOptions.and.resolveTo({
+        options: [{ value: 'clock', metadata: { type, appearanceProperties: 'Label,LabelColor,Font' } }],
+        allowsCustomValue: false,
+      });
+      const setLabel = block('set-label');
+      setLabel.parameters = [...(setLabel.parameters ?? []), labelNumberParameter('2')];
+      fixture.componentRef.setInput('block', setLabel);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return fixture.debugElement.query(By.directive(SelectComponent));
+    };
+
+    expect(await render('Clock')).toBeNull();
+    expect(await render('ActionButton')).not.toBeNull();
+  });
+
+  it('shows no label picker for an action that does not change a label', async () => {
+    fixture.componentRef.setInput('block', block('set-background-color'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.directive(SelectComponent))).toBeNull();
   });
 
   it('keeps every font field explicitly unchanged until the user selects a value', async () => {

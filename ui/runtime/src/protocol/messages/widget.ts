@@ -208,6 +208,7 @@ export interface LabelTextUpdatedEvent {
   widgetId: string;
   state: string;
   text: string | null;
+  extraTexts?: (string | null)[];
 }
 
 export interface WidgetStateUpdatedEvent {

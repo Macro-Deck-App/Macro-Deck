@@ -760,6 +760,180 @@ public class WidgetAppearanceJsonTests
 	}
 #pragma warning restore CS0618
 
+	[Test]
+	public void A_patch_without_a_label_number_changes_the_primary_label_and_leaves_the_extra_labels()
+	{
+		var data = Parse("""{"label":"Main","extraLabels":[{"id":"a","label":"Second"}]}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { Label = "Changed", LabelColor = "#ff0000" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data["label"]!.GetValue<string>(), Is.EqualTo("Changed"));
+			Assert.That(data["labelColor"]!.GetValue<string>(), Is.EqualTo("#ff0000"));
+			Assert.That(ExtraLabel(data, 0)["label"]!.GetValue<string>(), Is.EqualTo("Second"));
+			Assert.That(ExtraLabel(data, 0)["labelColor"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_numbered_patch_changes_that_label_and_leaves_the_primary_label()
+	{
+		var data = Parse("""{"label":"Main","extraLabels":[{"id":"a","label":"Second"}]}""");
+
+		var changed = WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch
+			{
+				LabelNumber = 2,
+				Label = "Changed",
+				FontSize = 22,
+				LabelPosition = "top",
+				BackgroundColor = "#101010"
+			},
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(data["label"]!.GetValue<string>(), Is.EqualTo("Main"));
+			Assert.That(data["fontSize"], Is.Null);
+			Assert.That(ExtraLabel(data, 0)["id"]!.GetValue<string>(), Is.EqualTo("a"));
+			Assert.That(ExtraLabel(data, 0)["label"]!.GetValue<string>(), Is.EqualTo("Changed"));
+			Assert.That(ExtraLabel(data, 0)["fontSize"]!.GetValue<double>(), Is.EqualTo(22));
+			Assert.That(ExtraLabel(data, 0)["labelPosition"]!.GetValue<string>(), Is.EqualTo("top"));
+			Assert.That(ExtraLabel(data, 0)["backgroundColor"], Is.Null);
+			Assert.That(data["backgroundColor"]!.GetValue<string>(), Is.EqualTo("#101010"));
+		});
+	}
+
+	[Test]
+	public void A_numbered_patch_creates_the_label_and_every_label_before_it()
+	{
+		var data = Parse("""{"label":"Main"}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { LabelNumber = 3, Label = "Third" },
+			_offOnly);
+
+		var labels = data["extraLabels"]!.AsArray();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(labels, Has.Count.EqualTo(2));
+			Assert.That(labels[0]!["label"], Is.Null);
+			Assert.That(labels[1]!["label"]!.GetValue<string>(), Is.EqualTo("Third"));
+			Assert.That(labels.Select(label => label!["id"]!.GetValue<string>()), Is.Unique);
+		});
+	}
+
+	[Test]
+	public void A_numbered_patch_on_a_state_button_changes_that_states_own_label()
+	{
+		var data = Parse(
+			"""{"stateMode":true,"states":[{"id":"off","label":"Off","appearance":{}},{"id":"on","label":"On","appearance":{}}]}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { LabelNumber = 2, Label = "Live" },
+			["on"]);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ExtraLabel(Appearance(data, "on")!, 0)["label"]!.GetValue<string>(), Is.EqualTo("Live"));
+			Assert.That(Appearance(data, "off")!["extraLabels"], Is.Null);
+			Assert.That(data["extraLabels"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void Clearing_a_numbered_label_resets_that_label_only()
+	{
+		var data = Parse(
+			"""{"label":"Main","labelColor":"#111111","extraLabels":[{"id":"a","label":"Second","labelColor":"#222222","fontSize":30}]}""");
+
+		var cleared = WidgetAppearanceJson.ClearProperty(data,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.LabelColor,
+			"off",
+			null,
+			2);
+		var missing = WidgetAppearanceJson.ClearProperty(data,
+			WidgetTypeIds.ActionButton,
+			WidgetAppearanceProperty.Font,
+			"off",
+			null,
+			4);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(cleared, Is.True);
+			Assert.That(missing, Is.False);
+			Assert.That(data["labelColor"]!.GetValue<string>(), Is.EqualTo("#111111"));
+			Assert.That(ExtraLabel(data, 0)["labelColor"], Is.Null);
+			Assert.That(ExtraLabel(data, 0)["fontSize"]!.GetValue<double>(), Is.EqualTo(30));
+		});
+	}
+
+	[Test]
+	public void A_patched_alignment_is_a_preset_and_replaces_the_free_position_on_its_axis_only()
+	{
+		var data = Parse(
+			"""{"label":"Main","labelX":20,"labelY":70,"extraLabels":[{"id":"a","label":"Second","labelX":33}]}""");
+
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { TextAlign = "right" },
+			_offOnly);
+		WidgetAppearanceJson.Apply(data,
+			WidgetTypeIds.ActionButton,
+			new WidgetAppearancePatch { LabelNumber = 2, TextAlign = "left" },
+			_offOnly);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(data["textAlign"]!.GetValue<string>(), Is.EqualTo("right"));
+			Assert.That(data["labelX"], Is.Null);
+			Assert.That(data["labelY"]!.GetValue<double>(), Is.EqualTo(70));
+			Assert.That(ExtraLabel(data, 0)["textAlign"]!.GetValue<string>(), Is.EqualTo("left"));
+			Assert.That(ExtraLabel(data, 0)["labelX"], Is.Null);
+		});
+	}
+
+	[Test]
+	public void Clearing_the_font_of_another_widget_type_leaves_its_own_keys_of_the_same_name_alone()
+	{
+		var provider = Parse("""{"label":"Gauge","fontSize":20,"textAlign":"left","labelX":3,"labelY":4}""");
+		var slider = Parse("""{"label":"Volume","labelX":3,"labelY":4}""");
+
+		var cleared = WidgetAppearanceJson.ClearProperty(provider,
+			"acme.gauge",
+			WidgetAppearanceProperty.Font,
+			"off",
+			[WidgetAppearanceProperty.Font]);
+		WidgetAppearanceJson.ClearProperty(slider, WidgetTypeIds.Slider, WidgetAppearanceProperty.Font, "off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(cleared, Is.True);
+			Assert.That(provider["fontSize"], Is.Null);
+			Assert.That(provider["textAlign"], Is.Null);
+			Assert.That(provider["labelX"]!.GetValue<double>(), Is.EqualTo(3));
+			Assert.That(provider["labelY"]!.GetValue<double>(), Is.EqualTo(4));
+			Assert.That(slider["labelX"]!.GetValue<double>(), Is.EqualTo(3));
+			Assert.That(slider["labelY"]!.GetValue<double>(), Is.EqualTo(4));
+		});
+	}
+
+	private static JsonObject ExtraLabel(JsonObject target, int index)
+	{
+		return target["extraLabels"]!.AsArray()[index]!.AsObject();
+	}
+
 	private static JsonObject Parse(string json)
 	{
 		return WidgetAppearanceJson.ParseDataBag(json);

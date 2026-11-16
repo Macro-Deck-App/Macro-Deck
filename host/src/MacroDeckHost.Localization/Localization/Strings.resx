@@ -14421,6 +14421,12 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Label</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Which label this changes. Label 1 is the main label; a label that does not exist yet is added.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Label to change</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Button label</value>
   </data>
@@ -20030,6 +20036,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Reload options</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Changed from the default</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>This field isn't supported by this version of Macro Deck</value>
   </data>
@@ -21480,6 +21489,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Mouse position on the screen</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Add label</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Add rule</value>
   </data>
@@ -21539,6 +21551,34 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>This configuration is too large for the visual editor. Remove actions or events in JSON mode to edit it here again.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Label {number}</value>
+    <comment>[number:int]</comment>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Label being edited</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Typography</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Horizontal position (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Vertical position (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Manage this label</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Paste as new label</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Replace with copied label</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Restore last working version</value>

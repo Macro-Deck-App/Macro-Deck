@@ -21,6 +21,7 @@ public sealed class ObsIntegration : IPluginIntegration, IVariableProvider, IEve
 | [Actions](/features/actions/) | `IActionDefinition`, `IActionExecutor` | Do something when a button is pressed or a flow runs. |
 | [Button states](/features/button-states/) | `IStateProviderActionDefinition` | Show on/off, muted, recording and similar states on a button. |
 | [Button icons](/features/button-icons/) | `IIconProviderActionDefinition` | Draw album art, avatars or weather imagery on a button. |
+| [Button labels](/features/button-labels/) | `WidgetAppearancePatch.LabelNumber` | Change one of a button's up to four labels. |
 
 ## Data
 

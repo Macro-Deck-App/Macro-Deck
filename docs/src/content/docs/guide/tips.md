@@ -42,8 +42,34 @@ Unlock the deck to edit it, lock it to press buttons.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
 - **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
   outline with **Label Outline** and the width next to it, or frame it with **Label Box Border** and its
-  width. A width can be changed once its color is set. Each state can have its own. Hardware devices and
+  width. A width appears once its color is set. Each state can have its own. Hardware devices and
   the Companion app keep the default label look for now.
+- **Place an Action Button's label anywhere:** in the **Label** tab, **Horizontal position** and
+  **Vertical position** slide the label across the button, from 0 (flush left or top) over 50 (centered)
+  to 100 (flush right or bottom), so it always stays inside the button. **Align** and **Position** are
+  shortcuts for the nine usual places and set the two sliders for you. **Reset** next to the **Position**
+  heading puts the label back in the center; in a state it returns to the position the button itself has.
+- **Drag a label in the preview:** in an Action Button's editor, grab a label in the button preview at
+  the top and drag it where you want it. The position sliders follow, and dragging another label picks
+  it in the list.
+- **Fold away label settings you do not need:** the **Label** tab is split into **Text**, **Typography**,
+  **Position** and **Appearance**. Click a heading to collapse or expand it; Macro Deck remembers that for
+  every button. A dot next to a heading shows that something in it differs from the default, and **Reset**
+  beside the dot returns only that section to its defaults.
+- **Give an Action Button several labels:** in the **Label** tab, choose **Add label**. A button can have
+  up to four. The list at the top of the tab picks the label you are editing, and each one has its own
+  text, font, size, color and position. The menu next to the list works on the label you picked:
+  **Duplicate** adds a copy of it, **Copy** remembers it, **Paste as new label** and **Replace with copied
+  label** bring a copied label into this or any other button or state, and **Remove** deletes it. The
+  first label cannot be removed.
+  - Every label can show variables, and a label whose text cannot be shown displays `n/v` on its own
+    while the others stay as they are.
+  - A button with several states keeps a separate set of extra labels for each state. Turning **Multi
+    state** on therefore hides the extra labels you added before; they are kept and return when you turn
+    it off again.
+  - **Set Label**, **Set Label Color** and **Set Font** have a **Label to change** setting. It starts at
+    **Label 1**; picking a label the button does not have yet adds it.
+  - Hardware devices and the Companion app show only the first label until they support more.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.

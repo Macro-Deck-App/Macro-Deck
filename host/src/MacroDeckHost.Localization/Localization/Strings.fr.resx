@@ -14418,6 +14418,12 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Libellé</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Le libellé à modifier. Le libellé 1 est le libellé principal ; un libellé qui n'existe pas encore est ajouté.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Libellé à modifier</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Libellé du bouton</value>
   </data>
@@ -20025,6 +20031,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Recharger les options</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Différent de la valeur par défaut</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Ce champ n'est pas pris en charge par cette version de Macro Deck</value>
   </data>
@@ -21456,6 +21465,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Position de la souris à l'écran</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Ajouter un libellé</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Ajouter une règle</value>
   </data>
@@ -21515,6 +21527,33 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Cette configuration est trop volumineuse pour l'éditeur visuel. Supprime des actions ou des événements en mode JSON pour la modifier à nouveau ici.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Libellé {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Libellé en cours de modification</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Texte</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Typographie</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Position horizontale (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Position verticale (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Gérer ce libellé</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Coller comme nouveau libellé</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Remplacer par le libellé copié</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Restaurer la dernière version fonctionnelle</value>

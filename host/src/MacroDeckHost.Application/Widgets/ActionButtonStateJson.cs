@@ -66,6 +66,7 @@ public static partial class ActionButtonStateJson
 		}
 
 		PruneDegenerateMapping(data);
+		ActionButtonLabelJson.Normalize(data);
 		ActionButtonIconJson.Normalize(data);
 
 		return data;

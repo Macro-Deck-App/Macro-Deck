@@ -84,8 +84,8 @@ public sealed class LabelRenderBackgroundService : HostReadyBackgroundService
 
 		foreach (var state in _subscriptions.SubscribedStates(id))
 		{
-			var text = await labelText.ResolveText(widgetId, state, cancellationToken);
-			var evt = new LabelTextUpdatedEvent { WidgetId = id, State = state, Text = text };
+			var texts = await labelText.ResolveTexts(widgetId, state, cancellationToken);
+			var evt = LabelTextUpdatedEvent.From(id, state, texts);
 
 			// Raised beside the client push, carrying the exact resolved text it computed, so an open
 			// session for this widget's state can never disagree with what a legacy client is pushed.

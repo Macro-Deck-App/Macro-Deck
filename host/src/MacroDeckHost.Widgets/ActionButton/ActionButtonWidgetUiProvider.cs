@@ -26,6 +26,8 @@ namespace MacroDeckHost.Widgets.ActionButton;
 
 public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 {
+	private readonly ActionButtonLabelClipboard _labelClipboard = new();
+
 	// The owner id every image resource decoded from a legacy imageUrl data URI is registered under.
 	private const string ImageResourceOwnerId = "app.macro-deck.widget-action-button-image";
 
@@ -134,7 +136,10 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 				culture,
 				_timeProvider,
 				_iconPackCache,
-				sessionLifetime.Token);
+				sessionLifetime.Token)
+			{
+				LabelClipboard = _labelClipboard
+			};
 			var configView = new UiView(request.Surface,
 				ActionButtonWidgetConfigView.Build(configData,
 					WidgetConfigSurfaces.AspectRatio(request.Surface),
@@ -218,19 +223,21 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 			: null;
 		var activeState = new UiState<string?>(resolvedState?.Id ?? config.InitialStateId);
 		var configState = new UiState<ActionButtonWidgetData>(config);
-		var initialLabel
-			= await ResolveInitialLabelAsync(config,
+		var initialLabels
+			= await ResolveInitialLabelsAsync(config,
 					activeState.Peek(),
 					stored,
 					widget,
 					variableScopeWidgetId,
 					cancellationToken)
 				.ConfigureAwait(false);
-		var labelText = new UiState<string?>(initialLabel);
+		var labelText = new UiState<string?>(initialLabels.Primary);
+		var extraLabelTexts = new UiState<IReadOnlyList<string?>>(initialLabels.Extras);
 
 		var session = new ActionButtonWidgetSession(configState,
 			activeState,
 			labelText,
+			extraLabelTexts,
 			iconResourcesState,
 			iconProviderState,
 			widget,
@@ -253,6 +260,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		var element = ActionButtonWidgetView.Build(configState,
 			activeState,
 			labelText,
+			extraLabelTexts,
 			iconResourcesState,
 			iconProviderState,
 			imageResource,
@@ -311,7 +319,7 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 	/// data to resolve, so its own raw label goes through the preview path instead - against
 	/// <paramref name="variableScopeWidgetId" />'s widget-scoped variables when the surface named one, and
 	/// against global variables alone when it did not.</summary>
-	private async Task<string?> ResolveInitialLabelAsync(
+	private async Task<LabelTexts> ResolveInitialLabelsAsync(
 		ActionButtonWidgetData config,
 		string? stateId,
 		bool interactive,
@@ -319,15 +327,15 @@ public sealed class ActionButtonWidgetUiProvider : IBuiltInWidgetUiProvider
 		string? variableScopeWidgetId,
 		CancellationToken cancellationToken)
 	{
-		var rawLabel = config.Resolve(stateId).Label;
-
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var labelTextService = scope.ServiceProvider.GetRequiredService<ILabelTextService>();
 
 		return interactive
-			? await labelTextService.ResolveText(widget.Id, stateId ?? "off", cancellationToken).ConfigureAwait(false)
-			: await labelTextService
-				.ResolvePreview(new LabelImagePreviewRequest { Label = rawLabel, ScopeRefId = variableScopeWidgetId },
+			? await labelTextService.ResolveTexts(widget.Id, stateId ?? "off", cancellationToken).ConfigureAwait(false)
+			: await ActionButtonWidgetSession
+				.ResolvePreviewTextsAsync(labelTextService,
+					config.Resolve(stateId),
+					variableScopeWidgetId,
 					cancellationToken)
 				.ConfigureAwait(false);
 	}

@@ -73,6 +73,34 @@ internal sealed class LabelRenderBackgroundServiceTests
 		});
 	}
 
+	[Test]
+	public async Task Process_pushes_the_extra_label_texts_with_the_primary_one_and_none_for_a_button_without_them()
+	{
+		var withExtras = Guid.NewGuid();
+		var plain = Guid.NewGuid();
+		_subscriptions.Add("conn-1", withExtras.ToString(), "on");
+		_subscriptions.Add("conn-1", plain.ToString(), "on");
+		_labelText.TextByState[(withExtras, "on")] = "Main";
+		_labelText.ExtraTextsByState[(withExtras, "on")] = ["42 %", null];
+		_labelText.TextByState[(plain, "on")] = "Plain";
+
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(withExtras);
+		_queue.Enqueue(plain);
+
+		await WaitUntil(() => _transport.Sent.Count == 2 && _renderSignals.LabelChanges.Count == 2);
+
+		var rich = _transport.Sent.Single(evt => evt.WidgetId == withExtras.ToString());
+		Assert.Multiple(() =>
+		{
+			Assert.That(rich.Text, Is.EqualTo("Main"));
+			Assert.That(rich.ExtraTexts, Is.EqualTo(new[] { "42 %", null }));
+			Assert.That(_renderSignals.LabelChanges.Single(evt => evt.WidgetId == withExtras.ToString()).ExtraTexts,
+				Is.EqualTo(new[] { "42 %", null }));
+			Assert.That(_transport.Sent.Single(evt => evt.WidgetId == plain.ToString()).ExtraTexts, Is.Null);
+		});
+	}
+
 	// A widget nobody is subscribed to must neither be pushed to clients nor raise the render signal -
 	// Process returns before it ever resolves or raises anything for it.
 	[Test]
@@ -114,9 +142,15 @@ internal sealed class LabelRenderBackgroundServiceTests
 	{
 		public Dictionary<(Guid WidgetId, string State), string> TextByState { get; } = [];
 
-		public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
+		public Dictionary<(Guid WidgetId, string State), IReadOnlyList<string?>> ExtraTextsByState { get; } = [];
+
+		public Task<LabelTexts> ResolveTexts(
+			Guid widgetId,
+			string state,
+			CancellationToken cancellationToken = default)
 		{
-			return Task.FromResult(TextByState.TryGetValue((widgetId, state), out var text) ? text : null);
+			return Task.FromResult(new LabelTexts(TextByState.GetValueOrDefault((widgetId, state)),
+				ExtraTextsByState.GetValueOrDefault((widgetId, state)) ?? []));
 		}
 
 		public Task<string?> ResolvePreview(

@@ -1,7 +1,15 @@
 <ng-template #previewBlock>
   <div class="editor-preview">
     <div
+      #previewFrame
       class="preview-frame preview-frame-scaled"
+      [class.preview-frame--label-drag]="labelDrag() !== null"
+      [class.preview-frame--label-hover]="labelHover()"
+      (pointerleave)="labelHover.set(false)"
+      (pointerdown)="onPreviewPointerDown($event, previewFrame)"
+      (pointermove)="onPreviewPointerMove($event, previewFrame)"
+      (pointerup)="onPreviewPointerUp($event, previewFrame)"
+      (pointercancel)="onPreviewPointerUp($event, previewFrame)"
       [style.width.px]="previewReference.width * previewScale"
       [style.height.px]="previewReference.height * previewScale"
       [style.border-radius.px]="22 * previewScale">

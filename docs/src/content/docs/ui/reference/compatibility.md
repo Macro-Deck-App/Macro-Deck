@@ -60,6 +60,7 @@ profile's rule decides which of the two a new feature is. [Modifiers](/ui/compon
 | `page` | A surface kind | Has no page tab, so never opens one. See [Integration pages](/ui/views/page/). |
 | `split` (`UiSplit`), `list` (`UiConfigList`), `list-item` (`UiConfigListItem`) and `empty-state` (`UiEmptyState`) | Configuration types | Declines each one and draws the node's explicit `fallback`; without one, nothing. No fallback is invented for you. See [Page layout](/ui/views/configuration/#page-layout). |
 | `railTitle` on `split`; `label`, `description`, `icon`, `badge`, `severity` and `selected` on `list-item`; `icon`, `title` and `text` on `empty-state` | Properties of the new types | Only a reader that knows the types reads them. |
+| `section` (`UiConfigSection`), its `modified` and `memoryKey` properties, and the `reset` config event | A configuration type, properties and an event name | Declines the type and draws the node's explicit `fallback`; without one, nothing. Never sends `reset`. See [Collapsible sections](/ui/views/configuration/#collapsible-sections). |
 | `variant` and `iconWithLabel` on `button` | Properties | Ignores them and draws an ordinary button, icon-only when it has an `icon`. |
 | `align`, `gap` and `variant` (`card`) on `stack` | Properties | Ignores them and draws a plain stack, packed at the start with the usual spacing; an `accent` on it then keeps its old meaning. |
 | `badge` on `heading` | A property | Ignores it and draws the caption alone. |

@@ -483,6 +483,40 @@ public class WidgetAppearanceServiceTests
 		});
 	}
 
+	[TestCase(0)]
+	[TestCase(5)]
+	public async Task A_label_number_the_button_cannot_have_is_rejected_and_not_written(int labelNumber)
+	{
+		var fixture = new Fixture("""{"label":"Main"}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ Label = "Changed", LabelNumber = labelNumber }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Rejected));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_numbered_label_change_is_stored_on_the_addressed_label()
+	{
+		var fixture = new Fixture("""{"label":"Main"}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+			{ Label = "Fourth", LabelNumber = 4 }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(fixture.Widgets.Updated.Single().Data, Does.Contain("Fourth"));
+			Assert.That(ActionButtonLabelJson.ReadExtraLabels(
+					ActionButtonStateJson.ParseDataBag(fixture.Widgets.Updated.Single().Data)),
+				Has.Count.EqualTo(3));
+		});
+	}
+
 	[Test]
 	public async Task IconAppearance_OnAProviderControlledButton_IsDroppedLikeTheIcon()
 	{

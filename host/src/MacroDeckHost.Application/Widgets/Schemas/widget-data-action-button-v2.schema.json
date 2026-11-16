@@ -228,12 +228,56 @@
       "enum": ["top", "center", "bottom", null],
       "description": "Where the label sits relative to the icon. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own position is unset - it is not a duplicate of the per-state value."
     },
+    "labelX": {
+      "type": ["number", "null"],
+      "description": "Where the label sits across the button's content box, in percent: 0 is flush left, 50 centred, 100 flush right. Unset means the place textAlign names. The renderer clamps this to 0..100. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own position is unset."
+    },
+    "labelY": {
+      "type": ["number", "null"],
+      "description": "Where the label sits down the button's content box, in percent: 0 is flush top, 50 centred, 100 flush bottom. Unset means the place labelPosition names. The renderer clamps this to 0..100. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own position is unset."
+    },
+    "extraLabels": {
+      "$ref": "#/$defs/extraLabels",
+      "description": "The labels the button shows besides its primary one while stateMode is off. With stateMode on every state carries its own list and this one is not shown; it is kept and shows again when stateMode is turned off."
+    },
     "border": {
       "$ref": "#/$defs/widgetBorder",
       "description": "Outline drawn along the widget edge. With stateMode off this is what renders; with it on, this is the fallback a state uses when that state's own border is unset - it is not a duplicate of the per-state value."
     }
   },
   "$defs": {
+    "extraLabels": {
+      "type": ["array", "null"],
+      "description": "The labels drawn over the button besides its primary label, in drawing order. The host keeps the first three and drops the rest.",
+      "items": { "$ref": "#/$defs/extraLabel" }
+    },
+    "extraLabel": {
+      "type": "object",
+      "description": "One extra label. It uses the primary label's key names; a key it leaves unset takes the default, never the primary label's value.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identity of the label within its list. The host assigns one when it is missing, repeated or longer than 12 characters."
+        },
+        "label": {
+          "type": ["string", "null"],
+          "description": "Label text. May carry a template. An empty text draws nothing."
+        },
+        "labelColor": { "type": ["string", "null"], "description": "Text color." },
+        "labelBoxColor": { "type": ["string", "null"], "description": "Color of the box behind the text." },
+        "labelShadow": { "type": ["boolean", "null"], "description": "Whether the text casts a shadow. Unset means on." },
+        "labelOutlineColor": { "type": ["string", "null"], "description": "Color of the text outline." },
+        "labelOutlineWidth": { "type": ["number", "null"], "description": "Width of the text outline, in percent of the cell." },
+        "labelBoxBorderColor": { "type": ["string", "null"], "description": "Color of the box border." },
+        "labelBoxBorderWidth": { "type": ["number", "null"], "description": "Width of the box border, in percent of the cell." },
+        "fontFaceId": { "type": ["string", "null"], "description": "Font face of the text." },
+        "fontSize": { "type": ["number", "null"], "description": "Text size, in percent of the cell." },
+        "labelX": { "type": ["number", "null"], "description": "Horizontal position, in percent of the button's content box: 0 flush left, 50 centred, 100 flush right. Unset means the place textAlign names, else centred." },
+        "labelY": { "type": ["number", "null"], "description": "Vertical position, in percent of the button's content box: 0 flush top, 50 centred, 100 flush bottom. Unset means the place labelPosition names, else centred." },
+        "textAlign": { "enum": ["left", "center", "right", null], "description": "One of the three preset horizontal positions, used while labelX is unset." },
+        "labelPosition": { "enum": ["top", "center", "bottom", null], "description": "One of the three preset vertical positions, used while labelY is unset." }
+      }
+    },
     "widgetBorder": {
       "type": "object",
       "description": "Outline drawn along the inner edge of the widget.",
@@ -325,6 +369,18 @@
         "labelPosition": {
           "enum": ["top", "center", "bottom", null],
           "description": "Where the label sits relative to the icon for this state."
+        },
+        "labelX": {
+          "type": ["number", "null"],
+          "description": "Horizontal label position for this state, in percent of the button's content box."
+        },
+        "labelY": {
+          "type": ["number", "null"],
+          "description": "Vertical label position for this state, in percent of the button's content box."
+        },
+        "extraLabels": {
+          "$ref": "#/$defs/extraLabels",
+          "description": "The labels this state shows besides its primary one. A state never falls back to the button's or another state's list."
         },
         "labelColor": {
           "type": ["string", "null"],

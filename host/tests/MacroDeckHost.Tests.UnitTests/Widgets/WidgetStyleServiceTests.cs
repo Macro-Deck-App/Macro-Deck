@@ -22,6 +22,8 @@ public class WidgetStyleServiceTests
 										"labelBoxColor":"#010101","labelShadow":false,"labelOutlineColor":"#ff0000",
 										"labelOutlineWidth":2,"labelBoxBorderColor":"#00ff00","labelBoxBorderWidth":3,
 										"fontFaceId":"font-a","fontSize":20,"textAlign":"left","labelPosition":"top",
+										"labelX":12,"labelY":80,
+										"extraLabels":[{"id":"x","label":"Source extra"}],
 										"border":{"style":"static","color":"#abcdef"},
 										"icon":{"type":"pack","reference":"pack/source"},"iconColor":"#123456",
 										"iconDisplay":{"fit":"cover","zoom":150}}
@@ -30,7 +32,8 @@ public class WidgetStyleServiceTests
 	private static readonly string[] _buttonStyleKeys =
 	[
 		"backgroundColor", "labelColor", "labelBoxColor", "labelShadow", "labelOutlineColor", "labelOutlineWidth",
-		"labelBoxBorderColor", "labelBoxBorderWidth", "fontFaceId", "fontSize", "textAlign", "labelPosition", "border",
+		"labelBoxBorderColor", "labelBoxBorderWidth", "fontFaceId", "fontSize", "textAlign", "labelPosition",
+		"labelX", "labelY", "border",
 		"iconColor", "iconDisplay"
 	];
 
@@ -58,7 +61,7 @@ public class WidgetStyleServiceTests
 				Assert.That(Json(result[key]), Is.EqualTo(Json(expected[key])), key);
 			}
 
-			foreach (var key in new[] { "label", "flows", "icon" })
+			foreach (var key in new[] { "label", "flows", "icon", "extraLabels" })
 			{
 				Assert.That(Json(result[key]), Is.EqualTo(Json(untouched[key])), key);
 			}

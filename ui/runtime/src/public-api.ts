@@ -296,6 +296,7 @@ export {
   type ActionButtonTriggerType,
   BORDER_ANIMATION_PERIOD_MS,
   BUILT_IN_WIDGET_TYPES,
+  type ButtonExtraLabel,
   type ButtonState,
   type ButtonStateDefinition,
   type ButtonStateMapping,

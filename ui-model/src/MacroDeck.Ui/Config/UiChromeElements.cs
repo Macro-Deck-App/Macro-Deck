@@ -647,6 +647,62 @@ public sealed record UiConfigDialog : UiContainer
 }
 
 /// <summary>
+/// A titled group of fields under a header the user clicks to collapse and expand. Use it to keep a long form
+/// scannable: the fields used most stay open, the rest sit one click away.
+///
+/// <para>
+/// Collapsing hides the fields and changes nothing else: they stay in the tree, keep their values and are
+/// submitted with the form. The expansion is the user's own and per client, like an
+/// <see cref="UiAdvancedSection" />'s. <see cref="DefaultExpanded" /> says how the section starts, and a client
+/// that knows <see cref="MemoryKey" /> opens it the way that user left a section of the same name the last
+/// time, in any form.
+/// </para>
+///
+/// <para>
+/// Declaring a handler for <see cref="UiConfigEvents.Reset" /> puts a reset control in the header, which the
+/// renderer offers while <see cref="Modified" /> is true. The handler returns the section's own fields to
+/// their defaults; the section never clears anything by itself.
+/// </para>
+///
+/// <para>
+/// A renderer that predates the type declines it and draws the node's <see cref="UiElement.Fallback" />.
+/// Leave the fallback out only where the renderer is known, such as a host-built form.
+/// </para>
+/// </summary>
+public sealed record UiConfigSection : UiContainer
+{
+	/// <summary>The header's caption.</summary>
+	public UiText Label { get; init; }
+
+	/// <summary>Whether the section starts open for a user with no remembered choice. Absent means open.</summary>
+	public UiValue<bool> DefaultExpanded { get; init; }
+
+	/// <summary>Whether the fields inside differ from their defaults. The header marks a modified section, so a
+	/// collapsed one still shows that it carries settings. Absent means unmodified.</summary>
+	public UiValue<bool> Modified { get; init; }
+
+	/// <summary>The name the client remembers this section's expansion under, shared by every section that
+	/// carries the same one. Absent means the expansion is not remembered beyond the open form.</summary>
+	public UiValue<string> MemoryKey { get; init; }
+
+	/// <inheritdoc />
+	public override string Type => UiConfigPrimitives.Section;
+
+	/// <inheritdoc />
+	protected internal override void DeclareProperties(UiPropertyDeclaration properties)
+	{
+		ArgumentNullException.ThrowIfNull(properties);
+
+		base.DeclareProperties(properties);
+
+		properties.Set(UiConfigProperties.Label, Label.Value);
+		properties.Set(UiConfigProperties.DefaultExpanded, DefaultExpanded);
+		properties.Set(UiConfigProperties.Modified, Modified);
+		properties.Set(UiConfigProperties.MemoryKey, MemoryKey);
+	}
+}
+
+/// <summary>
 /// A compact control that opens a list of actions: its children are <see cref="UiConfigButton" />s, drawn as
 /// the list's entries with their icons and labels, and each raises its own <c>activate</c> (asking first when
 /// it declares a confirmation). <see cref="Label" /> is the control's accessible name, <see cref="Icon" /> its

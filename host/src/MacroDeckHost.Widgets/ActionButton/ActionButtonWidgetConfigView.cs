@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Localization;
@@ -146,8 +147,11 @@ internal static class ActionButtonWidgetConfigView
 			?? ActionButtonWidgetData.DefaultLabelStrokeWidth);
 		var fontFaceId = new UiState<string>(WidgetConfigJson.ReadString(data, "fontFaceId") ?? string.Empty);
 		var fontSize = new UiState<double>(WidgetConfigJson.ReadDouble(data, "fontSize") ?? 14);
-		var textAlign = new UiState<string>(WidgetConfigJson.ReadString(data, "textAlign") ?? "center");
-		var labelPosition = new UiState<string>(WidgetConfigJson.ReadString(data, "labelPosition") ?? "center");
+		var labelX = new UiState<double>(ActionButtonLabelJson.ReadX(model.Data) ?? ActionButtonLabelJson.Center);
+		var labelY = new UiState<double>(ActionButtonLabelJson.ReadY(model.Data) ?? ActionButtonLabelJson.Center);
+		var extraLabels = new UiState<List<JsonObject>>([
+			.. ActionButtonLabelJson.ReadExtraLabels(model.Data).Select(label => (JsonObject)label.DeepClone())
+		]);
 		var rootBorder = WidgetConfigJson.ReadObject(data, "border");
 		var borderStyle = new UiState<string>(WidgetConfigJson.ReadString(rootBorder, "style") ?? "off");
 		var borderColor = new UiState<string>(WidgetConfigJson.ReadString(rootBorder, "color") ?? string.Empty);
@@ -156,6 +160,8 @@ internal static class ActionButtonWidgetConfigView
 
 		// ---- Local, session-only UI state - never bound to a widget-data key ----------------------------
 
+		var selectedLabel = new UiState<int>(0);
+		var labelClipboardVersion = new UiState<int>(0);
 		var pendingOffer = new UiState<ProviderOffer?>(null);
 		var offerUseState = new UiState<bool>(true);
 		var offerUseIcon = new UiState<bool>(true);
@@ -784,6 +790,595 @@ internal static class ActionButtonWidgetConfigView
 
 		// The tab strip is chrome, so its key is the caller's to choose: chrome inside an array item shares
 		// the enclosing structural scope, which would make the root strip and a state's strip one id.
+		IReadOnlyList<UiElement> BuildLabelForm(
+			string suffix,
+			UiBinding<string> labelBinding,
+			UiBinding<string> fontFaceIdBinding,
+			Func<string> currentFontFaceId,
+			Action<string> setFontFaceId,
+			UiBinding<double> fontSizeBinding,
+			LabelAxis xAxis,
+			LabelAxis yAxis,
+			UiBinding<string> labelColorBinding,
+			UiBinding<string> labelBoxColorBinding,
+			UiBinding<bool> labelShadowBinding,
+			UiBinding<string> labelOutlineColorBinding,
+			UiBinding<double> labelOutlineWidthBinding,
+			UiBinding<string> labelBoxBorderColorBinding,
+			UiBinding<double> labelBoxBorderWidthBinding,
+			Func<string> currentLabelOutlineColor,
+			Func<string> currentLabelBoxBorderColor,
+			LabelSections sections)
+		{
+			return
+			[
+				new UiConfigSection
+				{
+					Key = $"text{suffix}",
+					Label = AppStrings.Widgets.Editor.LabelSectionText(),
+					MemoryKey = "action-button.label.text",
+					Children =
+					[
+						new UiStringInput
+						{
+							Key = "label",
+							Label = AppStrings.Widgets.Editor.Label(),
+							Placeholder = AppStrings.Widgets.Editor.ButtonLabelPlaceholder(),
+							// The one field on this form that takes variables, so LiteralOnly stays unset -
+							// the renderer offers the {{ }} helper exactly where the original editor did.
+							Multiline = true,
+							Binding = labelBinding
+						}
+					]
+				},
+				new UiConfigSection
+				{
+					Key = $"type{suffix}",
+					Label = AppStrings.Widgets.Editor.LabelSectionTypography(),
+					MemoryKey = "action-button.label.typography",
+					Modified = UiValue.From(() => sections.IsModified(_typographyKeys)),
+					Events = [UiEventHandler.On(UiConfigEvents.Reset, () => sections.Reset(_typographyKeys))],
+					Children =
+					[
+						// Font, full width on its own line, then Style and Size sharing the next line about
+						// 2:1 (issue #837) - exactly the original appearance form's linked Font/Style
+						// selects plus its Size field, none of which this profile's vocabulary names as one
+						// control. Family is not itself a stored key - only fontFaceId is - so it needs a
+						// transient input (UiInput.Transient): it renders and raises change like every other
+						// control, but the client's draft composer skips it entirely, and picking a family
+						// here only ever resolves a real fontFaceId (that family's first face), mirroring
+						// WidgetFontFaceControlComponent's own onFamilyChange. Style then offers only the
+						// faces the selected family actually ships, recomputed reactively from fontFaceId
+						// since family is derived from it rather than stored beside it.
+						new UiChoiceInput
+						{
+							Key = "fontFamily",
+							Transient = true,
+							Label = AppStrings.Widgets.Appearance.Font.FontLabel(),
+							// A face missing from the catalogue reports its raw id, so the Inherited option
+							// still differs from it and choosing it actually clears the override.
+							Binding = Bind.Custom(() =>
+								{
+									var faceId = currentFontFaceId();
+									var family = FamilyOf(faceId);
+
+									return family.Length == 0 ? faceId : family;
+								},
+								family =>
+								{
+									var faces = FacesForFamily(family);
+									setFontFaceId(faces.Count > 0 ? faces[0].FaceId : string.Empty);
+								}),
+							Options = UiValue.From(() => (IReadOnlyList<UiOption>)
+							[
+								new UiOption
+								{
+									Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited()
+								},
+								.. fontFamilies.Select(FamilyOption)
+							])
+						},
+						new UiConfigStack
+						{
+							Key = "label-appearance-row",
+							Direction = "horizontal",
+							Wrap = false,
+							Children =
+							[
+								new UiChoiceInput
+								{
+									Key = "fontFaceId",
+									Label = AppStrings.Widgets.Appearance.Font.StyleLabel(),
+									Binding = fontFaceIdBinding,
+									Disabled = UiValue.From(() =>
+										FacesForFamily(FamilyOf(currentFontFaceId())).Count == 0),
+									Options = UiValue.From(() =>
+										(IReadOnlyList<UiOption>)FacesForFamily(FamilyOf(currentFontFaceId()))
+											.Select(face => UiOption.Of(face.FaceId, face.StyleName))
+											.ToList()),
+									RowWeight = 2
+								},
+								new UiNumberInput
+								{
+									Key = "fontSize",
+									Label = AppStrings.Widgets.Appearance.Font.SizeLabel(),
+									Binding = fontSizeBinding,
+									Min = 1,
+									Max = 100,
+									RowWeight = 1
+								}
+							]
+						}
+					]
+				},
+				new UiConfigSection
+				{
+					Key = $"place{suffix}",
+					Label = AppStrings.Widgets.Appearance.Font.PositionLabel(),
+					MemoryKey = "action-button.label.position",
+					Modified = UiValue.From(() => sections.IsModified(_positionKeys)),
+					Events = [UiEventHandler.On(UiConfigEvents.Reset, () => sections.Reset(_positionKeys))],
+					Children =
+					[
+						// Align and Position, one non-wrapping line, each a segmented choice whose options
+						// carry an icon instead of text (issue #837) - the original editor's own icon
+						// button groups (icon names recovered from the pre-#791
+						// WidgetFontAppearanceControlComponent).
+						new UiConfigStack
+						{
+							Key = "label-alignment-row",
+							Direction = "horizontal",
+							Wrap = false,
+							Children =
+							[
+								new UiChoiceInput
+								{
+									Key = "labelXPreset",
+									Transient = true,
+									Segmented = true,
+									Label = AppStrings.Widgets.Appearance.Font.AlignLabel(),
+									Binding = PresetBinding(xAxis, "left", "right"),
+									RowWeight = 1,
+									Options = UiValue.Of<IReadOnlyList<UiOption>>([
+										UiOption.Of("left", AppStrings.Widgets.Appearance.Font.AlignLeft())
+											with
+											{
+												Icon = "align-left"
+											},
+										UiOption.Of("center", AppStrings.Widgets.Appearance.Font.AlignCenter())
+											with
+											{
+												Icon = "align-center"
+											},
+										UiOption.Of("right", AppStrings.Widgets.Appearance.Font.AlignRight())
+											with
+											{
+												Icon = "align-right"
+											}
+									])
+								},
+								new UiChoiceInput
+								{
+									Key = "labelYPreset",
+									Transient = true,
+									Segmented = true,
+									Label = AppStrings.Widgets.Appearance.Font.PositionLabel(),
+									Binding = PresetBinding(yAxis, "top", "bottom"),
+									RowWeight = 1,
+									Options = UiValue.Of<IReadOnlyList<UiOption>>([
+										UiOption.Of("top", AppStrings.Widgets.Appearance.Font.PositionTop())
+											with
+											{
+												Icon = "align-top"
+											},
+										UiOption.Of("center", AppStrings.Widgets.Appearance.Font.PositionCenter())
+											with
+											{
+												Icon = "align-middle"
+											},
+										UiOption.Of("bottom", AppStrings.Widgets.Appearance.Font.PositionBottom())
+											with
+											{
+												Icon = "align-bottom"
+											}
+									])
+								}
+							]
+						},
+						new UiNumberInput
+						{
+							Key = ActionButtonLabelJson.XKey,
+							Label = AppStrings.Widgets.Editor.LabelX(),
+							Binding = Bind.Custom(xAxis.Get, xAxis.Set),
+							Min = ActionButtonLabelJson.Start,
+							Max = ActionButtonLabelJson.End,
+							ShowSlider = true
+						},
+						new UiNumberInput
+						{
+							Key = ActionButtonLabelJson.YKey,
+							Label = AppStrings.Widgets.Editor.LabelY(),
+							Binding = Bind.Custom(yAxis.Get, yAxis.Set),
+							Min = ActionButtonLabelJson.Start,
+							Max = ActionButtonLabelJson.End,
+							ShowSlider = true
+						}
+					]
+				},
+				new UiConfigSection
+				{
+					Key = $"look{suffix}",
+					Label = AppStrings.Widgets.Editor.Appearance(),
+					MemoryKey = "action-button.label.appearance",
+					DefaultExpanded = false,
+					Modified = UiValue.From(() => sections.IsModified(_lookKeys)),
+					Events = [UiEventHandler.On(UiConfigEvents.Reset, () => sections.Reset(_lookKeys))],
+					Children =
+					[
+						new UiBooleanInput
+						{
+							Key = "labelShadow",
+							Label = AppStrings.Widgets.Editor.LabelShadow(),
+							Binding = labelShadowBinding
+						},
+						new UiColorInput
+						{
+							Key = "labelColor",
+							AllowVariables = true,
+							Label = AppStrings.Widgets.Editor.LabelColor(),
+							Binding = labelColorBinding,
+							// Reset returns to unset, the button's own default (a computed contrast colour),
+							// not a literal one this tree would have to know.
+							SupportsReset = true,
+							DefaultValue = string.Empty
+						},
+						LabelStroke("label-outline-row",
+							"labelOutlineColor",
+							AppStrings.Widgets.Editor.LabelOutline(),
+							labelOutlineColorBinding,
+							currentLabelOutlineColor,
+							"labelOutlineWidth",
+							AppStrings.Widgets.Editor.LabelOutlineWidth(),
+							labelOutlineWidthBinding,
+							ActionButtonWidgetData.MaxLabelOutlineWidth),
+						new UiColorInput
+						{
+							Key = "labelBoxColor",
+							AllowVariables = true,
+							Label = AppStrings.Widgets.Editor.LabelBoxColor(),
+							Binding = labelBoxColorBinding,
+							SupportsReset = true,
+							DefaultValue = string.Empty
+						},
+						LabelStroke("label-box-border-row",
+							"labelBoxBorderColor",
+							AppStrings.Widgets.Editor.LabelBoxBorder(),
+							labelBoxBorderColorBinding,
+							currentLabelBoxBorderColor,
+							"labelBoxBorderWidth",
+							AppStrings.Widgets.Editor.LabelBoxBorderWidth(),
+							labelBoxBorderWidthBinding,
+							ActionButtonWidgetData.MaxLabelBoxBorderWidth)
+					]
+				}
+			];
+		}
+
+		int SelectedLabelIndex(ExtraLabelList extraLabels)
+		{
+			return Math.Clamp(selectedLabel.Value, 0, extraLabels.Read().Count);
+		}
+
+		string? SelectedExtraLabelId(ExtraLabelList extraLabels)
+		{
+			var index = SelectedLabelIndex(extraLabels);
+
+			return index == 0 ? null : ExtraLabelId(extraLabels.Read()[index - 1]);
+		}
+
+		UiElement[] ManageLabelEntries(ExtraLabelList extraLabels, PrimaryLabel primary, string keySuffix)
+		{
+			JsonObject Selected()
+			{
+				var index = SelectedLabelIndex(extraLabels);
+
+				return index == 0 ? primary.Read() : LabelContent(extraLabels.Read()[index - 1]);
+			}
+
+			void AddLabel(JsonObject content)
+			{
+				var labels = extraLabels.Read();
+				content["id"] = ActionButtonLabelJson.NewId();
+				extraLabels.Write([.. labels, content]);
+				selectedLabel.Value = labels.Count + 1;
+			}
+
+			bool HasRoom()
+			{
+				return extraLabels.Read().Count < ActionButtonLabelJson.MaxExtraLabels;
+			}
+
+			bool HasCopiedLabel()
+			{
+				return labelClipboardVersion.Value >= 0 && context.LabelClipboard.HasLabel;
+			}
+
+			return
+			[
+				new UiWhen
+				{
+					Key = $"duplicateLabel-when{keySuffix}",
+					Condition = HasRoom,
+					Content = () => new UiConfigButton
+					{
+						Key = $"duplicateLabel{keySuffix}",
+						Label = AppStrings.Widgets.Folder.Duplicate(),
+						Icon = "copy",
+						Events = [UiEventHandler.On(UiConfigEvents.Activate, () => AddLabel(Selected()))]
+					}
+				},
+				new UiConfigButton
+				{
+					Key = $"copyLabel{keySuffix}",
+					Label = MacroDeckStrings.Common.Copy(),
+					Icon = "clipboard",
+					Events =
+					[
+						UiEventHandler.On(UiConfigEvents.Activate,
+							() =>
+							{
+								context.LabelClipboard.Copy(Selected());
+								labelClipboardVersion.Value++;
+							})
+					]
+				},
+				new UiWhen
+				{
+					Key = $"pasteLabel-when{keySuffix}",
+					Condition = () => HasCopiedLabel() && HasRoom(),
+					Content = () => new UiConfigButton
+					{
+						Key = $"pasteLabel{keySuffix}",
+						Label = AppStrings.Widgets.Editor.PasteLabelAsNew(),
+						Icon = "plus",
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Activate,
+								() =>
+								{
+									if (context.LabelClipboard.Paste() is { } copied)
+									{
+										AddLabel(copied);
+									}
+								})
+						]
+					}
+				},
+				new UiWhen
+				{
+					Key = $"replaceLabel-when{keySuffix}",
+					Condition = HasCopiedLabel,
+					Content = () => new UiConfigButton
+					{
+						Key = $"replaceLabel{keySuffix}",
+						Label = AppStrings.Widgets.Editor.PasteLabelReplace(),
+						Icon = "pencil",
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Activate,
+								() =>
+								{
+									if (context.LabelClipboard.Paste() is not { } copied)
+									{
+										return;
+									}
+
+									var index = SelectedLabelIndex(extraLabels);
+									if (index == 0)
+									{
+										primary.Write(copied);
+
+										return;
+									}
+
+									var labels = extraLabels.Read();
+									copied["id"] = ExtraLabelId(labels[index - 1]);
+									extraLabels.Write([
+										.. labels.Select((label, i) => i == index - 1 ? copied : label)
+									]);
+								})
+						]
+					}
+				},
+				new UiWhen
+				{
+					Key = $"removeLabel-when{keySuffix}",
+					Condition = () => SelectedLabelIndex(extraLabels) > 0,
+					Content = () => new UiConfigButton
+					{
+						Key = $"removeLabel{keySuffix}",
+						Label = MacroDeckStrings.Common.Remove(),
+						Icon = "trash",
+						Events =
+						[
+							UiEventHandler.On(UiConfigEvents.Activate,
+								() =>
+								{
+									var index = SelectedLabelIndex(extraLabels);
+									if (index == 0)
+									{
+										return;
+									}
+
+									extraLabels.Write([.. extraLabels.Read().Where((_, i) => i != index - 1)]);
+									selectedLabel.Value = index - 1;
+								})
+						]
+					}
+				}
+			];
+		}
+
+		UiConfigStack BuildLabelPicker(ExtraLabelList extraLabels, PrimaryLabel primary)
+		{
+			return new UiConfigStack
+			{
+				Key = "labels",
+				Direction = "horizontal",
+				Wrap = false,
+				Children =
+				[
+					new UiChoiceInput
+					{
+						Key = "labelPicker",
+						Transient = true,
+						HideLabel = true,
+						RowWeight = 1,
+						Label = AppStrings.Widgets.Editor.LabelPicker(),
+						Binding = Bind.Custom(()
+								=> SelectedLabelIndex(extraLabels).ToString(CultureInfo.InvariantCulture),
+							value => selectedLabel.Value
+								= int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var index)
+									? index
+									: 0),
+						Options = UiValue.From(() => (IReadOnlyList<UiOption>)Enumerable
+							.Range(0, extraLabels.Read().Count + 1)
+							.Select(index => UiOption.Of(index.ToString(CultureInfo.InvariantCulture),
+								AppStrings.Widgets.Editor.LabelNumber(index + 1)))
+							.ToList())
+					},
+					new UiWhen
+					{
+						Key = "addLabel-when",
+						Condition = () => extraLabels.Read().Count < ActionButtonLabelJson.MaxExtraLabels,
+						Content = () => new UiConfigButton
+						{
+							Key = "addLabel",
+							Label = AppStrings.Widgets.Editor.AddLabel(),
+							Icon = "plus",
+							Events =
+							[
+								UiEventHandler.On(UiConfigEvents.Activate,
+									() =>
+									{
+										var labels = extraLabels.Read();
+										extraLabels.Write([
+											.. labels,
+											new JsonObject { ["id"] = ActionButtonLabelJson.NewId() }
+										]);
+										selectedLabel.Value = labels.Count + 1;
+									})
+							]
+						}
+					},
+					new UiConfigMenu
+					{
+						Key = "manageLabel",
+						Label = AppStrings.Widgets.Editor.ManageThisLabel(),
+						Icon = "dots-vertical",
+						Children = ManageLabelEntries(extraLabels, primary, string.Empty),
+						Fallback = new UiConfigStack
+						{
+							Key = "manageLabel-f",
+							Direction = "horizontal",
+							Wrap = false,
+							Children = ManageLabelEntries(extraLabels, primary, "-f")
+						}
+					}
+				]
+			};
+		}
+
+		UiArrayInput BuildExtraLabelsArray(ExtraLabelList extraLabels)
+		{
+			return new UiArrayInput
+			{
+				Key = ActionButtonLabelJson.ExtraLabelsKey,
+				Binding = Bind.Custom(() => SerializeLabels(extraLabels.Read()),
+					value => extraLabels.Write(DeserializeLabels(value))),
+				Children =
+				[
+					new UiRepeat<string>
+					{
+						Key = "extraLabelItems",
+						Items = UiValue.From(() =>
+							(IReadOnlyList<string>)extraLabels.Read().Select(ExtraLabelId).ToList()),
+						KeySelector = id => id,
+						Template = (id, _) => new UiObjectInput
+						{
+							Key = id,
+							Children =
+							[
+								new UiWhen
+								{
+									Key = $"extra-label-when-{id}",
+									Condition = () => SelectedExtraLabelId(extraLabels) == id,
+									Content = () => new UiFragment
+									{
+										Key = "extra-label",
+										Children =
+										[
+											new UiConfigStack
+											{
+												Key = $"f-{ShortKey(id)}",
+												Children = BuildLabelForm($"-{ShortKey(id)}",
+													ExtraLabelString(extraLabels, id, "label"),
+													ExtraLabelString(extraLabels, id, "fontFaceId"),
+													() => ReadExtraLabelString(extraLabels, id, "fontFaceId")
+														?? string.Empty,
+													value => MutateExtraLabel(extraLabels,
+														id,
+														label =>
+														{
+															if (value.Length == 0)
+															{
+																label.Remove("fontFaceId");
+															}
+															else
+															{
+																label["fontFaceId"] = value;
+															}
+														}),
+													ExtraLabelDouble(extraLabels,
+														id,
+														"fontSize",
+														ActionButtonWidgetData.DefaultFontSizePercent),
+													ExtraLabelPosition(extraLabels, id, ActionButtonLabelJson.XKey),
+													ExtraLabelPosition(extraLabels, id, ActionButtonLabelJson.YKey),
+													ExtraLabelString(extraLabels, id, "labelColor"),
+													ExtraLabelString(extraLabels, id, "labelBoxColor"),
+													ExtraLabelBool(extraLabels, id, "labelShadow", true),
+													ExtraLabelString(extraLabels, id, "labelOutlineColor"),
+													ExtraLabelDouble(extraLabels,
+														id,
+														"labelOutlineWidth",
+														ActionButtonWidgetData.DefaultLabelStrokeWidth),
+													ExtraLabelString(extraLabels, id, "labelBoxBorderColor"),
+													ExtraLabelDouble(extraLabels,
+														id,
+														"labelBoxBorderWidth",
+														ActionButtonWidgetData.DefaultLabelStrokeWidth),
+													() => ReadExtraLabelString(extraLabels, id, "labelOutlineColor")
+														?? string.Empty,
+													() => ReadExtraLabelString(extraLabels, id, "labelBoxBorderColor")
+														?? string.Empty,
+													new LabelSections(keys
+															=> FindExtraLabel(extraLabels, id) is { } extra
+															&& keys.Any(key => IsLabelKeyModified(extra, key)),
+														keys => MutateExtraLabel(extraLabels,
+															id,
+															label => RemoveLabelKeys(label, keys))))
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				]
+			};
+		}
+
 		UiElement BuildAppearanceTabs(
 			string key,
 			UiBinding<string> labelBinding,
@@ -791,8 +1386,6 @@ internal static class ActionButtonWidgetConfigView
 			Func<string> currentFontFaceId,
 			Action<string> setFontFaceId,
 			UiBinding<double> fontSizeBinding,
-			UiBinding<string> textAlignBinding,
-			UiBinding<string> labelPositionBinding,
 			UiBinding<string> labelColorBinding,
 			UiBinding<string> labelBoxColorBinding,
 			UiBinding<bool> labelShadowBinding,
@@ -810,7 +1403,12 @@ internal static class ActionButtonWidgetConfigView
 			Func<string> currentBackgroundColor,
 			Func<string> currentIconColor,
 			Func<string> currentLabelOutlineColor,
-			Func<string> currentLabelBoxBorderColor)
+			Func<string> currentLabelBoxBorderColor,
+			LabelAxis xAxis,
+			LabelAxis yAxis,
+			ExtraLabelList extraLabels,
+			PrimaryLabel primary,
+			LabelSections primarySections)
 		{
 			return new UiTabs
 			{
@@ -823,192 +1421,35 @@ internal static class ActionButtonWidgetConfigView
 						Label = AppStrings.Widgets.Editor.Label(),
 						Children =
 						[
-							new UiStringInput
+							BuildLabelPicker(extraLabels, primary),
+							new UiWhen
 							{
-								Key = "label",
-								Label = AppStrings.Widgets.Editor.Label(),
-								Placeholder = AppStrings.Widgets.Editor.ButtonLabelPlaceholder(),
-								// The one field on this form that takes variables, so LiteralOnly stays unset -
-								// the renderer offers the {{ }} helper exactly where the original editor did.
-								Multiline = true,
-								Binding = labelBinding
+								Key = "primary-label-when",
+								Condition = () => SelectedExtraLabelId(extraLabels) is null,
+								Content = () => new UiFragment
+								{
+									Key = "primary-label",
+									Children = BuildLabelForm(string.Empty,
+										labelBinding,
+										fontFaceIdBinding,
+										currentFontFaceId,
+										setFontFaceId,
+										fontSizeBinding,
+										xAxis,
+										yAxis,
+										labelColorBinding,
+										labelBoxColorBinding,
+										labelShadowBinding,
+										labelOutlineColorBinding,
+										labelOutlineWidthBinding,
+										labelBoxBorderColorBinding,
+										labelBoxBorderWidthBinding,
+										currentLabelOutlineColor,
+										currentLabelBoxBorderColor,
+										primarySections)
+								}
 							},
-							// Font, full width on its own line, then Style and Size sharing the next line about
-							// 2:1 (issue #837) - exactly the original appearance form's linked Font/Style
-							// selects plus its Size field, none of which this profile's vocabulary names as one
-							// control. Family is not itself a stored key - only fontFaceId is - so it needs a
-							// transient input (UiInput.Transient): it renders and raises change like every other
-							// control, but the client's draft composer skips it entirely, and picking a family
-							// here only ever resolves a real fontFaceId (that family's first face), mirroring
-							// WidgetFontFaceControlComponent's own onFamilyChange. Style then offers only the
-							// faces the selected family actually ships, recomputed reactively from fontFaceId
-							// since family is derived from it rather than stored beside it.
-							new UiChoiceInput
-							{
-								Key = "fontFamily",
-								Transient = true,
-								Label = AppStrings.Widgets.Appearance.Font.FontLabel(),
-								// A face missing from the catalogue reports its raw id, so the Inherited option
-								// still differs from it and choosing it actually clears the override.
-								Binding = Bind.Custom(() =>
-									{
-										var faceId = currentFontFaceId();
-										var family = FamilyOf(faceId);
-
-										return family.Length == 0 ? faceId : family;
-									},
-									family =>
-									{
-										var faces = FacesForFamily(family);
-										setFontFaceId(faces.Count > 0 ? faces[0].FaceId : string.Empty);
-									}),
-								Options = UiValue.From(() => (IReadOnlyList<UiOption>)
-								[
-									new UiOption
-									{
-										Value = string.Empty, Label = AppStrings.Forms.InheritableSetting.Inherited()
-									},
-									.. fontFamilies.Select(FamilyOption)
-								])
-							},
-							new UiConfigStack
-							{
-								Key = "label-appearance-row",
-								Direction = "horizontal",
-								Wrap = false,
-								Children =
-								[
-									new UiChoiceInput
-									{
-										Key = "fontFaceId",
-										Label = AppStrings.Widgets.Appearance.Font.StyleLabel(),
-										Binding = fontFaceIdBinding,
-										Disabled = UiValue.From(() =>
-											FacesForFamily(FamilyOf(currentFontFaceId())).Count == 0),
-										Options = UiValue.From(() =>
-											(IReadOnlyList<UiOption>)FacesForFamily(FamilyOf(currentFontFaceId()))
-												.Select(face => UiOption.Of(face.FaceId, face.StyleName))
-												.ToList()),
-										RowWeight = 2
-									},
-									new UiNumberInput
-									{
-										Key = "fontSize",
-										Label = AppStrings.Widgets.Appearance.Font.SizeLabel(),
-										Binding = fontSizeBinding,
-										Min = 1,
-										Max = 100,
-										RowWeight = 1
-									}
-								]
-							},
-							// Align and Position, one non-wrapping line, each a segmented choice whose options
-							// carry an icon instead of text (issue #837) - the original editor's own icon
-							// button groups (icon names recovered from the pre-#791
-							// WidgetFontAppearanceControlComponent).
-							new UiConfigStack
-							{
-								Key = "label-alignment-row",
-								Direction = "horizontal",
-								Wrap = false,
-								Children =
-								[
-									new UiChoiceInput
-									{
-										Key = "textAlign",
-										Segmented = true,
-										Label = AppStrings.Widgets.Appearance.Font.AlignLabel(),
-										Binding = textAlignBinding,
-										RowWeight = 1,
-										Options = UiValue.Of<IReadOnlyList<UiOption>>([
-											UiOption.Of("left", AppStrings.Widgets.Appearance.Font.AlignLeft())
-												with
-												{
-													Icon = "align-left"
-												},
-											UiOption.Of("center", AppStrings.Widgets.Appearance.Font.AlignCenter())
-												with
-												{
-													Icon = "align-center"
-												},
-											UiOption.Of("right", AppStrings.Widgets.Appearance.Font.AlignRight())
-												with
-												{
-													Icon = "align-right"
-												}
-										])
-									},
-									new UiChoiceInput
-									{
-										Key = "labelPosition",
-										Segmented = true,
-										Label = AppStrings.Widgets.Appearance.Font.PositionLabel(),
-										Binding = labelPositionBinding,
-										RowWeight = 1,
-										Options = UiValue.Of<IReadOnlyList<UiOption>>([
-											UiOption.Of("top", AppStrings.Widgets.Appearance.Font.PositionTop())
-												with
-												{
-													Icon = "align-top"
-												},
-											UiOption.Of("center", AppStrings.Widgets.Appearance.Font.PositionCenter())
-												with
-												{
-													Icon = "align-middle"
-												},
-											UiOption.Of("bottom", AppStrings.Widgets.Appearance.Font.PositionBottom())
-												with
-												{
-													Icon = "align-bottom"
-												}
-										])
-									}
-								]
-							},
-							new UiBooleanInput
-							{
-								Key = "labelShadow",
-								Label = AppStrings.Widgets.Editor.LabelShadow(),
-								Binding = labelShadowBinding
-							},
-							new UiColorInput
-							{
-								Key = "labelColor",
-								AllowVariables = true,
-								Label = AppStrings.Widgets.Editor.LabelColor(),
-								Binding = labelColorBinding,
-								// Reset returns to unset, the button's own default (a computed contrast colour),
-								// not a literal one this tree would have to know.
-								SupportsReset = true,
-								DefaultValue = string.Empty
-							},
-							LabelStroke("label-outline-row",
-								"labelOutlineColor",
-								AppStrings.Widgets.Editor.LabelOutline(),
-								labelOutlineColorBinding,
-								currentLabelOutlineColor,
-								"labelOutlineWidth",
-								AppStrings.Widgets.Editor.LabelOutlineWidth(),
-								labelOutlineWidthBinding,
-								ActionButtonWidgetData.MaxLabelOutlineWidth),
-							new UiColorInput
-							{
-								Key = "labelBoxColor",
-								AllowVariables = true,
-								Label = AppStrings.Widgets.Editor.LabelBoxColor(),
-								Binding = labelBoxColorBinding,
-								SupportsReset = true,
-								DefaultValue = string.Empty
-							},
-							LabelStroke("label-box-border-row",
-								"labelBoxBorderColor",
-								AppStrings.Widgets.Editor.LabelBoxBorder(),
-								labelBoxBorderColorBinding,
-								currentLabelBoxBorderColor,
-								"labelBoxBorderWidth",
-								AppStrings.Widgets.Editor.LabelBoxBorderWidth(),
-								labelBoxBorderWidthBinding,
-								ActionButtonWidgetData.MaxLabelBoxBorderWidth)
+							BuildExtraLabelsArray(extraLabels)
 						]
 					},
 					new UiTab
@@ -1301,7 +1742,7 @@ internal static class ActionButtonWidgetConfigView
 				Key = "appearance",
 				Children =
 				[
-					BuildAppearanceTabs($"state-appearance-tabs-{stateId}",
+					BuildAppearanceTabs($"state-tabs-{ShortKey(stateId)}",
 						StateStringBinding(states, stateId, "label"),
 						StateStringBinding(states, stateId, "fontFaceId"),
 						() =>
@@ -1320,9 +1761,7 @@ internal static class ActionButtonWidgetConfigView
 										appearance["fontFaceId"] = value;
 									}
 								}),
-						StateDoubleBinding(states, stateId, "fontSize", 14),
-						StateStringBinding(states, stateId, "textAlign", fallback: "center"),
-						StateStringBinding(states, stateId, "labelPosition", fallback: "center"),
+						StateDoubleBinding(states, stateId, "fontSize", () => fontSize.Value),
 						StateStringBinding(states, stateId, "labelColor"),
 						StateStringBinding(states, stateId, "labelBoxColor"),
 						StateBoolBinding(states, stateId, "labelShadow", () => labelShadow.Value),
@@ -1349,7 +1788,29 @@ internal static class ActionButtonWidgetConfigView
 								labelOutlineColor.Value),
 						() =>
 							OwnOrRoot(ReadAppearanceString(states.Value, stateId, "labelBoxBorderColor"),
-								labelBoxBorderColor.Value))
+								labelBoxBorderColor.Value),
+						StatePositionBinding(states, stateId, ActionButtonLabelJson.XKey, () => labelX.Value),
+						StatePositionBinding(states, stateId, ActionButtonLabelJson.YKey, () => labelY.Value),
+						new ExtraLabelList(()
+								=> ActionButtonLabelJson.ReadExtraLabels(states.Value
+									.FirstOrDefault(s => s.Id == stateId)
+									?.Appearance),
+							labels => MutateAppearance(states,
+								stateId,
+								appearance => appearance[ActionButtonLabelJson.ExtraLabelsKey]
+									= new JsonArray([.. labels.Select(label => label.DeepClone())]))),
+						new PrimaryLabel(()
+								=> LabelContent(states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance ?? [],
+									ReadRootLabel()),
+							content => MutateAppearance(states,
+								stateId,
+								appearance => ReplaceLabelContent(appearance, WithLabelDefaults(content)))),
+						new LabelSections(keys
+								=> states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance is { } own
+								&& LabelKeysWithPresets(keys).Any(own.ContainsKey),
+							keys => MutateAppearance(states,
+								stateId,
+								appearance => RemoveLabelKeys(appearance, keys))))
 				]
 			};
 		}
@@ -1802,8 +2263,6 @@ internal static class ActionButtonWidgetConfigView
 				() => fontFaceId.Value,
 				value => fontFaceId.Value = value,
 				Bind.To(fontSize),
-				Bind.To(textAlign),
-				Bind.To(labelPosition),
 				Bind.To(labelColor),
 				Bind.To(labelBoxColor),
 				Bind.To(labelShadow),
@@ -1854,7 +2313,70 @@ internal static class ActionButtonWidgetConfigView
 				() => backgroundColor.Value,
 				() => iconColor.Value,
 				() => labelOutlineColor.Value,
-				() => labelBoxBorderColor.Value);
+				() => labelBoxBorderColor.Value,
+				new LabelAxis(() => labelX.Value, value => labelX.Value = value),
+				new LabelAxis(() => labelY.Value, value => labelY.Value = value),
+				new ExtraLabelList(() => extraLabels.Value, labels => extraLabels.Value = [.. labels]),
+				new PrimaryLabel(ReadRootLabel, WriteRootLabel),
+				new LabelSections(keys
+						=> ReadRootLabel() is var content && keys.Any(key => IsLabelKeyModified(content, key)),
+					keys =>
+					{
+						var content = ReadRootLabel();
+						RemoveLabelKeys(content, keys);
+						WriteRootLabel(content);
+					}));
+		}
+
+		JsonObject ReadRootLabel()
+		{
+			var content = new JsonObject
+			{
+				["label"] = label.Value,
+				["labelShadow"] = labelShadow.Value,
+				["labelOutlineWidth"] = labelOutlineWidth.Value,
+				["labelBoxBorderWidth"] = labelBoxBorderWidth.Value,
+				["fontSize"] = fontSize.Value,
+				[ActionButtonLabelJson.XKey] = labelX.Value,
+				[ActionButtonLabelJson.YKey] = labelY.Value
+			};
+
+			foreach (var (key, value) in new[]
+				{
+					("labelColor", labelColor.Value),
+					("labelBoxColor", labelBoxColor.Value),
+					("labelOutlineColor", labelOutlineColor.Value),
+					("labelBoxBorderColor", labelBoxBorderColor.Value),
+					("fontFaceId", fontFaceId.Value)
+				})
+			{
+				if (value.Length > 0)
+				{
+					content[key] = value;
+				}
+			}
+
+			return content;
+		}
+
+		void WriteRootLabel(JsonObject content)
+		{
+			label.Value = ContentString(content, "label");
+			labelColor.Value = ContentString(content, "labelColor");
+			labelBoxColor.Value = ContentString(content, "labelBoxColor");
+			labelShadow.Value = content["labelShadow"] is not JsonValue shadow
+				|| !shadow.TryGetValue<bool>(out var on)
+				|| on;
+			labelOutlineColor.Value = ContentString(content, "labelOutlineColor");
+			labelOutlineWidth.Value
+				= ContentNumber(content, "labelOutlineWidth", ActionButtonWidgetData.DefaultLabelStrokeWidth);
+			labelBoxBorderColor.Value = ContentString(content, "labelBoxBorderColor");
+			labelBoxBorderWidth.Value
+				= ContentNumber(content, "labelBoxBorderWidth", ActionButtonWidgetData.DefaultLabelStrokeWidth);
+			fontFaceId.Value = ContentString(content, "fontFaceId");
+			fontSize.Value = ContentNumber(content, "fontSize", ActionButtonWidgetData.DefaultFontSizePercent);
+			labelX.Value = ContentNumber(content, ActionButtonLabelJson.XKey, ActionButtonLabelJson.Center);
+			labelY.Value = ContentNumber(content, ActionButtonLabelJson.YKey, ActionButtonLabelJson.Center);
 		}
 
 		// Host-owned keys no control edits: a bound composite is authoritative in the client's draft, and a
@@ -2001,15 +2523,6 @@ internal static class ActionButtonWidgetConfigView
 		UiState<List<ActionButtonStateEntry>> states,
 		string stateId,
 		string field,
-		double fallback)
-	{
-		return StateDoubleBinding(states, stateId, field, () => fallback);
-	}
-
-	private static UiBinding<double> StateDoubleBinding(
-		UiState<List<ActionButtonStateEntry>> states,
-		string stateId,
-		string field,
 		Func<double> fallback)
 	{
 		return Bind.Custom(() =>
@@ -2069,17 +2582,21 @@ internal static class ActionButtonWidgetConfigView
 					DefaultValue = string.Empty,
 					RowWeight = 2
 				},
-				new UiNumberInput
+				new UiWhen
 				{
-					Key = widthKey,
-					Label = widthLabel,
-					HideLabel = true,
-					Binding = widthBinding,
-					Min = 0,
-					Max = maxWidth,
-					Step = 0.5,
-					RowWeight = 1,
-					Disabled = UiValue.From(() => string.IsNullOrEmpty(currentColor()))
+					Key = $"{widthKey}-when",
+					Condition = () => !string.IsNullOrEmpty(currentColor()),
+					Content = () => new UiNumberInput
+					{
+						Key = widthKey,
+						Label = widthLabel,
+						HideLabel = true,
+						Binding = widthBinding,
+						Min = 0,
+						Max = maxWidth,
+						Step = 0.5,
+						RowWeight = 1
+					}
 				}
 			]
 		};
@@ -2297,6 +2814,270 @@ internal static class ActionButtonWidgetConfigView
 	}
 
 	// ---- states array (de)serialization for the whole-array binding (drag reorder) ------------------------
+
+	private sealed record ExtraLabelList(Func<IReadOnlyList<JsonObject>> Read, Action<IReadOnlyList<JsonObject>> Write);
+
+	private static string ExtraLabelId(JsonObject label)
+	{
+		return label["id"] is JsonValue value && value.TryGetValue<string>(out var id) ? id : string.Empty;
+	}
+
+	private static JsonObject? FindExtraLabel(ExtraLabelList labels, string id)
+	{
+		return labels.Read().FirstOrDefault(label => ExtraLabelId(label) == id);
+	}
+
+	private static string? ReadExtraLabelString(ExtraLabelList labels, string id, string field)
+	{
+		return FindExtraLabel(labels, id)?[field] is JsonValue value && value.TryGetValue<string>(out var text)
+			? text
+			: null;
+	}
+
+	private static void MutateExtraLabel(ExtraLabelList labels, string id, Action<JsonObject> mutate)
+	{
+		labels.Write([
+			.. labels.Read()
+				.Select(label =>
+				{
+					if (ExtraLabelId(label) != id)
+					{
+						return label;
+					}
+
+					var clone = (JsonObject)label.DeepClone();
+					mutate(clone);
+
+					return clone;
+				})
+		]);
+	}
+
+	private static UiBinding<string> ExtraLabelString(
+		ExtraLabelList labels,
+		string id,
+		string field,
+		string fallback = "")
+	{
+		return Bind.Custom(() => ReadExtraLabelString(labels, id, field) ?? fallback,
+			value => MutateExtraLabel(labels, id, label => label[field] = value));
+	}
+
+	private static UiBinding<double> ExtraLabelDouble(ExtraLabelList labels, string id, string field, double fallback)
+	{
+		return Bind.Custom(()
+				=> FindExtraLabel(labels, id)?[field] is JsonValue value && value.TryGetValue<double>(out var number)
+					? number
+					: fallback,
+			value => MutateExtraLabel(labels, id, label => label[field] = value));
+	}
+
+	private static UiBinding<bool> ExtraLabelBool(ExtraLabelList labels, string id, string field, bool fallback)
+	{
+		return Bind.Custom(()
+				=> FindExtraLabel(labels, id)?[field] is JsonValue value && value.TryGetValue<bool>(out var flag)
+					? flag
+					: fallback,
+			value => MutateExtraLabel(labels, id, label => label[field] = value));
+	}
+
+	private static double? ReadLabelPosition(JsonObject? target, string key)
+	{
+		return key == ActionButtonLabelJson.XKey
+			? ActionButtonLabelJson.ReadX(target)
+			: ActionButtonLabelJson.ReadY(target);
+	}
+
+	private sealed record LabelAxis(Func<double> Get, Action<double> Set);
+
+	private sealed record PrimaryLabel(Func<JsonObject> Read, Action<JsonObject> Write);
+
+	private sealed record LabelSections(
+		Func<IReadOnlyList<string>, bool> IsModified,
+		Action<IReadOnlyList<string>> Reset);
+
+	private static readonly string[] _typographyKeys = ["fontFaceId", "fontSize"];
+
+	private static readonly string[] _positionKeys = [ActionButtonLabelJson.XKey, ActionButtonLabelJson.YKey];
+
+	private static readonly string[] _lookKeys =
+	[
+		"labelShadow", "labelColor", "labelOutlineColor", "labelOutlineWidth", "labelBoxColor",
+		"labelBoxBorderColor", "labelBoxBorderWidth"
+	];
+
+	private static IEnumerable<string> LabelKeysWithPresets(IReadOnlyList<string> keys)
+	{
+		return keys.Contains(ActionButtonLabelJson.XKey) ? keys.Append("textAlign").Append("labelPosition") : keys;
+	}
+
+	private static void RemoveLabelKeys(JsonObject label, IReadOnlyList<string> keys)
+	{
+		foreach (var key in LabelKeysWithPresets(keys))
+		{
+			label.Remove(key);
+		}
+	}
+
+	private static bool IsLabelKeyModified(JsonObject label, string key)
+	{
+		return key switch
+		{
+			ActionButtonLabelJson.XKey
+				=> (ActionButtonLabelJson.ReadX(label) ?? ActionButtonLabelJson.Center) != ActionButtonLabelJson.Center,
+			ActionButtonLabelJson.YKey
+				=> (ActionButtonLabelJson.ReadY(label) ?? ActionButtonLabelJson.Center) != ActionButtonLabelJson.Center,
+			"labelShadow" => label[key] is JsonValue shadow && shadow.TryGetValue<bool>(out var on) && !on,
+			"fontSize" => ContentNumber(label, key, ActionButtonWidgetData.DefaultFontSizePercent)
+				!= ActionButtonWidgetData.DefaultFontSizePercent,
+			"labelOutlineWidth" or "labelBoxBorderWidth"
+				=> ContentNumber(label, key, ActionButtonWidgetData.DefaultLabelStrokeWidth)
+				!= ActionButtonWidgetData.DefaultLabelStrokeWidth,
+			_ => ContentString(label, key).Length > 0
+		};
+	}
+
+	// Chrome keys under a label carry this instead of the id, which keeps composed node ids short.
+	private static string ShortKey(string id)
+	{
+		var hash = 2166136261;
+		foreach (var character in id)
+		{
+			hash = (hash ^ character) * 16777619;
+		}
+
+		return hash.ToString("x8", CultureInfo.InvariantCulture);
+	}
+
+	private static readonly string[] _labelContentKeys =
+	[
+		"label", "labelColor", "labelBoxColor", "labelShadow", "labelOutlineColor", "labelOutlineWidth",
+		"labelBoxBorderColor", "labelBoxBorderWidth", "fontFaceId", "fontSize"
+	];
+
+	private static string ContentString(JsonObject content, string key)
+	{
+		return content[key] is JsonValue value && value.TryGetValue<string>(out var text) ? text : string.Empty;
+	}
+
+	private static double ContentNumber(JsonObject content, string key, double fallback)
+	{
+		return content[key] is JsonValue value && value.TryGetValue<double>(out var number) ? number : fallback;
+	}
+
+	private static JsonObject LabelContent(JsonObject source, JsonObject? fallback = null)
+	{
+		var content = new JsonObject();
+		foreach (var key in _labelContentKeys)
+		{
+			if ((source[key] ?? fallback?[key]) is { } value)
+			{
+				content[key] = value.DeepClone();
+			}
+		}
+
+		content[ActionButtonLabelJson.XKey] = ActionButtonLabelJson.ReadX(source)
+			?? ActionButtonLabelJson.ReadX(fallback)
+			?? ActionButtonLabelJson.Center;
+		content[ActionButtonLabelJson.YKey] = ActionButtonLabelJson.ReadY(source)
+			?? ActionButtonLabelJson.ReadY(fallback)
+			?? ActionButtonLabelJson.Center;
+
+		return content;
+	}
+
+	// A state falls back to the button for every key it leaves out, so the defaults are written out.
+	private static JsonObject WithLabelDefaults(JsonObject content)
+	{
+		var complete = (JsonObject)content.DeepClone();
+		complete["label"] ??= string.Empty;
+		complete["labelColor"] ??= ActionButtonWidgetData.DefaultLabelColor;
+		complete["labelShadow"] ??= true;
+		complete["labelOutlineWidth"] ??= ActionButtonWidgetData.DefaultLabelStrokeWidth;
+		complete["labelBoxBorderWidth"] ??= ActionButtonWidgetData.DefaultLabelStrokeWidth;
+		complete["fontSize"] ??= ActionButtonWidgetData.DefaultFontSizePercent;
+
+		return complete;
+	}
+
+	private static void ReplaceLabelContent(JsonObject target, JsonObject content)
+	{
+		foreach (var key in _labelContentKeys.Append(ActionButtonLabelJson.XKey).Append(ActionButtonLabelJson.YKey))
+		{
+			if (content[key] is { } value)
+			{
+				target[key] = value.DeepClone();
+			}
+			else
+			{
+				target.Remove(key);
+			}
+		}
+
+		target.Remove("textAlign");
+		target.Remove("labelPosition");
+	}
+
+	private static LabelAxis StatePositionBinding(
+		UiState<List<ActionButtonStateEntry>> states,
+		string stateId,
+		string key,
+		Func<double> fallback)
+	{
+		return new LabelAxis(()
+				=> ReadLabelPosition(states.Value.FirstOrDefault(s => s.Id == stateId)?.Appearance, key) ?? fallback(),
+			value => MutateAppearance(states, stateId, appearance => appearance[key] = value));
+	}
+
+	private static LabelAxis ExtraLabelPosition(ExtraLabelList labels, string id, string key)
+	{
+		return new LabelAxis(() => ReadLabelPosition(FindExtraLabel(labels, id), key) ?? ActionButtonLabelJson.Center,
+			value => MutateExtraLabel(labels, id, label => label[key] = value));
+	}
+
+	private static UiBinding<string> PresetBinding(LabelAxis axis, string start, string end)
+	{
+		return Bind.Custom(() => axis.Get() switch
+			{
+				ActionButtonLabelJson.Start => start,
+				ActionButtonLabelJson.Center => "center",
+				ActionButtonLabelJson.End => end,
+				_ => string.Empty
+			},
+			preset =>
+			{
+				if (preset == start)
+				{
+					axis.Set(ActionButtonLabelJson.Start);
+				}
+				else if (preset == end)
+				{
+					axis.Set(ActionButtonLabelJson.End);
+				}
+				else if (preset == "center")
+				{
+					axis.Set(ActionButtonLabelJson.Center);
+				}
+			});
+	}
+
+	// An empty list is submitted as null, which the draft composer drops, so a button without extra
+	// labels saves no key at all.
+	private static JsonElement SerializeLabels(IReadOnlyList<JsonObject> labels)
+	{
+		return labels.Count == 0
+			? JsonSerializer.SerializeToElement<object?>(null)
+			: JsonSerializer.Deserialize<JsonElement>(new JsonArray([.. labels.Select(label => label.DeepClone())])
+				.ToJsonString());
+	}
+
+	private static List<JsonObject> DeserializeLabels(JsonElement value)
+	{
+		return value.ValueKind == JsonValueKind.Array
+			&& JsonNode.Parse(value.GetRawText()) is JsonArray array
+				? [.. array.OfType<JsonObject>().Select(label => (JsonObject)label.DeepClone())]
+				: [];
+	}
 
 	private static JsonElement SerializeStates(IReadOnlyList<ActionButtonStateEntry> entries)
 	{

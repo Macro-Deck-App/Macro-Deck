@@ -224,6 +224,9 @@ public static class UiConfigPrimitives
 	/// <summary>A question the surface puts to the user in a modal dialog while the node is in the tree.</summary>
 	public const string Dialog = "dialog";
 
+	/// <summary>A titled group of fields the user can collapse - see <see cref="UiConfigSection" />.</summary>
+	public const string Section = "section";
+
 	/// <summary>A page laid out as a rail beside a detail area, the way Macro Deck's own library pages are.
 	/// </summary>
 	public const string Split = "split";
@@ -255,6 +258,6 @@ public static class UiConfigPrimitives
 		DevicePicker, IntegrationPicker, IconDisplay, StateMappingEditor, Thresholds, Flow, Step, Stack, Tabs,
 		Tab, Heading, Prose, Instructions, Instruction, CopyValue, Link, AdvancedSection, Divider, Banner,
 		ValidationMessage, Busy, Button, WidgetConfiguration, WidgetProperties, WidgetEditor, Status,
-		Menu, Dialog, Split, List, ListItem, EmptyState
+		Menu, Dialog, Split, List, ListItem, EmptyState, Section
 	];
 }

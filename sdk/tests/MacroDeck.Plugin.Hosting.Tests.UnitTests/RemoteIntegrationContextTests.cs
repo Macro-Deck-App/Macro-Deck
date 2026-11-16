@@ -856,6 +856,32 @@ public class RemoteIntegrationContextTests
 	}
 
 	[Test]
+	public async Task A_label_number_reaches_the_host_on_the_wire_and_a_patch_without_one_sends_none()
+	{
+		await _context.Widgets.ApplyAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = "w1",
+			Patch = new WidgetAppearancePatch { Label = "Second", LabelNumber = 2 }
+		});
+		var numbered = JsonSerializer.SerializeToElement(_invoker.LastArguments, PluginProtocolJson.Options);
+
+		await _context.Widgets.ApplyAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = "w1",
+			Patch = new WidgetAppearancePatch { Label = "Main" }
+		});
+		var plain = JsonSerializer.SerializeToElement(_invoker.LastArguments, PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(numbered.GetProperty("patch").GetProperty("labelNumber").GetInt32(), Is.EqualTo(2));
+			Assert.That(plain.GetProperty("patch").TryGetProperty("labelNumber", out var absent)
+				&& absent.ValueKind != JsonValueKind.Null,
+				Is.False);
+		});
+	}
+
+	[Test]
 	public void Event_bindings_are_empty_before_the_host_pushed_any()
 	{
 		Assert.That(_context.Events.GetBindings(), Is.Empty);

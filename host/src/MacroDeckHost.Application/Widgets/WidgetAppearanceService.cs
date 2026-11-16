@@ -110,6 +110,15 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		WidgetAppearanceRequest request,
 		CancellationToken cancellationToken = default)
 	{
+		if (!WidgetAppearanceJson.IsValidLabelNumber(request.Patch.LabelNumber))
+		{
+			_logger.Warning(
+				"Widget appearance change on widget {WidgetId} skipped: label number {LabelNumber} does not exist",
+				request.WidgetId,
+				request.Patch.LabelNumber);
+			return WidgetAppearanceOutcome.Rejected;
+		}
+
 		if (request.Patch.IsEmpty && request.ClearProperties.Count == 0)
 		{
 			return WidgetAppearanceOutcome.Unchanged;
@@ -156,7 +165,12 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		{
 			foreach (var state in states)
 			{
-				changed |= WidgetAppearanceJson.ClearProperty(data, widget.Type, property, state, providerSupported);
+				changed |= WidgetAppearanceJson.ClearProperty(data,
+					widget.Type,
+					property,
+					state,
+					providerSupported,
+					patch.LabelNumber);
 			}
 		}
 

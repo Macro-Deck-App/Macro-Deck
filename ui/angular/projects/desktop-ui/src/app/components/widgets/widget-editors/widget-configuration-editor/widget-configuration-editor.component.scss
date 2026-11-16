@@ -47,3 +47,14 @@
   left: 0;
   transform-origin: 0 0;
 }
+
+// The tile inside the preview sets its own hand, so the drag cursors have to reach every node in it.
+.editor-preview .preview-frame--label-hover,
+.editor-preview .preview-frame--label-hover ::ng-deep * {
+  cursor: grab;
+}
+
+.editor-preview .preview-frame--label-drag,
+.editor-preview .preview-frame--label-drag ::ng-deep * {
+  cursor: grabbing;
+}

@@ -23,6 +23,28 @@ const StackGaps: readonly string[] = Object.values(UiStackGaps);
 const ListItemSeverities: readonly string[] = ['info', 'success', 'warning', 'error'];
 const SplitRegionOrder = [UiSplitRegions.RailActions, UiSplitRegions.Rail, UiSplitRegions.Detail];
 
+const SectionMemoryPrefix = 'macrodeck.config-section.';
+
+// Storage can be unavailable or full: a section then simply opens the way its author declared.
+function rememberedSectionState(memoryKey: string | undefined): boolean | null {
+  if (!memoryKey) return null;
+  try {
+    const stored = localStorage.getItem(SectionMemoryPrefix + memoryKey);
+    return stored === 'open' ? true : stored === 'closed' ? false : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberSectionState(memoryKey: string | undefined, open: boolean): void {
+  if (!memoryKey) return;
+  try {
+    localStorage.setItem(SectionMemoryPrefix + memoryKey, open ? 'open' : 'closed');
+  } catch {
+    return;
+  }
+}
+
 function isExternalUrl(url: string): boolean {
   try {
     const parsed = new URL(url, window.location.href);
@@ -149,6 +171,35 @@ function isExternalUrl(url: string): boolean {
             @for (child of children(); track child.id) { <shared-ui-node [node]="child" /> }
           }
         </div>
+      }
+      @case (types.Section) {
+        <section class="config-chrome-section">
+          <div class="config-chrome-section-header">
+            <button
+              type="button"
+              class="config-chrome-section-toggle"
+              [attr.aria-expanded]="sectionOpen()"
+              [attr.aria-controls]="node().id + '-body'"
+              (click)="onToggleSection()">
+              <span
+                class="icon icon-chevron-right rtl-mirror icon-xs config-chrome-section-chevron"
+                [class.config-chrome-section-chevron--open]="sectionOpen()"
+                aria-hidden="true"></span>
+              <span class="config-chrome-section-label">{{ label() ?? '' }}</span>
+              @if (sectionModified()) {
+                <span class="config-chrome-section-dot" role="img" [attr.aria-label]="sectionModifiedLabel()" [title]="sectionModifiedLabel()"></span>
+              }
+            </button>
+            @if (sectionModified() && sectionResets()) {
+              <shared-button variant="ghost" size="compact" (click)="onResetSection()">{{ sectionResetLabel() }}</shared-button>
+            }
+          </div>
+          @if (sectionOpen()) {
+            <div class="config-chrome-section-body" [id]="node().id + '-body'">
+              @for (child of children(); track child.id) { <shared-ui-node [node]="child" /> }
+            </div>
+          }
+        </section>
       }
       @case (types.Banner) {
         <div class="config-chrome-banner" [attr.data-severity]="severity()">{{ text() }}</div>
@@ -352,7 +403,12 @@ function isExternalUrl(url: string): boolean {
       </shared-confirmation-modal>
     }
   `,
-  styleUrls: ['./ui-render.component.scss', './ui-chrome-styled.component.scss', './ui-chrome-layout.component.scss'],
+  styleUrls: [
+    './ui-render.component.scss',
+    './ui-chrome-styled.component.scss',
+    './ui-chrome-layout.component.scss',
+    './ui-chrome-section.component.scss',
+  ],
 })
 export class UiChromeComponent {
   readonly node = input.required<UiNode>();
@@ -438,6 +494,23 @@ export class UiChromeComponent {
     () => this.expandedSignal() ?? nodeBoolean(this.node(), Properties.DefaultExpanded) ?? false,
   );
 
+  private readonly sectionOpenSignal = signal<boolean | null>(null);
+  protected readonly sectionOpen = computed(() => {
+    const node = this.node();
+    return this.sectionOpenSignal()
+      ?? rememberedSectionState(nodeString(node, Properties.MemoryKey))
+      ?? nodeBoolean(node, Properties.DefaultExpanded)
+      ?? true;
+  });
+  protected readonly sectionModified = computed(() => nodeBoolean(this.node(), Properties.Modified) === true);
+  protected readonly sectionResets = computed(() => emitsEvent(this.node(), UiConfigEvents.Reset));
+  protected readonly sectionModifiedLabel = computed(
+    () => this.localization.translateKey(AppStrings.UiRender.SectionModified),
+  );
+  protected readonly sectionResetLabel = computed(
+    () => this.localization.translateKey(AppStrings.Widgets.Appearance.IconDisplay.Reset),
+  );
+
   private readonly activeTabIdSignal = signal<string | null>(null);
   protected readonly tabOptions = computed<SegmentedOption[]>(() =>
     this.children().map(tab => ({ value: tab.id, label: nodeText(tab, Properties.Label, this.localization) ?? tab.id })),
@@ -514,6 +587,20 @@ export class UiChromeComponent {
     this.context.emit(asking.node, UiConfigEvents.Activate, asking.prompt ? asking.text : undefined);
   }
 
+
+  protected onToggleSection(): void {
+    const node = this.node();
+    const open = !this.sectionOpen();
+    this.sectionOpenSignal.set(open);
+    rememberSectionState(nodeString(node, Properties.MemoryKey), open);
+    if (emitsEvent(node, open ? UiConfigEvents.Expand : UiConfigEvents.Collapse)) {
+      this.context.emit(node, open ? UiConfigEvents.Expand : UiConfigEvents.Collapse);
+    }
+  }
+
+  protected onResetSection(): void {
+    this.context.emit(this.node(), UiConfigEvents.Reset);
+  }
 
   protected onToggleExpanded(open: boolean): void {
     const node = this.node();

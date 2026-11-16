@@ -14419,6 +14419,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>ラベル</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>変更するラベルを選択します。ラベル 1 がメインのラベルです。まだ存在しないラベルは追加されます。</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>変更するラベル</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>ボタンのラベル</value>
   </data>
@@ -20026,6 +20032,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>オプションを再読み込み</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>既定値から変更されています</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>このフィールドはこのバージョンの Macro Deck ではサポートされていません</value>
   </data>
@@ -21475,6 +21484,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>画面上のマウス位置</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>ラベルを追加</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>ルールを追加</value>
   </data>
@@ -21534,6 +21546,33 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>この設定はビジュアルエディターで扱える大きさを超えています。ここで再び編集するには、JSON モードでアクションやイベントを削除してください。</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>ラベル {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>編集中のラベル</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>テキスト</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>タイポグラフィ</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>水平位置 (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>垂直位置 (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>このラベルを管理</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>新しいラベルとして貼り付け</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>コピーしたラベルで置き換え</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>最後に動作していたバージョンを復元</value>

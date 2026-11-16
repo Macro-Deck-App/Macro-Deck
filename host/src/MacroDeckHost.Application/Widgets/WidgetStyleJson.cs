@@ -54,6 +54,8 @@ public static class WidgetStyleJson
 			"fontSize",
 			"textAlign",
 			"labelPosition",
+			ActionButtonLabelJson.XKey,
+			ActionButtonLabelJson.YKey,
 			Border,
 			IconColor,
 			IconDisplay

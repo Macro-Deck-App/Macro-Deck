@@ -90,6 +90,8 @@ export const UiConfigProperties = {
   Align: 'align',
   Gap: 'gap',
   Rows: 'rows',
+  Modified: 'modified',
+  MemoryKey: 'memoryKey',
 } as const;
 
 export interface UiNodeOption {

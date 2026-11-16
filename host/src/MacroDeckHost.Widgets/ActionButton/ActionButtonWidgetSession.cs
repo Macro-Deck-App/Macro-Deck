@@ -45,6 +45,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	private readonly UiState<ActionButtonWidgetData> _configState;
 	private readonly UiState<string?> _activeState;
 	private readonly UiState<string?> _labelText;
+	private readonly UiState<IReadOnlyList<string?>> _extraLabelTexts;
 	private readonly UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>> _iconResourcesState;
 	private readonly UiState<WidgetIconResolution> _iconProviderState;
 	private readonly WidgetEntity _widget;
@@ -139,6 +140,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		UiState<ActionButtonWidgetData> configState,
 		UiState<string?> activeState,
 		UiState<string?> labelText,
+		UiState<IReadOnlyList<string?>> extraLabelTexts,
 		UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>> iconResourcesState,
 		UiState<WidgetIconResolution> iconProviderState,
 		WidgetEntity widget,
@@ -161,6 +163,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		ArgumentNullException.ThrowIfNull(configState);
 		ArgumentNullException.ThrowIfNull(activeState);
 		ArgumentNullException.ThrowIfNull(labelText);
+		ArgumentNullException.ThrowIfNull(extraLabelTexts);
 		ArgumentNullException.ThrowIfNull(iconResourcesState);
 		ArgumentNullException.ThrowIfNull(iconProviderState);
 		ArgumentNullException.ThrowIfNull(widget);
@@ -178,6 +181,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_configState = configState;
 		_activeState = activeState;
 		_labelText = labelText;
+		_extraLabelTexts = extraLabelTexts;
 		_iconResourcesState = iconResourcesState;
 		_iconProviderState = iconProviderState;
 		_widget = widget;
@@ -218,7 +222,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 
 		var handlers = new List<UiEventHandler>();
 
-		IReadOnlyList<string> names = IsVirtual
+		var names = IsVirtual
 			? [UiComponentEvents.Press, UiComponentEvents.LongPress]
 			: _configState.Peek().DeclaredTriggers();
 
@@ -275,9 +279,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		_stateSubscriptions.Add(_connectionId, widgetKey);
 
 		var initialStateId = _activeState.Peek();
-		var initialLabel = _configState.Peek().Resolve(initialStateId).Label;
 
-		if (VariableTemplateRenderer.ContainsLiquid(initialLabel))
+		if (HasTemplate(_configState.Peek().Resolve(initialStateId)))
 		{
 			_subscribedLabelState = LabelGroups.Normalize(initialStateId ?? "off");
 			_labelSubscriptions.Add(_connectionId, widgetKey, _subscribedLabelState);
@@ -550,17 +553,13 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	/// press, or explicitly in <see cref="OnStateSignal" /> for an external one.</summary>
 	private void ApplyActiveState(string? stateId)
 	{
-		var rawLabel = _configState.Peek().Resolve(stateId).Label;
-		var isLiquid = VariableTemplateRenderer.ContainsLiquid(rawLabel);
+		var appearance = _configState.Peek().Resolve(stateId);
+		var isLiquid = HasTemplate(appearance);
 
 		using (_view!.Batch())
 		{
 			_activeState.Value = stateId;
-
-			if (!isLiquid)
-			{
-				_labelText.Value = rawLabel;
-			}
+			ApplyLiteralLabels(appearance);
 		}
 
 		_activeStateIsExplicit = true;
@@ -630,6 +629,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 			using (_view!.Batch())
 			{
 				_labelText.Value = evt.Text;
+				_extraLabelTexts.Value = evt.ExtraTexts ?? [];
 			}
 		}
 	}
@@ -656,8 +656,8 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 		}
 
 		var stateId = _activeState.Peek();
-		var rawLabel = newConfig.Resolve(stateId).Label;
-		var isLiquid = VariableTemplateRenderer.ContainsLiquid(rawLabel);
+		var appearance = newConfig.Resolve(stateId);
+		var isLiquid = HasTemplate(appearance);
 
 		lock (_viewSync)
 		{
@@ -670,10 +670,7 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 				// gets one on the editor's first save, so without this the tile a session opened at
 				// creation keeps rendering no label at all until that session is rebuilt. A template's
 				// text still arrives only through OnLabelSignal - see ApplyActiveState.
-				if (!isLiquid)
-				{
-					_labelText.Value = rawLabel;
-				}
+				ApplyLiteralLabels(appearance);
 			}
 
 			RekeyLabelSubscription(stateId, isLiquid);
@@ -977,12 +974,13 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 	/// <see cref="ILabelTextService" /> is scoped and this session outlives any single scope.</summary>
 	private async Task ResolveDraftLabelAsync(CancellationToken cancellationToken)
 	{
-		var rawLabel = _configState.Peek().Resolve(_activeState.Peek()).Label;
+		var appearance = _configState.Peek().Resolve(_activeState.Peek());
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var labelTextService = scope.ServiceProvider.GetRequiredService<ILabelTextService>();
-		var resolved = await labelTextService
-			.ResolvePreview(new LabelImagePreviewRequest { Label = rawLabel, ScopeRefId = _variableScopeWidgetId },
+		var resolved = await ResolvePreviewTextsAsync(labelTextService,
+				appearance,
+				_variableScopeWidgetId,
 				cancellationToken)
 			.ConfigureAwait(false);
 
@@ -990,15 +988,71 @@ internal sealed class ActionButtonWidgetSession : IUiSession, IOriginAwareUiSess
 
 		lock (_viewSync)
 		{
-			if (_disposed || string.Equals(resolved, _labelText.Peek(), StringComparison.Ordinal))
+			if (_disposed
+				|| string.Equals(resolved.Primary, _labelText.Peek(), StringComparison.Ordinal)
+				&& resolved.Extras.SequenceEqual(_extraLabelTexts.Peek(), StringComparer.Ordinal))
 			{
 				return;
 			}
 
 			using (_view!.Batch())
 			{
-				_labelText.Value = resolved;
+				_labelText.Value = resolved.Primary;
+				_extraLabelTexts.Value = resolved.Extras;
 			}
+		}
+	}
+
+	internal static async Task<LabelTexts> ResolvePreviewTextsAsync(
+		ILabelTextService labelTextService,
+		ActionButtonResolvedAppearance appearance,
+		string? variableScopeWidgetId,
+		CancellationToken cancellationToken)
+	{
+		var primary = await Preview(appearance.Label).ConfigureAwait(false);
+		var extras = new List<string?>(appearance.ExtraLabels.Count);
+		foreach (var label in appearance.ExtraLabels)
+		{
+			extras.Add(await Preview(label.Text).ConfigureAwait(false));
+		}
+
+		return new LabelTexts(primary, extras);
+
+		Task<string?> Preview(string? template)
+		{
+			return labelTextService.ResolvePreview(
+				new LabelImagePreviewRequest { Label = template, ScopeRefId = variableScopeWidgetId },
+				cancellationToken);
+		}
+	}
+
+	private static bool HasTemplate(ActionButtonResolvedAppearance appearance)
+	{
+		return VariableTemplateRenderer.ContainsLiquid(appearance.Label)
+			|| appearance.ExtraLabels.Any(label => VariableTemplateRenderer.ContainsLiquid(label.Text));
+	}
+
+	// A template's text arrives only through the label signal, so its slot keeps what it shows until then.
+	private void ApplyLiteralLabels(ActionButtonResolvedAppearance appearance)
+	{
+		if (!VariableTemplateRenderer.ContainsLiquid(appearance.Label))
+		{
+			_labelText.Value = appearance.Label;
+		}
+
+		var previous = _extraLabelTexts.Peek();
+		var texts = new List<string?>(appearance.ExtraLabels.Count);
+		foreach (var label in appearance.ExtraLabels)
+		{
+			var slot = texts.Count;
+			texts.Add(VariableTemplateRenderer.ContainsLiquid(label.Text)
+				? slot < previous.Count ? previous[slot] : null
+				: label.Text);
+		}
+
+		if (!texts.SequenceEqual(previous, StringComparer.Ordinal))
+		{
+			_extraLabelTexts.Value = texts;
 		}
 	}
 

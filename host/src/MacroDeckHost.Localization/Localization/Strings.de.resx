@@ -14416,6 +14416,12 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Beschriftung</value>
   </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Welche Beschriftung geändert wird. Beschriftung 1 ist die Hauptbeschriftung; eine noch nicht vorhandene Beschriftung wird hinzugefügt.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Zu ändernde Beschriftung</value>
+  </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Button-Beschriftung</value>
   </data>
@@ -20023,6 +20029,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Optionen neu laden</value>
   </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Vom Standard abweichend</value>
+  </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Dieses Feld wird von dieser Version von Macro Deck nicht unterstützt</value>
   </data>
@@ -21454,6 +21463,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Mausposition auf dem Bildschirm</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Beschriftung hinzufügen</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Regel hinzufügen</value>
   </data>
@@ -21513,6 +21525,33 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Diese Konfiguration ist zu groß für den visuellen Editor. Entferne Aktionen oder Ereignisse im JSON-Modus, um sie hier wieder zu bearbeiten.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Beschriftung {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Bearbeitete Beschriftung</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Text</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Typografie</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Horizontale Position (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Vertikale Position (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Diese Beschriftung verwalten</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Als neue Beschriftung einfügen</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Durch kopierte Beschriftung ersetzen</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Letzte funktionierende Version wiederherstellen</value>

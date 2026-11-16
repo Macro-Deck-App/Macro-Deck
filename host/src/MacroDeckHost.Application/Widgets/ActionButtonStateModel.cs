@@ -106,6 +106,7 @@ public sealed class ActionButtonStateModel
 		var normalized = (JsonObject)data.DeepClone();
 		Upgrade(normalized);
 		ActionButtonStateJson.NormalizeStatesArray(normalized);
+		ActionButtonLabelJson.Normalize(normalized);
 		return Build(normalized);
 	}
 

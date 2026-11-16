@@ -76,11 +76,14 @@ public static class UiConfigEvents
 	/// draft.</summary>
 	public const string ContentUploadFailed = "content-upload-failed";
 
+	/// <summary>The user asked a section to return its fields to their defaults.</summary>
+	public const string Reset = "reset";
+
 	/// <summary>The event names this package ships, in declaration order. Not exhaustive - see the type's
 	/// remarks.</summary>
 	public static readonly IReadOnlyList<string> WellKnown =
 	[
 		Change, Submit, Cancel, Back, Activate, Expand, Collapse, Open, Filter, Reload, Add, Remove, Provide,
-		ContentUploaded, ContentUploadFailed
+		ContentUploaded, ContentUploadFailed, Reset
 	];
 }

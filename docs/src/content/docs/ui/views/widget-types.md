@@ -249,7 +249,8 @@ type and write the value to the stored data, under these keys:
 | `accentColor` | `AccentColor` | `#rrggbb` or `#rrggbbaa` |
 
 `UiWidgetAppearanceKeys` holds the names. Clearing a setting removes its key. Other values of
-`WidgetAppearanceProperty`, such as `Icon`, are ignored for a provider's type.
+`WidgetAppearanceProperty`, such as `Icon`, are ignored for a provider's type, and so is
+[`WidgetAppearancePatch.LabelNumber`](/features/button-labels/): a widget of your type has the one label.
 
 Macro Deck draws only the border. Draw the rest yourself: the change reopens your widget's session with the
 new data, and `UiWidgetAppearance.Read` gives you the values:

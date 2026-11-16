@@ -1,0 +1,72 @@
+.config-chrome-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.config-chrome-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-compact, 1.75rem);
+}
+
+.config-chrome-section-toggle {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold, 600);
+  letter-spacing: 0.06em;
+  text-align: start;
+  text-transform: uppercase;
+}
+
+.config-chrome-section-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.config-chrome-section-toggle:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+.config-chrome-section-chevron {
+  flex: 0 0 auto;
+  background-color: currentColor;
+  transition: transform var(--transition-fast);
+}
+
+.config-chrome-section-chevron--open {
+  transform: rotate(90deg);
+}
+
+.config-chrome-section-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.config-chrome-section-dot {
+  flex: 0 0 auto;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+}
+
+.config-chrome-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
