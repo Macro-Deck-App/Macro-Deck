@@ -1220,6 +1220,14 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>{names} の更新フィードを確認できませんでした。</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} が利用可能です。
+
+このポータブル版は自動で更新されません。Macro Deck の Web サイトからポータブル版 ZIP をダウンロードし、プログラムファイルを置き換えてください。Data フォルダーは残してください。Macro Deck はそのまま動作し続けます。</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>このポータブル版の Macro Deck は更新を自動でインストールしません。{downloadPageUrl} から新しいポータブル版 ZIP をダウンロードし、Macro Deck を終了してプログラムファイルを置き換えてください。Data フォルダーは残してください。</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>ダウンロードをキャンセル</value>
   </data>
@@ -18167,6 +18175,10 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>バージョン {version} が利用可能です。</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>バージョン {version} が利用可能です。Macro Deck の Web サイトからポータブル版 ZIP をダウンロードし、プログラムファイルを置き換えてください。Data フォルダーは残してください。</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

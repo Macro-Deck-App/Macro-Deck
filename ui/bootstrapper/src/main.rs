@@ -33,6 +33,7 @@ mod mcp_bridge;
 mod menu;
 mod notifications;
 mod opened_files;
+mod portable;
 mod post_update_changelog;
 mod quit_after_update;
 mod quit_request;
@@ -186,6 +187,7 @@ fn init_logging(app: &AppHandle) {
         portable: std::env::var("MACRODECK_PORTABLE")
             .map(|value| value == "1")
             .unwrap_or(false),
+        portable_data_dir: portable::data_dir(),
         packaged,
         development: host::is_development_build(),
         data_root_directory_name: host::host_data_root_directory_name(),

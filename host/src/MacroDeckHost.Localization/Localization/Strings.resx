@@ -1220,6 +1220,14 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
     <value>Could not check the {names} update feeds.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} is available.
+
+This portable copy does not update itself. Download the portable ZIP from the Macro Deck website and replace the program files. Keep the Data folder. Macro Deck will keep running.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>This portable copy of Macro Deck does not install updates itself. Download the new portable ZIP from {downloadPageUrl}, quit Macro Deck and replace the program files. Keep the Data folder.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Cancel download</value>
   </data>
@@ -18171,6 +18179,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Version {version} is available.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Version {version} is available. Download the portable ZIP from the Macro Deck website and replace the program files. Keep the Data folder.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

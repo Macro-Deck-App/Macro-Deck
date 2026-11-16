@@ -1220,6 +1220,14 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>{names} अपडेट फ़ीड की जाँच नहीं हो सकी।</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} उपलब्ध है।
+
+यह पोर्टेबल कॉपी अपने आप अपडेट नहीं होती। Macro Deck वेबसाइट से पोर्टेबल ZIP डाउनलोड करें और प्रोग्राम फ़ाइलें बदलें। Data फ़ोल्डर रखें। Macro Deck चलता रहेगा।</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Macro Deck की यह पोर्टेबल कॉपी अपडेट खुद इंस्टॉल नहीं करती। {downloadPageUrl} से नया पोर्टेबल ZIP डाउनलोड करें, Macro Deck बंद करें और प्रोग्राम फ़ाइलें बदलें। Data फ़ोल्डर रखें।</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>डाउनलोड रद्द करें</value>
   </data>
@@ -18167,6 +18175,10 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>संस्करण {version} उपलब्ध है।</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>संस्करण {version} उपलब्ध है। Macro Deck वेबसाइट से पोर्टेबल ZIP डाउनलोड करें और प्रोग्राम फ़ाइलें बदलें। Data फ़ोल्डर रखें।</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

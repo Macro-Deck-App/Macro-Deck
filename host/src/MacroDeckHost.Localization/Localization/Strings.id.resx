@@ -1220,6 +1220,14 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
     <value>Tidak dapat memeriksa sumber pembaruan {names}.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} tersedia.
+
+Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari situs web Macro Deck dan ganti file program. Pertahankan folder Data. Macro Deck akan tetap berjalan.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Salinan portabel Macro Deck ini tidak memasang pembaruan sendiri. Unduh ZIP portabel baru dari {downloadPageUrl}, keluar dari Macro Deck, lalu ganti file program. Pertahankan folder Data.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Batalkan unduhan</value>
   </data>
@@ -18167,6 +18175,10 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Versi {version} tersedia.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Versi {version} tersedia. Unduh ZIP portabel dari situs web Macro Deck dan ganti file program. Pertahankan folder Data.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

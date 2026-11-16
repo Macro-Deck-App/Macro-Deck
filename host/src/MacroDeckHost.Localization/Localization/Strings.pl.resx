@@ -1221,6 +1221,14 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
     <value>Nie można sprawdzić kanałów aktualizacji {names}.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Dostępny jest Macro Deck {version}.
+
+Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik ZIP ze strony Macro Deck i zastąp pliki programu. Zachowaj folder Data. Macro Deck będzie nadal działać.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Ta przenośna kopia Macro Deck nie instaluje aktualizacji samodzielnie. Pobierz nowy przenośny plik ZIP z {downloadPageUrl}, zamknij Macro Deck i zastąp pliki programu. Zachowaj folder Data.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Anuluj pobieranie</value>
   </data>
@@ -18166,6 +18174,10 @@ Pobierz go ze strony Macro Deck i zaktualizuj zainstalowany pakiet AppImage, DEB
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Dostępna jest wersja {version}.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Dostępna jest wersja {version}. Pobierz przenośny plik ZIP ze strony Macro Deck i zastąp pliki programu. Zachowaj folder Data.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

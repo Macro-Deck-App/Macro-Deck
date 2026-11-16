@@ -745,7 +745,7 @@ pub async fn ensure_running(app: &AppHandle) -> bool {
         return true;
     }
 
-    let config_dir = app.path().app_config_dir().ok();
+    let config_dir = crate::portable::app_config_dir(app).ok();
     let port_file_dir = config_dir.as_deref().unwrap_or(Path::new("."));
 
     // Reuse an already-running host (e.g. restart of the UI only), but only
@@ -892,7 +892,7 @@ fn launch(app: &AppHandle, state: &HostState) -> Result<Option<(u64, u16)>, Laun
 
     // None only when the home directory is unresolvable. The port file tolerates that and falls
     // back to the process cwd; the bundle extraction below deliberately does not.
-    let config_dir = app.path().app_config_dir().ok();
+    let config_dir = crate::portable::app_config_dir(app).ok();
     let port_file_dir = config_dir.as_deref().unwrap_or(Path::new("."));
     let port = acquire_loopback_port(port_file_dir).ok_or(LaunchError::NoFreePort)?;
 
@@ -1139,7 +1139,7 @@ fn spawn_exit_monitor(app: AppHandle, generation: u64, pid: u32) {
             std::thread::sleep(Duration::from_millis(250));
         };
 
-        if let Ok(dir) = app.path().app_config_dir() {
+        if let Ok(dir) = crate::portable::app_config_dir(&app) {
             host_process::clear(&dir, pid);
         }
 

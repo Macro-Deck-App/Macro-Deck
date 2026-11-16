@@ -1220,6 +1220,14 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Не удалось проверить источники обновлений: {names}.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Доступна версия Macro Deck {version}.
+
+Эта портативная копия не обновляется сама. Скачайте портативный ZIP с сайта Macro Deck и замените файлы программы. Папку Data сохраните. Macro Deck продолжит работать.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Эта портативная копия Macro Deck не устанавливает обновления сама. Скачайте новый портативный ZIP с {downloadPageUrl}, закройте Macro Deck и замените файлы программы. Папку Data сохраните.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Отменить загрузку</value>
   </data>
@@ -18167,6 +18175,10 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Доступна версия {version}.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Доступна версия {version}. Скачайте портативный ZIP с сайта Macro Deck и замените файлы программы. Папку Data сохраните.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

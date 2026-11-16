@@ -378,4 +378,47 @@ public class AutostartServiceTests
 
 		File.Delete(executable);
 	}
+
+	[Test]
+	public void A_portable_copy_leaves_another_copys_login_item_alone()
+	{
+		var installed = new AutostartRegistration("/installed/MacroDeck", true);
+		var registrar = new FakeRegistrar { Stored = installed };
+		var executable = ExistingExecutable();
+		var service = new AutostartService(registrar, executable, true);
+
+		service.RefreshRegistration();
+		var settings = service.GetSettings();
+		var disabled = service.Update(false, false);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(settings, Is.EqualTo(new AutostartSettings(true, false, false)));
+			Assert.That(disabled.Success, Is.True);
+			Assert.That(registrar.Stored, Is.EqualTo(installed));
+		});
+
+		File.Delete(executable);
+	}
+
+	[Test]
+	public void A_portable_copy_registers_itself_when_autostart_is_switched_on()
+	{
+		var registrar = new FakeRegistrar { Stored = new AutostartRegistration("/installed/MacroDeck", false) };
+		var executable = ExistingExecutable();
+		var service = new AutostartService(registrar, executable, true);
+
+		service.Update(true, true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(registrar.Stored, Is.EqualTo(new AutostartRegistration(executable, true)));
+			Assert.That(service.GetSettings(), Is.EqualTo(new AutostartSettings(true, true, true)));
+		});
+
+		service.Update(false, false);
+		Assert.That(registrar.Stored, Is.Null);
+
+		File.Delete(executable);
+	}
 }

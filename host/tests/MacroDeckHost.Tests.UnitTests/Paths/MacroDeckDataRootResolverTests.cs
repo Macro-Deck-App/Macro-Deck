@@ -9,6 +9,9 @@ public class MacroDeckDataRootResolverTests
 	private static readonly string _workingDirectory = Path.Combine(Path.GetTempPath(), "macro-deck-workspace");
 	private static readonly string _homeDirectory = Path.Combine(Path.GetTempPath(), "macro-deck-home");
 
+	private static readonly string _appDirectory = Path.Combine(Path.GetTempPath(), "macro-deck-portable");
+	private static readonly string _hostDirectory = Path.Combine(_appDirectory, "host");
+
 	private static DataRootEnvironment CreateEnvironment(
 		DataRootPlatform platform,
 		bool packagedMarkerExists = false,
@@ -22,6 +25,35 @@ public class MacroDeckDataRootResolverTests
 			platform,
 			key => variables.GetValueOrDefault(key),
 			path => packagedMarkerExists && path == markerPath);
+	}
+
+	private static DataRootEnvironment CreatePackagedAppEnvironment(
+		string? portableMarkerDirectory,
+		Dictionary<string, string>? environmentVariables = null)
+	{
+		var variables = environmentVariables ?? new Dictionary<string, string>();
+		var existingFiles = new HashSet<string>
+		{
+			Path.Combine(_hostDirectory, MacroDeckDataRootResolver.PackagedMarkerFileName)
+		};
+		if (portableMarkerDirectory is not null)
+		{
+			existingFiles.Add(Path.Combine(portableMarkerDirectory, MacroDeckDataRootResolver.PortableMarkerFileName));
+		}
+
+		return new DataRootEnvironment(_hostDirectory + Path.DirectorySeparatorChar,
+			_workingDirectory,
+			_homeDirectory,
+			DataRootPlatform.Windows,
+			key => variables.GetValueOrDefault(key),
+			existingFiles.Contains);
+	}
+
+	private static void AssumeProductionChannel()
+	{
+		Assume.That(BuildConfig.Channel,
+			Is.EqualTo(BuildChannel.Production),
+			"A Development build roots its data under the working directory before any marker is read");
 	}
 
 	private static string ChannelDefault(string productionDataRoot)
@@ -145,5 +177,66 @@ public class MacroDeckDataRootResolverTests
 			});
 
 		Assert.That(MacroDeckDataRootResolver.Resolve(environment), Is.EqualTo(Path.GetFullPath(overrideDir)));
+	}
+
+	[Test]
+	public void A_portable_marker_beside_the_app_keeps_the_data_beside_the_app()
+	{
+		AssumeProductionChannel();
+		var environment = CreatePackagedAppEnvironment(_appDirectory);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(MacroDeckDataRootResolver.Resolve(environment),
+				Is.EqualTo(Path.Combine(_appDirectory, "Data")));
+			Assert.That(MacroDeckDataRootResolver.IsPortable(environment), Is.True);
+		});
+	}
+
+	[Test]
+	public void The_portable_marker_is_looked_up_beside_the_app_that_started_the_host()
+	{
+		AssumeProductionChannel();
+		var shellDirectory = Path.Combine(Path.GetTempPath(), "macro-deck-shell");
+		var environment = CreatePackagedAppEnvironment(shellDirectory,
+			new Dictionary<string, string>
+			{
+				[MacroDeckDataRootResolver.ShellExecutableEnvironmentVariable]
+					= Path.Combine(shellDirectory, "MacroDeck")
+			});
+
+		Assert.That(MacroDeckDataRootResolver.Resolve(environment), Is.EqualTo(Path.Combine(shellDirectory, "Data")));
+	}
+
+	[Test]
+	public void A_packaged_app_without_the_portable_marker_keeps_its_data_in_the_user_profile()
+	{
+		AssumeProductionChannel();
+		var appData = Path.Combine(_homeDirectory, "roaming");
+		var environment = CreatePackagedAppEnvironment(null,
+			new Dictionary<string, string> { ["APPDATA"] = appData });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(MacroDeckDataRootResolver.Resolve(environment), Is.EqualTo(Path.Combine(appData, "MacroDeck")));
+			Assert.That(MacroDeckDataRootResolver.IsPortable(environment), Is.False);
+		});
+	}
+
+	[Test]
+	public void A_data_directory_override_wins_over_the_portable_marker()
+	{
+		var overrideDir = Path.Combine(Path.GetTempPath(), "custom-data-root");
+		var environment = CreatePackagedAppEnvironment(_appDirectory,
+			new Dictionary<string, string>
+			{
+				[MacroDeckDataRootResolver.DataDirectoryEnvironmentVariable] = overrideDir
+			});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(MacroDeckDataRootResolver.Resolve(environment), Is.EqualTo(Path.GetFullPath(overrideDir)));
+			Assert.That(MacroDeckDataRootResolver.IsPortable(environment), Is.False);
+		});
 	}
 }

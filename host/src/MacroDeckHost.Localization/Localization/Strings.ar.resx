@@ -1220,6 +1220,14 @@
     <value>تعذّر التحقق من مصادر تحديثات {names}.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>يتوفر Macro Deck {version}.
+
+لا تُحدِّث هذه النسخة المحمولة نفسها. نزّل ملف ZIP المحمول من موقع Macro Deck واستبدل ملفات البرنامج. احتفظ بمجلد Data. سيستمر Macro Deck في العمل.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>لا تُثبّت هذه النسخة المحمولة من Macro Deck التحديثات بنفسها. نزّل ملف ZIP المحمول الجديد من {downloadPageUrl}، وأغلق Macro Deck، ثم استبدل ملفات البرنامج. احتفظ بمجلد Data.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>إلغاء التنزيل</value>
   </data>
@@ -18167,6 +18175,10 @@
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>الإصدار {version} متوفر.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>الإصدار {version} متوفر. نزّل ملف ZIP المحمول من موقع Macro Deck واستبدل ملفات البرنامج. احتفظ بمجلد Data.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

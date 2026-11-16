@@ -20,9 +20,47 @@ contain incomplete or unstable functionality.
 
 ## Windows
 
-<Downloads packages={['windows']} />
+<Downloads packages={['windows', 'portable']} />
 
-Download the installer and run it.
+Download the installer and run it. To run Macro Deck without installing it, for example from a USB
+drive, use the [portable ZIP](#portable-mode-windows) instead.
+
+### Portable mode (Windows)
+
+In portable mode, Macro Deck keeps everything it writes in a `Data` folder next to `MacroDeck.exe`
+instead of in your user profile: profiles, settings, plugins, icons, backups, logs and the window's
+browser data. Copy the whole folder to another computer or drive and Macro Deck starts with the same
+setup there.
+
+1. Download the portable `.zip` above.
+2. Extract it to a folder you can write to, such as a USB drive or a folder in your user profile.
+   Avoid `C:\Program Files`, where Macro Deck cannot create its `Data` folder.
+3. Start `MacroDeck.exe` from that folder.
+
+The empty file named `portable` next to `MacroDeck.exe` is what turns portable mode on. Delete it and
+the same copy keeps its data in your user profile again, like an installed one.
+
+Portable mode differs from an installed Macro Deck in a few ways:
+
+- **Updates**: Macro Deck still tells you about a new version, but does not install it. Download the
+  new portable `.zip`, quit Macro Deck, and replace the program files with the new ones. Keep the
+  `Data` folder. See [Updates](/guide/updates/).
+- **Encryption keys**: the keys that protect stored passwords and tokens stay in the `Data` folder
+  instead of your system's credential store, so the folder works on another computer. Anyone who can
+  read the folder can read them.
+- **Autostart**: switch it on in the portable copy's own settings. A portable copy never changes the
+  autostart entry on its own. Windows keeps one entry per user, so switching it on in the portable copy
+  replaces an installed copy's entry, and starting the installed copy again takes it back.
+- **Not available**: `macrodeck://` links, opening Macro Deck files by double-clicking them, and the
+  Windows Firewall rule all come from the installer. If Windows asks whether to allow Macro Deck
+  through the firewall on the first start, allow it so your devices can connect. Windows notifications
+  may not appear either.
+- A portable copy and an installed Macro Deck cannot run at the same time.
+- Windows 10 and 11 include the WebView2 runtime Macro Deck needs. On a system without it, install it
+  from Microsoft first.
+
+Do not add a `portable` file to an installed Macro Deck: the installer and its updates manage that
+folder.
 
 ## macOS
 

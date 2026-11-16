@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use tauri::plugin::TauriPlugin;
-use tauri::{AppHandle, Emitter, Manager, Wry};
+use tauri::{AppHandle, Emitter, Wry};
 
 use crate::{host, logging, updater};
 
@@ -28,8 +28,7 @@ pub fn plugin() -> TauriPlugin<Wry> {
 }
 
 fn record_path(app: &AppHandle) -> Option<PathBuf> {
-    app.path()
-        .app_config_dir()
+    crate::portable::app_config_dir(app)
         .ok()
         .map(|dir| dir.join(RECORD_FILE))
 }

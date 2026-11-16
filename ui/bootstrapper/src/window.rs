@@ -152,6 +152,7 @@ pub fn create_main_window(app: &AppHandle) {
         .zoom_hotkeys_enabled(false)
         .initialization_script(SHELL_BRIDGE_SCRIPT)
         .initialization_script(EXTERNAL_LINKS_SCRIPT);
+    builder = crate::portable::with_webview_data(builder);
 
     if should_disable_context_menu(host::is_packaged(), devtools_requested) {
         builder = builder.initialization_script(DISABLE_CONTEXT_MENU_SCRIPT);

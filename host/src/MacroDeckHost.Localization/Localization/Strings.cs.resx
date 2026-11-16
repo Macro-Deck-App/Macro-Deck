@@ -1221,6 +1221,14 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
     <value>Nepodařilo se zkontrolovat kanály aktualizací {names}.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Je k dispozici Macro Deck {version}.
+
+Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Macro Deck a nahraďte soubory programu. Složku Data ponechte. Macro Deck mezitím poběží dál.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Tato přenosná kopie Macro Deck neinstaluje aktualizace sama. Stáhněte nový přenosný ZIP z {downloadPageUrl}, ukončete Macro Deck a nahraďte soubory programu. Složku Data ponechte.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>Zrušit stahování</value>
   </data>
@@ -18166,6 +18174,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>Je dostupná verze {version}.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>Je k dispozici verze {version}. Stáhněte přenosný ZIP z webu Macro Deck a nahraďte soubory programu. Složku Data ponechte.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">

@@ -1220,6 +1220,14 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>{names} güncelleme kaynakları denetlenemedi.</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} kullanılabilir.
+
+Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro Deck web sitesinden indirin ve program dosyalarını değiştirin. Data klasörünü koruyun. Macro Deck çalışmaya devam edecek.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Macro Deck'in bu taşınabilir kopyası güncellemeleri kendisi yüklemez. Yeni taşınabilir ZIP dosyasını {downloadPageUrl} adresinden indirin, Macro Deck'ten çıkın ve program dosyalarını değiştirin. Data klasörünü koruyun.</value>
+  </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>İndirmeyi iptal et</value>
   </data>
@@ -18167,6 +18175,10 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>{version} sürümü kullanılabilir.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>{version} sürümü kullanılabilir. Taşınabilir ZIP dosyasını Macro Deck web sitesinden indirin ve program dosyalarını değiştirin. Data klasörünü koruyun.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">
