@@ -102,7 +102,11 @@ internal sealed class X11Connection : IDisposable
 
 			try
 			{
+				X11Windows.Sync(_display);
 				action(_display);
+			}
+			catch (X11DisplayLostException)
+			{
 			}
 			finally
 			{
@@ -136,7 +140,12 @@ internal sealed class X11Connection : IDisposable
 		T result;
 		try
 		{
+			X11Windows.Sync(_display);
 			result = action(_display);
+		}
+		catch (X11DisplayLostException)
+		{
+			result = default!;
 		}
 		finally
 		{
@@ -201,6 +210,11 @@ internal sealed class X11Connection : IDisposable
 			attached = _attach(display);
 		}
 		catch (DllNotFoundException)
+		{
+			_libraryMissing = true;
+			attached = false;
+		}
+		catch (X11DisplayLostException)
 		{
 			attached = false;
 		}

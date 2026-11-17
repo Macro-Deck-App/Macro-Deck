@@ -42,6 +42,30 @@ internal static class X11Windows
 		return _lost.ContainsKey(display);
 	}
 
+	// After a loss Xlib leaves extension state (Xkb, XTest, the keymap) half torn down, and calls that
+	// touch it crash the process, so nothing may call into a lost display again.
+	public static void ThrowIfLost(IntPtr display)
+	{
+		if (IsLost(display))
+		{
+			throw new X11DisplayLostException();
+		}
+	}
+
+	// Of the calls the host makes, only XSync and XFlush survive meeting a dead server inside the call,
+	// so a server loss is looked for with them before any Xkb or XTest call can be the first to see it.
+	public static void Sync(IntPtr display)
+	{
+		_ = XSync(display, false);
+		ThrowIfLost(display);
+	}
+
+	public static void Flush(IntPtr display)
+	{
+		_ = XFlush(display);
+		ThrowIfLost(display);
+	}
+
 	public static void CloseDisplay(IntPtr display)
 	{
 		_ = XCloseDisplay(display);
@@ -72,11 +96,6 @@ internal static class X11Windows
 		}
 	}
 
-	public static void CloseDisplay(IntPtr display)
-	{
-		_ = XCloseDisplay(display);
-	}
-
 	public static nuint DefaultRootWindow(IntPtr display)
 	{
 		return XDefaultRootWindow(display);
@@ -84,11 +103,13 @@ internal static class X11Windows
 
 	public static nuint InternAtom(IntPtr display, string name)
 	{
+		ThrowIfLost(display);
 		return XInternAtom(display, Encoding.UTF8.GetBytes(name + '\0'), true);
 	}
 
 	public static List<nuint> ReadLongProperty(IntPtr display, nuint window, nuint property)
 	{
+		ThrowIfLost(display);
 		var status = XGetWindowProperty(display,
 			window,
 			property,
@@ -177,7 +198,10 @@ internal static class X11Windows
 	private static extern int XCloseDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
-	private static extern int XCloseDisplay(IntPtr display);
+	private static extern int XSync(IntPtr display, [MarshalAs(UnmanagedType.Bool)] bool discard);
+
+	[DllImport(LibX11)]
+	private static extern int XFlush(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern nuint XDefaultRootWindow(IntPtr display);

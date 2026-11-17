@@ -364,7 +364,6 @@ public sealed class KeyboardInputService : IKeyboardInputService
 			}
 			catch (PlatformNotSupportedException)
 			{
-				// A cached window can belong to an X server that has since restarted; resolve it once more.
 				cached.Window.Dispose();
 				_backgroundHolds.Remove(processKey);
 			}

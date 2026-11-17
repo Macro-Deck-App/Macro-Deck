@@ -141,12 +141,14 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private static void LockModifiers(IntPtr display, uint affect, uint values)
 	{
 		_ = XSync(display, false);
+		X11Windows.ThrowIfLost(display);
 		_ = XkbLockModifiers(display, XkbUseCoreKbd, affect, values);
 		_ = XSync(display, false);
 	}
 
 	private static uint ReadLockedModifiers(IntPtr display)
 	{
+		X11Windows.ThrowIfLost(display);
 		return XkbGetState(display, XkbUseCoreKbd, out var state) == 0 ? state.LockedMods : 0u;
 	}
 
@@ -186,7 +188,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		nuint keysym)
 	{
 		return TryResolveOutsideSpare(keysym,
-			XKeysymToKeycode(display, keysym),
+			KeysymToKeycode(display, keysym),
 			layout.MinKeycode,
 			spareKeycode,
 			shiftMask,
@@ -226,16 +228,16 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		return new SpareKeycode(keycode,
 			keysym =>
 			{
+				X11Windows.ThrowIfLost(display);
 				_ = XChangeKeyboardMapping(display, keycode, 2, [keysym, keysym], 1);
 				_ = XSync(display, false);
 			},
 			clearing =>
 			{
+				X11Windows.ThrowIfLost(display);
 				_ = XSync(display, false);
-				if (!X11Windows.IsLost(display))
-				{
-					Thread.Sleep(clearing ? SpareKeyFinalSettleMs : SpareKeySettleMs);
-				}
+				X11Windows.ThrowIfLost(display);
+				Thread.Sleep(clearing ? SpareKeyFinalSettleMs : SpareKeySettleMs);
 			});
 	}
 
@@ -350,20 +352,25 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	private static TypingLayout ReadLayout(IntPtr display)
 	{
+		X11Windows.ThrowIfLost(display);
 		_ = XDisplayKeycodes(display, out var min, out var max);
 		var hasState = XkbGetState(display, XkbUseCoreKbd, out var state) == 0;
+		var level3Mask = KeysymToModifiers(display, IsoLevel3ShiftKeysym);
+		var shiftKeycode = KeysymToKeycode(display, ShiftLeftKeysym);
+		var level3Keycode = KeysymToKeycode(display, IsoLevel3ShiftKeysym);
 		return new TypingLayout(hasState ? state.Group : 0u,
 			hasState ? state.Mods : 0u,
 			hasState ? state.LockedMods : 0u,
-			XkbKeysymToModifiers(display, IsoLevel3ShiftKeysym),
-			XKeysymToKeycode(display, ShiftLeftKeysym),
-			XKeysymToKeycode(display, IsoLevel3ShiftKeysym),
+			level3Mask,
+			shiftKeycode,
+			level3Keycode,
 			min,
 			max);
 	}
 
 	private static nuint LookupKeysym(IntPtr display, uint keycode, uint state)
 	{
+		X11Windows.ThrowIfLost(display);
 		return XkbLookupKeySym(display, (byte)keycode, state, out _, out var keysym) ? keysym : 0;
 	}
 
@@ -435,6 +442,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		_ = XDisplayKeycodes(display, out _, out var max);
 		_spareKeycode = max; // Highest keycode is reliably unused; we borrow it for Unicode typing.
 		_root = XDefaultRootWindow(display);
+
+		// Xkb loads its keyboard description on first use; loaded here, typing never fetches it mid-action.
+		_ = XkbKeysymToModifiers(display, IsoLevel3ShiftKeysym);
 		return true;
 	}
 
@@ -443,7 +453,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		// Xlib applies a layout change to its cached keymap only once it reads the server's mapping event,
 		// so read everything pending before resolving or a press right after a switch uses the old layout.
 		_ = XSync(display, false);
-		var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(display, keysym));
+		var keycode = ResolveKeycode(key, keysym => KeysymToKeycode(display, keysym));
 		if (keycode == 0)
 		{
 			return;
@@ -453,13 +463,23 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		_ = XFlush(display);
 	}
 
+	private static uint KeysymToKeycode(IntPtr display, nuint keysym)
+	{
+		X11Windows.ThrowIfLost(display);
+		return XKeysymToKeycode(display, keysym);
+	}
+
+	private static uint KeysymToModifiers(IntPtr display, nuint keysym)
+	{
+		X11Windows.ThrowIfLost(display);
+		return XkbKeysymToModifiers(display, keysym);
+	}
+
 	private static void FakeKey(IntPtr display, uint keycode, bool press)
 	{
-		// An XTest request on a lost display corrupts libXext's display list for every later connection.
-		if (!X11Windows.IsLost(display))
-		{
-			_ = XTestFakeKeyEvent(display, keycode, press, 0);
-		}
+		X11Windows.ThrowIfLost(display);
+		_ = XTestFakeKeyEvent(display, keycode, press, 0);
+		X11Windows.Flush(display);
 	}
 
 	internal static uint ResolveKeycode(KeyCode key, Func<nuint, uint> keysymToKeycode)
@@ -661,6 +681,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	private static void SendKeyEvent(IntPtr display, nuint root, nuint window, uint keycode, uint state, bool press)
 	{
+		X11Windows.ThrowIfLost(display);
 		var buffer = Marshal.AllocHGlobal(EventBufferSize);
 		try
 		{
@@ -678,6 +699,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			Marshal.WriteInt32(buffer, 84, (int)keycode);
 			Marshal.WriteInt32(buffer, 88, 1); // same_screen = True
 			_ = XSendEvent(display, window, false, press ? KeyPressMask : KeyReleaseMask, buffer);
+			X11Windows.Flush(display);
 		}
 		finally
 		{
@@ -715,6 +737,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			Marshal.FreeHGlobal(buffer);
 		}
 
+		X11Windows.ThrowIfLost(display);
 		_ = XRaiseWindow(display, window);
 		_ = XSetInputFocus(display, window, RevertToParent, 0);
 		_ = XFlush(display);
@@ -893,7 +916,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		private void Send(IntPtr display, KeyCode key, bool press)
 		{
 			_ = XSync(display, false);
-			var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(display, keysym));
+			var keycode = ResolveKeycode(key, keysym => KeysymToKeycode(display, keysym));
 			if (keycode == 0)
 			{
 				return;
@@ -904,7 +927,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 				var mask = ResolveStateMask(key,
 					keycode,
 					code => LookupKeysym(display, code, 0),
-					keysym => XkbKeysymToModifiers(display, keysym));
+					keysym => KeysymToModifiers(display, keysym));
 				if (mask != 0)
 				{
 					_heldMasks[key] = mask;

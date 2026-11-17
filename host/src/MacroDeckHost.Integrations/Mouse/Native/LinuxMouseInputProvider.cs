@@ -187,21 +187,18 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 		return width > 0 && height > 0 ? new MouseRect(0, 0, width, height) : null;
 	}
 
-	// An XTest request on a lost display corrupts libXext's display list for every later connection.
 	private static void Motion(IntPtr display, MousePoint position)
 	{
-		if (!X11Windows.IsLost(display))
-		{
-			_ = XTestFakeMotionEvent(display, AnyScreen, position.X, position.Y, 0);
-		}
+		X11Windows.ThrowIfLost(display);
+		_ = XTestFakeMotionEvent(display, AnyScreen, position.X, position.Y, 0);
+		X11Windows.Flush(display);
 	}
 
 	private static void FakeButton(IntPtr display, uint button, bool press)
 	{
-		if (!X11Windows.IsLost(display))
-		{
-			_ = XTestFakeButtonEvent(display, button, press, 0);
-		}
+		X11Windows.ThrowIfLost(display);
+		_ = XTestFakeButtonEvent(display, button, press, 0);
+		X11Windows.Flush(display);
 	}
 
 	private static bool TryGetButtonNumber(MouseButton button, out uint number)
