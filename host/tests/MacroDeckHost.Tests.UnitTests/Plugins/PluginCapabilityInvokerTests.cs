@@ -210,34 +210,165 @@ public class PluginCapabilityInvokerTests
 		await invokeTask;
 	}
 
-	[Test]
-	public async Task Exhausting_The_Concurrency_Gate_Yields_A_Retryable_RATE_LIMITED()
+	private static IReadOnlyList<ProtocolEnvelope> Invocations(FakePluginConnection connection)
 	{
-		await AttachAsync("com.example.plugin");
+		return [.. connection.Sent.Where(envelope => envelope.Type == MessageTypes.CapabilityInvoke)];
+	}
 
-		var pending = new List<Task>();
-		for (var i = 0; i < ProtocolLimits.MaxConcurrentInvocations; i++)
+	private static async Task WaitUntilAsync(Func<bool> condition, string because)
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+		while (!condition())
 		{
-			pending.Add(_invoker.InvokeAsync("com.example.plugin", Request(), CancellationToken.None));
+			if (DateTime.UtcNow > deadline)
+			{
+				Assert.Fail(because);
+			}
+
+			await Task.Delay(10);
+		}
+	}
+
+	private List<Task<JsonElement?>> Saturate(string pluginId)
+	{
+		return
+		[
+			.. Enumerable.Range(0, ProtocolLimits.MaxConcurrentInvocations)
+				.Select(_ => _invoker.InvokeAsync(pluginId, Request(), CancellationToken.None))
+		];
+	}
+
+	[Test]
+	public async Task Calls_past_the_concurrency_limit_wait_for_a_free_slot_and_all_complete()
+	{
+		var connection = await AttachAsync("com.example.plugin");
+		const int burst = ProtocolLimits.MaxConcurrentInvocations + 13;
+
+		var calls = Enumerable.Range(0, burst)
+			.Select(_ => _invoker.InvokeAsync("com.example.plugin", Request(), CancellationToken.None))
+			.ToList();
+
+		Assert.That(Invocations(connection), Has.Count.EqualTo(ProtocolLimits.MaxConcurrentInvocations));
+		Assert.That(calls.Count(call => call.IsCompleted), Is.Zero, "A call past the limit failed instead of waiting.");
+
+		var answered = new HashSet<string>(StringComparer.Ordinal);
+		while (answered.Count < burst)
+		{
+			var outstanding = Invocations(connection).Where(envelope => !answered.Contains(envelope.Id!)).ToList();
+			Assert.That(outstanding,
+				Has.Count.LessThanOrEqualTo(ProtocolLimits.MaxConcurrentInvocations),
+				"The plugin was sent more invocations at once than the protocol allows.");
+
+			var next = outstanding.FirstOrDefault();
+			if (next is null)
+			{
+				await WaitUntilAsync(() => Invocations(connection).Count > answered.Count,
+					"A waiting call was never sent after a slot freed.");
+				continue;
+			}
+
+			answered.Add(next.Id!);
+			_invoker.TryComplete("com.example.plugin", SuccessResult(next.Id!));
 		}
 
-		var exception = Assert.ThrowsAsync<RemoteCapabilityException>(async ()
-			=> await _invoker.InvokeAsync("com.example.plugin", Request(), CancellationToken.None));
+		await Task.WhenAll(calls).WaitAsync(TimeSpan.FromSeconds(10));
+		Assert.That(Invocations(connection), Has.Count.EqualTo(burst));
+	}
 
+	[Test]
+	public async Task A_waiting_call_ends_with_the_callers_cancellation_and_is_never_sent()
+	{
+		var connection = await AttachAsync("com.example.plugin");
+		var held = Saturate("com.example.plugin");
+		using var cts = new CancellationTokenSource();
+
+		var waiting = _invoker.InvokeAsync("com.example.plugin", Request(), cts.Token);
+		await cts.CancelAsync();
+
+		Assert.ThrowsAsync<OperationCanceledException>(async () => await waiting);
+
+		foreach (var invocation in Invocations(connection))
+		{
+			_invoker.TryComplete("com.example.plugin", SuccessResult(invocation.Id!));
+		}
+
+		await Task.WhenAll(held);
+		Assert.That(Invocations(connection), Has.Count.EqualTo(ProtocolLimits.MaxConcurrentInvocations));
+	}
+
+	[Test]
+	public async Task A_call_that_waits_out_its_whole_budget_is_a_retryable_RATE_LIMITED_and_is_never_sent()
+	{
+		var connection = await AttachAsync("com.example.plugin");
+		Saturate("com.example.plugin");
+
+		var waiting = _invoker.InvokeAsync("com.example.plugin",
+			Request() with { Timeout = TimeSpan.FromSeconds(5) },
+			CancellationToken.None);
+
+		_time.Advance(TimeSpan.FromSeconds(5));
+
+		var exception = Assert.ThrowsAsync<RemoteCapabilityException>(async () => await waiting);
 		Assert.Multiple(() =>
 		{
 			Assert.That(exception!.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
 			Assert.That(exception.Retryable, Is.True);
+			Assert.That(Invocations(connection), Has.Count.EqualTo(ProtocolLimits.MaxConcurrentInvocations));
 		});
+	}
 
-		_invoker.AbortAll("com.example.plugin",
-			new ProtocolError
-				{ Code = ProtocolErrorCodes.CapabilityUnavailable, Message = "Test cleanup.", Retryable = true });
+	[Test]
+	public async Task Time_spent_waiting_for_a_slot_comes_off_the_calls_budget()
+	{
+		var connection = await AttachAsync("com.example.plugin");
+		Saturate("com.example.plugin");
 
-		foreach (var task in pending)
-		{
-			Assert.ThrowsAsync<RemoteCapabilityException>(async () => await task);
-		}
+		var waiting = _invoker.InvokeAsync("com.example.plugin", Request(), CancellationToken.None);
+
+		_time.Advance(TimeSpan.FromSeconds(10));
+		_invoker.TryComplete("com.example.plugin", SuccessResult(Invocations(connection)[0].Id!));
+
+		await WaitUntilAsync(() => Invocations(connection).Count > ProtocolLimits.MaxConcurrentInvocations,
+			"The waiting call was never sent after a slot freed.");
+		var sent = Invocations(connection)[^1];
+
+		var remaining = ProtocolTimeouts.CapabilityInvoke - TimeSpan.FromSeconds(10);
+		Assert.That(sent.DeadlineMs, Is.EqualTo((int)remaining.TotalMilliseconds));
+
+		_time.Advance(remaining);
+
+		var exception = Assert.ThrowsAsync<RemoteCapabilityException>(async () => await waiting);
+		Assert.That(exception!.Code, Is.EqualTo(ProtocolErrorCodes.Timeout));
+	}
+
+	[Test]
+	public async Task Disposing_the_invoker_ends_a_waiting_call_without_sending_it()
+	{
+		var connection = await AttachAsync("com.example.plugin");
+		Saturate("com.example.plugin");
+
+		var waiting = _invoker.InvokeAsync("com.example.plugin", Request(), CancellationToken.None);
+
+		_invoker.Dispose();
+
+		Assert.ThrowsAsync<ObjectDisposedException>(async () => await waiting.WaitAsync(TimeSpan.FromSeconds(10)));
+		Assert.That(Invocations(connection), Has.Count.EqualTo(ProtocolLimits.MaxConcurrentInvocations));
+	}
+
+	[Test]
+	public async Task A_plugin_at_its_limit_does_not_hold_up_another_plugins_call()
+	{
+		await AttachAsync("com.example.plugin-a");
+		var connectionB = await AttachAsync("com.example.plugin-b");
+		Saturate("com.example.plugin-a");
+		var waitingOnA = _invoker.InvokeAsync("com.example.plugin-a", Request(), CancellationToken.None);
+
+		var callB = _invoker.InvokeAsync("com.example.plugin-b", Request(), CancellationToken.None);
+
+		Assert.That(Invocations(connectionB), Has.Count.EqualTo(1));
+		_invoker.TryComplete("com.example.plugin-b", SuccessResult(Invocations(connectionB)[0].Id!));
+		await callB.WaitAsync(TimeSpan.FromSeconds(10));
+		Assert.That(waitingOnA.IsCompleted, Is.False);
 	}
 
 	[Test]
