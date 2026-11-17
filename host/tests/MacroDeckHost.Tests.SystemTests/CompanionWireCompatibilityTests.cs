@@ -12,7 +12,7 @@ namespace MacroDeckHost.Tests.SystemTests;
 // COMPAT-02: frozen Companion requests on the public listener, judged by engineering/api (Companion and
 // Macro Deck 2 app pages), ADR 0062 and ADR 0083 rather than by today's response DTOs.
 [TestFixture]
-internal sealed class CompanionWireCompatibilityTests : SystemTestFixture
+internal sealed partial class CompanionWireCompatibilityTests : SystemTestFixture
 {
 	private const string StatusRequest = "/api/auth/status";
 	private const string ClientId = "compat-client-1";
@@ -40,6 +40,16 @@ internal sealed class CompanionWireCompatibilityTests : SystemTestFixture
 	private static readonly string[] _widgetGeometry = ["positionX", "positionY", "width", "height"];
 
 	private static readonly string[] _runStatuses = ["Accepted", "Succeeded", "PartiallyFailed", "Failed", "Cancelled"];
+
+	private static readonly string[] _folderTexts
+		= ["profileId", "parentId", "backgroundColor", "emptyCellStyle", "viewId", "viewConfiguration"];
+
+	private static readonly string[] _folderNumbers = ["rows", "columns", "widgetSpacing", "widgetBorderRadius"];
+
+	private static readonly string[] _lockStateFields = ["locked", "lockScreenEnabled", "supported"];
+
+	private static readonly string[] _profileNumbers
+		= ["defaultColumns", "defaultRows", "defaultWidgetSpacing", "defaultWidgetBorderRadius"];
 
 	[Test]
 	public async Task An_installed_companion_detects_pairs_and_opens_the_ui_socket_on_the_current_host()
@@ -288,7 +298,8 @@ internal sealed class CompanionWireCompatibilityTests : SystemTestFixture
 		return await companion.SendAsync(ticketRequest);
 	}
 
-	private static async Task<(CompanionSocket Socket, string AccessToken)> ConnectCompanionAsync(HostInstance host)
+	private static async Task<(CompanionSocket Socket, string AccessToken, string DeviceId)> ConnectCompanionAsync(
+		HostInstance host)
 	{
 		using var companion = new HttpClient { BaseAddress = new Uri($"http://127.0.0.1:{host.PublicPort}") };
 		await SetUpOwnerAsync(host);
@@ -297,7 +308,8 @@ internal sealed class CompanionWireCompatibilityTests : SystemTestFixture
 		var code = (string)(await ObjectAsync(pairing))["code"]!;
 		using var redeemed = await companion.PostAsync("/api/auth/device-enrollment/redeem",
 			new StringContent(RedeemRequest(code), Encoding.UTF8, "application/json"));
-		var accessToken = (string)(await ObjectAsync(redeemed))["accessToken"]!;
+		var session = await ObjectAsync(redeemed);
+		var accessToken = (string)session["accessToken"]!;
 		using var ticketResponse = await RequestTicketAsync(companion, accessToken);
 		var ticket = (string)(await ObjectAsync(ticketResponse))["value"]!;
 
@@ -307,7 +319,7 @@ internal sealed class CompanionWireCompatibilityTests : SystemTestFixture
 		await socket.ConnectAsync(
 			new Uri($"ws://127.0.0.1:{host.PublicPort}/ws/ui?ticket={Uri.EscapeDataString(ticket)}"),
 			connectTimeout.Token);
-		return (new CompanionSocket(socket), accessToken);
+		return (new CompanionSocket(socket), accessToken, (string)session["device"]!["deviceId"]!);
 	}
 
 	private static async Task<(JsonObject Opened, JsonObject Attached, JsonObject Tree)> OpenWidgetSessionAsync(
@@ -358,18 +370,23 @@ internal sealed class CompanionWireCompatibilityTests : SystemTestFixture
 		return (profileId, folderId);
 	}
 
-	private static async Task<string> CreateWidgetAsync(HostInstance host, string folderId, int column)
+	private static async Task<string> CreateWidgetAsync(
+		HostInstance host,
+		string folderId,
+		int column,
+		string? data = null,
+		string type = "ActionButton")
 	{
 		using var response = await host.Api.PostAsJsonAsync("/api/widgets",
 			new
 			{
 				folderId,
-				type = "ActionButton",
+				type,
 				positionX = column,
 				positionY = 0,
 				width = 1,
 				height = 1,
-				data = WidgetData("One")
+				data = data ?? WidgetData("One")
 			});
 		response.EnsureSuccessStatusCode();
 		var body = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
