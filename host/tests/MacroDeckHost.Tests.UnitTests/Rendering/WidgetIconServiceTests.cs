@@ -9,6 +9,7 @@ using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Domain.Common;
@@ -57,6 +58,46 @@ public class WidgetIconServiceTests
 			+ "\",\"actionId\":\""
 			+ actionId
 			+ "\",\"parameters\":[]}]}]";
+	}
+
+	[Test]
+	public async Task A_provider_parameter_bound_to_a_variable_is_read_and_refetched_with_its_current_value()
+	{
+		var widget = Button(Guid.NewGuid(), null);
+		widget.Data
+			= "{\"iconProvider\":{\"blockId\":\"blk-1\",\"integrationId\":\"obs\",\"actionId\":\"scene-preview\"},"
+			+ "\"flows\":[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\","
+			+ "\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"obs\","
+			+ "\"actionId\":\"scene-preview\",\"parameters\":[{\"name\":\"scene\",\"type\":\"dynamic-choice\","
+			+ "\"value\":{\"$var\":\"scene_name\"}}]}]}]}";
+		var variable = new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "scene_name",
+			Scope = Domain.Enums.VariableScope.Widget,
+			ScopeRefId = widget.Id.ToString(),
+			Type = Domain.Enums.VariableType.Text,
+			Classification = Domain.Enums.VariableClassification.User,
+			Value = "Intro"
+		};
+		var variables = new VariableRegistry();
+		variables.Upsert(variable);
+		var action = new FakeIconProviderAction { Id = "scene-preview", SnapshotToReturn = BytesSnapshot("v1") };
+		var fixture = new Fixture(widget, variables: variables);
+		fixture.Integrations.Add(new FakeIntegration { Id = "obs", Actions = [action] });
+
+		await fixture.Service.Resolve(widget.Id);
+		var readWith = action.LastParameters!["scene"];
+		variable.Value = "Outro";
+		variables.Upsert(variable);
+		await fixture.Service.Resolve(widget.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(readWith, Is.EqualTo("Intro"));
+			Assert.That(action.LastParameters!["scene"], Is.EqualTo("Outro"));
+			Assert.That(action.GetActionIconContentCallCount, Is.EqualTo(2));
+		});
 	}
 
 	// Acceptance Group D, scenario 15 (the central counterexample): one provided icon covers every state,
@@ -599,7 +640,10 @@ public class WidgetIconServiceTests
 
 	private sealed class Fixture
 	{
-		public Fixture(WidgetEntity widget, IWidgetIconResources? iconResources = null)
+		public Fixture(
+			WidgetEntity widget,
+			IWidgetIconResources? iconResources = null,
+			VariableRegistry? variables = null)
 		{
 			var readiness = new StartupReadiness();
 			readiness.MarkCachesReady();
@@ -617,7 +661,8 @@ public class WidgetIconServiceTests
 					new EmptyAssetCache()),
 				iconResources ?? IconResources,
 				providerResources,
-				readiness);
+				readiness,
+				new VariableTemplateRenderer(variables ?? new VariableRegistry()));
 		}
 
 		public WidgetIconService Service { get; }
@@ -823,6 +868,7 @@ public class WidgetIconServiceTests
 		public int GetActionIconCallCount { get; private set; }
 		public int GetActionIconContentCallCount { get; private set; }
 		public List<string> ContentCallVersions { get; } = [];
+		public IReadOnlyDictionary<string, object?>? LastParameters { get; private set; }
 
 		public TimeSpan IconPollInterval { get; set; } = TimeSpan.FromSeconds(5);
 
@@ -833,6 +879,7 @@ public class WidgetIconServiceTests
 			CancellationToken cancellationToken)
 		{
 			GetActionIconCallCount++;
+			LastParameters = parameters;
 			return Task.FromResult(SnapshotToReturn);
 		}
 

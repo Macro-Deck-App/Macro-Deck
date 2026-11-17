@@ -281,7 +281,7 @@ internal sealed class IntegrationInitializerTests
 	{
 		using var serviceProvider = BuildScopeServices();
 		var index = new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache());
-		using var tracker = new EventBindingTracker(index, Serilog.Core.Logger.None);
+		using var tracker = EventBindingTrackers.Create(index);
 		var initializer = CreateInitializer(serviceProvider, TimeProvider.System, bindingTracker: tracker);
 		var integration = new BindingAwareIntegration();
 

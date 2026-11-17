@@ -5,10 +5,12 @@ import { Subject } from 'rxjs';
 
 import { ActionBlock, ActionBlockParameter, EventDefinition, GetActionParameterOptionsResponse, WIDGET_TARGET_SELF, isVariableReference } from '@macro-deck/runtime';
 import { ApiService, IconImageService, VariableService } from '@shared';
+import type { Variable } from '@macro-deck/runtime';
 import { ActionOptionsService, ResolvedActionParameterOption } from '../../../../services/action-options.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { WidgetTargetPickerComponent } from '../../../forms/widget-target-picker/widget-target-picker.component';
 import { KeyboardComboEditorComponent } from '../../../forms/keyboard-combo-editor/keyboard-combo-editor.component';
+import { VariablePickerComponent } from '../../../variable-picker/variable-picker.component';
 import { ParamRowComponent } from './param-row.component';
 
 function fakeApiService(): ApiService {
@@ -175,6 +177,64 @@ describe('ParamRowComponent host-backed option labels', () => {
         disabled: true,
       }),
     ]);
+  });
+
+  describe('marking a required selection unavailable', () => {
+    async function loadFor(param: ActionBlockParameter, siblings: ActionBlockParameter[] = []): Promise<void> {
+      component.param = param;
+      component.block = {
+        integrationId: 'app.macro-deck.obs',
+        actionId: 'set-input-setting',
+        parameters: [...siblings, param],
+      } as ActionBlock;
+      component.loadDynamicOptions();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+
+    const unavailable = jasmine.objectContaining({ label: jasmine.stringMatching(/no longer available/i) });
+
+    it('accepts a template in an autocomplete as a valid value', async () => {
+      await loadFor({
+        name: 'variable', type: 'autocomplete', label: 'Variable', value: '{{ vars.name }}',
+        required: true, dynamicOptions: true,
+      });
+
+      expect(component.effectiveOptions).not.toContain(unavailable);
+    });
+
+    it('still marks a template in a dynamic choice, which the host does not render', async () => {
+      await loadFor({
+        name: 'scene', type: 'dynamic-choice', label: 'Scene', value: '{{ vars.name }}',
+        required: true, dynamicOptions: true,
+      });
+
+      expect(component.dynamicChoiceOptions).toContain(unavailable);
+    });
+
+    it('does not blame a value whose list depends on a sibling bound to a variable', async () => {
+      await loadFor(
+        { name: 'setting', type: 'autocomplete', label: 'Setting', value: 'text', required: true, dynamicOptions: true },
+        [{ name: 'input', type: 'dynamic-choice', label: 'Input', value: { $var: 'scene_text_name' } }]);
+
+      expect(component.effectiveOptions).not.toContain(unavailable);
+    });
+
+    it('still marks a missing value when only a scalar sibling is bound to a variable', async () => {
+      await loadFor(
+        { name: 'input', type: 'dynamic-choice', label: 'Input', value: 'Mic', required: true, dynamicOptions: true },
+        [{ name: 'volume', type: 'number', label: 'Volume', value: { $var: 'volume' } }]);
+
+      expect(component.dynamicChoiceOptions).toContain(unavailable);
+    });
+
+    it('still marks a missing value whose siblings are literal', async () => {
+      await loadFor(
+        { name: 'setting', type: 'autocomplete', label: 'Setting', value: 'text', required: true, dynamicOptions: true },
+        [{ name: 'input', type: 'dynamic-choice', label: 'Input', value: 'Scoreboard' }]);
+
+      expect(component.effectiveOptions).toContain(unavailable);
+    });
   });
 
   it('stores what a number box was given as a number', async () => {
@@ -368,23 +428,105 @@ describe('ParamRowComponent host-backed option labels', () => {
     expect(fixture.nativeElement.querySelector('shared-variable-picker')).not.toBeNull();
   });
 
-  it('offers the external variable picker only for scalar primitive types', () => {
+  it('offers the external variable picker for scalar and list-picking types only', () => {
     const withType = (type: ActionBlockParameter['type']): boolean => {
       component.param = { name: 'p', type, label: 'P', value: '' };
       return component.showsExternalVariablePicker;
     };
 
-    for (const type of ['number', 'duration', 'boolean'] as const) {
+    for (const type of ['number', 'duration', 'boolean', 'autocomplete', 'dynamic-choice'] as const) {
       expect(withType(type))
         .withContext(`external picker should show for ${type}`)
         .toBeTrue();
     }
 
-    for (const type of ['choice', 'dynamic-choice', 'color', 'datetime', 'file', 'folder'] as const) {
+    for (const type of ['choice', 'color', 'datetime', 'file', 'folder'] as const) {
       expect(withType(type))
         .withContext(`external picker should be hidden for ${type}`)
         .toBeFalse();
     }
+  });
+
+  describe('binding a list-picking parameter to a variable', () => {
+    const textVariable = { name: 'scene_name', type: 'text', value: 'Intro' } as unknown as Variable;
+    const eventVariable = { name: 'scene', type: 'text', value: '', origin: 'event' } as unknown as Variable;
+
+    function render(param: ActionBlockParameter, eventId?: string): ComponentFixture<ParamRowComponent> {
+      const fixture = TestBed.createComponent(ParamRowComponent);
+      fixture.componentRef.setInput('blockId', 'block-1');
+      fixture.componentRef.setInput('param', param);
+      if (eventId) {
+        fixture.componentRef.setInput('eventId', eventId);
+      }
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    function picker(fixture: ComponentFixture<ParamRowComponent>): VariablePickerComponent | undefined {
+      return fixture.debugElement.query(By.directive(VariablePickerComponent))?.componentInstance;
+    }
+
+    beforeEach(() => {
+      store.pickerVariables.and.returnValue([eventVariable, textVariable]);
+      (store as unknown as Record<string, unknown>)['variables'] = () => [textVariable];
+    });
+
+    it('lets an autocomplete be bound to a text variable', () => {
+      const fixture = render({ name: 'variable', type: 'autocomplete', label: 'Variable', value: '' });
+
+      const found = picker(fixture);
+      expect(found).toBeDefined();
+      expect(found!.acceptedTypes).toEqual(['text']);
+
+      found!.pick.emit('scene_name');
+
+      const stored: unknown = store.updateParam.calls.mostRecent().args[2];
+      expect(stored).toEqual({ $var: 'scene_name' });
+    });
+
+    it('lets a dynamic choice be bound to a variable', () => {
+      const fixture = render({ name: 'input', type: 'dynamic-choice', label: 'Input', value: '' });
+
+      picker(fixture)!.pick.emit('scene_name');
+
+      const stored: unknown = store.updateParam.calls.mostRecent().args[2];
+      expect(stored).toEqual({ $var: 'scene_name' });
+    });
+
+    it('offers the picker again once a bound reference is cleared', () => {
+      const fixture = render({ name: 'input', type: 'dynamic-choice', label: 'Input', value: { $var: 'scene_name' } });
+      expect(picker(fixture)).toBeUndefined();
+      expect(fixture.nativeElement.querySelector('.param-variable-chip')).not.toBeNull();
+
+      component = fixture.componentInstance;
+      component.onClearVariable();
+      fixture.componentRef.setInput('param', { name: 'input', type: 'dynamic-choice', label: 'Input', value: '' });
+      fixture.detectChanges();
+
+      const stored: unknown = store.updateParam.calls.mostRecent().args[2];
+      expect(stored).toBe('');
+      expect(picker(fixture)).toBeDefined();
+    });
+
+    it('offers no picker on a literal-only list parameter', () => {
+      const fixture = render({
+        name: 'scriptId', type: 'dynamic-choice', label: 'Script', value: '', literalOnly: true,
+      });
+
+      expect(picker(fixture)).toBeUndefined();
+    });
+
+    it('offers an event trigger row the variables but not the event\'s own parameters', () => {
+      const fixture = render({ name: 'scene', type: 'dynamic-choice', label: 'Scene', value: '' }, 'obs::scene-changed');
+
+      expect(picker(fixture)!.variables).toEqual([textVariable]);
+    });
+
+    it('still offers an action row the event parameters it runs with', () => {
+      const fixture = render({ name: 'scene', type: 'dynamic-choice', label: 'Scene', value: '' });
+
+      expect(picker(fixture)!.variables).toEqual([eventVariable, textVariable]);
+    });
   });
 
   it('hides the external variable picker when references are disabled', () => {
@@ -1465,6 +1607,7 @@ describe('ParamRowComponent event filter operator rendering', () => {
     );
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['variables'] = () => [];
     (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     TestBed.configureTestingModule({
@@ -1727,6 +1870,7 @@ describe('ParamRowComponent creating a user variable', () => {
       'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel', 'actionRole']);
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['variables'] = () => [];
     (store as unknown as Record<string, unknown>)['previewScope'] = () => 'widget';
     (store as unknown as Record<string, unknown>)['previewScopeRefId'] = () => 'w1';
     (store as unknown as Record<string, unknown>)['previewOwnerWidgetId'] = () => 'w1';

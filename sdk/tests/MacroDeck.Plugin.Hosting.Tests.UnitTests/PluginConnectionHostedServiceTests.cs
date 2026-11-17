@@ -61,4 +61,13 @@ public class PluginConnectionHostedServiceTests
 
 		Assert.That(request.HostApiFeatures, Does.Contain(Protocol.Callbacks.HostApiFeatures.ScriptInputColor));
 	}
+
+	[Test]
+	public void The_built_session_request_announces_that_it_reads_resolved_binding_values()
+	{
+		var request = PluginConnectionHostedService.BuildSessionRequest([], _metadata, null);
+
+		Assert.That(request.HostApiFeatures,
+			Does.Contain(Protocol.Callbacks.HostApiFeatures.EventBindingResolvedValue));
+	}
 }

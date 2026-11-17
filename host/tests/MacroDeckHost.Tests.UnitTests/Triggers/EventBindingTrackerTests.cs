@@ -16,7 +16,7 @@ public class EventBindingTrackerTests
 	public void SetUp()
 	{
 		_index = new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache());
-		_tracker = new EventBindingTracker(_index, Serilog.Core.Logger.None);
+		_tracker = EventBindingTrackers.Create(_index);
 		_delivered = [];
 		_tracker.Subscribe(Record);
 	}
@@ -133,7 +133,7 @@ public class EventBindingTrackerTests
 	[Test]
 	public async Task A_listener_that_throws_does_not_stop_delivery_to_the_others()
 	{
-		using var tracker = new EventBindingTracker(_index, Serilog.Core.Logger.None);
+		using var tracker = EventBindingTrackers.Create(_index);
 		var reached = new List<string>();
 		tracker.Subscribe((_, _) => throw new InvalidOperationException("listener failure"));
 		tracker.Subscribe((providerId, _) =>

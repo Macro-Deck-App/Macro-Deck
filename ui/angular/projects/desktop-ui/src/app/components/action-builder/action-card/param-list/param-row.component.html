@@ -455,7 +455,7 @@
       }
       @if (showsExternalVariablePicker) {
         <shared-variable-picker
-          [variables]="store.pickerVariables()"
+          [variables]="externalPickerVariables"
           [scope]="store.previewScope()"
           [acceptedTypes]="acceptedVariableTypes"
           (pick)="onPickVariable($event)"

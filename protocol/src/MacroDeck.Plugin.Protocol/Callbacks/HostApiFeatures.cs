@@ -12,6 +12,12 @@ public static class HostApiFeatures
 	/// type it does not know and would otherwise lose the whole script list.</summary>
 	public const string ScriptInputColor = "scripts.input-color";
 
+	/// <summary>The plugin reads <c>resolvedValue</c> on <see cref="HostApis.EventBindings" /> entries and
+	/// wants a push when only a bound variable's value changed. Without it the host omits the field and
+	/// pushes only when the bindings themselves change, because an older SDK raises
+	/// <c>BindingsChanged</c> on every push.</summary>
+	public const string EventBindingResolvedValue = "event-bindings.resolved-value";
+
 	/// <summary>Every feature this protocol version defines.</summary>
-	public static readonly IReadOnlyList<string> All = [ScriptInputColor];
+	public static readonly IReadOnlyList<string> All = [ScriptInputColor, EventBindingResolvedValue];
 }

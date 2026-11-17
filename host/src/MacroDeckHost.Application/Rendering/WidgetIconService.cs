@@ -5,6 +5,7 @@ using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Application.Widgets.Icons;
 using MacroDeckHost.Domain.Entities;
@@ -23,6 +24,7 @@ public sealed class WidgetIconService : IWidgetIconService
 	private readonly IWidgetIconResources _iconResources;
 	private readonly IWidgetIconProviderResources _providerResources;
 	private readonly StartupReadiness _readiness;
+	private readonly IVariableTemplateRenderer _templateRenderer;
 
 	public WidgetIconService(
 		IFolderCache folderCache,
@@ -30,7 +32,8 @@ public sealed class WidgetIconService : IWidgetIconService
 		RemoteIconProviderActionRegistry remoteIconProviders,
 		IWidgetIconResources iconResources,
 		IWidgetIconProviderResources providerResources,
-		StartupReadiness readiness)
+		StartupReadiness readiness,
+		IVariableTemplateRenderer templateRenderer)
 	{
 		_folderCache = folderCache;
 		_integrationRegistry = integrationRegistry;
@@ -38,6 +41,7 @@ public sealed class WidgetIconService : IWidgetIconService
 		_iconResources = iconResources;
 		_providerResources = providerResources;
 		_readiness = readiness;
+		_templateRenderer = templateRenderer;
 	}
 
 	public Task<WidgetIconResolution> Resolve(Guid widgetId, CancellationToken cancellationToken = default)
@@ -58,7 +62,8 @@ public sealed class WidgetIconService : IWidgetIconService
 			return WidgetIconResolution.Inactive;
 		}
 
-		return await ResolveData(widget.Data, widgetId.ToString("N"), limit, cancellationToken).ConfigureAwait(false);
+		return await ResolveData(widget.Data, widgetId.ToString("N"), widgetId, limit, cancellationToken)
+			.ConfigureAwait(false);
 	}
 
 	public async Task<WidgetIconResolution> ResolveDraft(
@@ -68,12 +73,14 @@ public sealed class WidgetIconService : IWidgetIconService
 	{
 		await _readiness.WhenReady.WaitAsync(cancellationToken);
 
-		return await ResolveData(data, resourceKey, WidgetIconLimit.Host, cancellationToken).ConfigureAwait(false);
+		return await ResolveData(data, resourceKey, null, WidgetIconLimit.Host, cancellationToken)
+			.ConfigureAwait(false);
 	}
 
 	private async Task<WidgetIconResolution> ResolveData(
 		string? data,
 		string resourceKey,
+		Guid? widgetId,
 		WidgetIconLimit limit,
 		CancellationToken cancellationToken)
 	{
@@ -87,6 +94,11 @@ public sealed class WidgetIconService : IWidgetIconService
 		if (resolved is null)
 		{
 			return WidgetIconResolution.Inactive;
+		}
+
+		if (widgetId is { } id && ProviderParameters.HasVariableReference(resolved.Value.Block))
+		{
+			resolved = await WithResolvedReferencesAsync(resolved.Value, id).ConfigureAwait(false);
 		}
 
 		var snapshot = await TryReadSnapshot(resolved.Value, cancellationToken).ConfigureAwait(false);
@@ -177,8 +189,24 @@ public sealed class WidgetIconService : IWidgetIconService
 
 	private readonly record struct ResolvedProvider(
 		IIconProviderActionDefinition Action,
+		ActionBlock Block,
 		IReadOnlyDictionary<string, object?> Parameters,
 		string Fingerprint);
+
+	private async Task<ResolvedProvider> WithResolvedReferencesAsync(ResolvedProvider provider, Guid widgetId)
+	{
+		var parameters = await ProviderParameters.ResolveAsync(provider.Block, widgetId, _templateRenderer)
+			.ConfigureAwait(false);
+		var values = parameters
+			.OrderBy(pair => pair.Key, StringComparer.Ordinal)
+			.Select(pair => pair.Key + "->" + JsonSerializer.Serialize(pair.Value));
+
+		return provider with
+		{
+			Parameters = parameters,
+			Fingerprint = string.Join('\n', new[] { provider.Fingerprint }.Concat(values))
+		};
+	}
 
 	/// <summary>
 	/// The guard chain an icon-provider block must pass before it is ever read: found and enabled, its
@@ -225,7 +253,7 @@ public sealed class WidgetIconService : IWidgetIconService
 		}
 
 		var parameters = ActionParameterConverter.ToNullable(block.Parameters.ToDictionary(p => p.Name, p => p.Value));
-		return new ResolvedProvider(iconProvider, parameters, Fingerprint(integrationId, actionId, block));
+		return new ResolvedProvider(iconProvider, block, parameters, Fingerprint(integrationId, actionId, block));
 	}
 
 	private static string Fingerprint(string integrationId, string actionId, ActionBlock block)

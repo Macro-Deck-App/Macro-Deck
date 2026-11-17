@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, RUN_SCRIPT_WIDGET_PARAM, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptActionRole, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, containsLiquid, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, RUN_SCRIPT_WIDGET_PARAM, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptActionRole, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
 import { ButtonComponent, CheckboxComponent, InputComponent, LocalizationService, OverlayPanelComponent, ToggleSwitchComponent, TranslatePipe } from '@shared';
 import type { SecretKind, Variable, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../../../domain/url-input.util';
@@ -372,10 +372,16 @@ export class ParamRowComponent implements OnInit, OnChanges {
       case 'number':
       case 'boolean':
       case 'duration':
+      case 'autocomplete':
+      case 'dynamic-choice':
         return true;
       default:
         return false;
     }
+  }
+
+  get externalPickerVariables(): Variable[] {
+    return this.eventId ? this.store.variables() : this.store.pickerVariables();
   }
 
   get acceptedVariableTypes(): VariableType[] | undefined {
@@ -385,7 +391,6 @@ export class ParamRowComponent implements OnInit, OnChanges {
       case 'string':
       case 'url':
       case 'ipaddress':
-      case 'autocomplete':
         return ['text', 'numeric', 'boolean', 'color'];
       case 'color':
         return ['color'];
@@ -626,6 +631,12 @@ export class ParamRowComponent implements OnInit, OnChanges {
     if (!this.param.required || !this.stringValue || options.some(option => option.value === this.stringValue)) {
       return options;
     }
+    if (this.param.type === 'autocomplete' && containsLiquid(this.stringValue)) {
+      return options;
+    }
+    if (this.hasListSiblingBoundToReference()) {
+      return options;
+    }
 
     const label = this.param.valueLabel || this.stringValue;
     return [{
@@ -633,6 +644,13 @@ export class ParamRowComponent implements OnInit, OnChanges {
       label: this.localization.translateKey(AppStrings.ActionBuilder.Param.ConfigurationNoLongerAvailable, { label }),
       disabled: true,
     }, ...options];
+  }
+
+  private hasListSiblingBoundToReference(): boolean {
+    return (this.block?.parameters ?? [])
+      .some(sibling => sibling.name !== this.param.name
+        && (sibling.type === 'autocomplete' || sibling.type === 'dynamic-choice')
+        && (isVariableReference(sibling.value) || isEventReference(sibling.value)));
   }
 
   private mergeDraftStateOptions(
