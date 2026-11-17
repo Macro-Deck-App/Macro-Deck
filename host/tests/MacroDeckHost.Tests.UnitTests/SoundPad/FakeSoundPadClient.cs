@@ -33,13 +33,23 @@ internal sealed class FakeSoundPadClient : ISoundPadClient
 
 	public int ConnectAttempts { get; private set; }
 
+	public int Disconnects { get; private set; }
+
 	public bool Disposed { get; private set; }
 
 	public bool IsConnected { get; private set; }
 
+	public TaskCompletionSource? HoldNextConnect { get; set; }
+
 	public Task ConnectAsync()
 	{
 		ConnectAttempts++;
+		if (HoldNextConnect is { } hold)
+		{
+			HoldNextConnect = null;
+			return CompleteHeldConnectAsync(hold.Task, Reachable);
+		}
+
 		if (HangConnect)
 		{
 			return new TaskCompletionSource().Task;
@@ -54,8 +64,20 @@ internal sealed class FakeSoundPadClient : ISoundPadClient
 		return Task.CompletedTask;
 	}
 
+	private async Task CompleteHeldConnectAsync(Task hold, bool reachable)
+	{
+		await hold;
+		if (!reachable)
+		{
+			throw new TimeoutException("The SoundPad pipe is not there.");
+		}
+
+		IsConnected = true;
+	}
+
 	public void Disconnect()
 	{
+		Disconnects++;
 		IsConnected = false;
 	}
 
