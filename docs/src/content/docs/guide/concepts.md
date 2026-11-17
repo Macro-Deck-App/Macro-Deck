@@ -730,8 +730,12 @@ such a loop, the variables in it read as unavailable until the loop is gone.
 Some things to know:
 
 - A template variable is read-only: **Set Variable**, sliders and plugins cannot write to it.
-- Templates are rendered again only when a variable they read changes. A template with the current time
-  does not tick on its own.
+- Templates are rendered again when a variable they read changes. A template that shows the current
+  time, with `date.now`, `date.utc_now` or `'now' | date: '%H:%M'`, is also rendered again at the start
+  of every minute, in your computer's time zone. That holds wherever you write a template: template
+  variables, button labels and **State mapping**, gauge names, graph subtitles and slider labels. A change is
+  announced only when the value really changes, so a template that shows only the date stays quiet all
+  day.
 - After a start, a template that reads a plugin's variables shows empty values until the plugin is
   ready, and then updates.
 - An automation that writes a variable whenever a template variable reading it changes is a loop

@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -44,23 +45,17 @@ public sealed class LabelRenderBackgroundService : HostReadyBackgroundService
 		var reader = _queue.Reader;
 		while (await reader.WaitToReadAsync(stoppingToken))
 		{
-			var batch = new HashSet<Guid>();
-			while (reader.TryRead(out var id))
-			{
-				batch.Add(id);
-			}
+			var batch = new Dictionary<Guid, bool>();
+			Collect(reader, batch);
 
 			await Task.Delay(_debounce, stoppingToken);
-			while (reader.TryRead(out var id))
-			{
-				batch.Add(id);
-			}
+			Collect(reader, batch);
 
-			foreach (var widgetId in batch)
+			foreach (var (widgetId, onlyIfChanged) in batch)
 			{
 				try
 				{
-					await Process(widgetId, stoppingToken);
+					await Process(widgetId, onlyIfChanged, stoppingToken);
 				}
 				catch (Exception ex)
 				{
@@ -70,7 +65,15 @@ public sealed class LabelRenderBackgroundService : HostReadyBackgroundService
 		}
 	}
 
-	private async Task Process(Guid widgetId, CancellationToken cancellationToken)
+	private static void Collect(ChannelReader<LabelRender> reader, Dictionary<Guid, bool> batch)
+	{
+		while (reader.TryRead(out var render))
+		{
+			batch[render.WidgetId] = render.OnlyIfChanged && batch.GetValueOrDefault(render.WidgetId, true);
+		}
+	}
+
+	private async Task Process(Guid widgetId, bool onlyIfChanged, CancellationToken cancellationToken)
 	{
 		var id = widgetId.ToString();
 
@@ -85,6 +88,12 @@ public sealed class LabelRenderBackgroundService : HostReadyBackgroundService
 		foreach (var state in _subscriptions.SubscribedStates(id))
 		{
 			var texts = await labelText.ResolveTexts(widgetId, state, cancellationToken);
+			if (onlyIfChanged && _subscriptions.WasPushed(id, state, texts))
+			{
+				continue;
+			}
+
+			_subscriptions.RecordPushed(id, state, texts);
 			var evt = LabelTextUpdatedEvent.From(id, state, texts);
 
 			// Raised beside the client push, carrying the exact resolved text it computed, so an open

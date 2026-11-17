@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Variables.Templates;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.BackgroundServices;
+using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Variables;
@@ -16,6 +17,7 @@ public class TemplateVariableTests
 	private const string WidgetId = "22222222-2222-2222-2222-222222222222";
 
 	private VariableRegistry _registry = null!;
+	private ManualTimeProvider _clock = null!;
 	private RecordingMediator _mediator = null!;
 	private TemplateVariableSynchronizer _templates = null!;
 	private VariableService _service = null!;
@@ -24,8 +26,13 @@ public class TemplateVariableTests
 	public void SetUp()
 	{
 		_registry = new VariableRegistry();
+		_clock = new ManualTimeProvider
+		{
+			Now = new DateTimeOffset(2026, 3, 1, 12, 0, 30, TimeSpan.Zero),
+			Zone = TimeZoneInfo.Utc
+		};
 		_mediator = new RecordingMediator();
-		_templates = new TemplateVariableSynchronizer(_registry, _mediator);
+		_templates = new TemplateVariableSynchronizer(_registry, _mediator, _clock);
 		_mediator.BeforePublish = Route;
 		_service = TestVariableServices.Create(_registry,
 			new NullUserVariableStore(),
@@ -432,6 +439,7 @@ public class TemplateVariableTests
 		var tick = await Plain("tick", VariableType.Numeric, 1m);
 		var created = await Template("stamp", VariableType.Text, "{{ vars.tick }} {{ 'now' | date: '%H:%M:%S.%L' }}");
 		_mediator.Published.Clear();
+		_clock.Advance(TimeSpan.FromMilliseconds(250));
 
 		await _service.SetValue(tick.Id, 2m);
 		await Settle();
@@ -440,6 +448,76 @@ public class TemplateVariableTests
 		{
 			Assert.That(created.Data!.TemplateError, Is.Null, created.Data.TemplateError?.Detail);
 			Assert.That(UpdatesOf(created.Data!), Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task A_template_that_reads_the_time_is_rendered_again_when_a_minute_starts()
+	{
+		var other = await Plain("other", VariableType.Text, "x");
+		var clock = await Template("clock", VariableType.Text, "{{ date.now | date.to_string '%H:%M' }}");
+		var plain = await Template("plain", VariableType.Text, "[{{ vars.other }}]");
+		var before = Value(clock.Data!);
+		_mediator.Published.Clear();
+
+		_clock.Advance(TimeSpan.FromSeconds(30));
+		await Tick();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(before, Is.EqualTo("12:00"));
+			Assert.That(Value(clock.Data!), Is.EqualTo("12:01"));
+			Assert.That(ChangesOf(clock.Data!), Is.EqualTo(1));
+			Assert.That(UpdatesOf(plain.Data!), Is.Zero);
+			Assert.That(Value(other), Is.EqualTo("x"));
+		});
+	}
+
+	[Test]
+	public async Task A_template_that_shows_only_the_date_announces_nothing_when_a_minute_starts()
+	{
+		var date = await Template("today", VariableType.Text, "{{ 'today' | date: '%Y-%m-%d' }}");
+		_mediator.Published.Clear();
+
+		_clock.Advance(TimeSpan.FromMinutes(1));
+		await Tick();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Value(date.Data!), Is.EqualTo("2026-03-01"));
+			Assert.That(_mediator.Published, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_template_variable_reading_a_time_template_variable_follows_the_minute()
+	{
+		await Template("clock", VariableType.Text, "{{ date.now | date.to_string '%H:%M' }}");
+		var reader = await Template("reader", VariableType.Text, "[{{ vars.clock }}]");
+
+		_clock.Advance(TimeSpan.FromSeconds(30));
+		await Tick();
+
+		Assert.That(Value(reader.Data!), Is.EqualTo("[12:01]"));
+	}
+
+	[Test]
+	public async Task A_template_that_stops_reading_the_time_is_no_longer_rendered_each_minute()
+	{
+		var source = await Plain("source", VariableType.Text, "x");
+		var clock = await Template("clock", VariableType.Text, "{{ date.now | date.to_string '%H:%M' }}");
+		await _templates.ChangeAsync(clock.Data!.Id, new VariableTemplateSource("[{{ vars.source }}]"));
+		await Settle();
+		_registry.GetById(source.Id)!.Value = "changed without telling anyone";
+		_mediator.Published.Clear();
+
+		_clock.Advance(TimeSpan.FromMinutes(1));
+		await Tick();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Value(clock.Data), Is.EqualTo("[x]"));
+			Assert.That(_mediator.Published, Is.Empty);
 		});
 	}
 
@@ -673,6 +751,18 @@ public class TemplateVariableTests
 	private string Value(VariableEntity variable)
 	{
 		return _registry.GetById(variable.Id)!.Value;
+	}
+
+	private async Task Tick()
+	{
+		_templates.NoteMinuteElapsed();
+		await Settle();
+	}
+
+	private int ChangesOf(VariableEntity variable)
+	{
+		return _mediator.Published.OfType<VariableValueChangedNotification>()
+			.Count(change => change.Variable.Id == variable.Id);
 	}
 
 	private int UpdatesOf(VariableEntity variable)
