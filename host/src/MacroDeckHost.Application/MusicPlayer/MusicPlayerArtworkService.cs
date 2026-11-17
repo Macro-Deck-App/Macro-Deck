@@ -44,8 +44,9 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 
 	public string GetETag(string artworkId, int? size)
 	{
+		// The v2 generation marks the move from WebP to JPEG/PNG, so a client holding WebP bytes never gets a 304.
 		var variant = size?.ToString(CultureInfo.InvariantCulture) ?? "master";
-		return $"\"{artworkId}-{variant}\"";
+		return $"\"{artworkId}-{variant}-v2\"";
 	}
 
 	public Task<ArtworkImageResult?> GetImage(
@@ -144,7 +145,7 @@ public sealed class MusicPlayerArtworkService : IMusicPlayerArtworkService
 					artwork.Data,
 					_noVariants,
 					string.IsNullOrEmpty(artwork.MimeType) ? FallbackContentType : artwork.MimeType)
-				: new CacheEntry(key, processed.MasterWebp, processed.Variants, "image/webp");
+				: new CacheEntry(key, processed.Master, processed.Variants, processed.ContentType);
 
 			Insert(entry);
 			return entry;
