@@ -406,6 +406,7 @@ public class Startup
 		services.AddHostedService<BackupScheduleBackgroundService>();
 		services.AddHostedService<VariableInitializeBackgroundService>();
 		services.AddHostedService<TemplateVariableBackgroundService>();
+		services.AddHostedService<MinuteClockBackgroundService>();
 		services.AddHostedService<FileVariableShutdownBackgroundService>();
 		services.AddHostedService<IntegrationVariablePollingBackgroundService>();
 		services.AddHostedService<VariableBindingRestoreBackgroundService>();

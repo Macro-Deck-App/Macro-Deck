@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Events.Handlers;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Application.Variables.Templates;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -42,7 +43,7 @@ public class VariableValueChangedInvalidationTests
 		var ids = new List<Guid>();
 		while (queue.Reader.TryRead(out var id))
 		{
-			ids.Add(id);
+			ids.Add(id.WidgetId);
 		}
 
 		return ids;
@@ -53,6 +54,56 @@ public class VariableValueChangedInvalidationTests
 		var index = new WidgetVariableIndex(new FakeFolderCache(widgets));
 		index.Rebuild();
 		return index;
+	}
+
+	[Test]
+	public async Task A_minute_reaches_everything_that_shows_the_time_and_nothing_else()
+	{
+		var clockLabel = Button(Guid.NewGuid(), "{\"label\":\"{{ 'now' | date: '%H:%M' }}\"}");
+		var unwatched = Button(Guid.NewGuid(), "{\"label\":\"{{ date.now.hour }}\"}");
+		var plain = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.cpu }}\"}");
+		var clockState = Button(Guid.NewGuid(),
+			"{\"label\":\"x{{ vars.cpu }}\",\"stateMapping\":{\"when\":\"{{ date.now.hour }}\"}}");
+		var labels = new LabelRenderChannel();
+		var states = new WidgetStateEvalChannel();
+		var subscriptions = new LabelSubscriptionTracker();
+		subscriptions.Add("conn1", clockLabel.Id.ToString(), "off");
+		subscriptions.Add("conn1", plain.Id.ToString(), "off");
+		var signals = new RecordingRenderSignals();
+		var notifier = new VariableChangeNotifier();
+		var published = new List<string>();
+		notifier.Changed += (_, args) => published.Add(args.Name);
+		using var templates = new TemplateVariableSynchronizer(new VariableRegistry(), new RecordingMediator());
+		var handler = new MinuteElapsedHandler(templates,
+			IndexOver(clockLabel, unwatched, plain, clockState),
+			labels,
+			subscriptions,
+			states,
+			signals,
+			notifier);
+
+		await handler.Handle(new MinuteElapsedNotification(), CancellationToken.None);
+
+		var stateIds = new List<Guid>();
+		while (states.Reader.TryRead(out var id))
+		{
+			stateIds.Add(id);
+		}
+
+		var labelRenders = new List<LabelRender>();
+		while (labels.Reader.TryRead(out var render))
+		{
+			labelRenders.Add(render);
+		}
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(labelRenders, Is.EqualTo(new[] { new LabelRender(clockLabel.Id, true) }));
+			Assert.That(stateIds, Is.EqualTo(new[] { clockState.Id }));
+			Assert.That(published, Is.EqualTo(new[] { TemplateClock.Name }));
+			Assert.That(signals.VariableChanges, Is.EqualTo(1));
+			Assert.That(templates.HasPendingChanges, Is.True);
+		});
 	}
 
 	[Test]

@@ -1085,7 +1085,7 @@ public class VariableBroadcastTests
 		var ids = new List<Guid>();
 		while (queue.Reader.TryRead(out var id))
 		{
-			ids.Add(id);
+			ids.Add(id.WidgetId);
 		}
 
 		return ids;

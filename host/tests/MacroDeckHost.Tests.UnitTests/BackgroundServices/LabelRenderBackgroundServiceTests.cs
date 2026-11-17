@@ -124,6 +124,66 @@ internal sealed class LabelRenderBackgroundServiceTests
 		});
 	}
 
+	[Test]
+	public async Task A_minute_render_pushes_a_label_only_when_its_text_changed()
+	{
+		var unchanged = Guid.NewGuid();
+		var changed = Guid.NewGuid();
+		_subscriptions.Add("conn-1", unchanged.ToString(), "on");
+		_subscriptions.Add("conn-1", changed.ToString(), "on");
+		_labelText.TextByState[(unchanged, "on")] = "Mon";
+		_labelText.TextByState[(changed, "on")] = "12:00";
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(unchanged);
+		_queue.Enqueue(changed);
+		await WaitUntil(() => _transport.Sent.Count == 2);
+
+		_labelText.TextByState[(changed, "on")] = "12:01";
+		_queue.EnqueueIfChanged(unchanged);
+		_queue.EnqueueIfChanged(changed);
+		await WaitUntil(() => _transport.Sent.Count >= 3);
+		_queue.Enqueue(unchanged);
+		await WaitUntil(() => _transport.Sent.Count >= 4);
+
+		Assert.That(_transport.Sent.Select(sent => sent.Text), Is.EqualTo(new[] { "Mon", "12:00", "12:01", "Mon" }));
+	}
+
+	[Test]
+	public async Task A_minute_render_pushes_when_only_an_extra_label_changed()
+	{
+		var widgetId = Guid.NewGuid();
+		_subscriptions.Add("conn-1", widgetId.ToString(), "on");
+		_labelText.TextByState[(widgetId, "on")] = "Main";
+		_labelText.ExtraTextsByState[(widgetId, "on")] = ["12:00"];
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 1);
+
+		_labelText.ExtraTextsByState[(widgetId, "on")] = ["12:01"];
+		_queue.EnqueueIfChanged(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 2);
+
+		Assert.That(_transport.Sent[1].ExtraTexts, Is.EqualTo(new[] { "12:01" }));
+	}
+
+	[Test]
+	public async Task A_minute_render_pushes_to_a_viewer_that_joined_after_everyone_left()
+	{
+		var widgetId = Guid.NewGuid();
+		_subscriptions.Add("conn-1", widgetId.ToString(), "on");
+		_labelText.TextByState[(widgetId, "on")] = "Mon";
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 1);
+
+		_subscriptions.RemoveConnection("conn-1");
+		_subscriptions.Add("conn-2", widgetId.ToString(), "on");
+		_queue.EnqueueIfChanged(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 2);
+
+		Assert.That(_transport.Sent[1].Text, Is.EqualTo("Mon"));
+	}
+
 	private static async Task WaitUntil(Func<bool> condition, int timeoutMs = 15000)
 	{
 		var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);

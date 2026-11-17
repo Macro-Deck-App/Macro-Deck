@@ -18,6 +18,8 @@ internal static class TemplateFilters
 	private static readonly IScriptCustomFunction _colorMix =
 		DelegateCustomFunction.CreateFunc<TemplateFilterArgument?, TemplateFilterArgument?, object?, string>(Mix);
 
+	private static readonly ClockDateFunctions _date = new();
+
 	private static readonly IReadOnlyDictionary<string, IScriptCustomFunction> _modifiers
 		= new Dictionary<string, IScriptCustomFunction>(StringComparer.Ordinal)
 		{
@@ -62,7 +64,13 @@ internal static class TemplateFilters
 
 	internal static ScriptObject CreateScope()
 	{
-		var scope = new ScriptObject { [PlainTextName] = _plainText, ["color"] = _color, ["color_mix"] = _colorMix };
+		var scope = new ScriptObject
+		{
+			[PlainTextName] = _plainText,
+			["color"] = _color,
+			["color_mix"] = _colorMix,
+			["date"] = _date
+		};
 		foreach (var modifier in _modifiers)
 		{
 			scope[modifier.Key] = modifier.Value;

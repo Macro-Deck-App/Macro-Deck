@@ -136,12 +136,14 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 	private static readonly ParserOptions _liquidParserOptions = new() { LiquidFunctionsToScriban = true };
 
 	private readonly VariableRegistry _registry;
+	private readonly TimeProvider _clock;
 	private readonly ConcurrentDictionary<string, ParsedTemplate> _templateCache = new();
 	private readonly ConcurrentDictionary<VariableScopeChain, RenderMemo> _memo = new();
 
-	public VariableTemplateRenderer(VariableRegistry registry)
+	public VariableTemplateRenderer(VariableRegistry registry, TimeProvider? clock = null)
 	{
 		_registry = registry;
+		_clock = clock ?? TimeProvider.System;
 	}
 
 	public Task<string> RenderAsync(string templateText, VariableScope contextScope, string? contextScopeRefId)
@@ -169,7 +171,7 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		var parsed = Parse(templateText);
 		if (parsed.Names is null)
 		{
-			return Render(parsed.Template, BuildContext(chain));
+			return Render(parsed.Template, BuildContext(chain), _clock).Text;
 		}
 
 		var snapshot = CaptureSnapshot(parsed.Names, chain);
@@ -218,7 +220,7 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		return RenderSnapshot(Parse(templateText).Template, snapshot);
 	}
 
-	private static string RenderSnapshot(Template template, IReadOnlyList<VariableSnapshot> snapshot)
+	private string RenderSnapshot(Template template, IReadOnlyList<VariableSnapshot> snapshot)
 	{
 		var vars = new VariablesScriptObject();
 		var resolvable = new Dictionary<string, VariableEntity>(StringComparer.Ordinal);
@@ -240,7 +242,7 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 		}
 
 		var root = new ScriptObject { ["vars"] = vars, ["event"] = new ScriptObject() };
-		return Render(template, new VariableContext(resolvable, root));
+		return Render(template, new VariableContext(resolvable, root), _clock).Text;
 	}
 
 	internal string RenderRecording(
@@ -269,8 +271,15 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 			reads);
 
 		var root = new ScriptObject { ["vars"] = vars, ["event"] = new ScriptObject() };
-		return Render(Parse(templateText).Template,
-			new VariableContext(new Dictionary<string, VariableEntity>(StringComparer.Ordinal), root));
+		var (text, readsClock) = Render(Parse(templateText).Template,
+			new VariableContext(new Dictionary<string, VariableEntity>(StringComparer.Ordinal), root),
+			_clock);
+		if (readsClock)
+		{
+			reads.Add(TemplateClock.Name);
+		}
+
+		return text;
 	}
 
 	internal string? FindParseError(string templateText)
@@ -386,16 +395,20 @@ public class VariableTemplateRenderer : IVariableTemplateRenderer
 			return templateText;
 		}
 
-		return Render(Parse(templateText).Template, context);
+		return Render(Parse(templateText).Template, context, _clock).Text;
 	}
 
-	private static string Render(Template template, VariableContext context)
+	private static (string Text, bool ReadsClock) Render(
+		Template template,
+		VariableContext context,
+		TimeProvider clock)
 	{
-		var templateContext = new VariableTemplateContext();
+		var templateContext = new VariableTemplateContext(clock);
 
 		templateContext.PushGlobal(TemplateFilters.CreateScope());
 		templateContext.PushGlobal(context.ScribanObject);
-		return template.Render(templateContext);
+		var text = template.Render(templateContext);
+		return (text, templateContext.ReadsClock);
 	}
 
 	// Wrapped on the unavailable branch too: a variable's unit does not stop existing because its provider is
