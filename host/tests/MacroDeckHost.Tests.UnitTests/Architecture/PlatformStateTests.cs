@@ -24,6 +24,9 @@ internal sealed class PlatformStateTests
 		"MacroDeckHost.Platform.Native.MacOsAccessibility._startupPromptClaimed",
 		"MacroDeckHost.Platform.Native.MacOsMainRunLoop._isPumping",
 		"MacroDeckHost.Platform.Native.Win32Input._lastBlockedReportTicks",
+		"MacroDeckHost.Platform.Native.X11Windows._ioHandlerChecked",
+		"MacroDeckHost.Platform.Native.X11Windows._lost",
+		"MacroDeckHost.Platform.Native.X11Windows._setExitHandler",
 		"MacroDeckHost.Platform.Notifications.WindowsNotificationService._nextId"
 	];
 

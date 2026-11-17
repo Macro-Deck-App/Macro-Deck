@@ -38,24 +38,23 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private const int SpareKeySettleMs = 20;
 	private const int SpareKeyFinalSettleMs = 100;
 
-	private readonly IntPtr _display;
-	private readonly int _spareKeycode;
-	private readonly nuint _root;
+	private readonly X11Connection _connection;
+	private int _spareKeycode;
+	private nuint _root;
 
 	public LinuxKeyboardInputProvider()
+		: this(null)
 	{
-		_display = OperatingSystem.IsLinux() ? SafeOpenDisplay() : IntPtr.Zero;
-		if (_display != IntPtr.Zero)
-		{
-			_ = XDisplayKeycodes(_display, out _, out var max);
-			_spareKeycode = max; // Highest keycode is reliably unused; we borrow it for Unicode typing.
-			_root = XDefaultRootWindow(_display);
-		}
+	}
+
+	internal LinuxKeyboardInputProvider(string? displayName)
+	{
+		_connection = new X11Connection(Attach, () => KeyboardInputService.Unavailable(PlatformName), displayName);
 	}
 
 	public string PlatformName => "Linux (X11 XTest)";
 
-	public bool IsSupported => _display != IntPtr.Zero;
+	public bool IsSupported => _connection.IsAvailable;
 
 	public bool IsDegraded => IsSupported && LinuxDisplaySession.IsWayland;
 
@@ -73,41 +72,39 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	public void KeyDown(KeyCode key)
 	{
-		SendKey(key, true);
+		_connection.Run(display => SendKey(display, key, true));
 	}
 
 	public void KeyUp(KeyCode key)
 	{
-		SendKey(key, false);
+		_ = _connection.TryRun(display => SendKey(display, key, false));
 	}
 
 	public void TypeUnicode(string text)
 	{
-		if (_display == IntPtr.Zero)
+		_connection.Run(display =>
 		{
-			return;
-		}
+			var layout = ReadLayout(display);
+			var level3Mask = layout.Level3Keycode == 0 ? 0 : layout.Level3Mask;
+			var shiftMask = layout.ShiftKeycode == 0 ? 0 : ShiftMask;
+			TypeWithCapsLockReleased(layout.LockedModifiers,
+				(affect, values) => LockModifiers(display, affect, values),
+				() => ReadLockedModifiers(display),
+				() =>
+				{
+					TypeKeysyms(ToKeysyms(text),
+						CreateSpareKeycode(display, _spareKeycode),
+						keysym => ResolveLayoutKey(display, layout, _spareKeycode, shiftMask, level3Mask, keysym),
+						key => TypeKey(display, layout, key),
+						keycode =>
+						{
+							FakeKey(display, keycode, true);
+							FakeKey(display, keycode, false);
+						});
 
-		var layout = ReadLayout(_display);
-		var level3Mask = layout.Level3Keycode == 0 ? 0 : layout.Level3Mask;
-		var shiftMask = layout.ShiftKeycode == 0 ? 0 : ShiftMask;
-		TypeWithCapsLockReleased(layout.LockedModifiers,
-			(affect, values) => LockModifiers(_display, affect, values),
-			() => ReadLockedModifiers(_display),
-			() =>
-			{
-				TypeKeysyms(ToKeysyms(text),
-					CreateSpareKeycode(_display, _spareKeycode),
-					keysym => ResolveLayoutKey(_display, layout, _spareKeycode, shiftMask, level3Mask, keysym),
-					key => TypeKey(layout, key),
-					keycode =>
-					{
-						FakeKey(keycode, true);
-						FakeKey(keycode, false);
-					});
-
-				_ = XFlush(_display);
-			});
+					_ = XFlush(display);
+				});
+		});
 	}
 
 	// The server stamps locked modifiers on every XTest event and receivers recase letters under Lock,
@@ -235,7 +232,10 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			clearing =>
 			{
 				_ = XSync(display, false);
-				Thread.Sleep(clearing ? SpareKeyFinalSettleMs : SpareKeySettleMs);
+				if (!X11Windows.IsLost(display))
+				{
+					Thread.Sleep(clearing ? SpareKeyFinalSettleMs : SpareKeySettleMs);
+				}
 			});
 	}
 
@@ -319,32 +319,32 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		return false;
 	}
 
-	private void TypeKey(TypingLayout layout, TypingKey key)
+	private static void TypeKey(IntPtr display, TypingLayout layout, TypingKey key)
 	{
 		// A modifier the user or a Key down action already holds stays as it is, so typing never ends that hold.
 		var pressShift = (key.Modifiers & ShiftMask) != 0 && (layout.ActiveModifiers & ShiftMask) == 0;
 		var pressLevel3 = (key.Modifiers & layout.Level3Mask) != 0 && (layout.ActiveModifiers & layout.Level3Mask) == 0;
 		if (pressShift)
 		{
-			FakeKey(layout.ShiftKeycode, true);
+			FakeKey(display, layout.ShiftKeycode, true);
 		}
 
 		if (pressLevel3)
 		{
-			FakeKey(layout.Level3Keycode, true);
+			FakeKey(display, layout.Level3Keycode, true);
 		}
 
-		FakeKey(key.Keycode, true);
-		FakeKey(key.Keycode, false);
+		FakeKey(display, key.Keycode, true);
+		FakeKey(display, key.Keycode, false);
 
 		if (pressLevel3)
 		{
-			FakeKey(layout.Level3Keycode, false);
+			FakeKey(display, layout.Level3Keycode, false);
 		}
 
 		if (pressShift)
 		{
-			FakeKey(layout.ShiftKeycode, false);
+			FakeKey(display, layout.ShiftKeycode, false);
 		}
 	}
 
@@ -367,9 +367,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		return XkbLookupKeySym(display, (byte)keycode, state, out _, out var keysym) ? keysym : 0;
 	}
 
-	public bool SupportsWindowTargeting => _display != IntPtr.Zero;
+	public bool SupportsWindowTargeting => true;
 
-	public bool SupportsBackgroundSend => _display != IntPtr.Zero;
+	public bool SupportsBackgroundSend => true;
 
 	public KeyModifier BackgroundModifiers
 		=> KeyModifier.Control
@@ -383,28 +383,17 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	public string? GetForegroundProcessName()
 	{
-		if (_display == IntPtr.Zero)
+		var pid = _connection.Run(display =>
 		{
-			return null;
-		}
+			var window = X11Windows.GetActiveWindow(display, _root);
+			return window == 0 ? null : X11Windows.GetWindowPid(display, window);
+		});
 
-		var window = X11Windows.GetActiveWindow(_display, _root);
-		if (window == 0)
-		{
-			return null;
-		}
-
-		var pid = X11Windows.GetWindowPid(_display, window);
 		return pid is null ? null : KeyboardProcessName.ForPid(pid.Value);
 	}
 
 	public IKeyboardTargetWindow? ResolveTarget(string processName)
 	{
-		if (_display == IntPtr.Zero)
-		{
-			return null;
-		}
-
 		var pids = new HashSet<int>();
 		foreach (var process in KeyboardProcessName.Find(processName))
 		{
@@ -417,60 +406,56 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			return null;
 		}
 
-		var clientList = X11Windows.InternAtom(_display, "_NET_CLIENT_LIST");
-		if (clientList == 0)
+		return _connection.Run(display =>
 		{
-			return null;
-		}
-
-		var windows = new List<nuint>();
-		foreach (var window in X11Windows.ReadLongProperty(_display, _root, clientList))
-		{
-			var pid = X11Windows.GetWindowPid(_display, window);
-			if (pid is not null && pids.Contains(pid.Value))
+			var clientList = X11Windows.InternAtom(display, "_NET_CLIENT_LIST");
+			if (clientList == 0)
 			{
-				windows.Add(window);
+				return null;
 			}
-		}
 
-		return windows.Count == 0 ? null : new LinuxTargetWindow(_display, _root, _spareKeycode, windows);
+			var windows = new List<nuint>();
+			foreach (var window in X11Windows.ReadLongProperty(display, _root, clientList))
+			{
+				var pid = X11Windows.GetWindowPid(display, window);
+				if (pid is not null && pids.Contains(pid.Value))
+				{
+					windows.Add(window);
+				}
+			}
+
+			return windows.Count == 0
+				? null
+				: new LinuxTargetWindow(_connection, _connection.Generation, _root, _spareKeycode, windows);
+		});
 	}
 
-	private void SendKey(KeyCode key, bool isPress)
+	private bool Attach(IntPtr display)
 	{
-		if (_display == IntPtr.Zero)
-		{
-			return;
-		}
+		_ = XDisplayKeycodes(display, out _, out var max);
+		_spareKeycode = max; // Highest keycode is reliably unused; we borrow it for Unicode typing.
+		_root = XDefaultRootWindow(display);
+		return true;
+	}
 
+	private static void SendKey(IntPtr display, KeyCode key, bool isPress)
+	{
 		// Xlib applies a layout change to its cached keymap only once it reads the server's mapping event,
 		// so read everything pending before resolving or a press right after a switch uses the old layout.
-		_ = XSync(_display, false);
-		var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(_display, keysym));
+		_ = XSync(display, false);
+		var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(display, keysym));
 		if (keycode == 0)
 		{
 			return;
 		}
 
-		FakeKey(keycode, isPress);
-		_ = XFlush(_display);
+		FakeKey(display, keycode, isPress);
+		_ = XFlush(display);
 	}
 
-	private void FakeKey(uint keycode, bool press)
+	private static void FakeKey(IntPtr display, uint keycode, bool press)
 	{
-		_ = XTestFakeKeyEvent(_display, keycode, press, 0);
-	}
-
-	private static IntPtr SafeOpenDisplay()
-	{
-		try
-		{
-			return X11Windows.OpenDisplay();
-		}
-		catch (DllNotFoundException)
-		{
-			return IntPtr.Zero;
-		}
+		_ = XTestFakeKeyEvent(display, keycode, press, 0);
 	}
 
 	internal static uint ResolveKeycode(KeyCode key, Func<nuint, uint> keysymToKeycode)
@@ -594,14 +579,8 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	public void Dispose()
 	{
-		if (_display != IntPtr.Zero)
-		{
-			_ = XCloseDisplay(_display);
-		}
+		_connection.Dispose();
 	}
-
-	[DllImport(LibX11)]
-	private static extern int XCloseDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern uint XKeysymToKeycode(IntPtr display, nuint keysym);
@@ -823,15 +802,22 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	private sealed class LinuxTargetWindow : IKeyboardTargetWindow
 	{
-		private readonly IntPtr _display;
+		private readonly X11Connection _connection;
+		private readonly int _generation;
 		private readonly nuint _root;
 		private readonly int _spareKeycode;
 		private readonly IReadOnlyList<nuint> _windows;
 		private readonly Dictionary<KeyCode, uint> _heldMasks = new();
 
-		public LinuxTargetWindow(IntPtr display, nuint root, int spareKeycode, IReadOnlyList<nuint> windows)
+		public LinuxTargetWindow(
+			X11Connection connection,
+			int generation,
+			nuint root,
+			int spareKeycode,
+			IReadOnlyList<nuint> windows)
 		{
-			_display = display;
+			_connection = connection;
+			_generation = generation;
 			_root = root;
 			_spareKeycode = spareKeycode;
 			_windows = windows;
@@ -839,47 +825,60 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 		public IDisposable? Focus()
 		{
-			var previous = X11Windows.GetActiveWindow(_display, _root);
-			if (!ActivateWindow(_display, _root, _windows[0]))
-			{
-				return null;
-			}
+			return _connection.Run(display =>
+				{
+					var previous = X11Windows.GetActiveWindow(display, _root);
+					if (!ActivateWindow(display, _root, _windows[0]))
+					{
+						return null;
+					}
 
-			Thread.Sleep(40);
-			return X11Windows.GetActiveWindow(_display, _root) == _windows[0]
-				? new RestoreScope(_display, _root, previous)
-				: null;
+					Thread.Sleep(40);
+					return X11Windows.GetActiveWindow(display, _root) == _windows[0]
+						? new RestoreScope(_connection, _generation, _root, previous)
+						: null;
+				},
+				_generation);
 		}
 
 		public void KeyDown(KeyCode key)
 		{
-			Send(key, true);
+			_connection.Run(display => Send(display, key, true), _generation);
 		}
 
 		public void KeyUp(KeyCode key)
 		{
-			Send(key, false);
+			_ = _connection.TryRun(display => Send(display, key, false), _generation);
 		}
 
 		public void TypeUnicode(string text)
 		{
-			var layout = ReadLayout(_display);
-			var groupState = (layout.Group & 3) << XkbGroupShift;
-			TypeKeysyms(ToKeysyms(text),
-				CreateSpareKeycode(_display, _spareKeycode),
-				keysym => ResolveLayoutKey(_display, layout, _spareKeycode, ShiftMask, layout.Level3Mask, keysym),
-				key => SendToWindows(key.Keycode, key.Modifiers | groupState),
-				keycode => SendToWindows(keycode, groupState));
+			_connection.Run(display =>
+				{
+					var layout = ReadLayout(display);
+					var groupState = (layout.Group & 3) << XkbGroupShift;
+					TypeKeysyms(ToKeysyms(text),
+						CreateSpareKeycode(display, _spareKeycode),
+						keysym => ResolveLayoutKey(display,
+							layout,
+							_spareKeycode,
+							ShiftMask,
+							layout.Level3Mask,
+							keysym),
+						key => SendToWindows(display, key.Keycode, key.Modifiers | groupState),
+						keycode => SendToWindows(display, keycode, groupState));
 
-			_ = XFlush(_display);
+					_ = XFlush(display);
+				},
+				_generation);
 		}
 
-		private void SendToWindows(uint keycode, uint state)
+		private void SendToWindows(IntPtr display, uint keycode, uint state)
 		{
 			foreach (var window in _windows)
 			{
-				SendKeyEvent(_display, _root, window, keycode, state, true);
-				SendKeyEvent(_display, _root, window, keycode, state, false);
+				SendKeyEvent(display, _root, window, keycode, state, true);
+				SendKeyEvent(display, _root, window, keycode, state, false);
 			}
 		}
 
@@ -887,10 +886,10 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		{
 		}
 
-		private void Send(KeyCode key, bool press)
+		private void Send(IntPtr display, KeyCode key, bool press)
 		{
-			_ = XSync(_display, false);
-			var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(_display, keysym));
+			_ = XSync(display, false);
+			var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(display, keysym));
 			if (keycode == 0)
 			{
 				return;
@@ -900,8 +899,8 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			{
 				var mask = ResolveStateMask(key,
 					keycode,
-					code => LookupKeysym(_display, code, 0),
-					keysym => XkbKeysymToModifiers(_display, keysym));
+					code => LookupKeysym(display, code, 0),
+					keysym => XkbKeysymToModifiers(display, keysym));
 				if (mask != 0)
 				{
 					_heldMasks[key] = mask;
@@ -920,21 +919,23 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 			foreach (var window in _windows)
 			{
-				SendKeyEvent(_display, _root, window, keycode, eventState, press);
+				SendKeyEvent(display, _root, window, keycode, eventState, press);
 			}
 
-			_ = XFlush(_display);
+			_ = XFlush(display);
 		}
 
 		private sealed class RestoreScope : IDisposable
 		{
-			private readonly IntPtr _display;
+			private readonly X11Connection _connection;
+			private readonly int _generation;
 			private readonly nuint _root;
 			private readonly nuint _previous;
 
-			public RestoreScope(IntPtr display, nuint root, nuint previous)
+			public RestoreScope(X11Connection connection, int generation, nuint root, nuint previous)
 			{
-				_display = display;
+				_connection = connection;
+				_generation = generation;
 				_root = root;
 				_previous = previous;
 			}
@@ -943,7 +944,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			{
 				if (_previous != 0)
 				{
-					_ = ActivateWindow(_display, _root, _previous);
+					_ = _connection.TryRun(display => ActivateWindow(display, _root, _previous), _generation);
 				}
 			}
 		}

@@ -25,27 +25,24 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 	private const uint BackButton = 8;
 	private const uint ForwardButton = 9;
 
-	private readonly IntPtr _display;
-	private readonly nuint _root;
-	private readonly int _screen;
-	private readonly LocalizedText _degradedReason;
-
-	private bool _disposed;
+	private readonly X11Connection _connection;
+	private nuint _root;
+	private int _screen;
+	private LocalizedText _degradedReason;
 
 	public LinuxMouseInputProvider()
+		: this(null)
 	{
-		_display = OperatingSystem.IsLinux() ? SafeOpenDisplay() : IntPtr.Zero;
-		if (_display != IntPtr.Zero)
-		{
-			_root = XDefaultRootWindow(_display);
-			_screen = XDefaultScreen(_display);
-			_degradedReason = DetectDegradation();
-		}
+	}
+
+	internal LinuxMouseInputProvider(string? displayName)
+	{
+		_connection = new X11Connection(Attach, () => MouseInputService.Unavailable(PlatformName), displayName);
 	}
 
 	public string PlatformName => "Linux (X11 XTest)";
 
-	public bool IsSupported => _display != IntPtr.Zero;
+	public bool IsSupported => _connection.IsAvailable;
 
 	public bool IsDegraded => !_degradedReason.IsEmpty;
 
@@ -61,114 +58,97 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 
 	public bool TryGetPosition(out MousePoint position)
 	{
-		position = default;
-		if (_display == IntPtr.Zero)
-		{
-			return false;
-		}
-
-		if (!XQueryPointer(_display, _root, out _, out _, out var x, out var y, out _, out _, out _))
-		{
-			return false;
-		}
-
-		position = new MousePoint(x, y);
-		return true;
+		var result = _connection.RunIfConnected(QueryPointer, null);
+		position = result ?? default;
+		return result is not null;
 	}
 
 	public bool TryGetDesktopBounds(out MouseRect bounds)
 	{
-		bounds = default;
-		if (_display == IntPtr.Zero)
-		{
-			return false;
-		}
-
-		var width = XDisplayWidth(_display, _screen);
-		var height = XDisplayHeight(_display, _screen);
-		if (width <= 0 || height <= 0)
-		{
-			return false;
-		}
-
-		bounds = new MouseRect(0, 0, width, height);
-		return true;
+		var result = _connection.RunIfConnected(QueryDesktopBounds, null);
+		bounds = result ?? default;
+		return result is not null;
 	}
 
 	public void MoveTo(MousePoint position)
 	{
-		if (_display == IntPtr.Zero)
+		_connection.Run(display =>
 		{
-			return;
-		}
-
-		Motion(position);
-		_ = XFlush(_display);
+			Motion(display, position);
+			_ = XFlush(display);
+		});
 	}
 
 	public void ButtonDown(MouseButton button, MousePoint? position)
 	{
-		if (_display == IntPtr.Zero || !TryGetButtonNumber(button, out var number))
+		if (!TryGetButtonNumber(button, out var number))
 		{
 			return;
 		}
 
-		if (position is { } point)
+		_connection.Run(display =>
 		{
-			Motion(point);
-		}
+			if (position is { } point)
+			{
+				Motion(display, point);
+			}
 
-		FakeButton(number, true);
-		_ = XFlush(_display);
+			FakeButton(display, number, true);
+			_ = XFlush(display);
+		});
 	}
 
 	public void ButtonUp(MouseButton button)
 	{
-		if (_display == IntPtr.Zero || !TryGetButtonNumber(button, out var number))
+		if (!TryGetButtonNumber(button, out var number))
 		{
 			return;
 		}
 
-		FakeButton(number, false);
-		_ = XFlush(_display);
+		_ = _connection.TryRun(display =>
+		{
+			FakeButton(display, number, false);
+			_ = XFlush(display);
+		});
 	}
 
 	public void Click(MouseButton button, int clickCount, MousePoint? position)
 	{
-		if (_display == IntPtr.Zero || !TryGetButtonNumber(button, out var number))
+		if (!TryGetButtonNumber(button, out var number))
 		{
 			return;
 		}
 
-		if (position is { } point)
+		_connection.Run(display =>
 		{
-			Motion(point);
-		}
+			if (position is { } point)
+			{
+				Motion(display, point);
+			}
 
-		var clicks = Math.Clamp(clickCount, 1, 3);
-		for (var i = 0; i < clicks; i++)
-		{
-			FakeButton(number, true);
-			FakeButton(number, false);
-		}
+			var clicks = Math.Clamp(clickCount, 1, 3);
+			for (var i = 0; i < clicks; i++)
+			{
+				FakeButton(display, number, true);
+				FakeButton(display, number, false);
+			}
 
-		_ = XFlush(_display);
+			_ = XFlush(display);
+		});
 	}
 
 	public void DragTo(MouseButton button, MousePoint position)
 	{
-		if (_display == IntPtr.Zero)
+		_connection.Run(display =>
 		{
-			return;
-		}
-
-		Motion(position);
-		_ = XFlush(_display);
+			Motion(display, position);
+			_ = XFlush(display);
+		});
 	}
 
 	public void Scroll(ScrollAxis axis, int notches)
 	{
-		if (_display == IntPtr.Zero || notches == 0)
+		if (notches == 0)
 		{
 			return;
 		}
@@ -180,24 +160,41 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 			_ => positive ? ScrollUpButton : ScrollDownButton
 		};
 
-		var count = Math.Abs(notches);
-		for (var i = 0; i < count; i++)
+		_connection.Run(display =>
 		{
-			FakeButton(button, true);
-			FakeButton(button, false);
-		}
+			var count = Math.Abs(notches);
+			for (var i = 0; i < count; i++)
+			{
+				FakeButton(display, button, true);
+				FakeButton(display, button, false);
+			}
 
-		_ = XFlush(_display);
+			_ = XFlush(display);
+		});
 	}
 
-	private void Motion(MousePoint position)
+	private MousePoint? QueryPointer(IntPtr display)
 	{
-		_ = XTestFakeMotionEvent(_display, AnyScreen, position.X, position.Y, 0);
+		return XQueryPointer(display, _root, out _, out _, out var x, out var y, out _, out _, out _)
+			? new MousePoint(x, y)
+			: null;
 	}
 
-	private void FakeButton(uint button, bool press)
+	private MouseRect? QueryDesktopBounds(IntPtr display)
 	{
-		_ = XTestFakeButtonEvent(_display, button, press, 0);
+		var width = XDisplayWidth(display, _screen);
+		var height = XDisplayHeight(display, _screen);
+		return width > 0 && height > 0 ? new MouseRect(0, 0, width, height) : null;
+	}
+
+	private static void Motion(IntPtr display, MousePoint position)
+	{
+		_ = XTestFakeMotionEvent(display, AnyScreen, position.X, position.Y, 0);
+	}
+
+	private static void FakeButton(IntPtr display, uint button, bool press)
+	{
+		_ = XTestFakeButtonEvent(display, button, press, 0);
 	}
 
 	private static bool TryGetButtonNumber(MouseButton button, out uint number)
@@ -215,36 +212,17 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 		return number != 0;
 	}
 
-	private static IntPtr SafeOpenDisplay()
+	private bool Attach(IntPtr display)
 	{
-		IntPtr display;
-		try
+		if (!XTestQueryExtension(display, out _, out _, out _, out _))
 		{
-			display = X11Windows.OpenDisplay();
-		}
-		catch (DllNotFoundException)
-		{
-			return IntPtr.Zero;
+			return false;
 		}
 
-		if (display == IntPtr.Zero)
-		{
-			return IntPtr.Zero;
-		}
-
-		try
-		{
-			if (XTestQueryExtension(display, out _, out _, out _, out _))
-			{
-				return display;
-			}
-		}
-		catch (DllNotFoundException)
-		{
-		}
-
-		_ = XCloseDisplay(display);
-		return IntPtr.Zero;
+		_root = XDefaultRootWindow(display);
+		_screen = XDefaultScreen(display);
+		_degradedReason = DetectDegradation();
+		return true;
 	}
 
 	private static LocalizedText DetectDegradation()
@@ -256,17 +234,8 @@ public sealed class LinuxMouseInputProvider : IMouseInputProvider, IDisposable
 
 	public void Dispose()
 	{
-		if (_disposed || _display == IntPtr.Zero)
-		{
-			return;
-		}
-
-		_disposed = true;
-		_ = XCloseDisplay(_display);
+		_connection.Dispose();
 	}
-
-	[DllImport(LibX11)]
-	private static extern int XCloseDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern int XFlush(IntPtr display);
