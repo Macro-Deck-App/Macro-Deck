@@ -36,6 +36,8 @@ public class WidgetSchemaEndpointTests
 			null!,
 			null!,
 			null!,
+			null!,
+			null!,
 			null!);
 	}
 

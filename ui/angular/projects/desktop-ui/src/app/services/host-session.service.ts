@@ -14,6 +14,9 @@ export class HostSessionService {
   private readonly stoppingSignal = signal(false);
   readonly stopping = this.stoppingSignal.asReadonly();
 
+  private readonly pluginsDisabledSignal = signal(false);
+  readonly pluginsDisabledAtStartup = this.pluginsDisabledSignal.asReadonly();
+
   start(): void {
     void shellBridge()?.onHostStopping?.(() => this.stoppingSignal.set(true));
     this.api.connectionState$.subscribe(state => {
@@ -31,6 +34,7 @@ export class HostSessionService {
 
     try {
       const session = await this.api.getHostSession();
+      this.pluginsDisabledSignal.set(session.pluginsDisabledAtStartup === true);
       const previous = this.read();
 
       if (previous === null) {

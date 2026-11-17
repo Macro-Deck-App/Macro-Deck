@@ -322,6 +322,7 @@ export const ClientAppStrings = {
 		},
 		KeepAwake: {
 			Active: 'macrodeck.app:WebClient.KeepAwake.Active',
+			AwaitingTap: 'macrodeck.app:WebClient.KeepAwake.AwaitingTap',
 			Denied: 'macrodeck.app:WebClient.KeepAwake.Denied',
 			Description: 'macrodeck.app:WebClient.KeepAwake.Description',
 			InsecureOrigin: 'macrodeck.app:WebClient.KeepAwake.InsecureOrigin',
@@ -691,6 +692,7 @@ export const ClientAppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:WebClient.Install.UpdateLabel': 'Update',
 	'macrodeck.app:WebClient.Install.UpdateNow': 'Update now',
 	'macrodeck.app:WebClient.KeepAwake.Active': 'The display is being kept awake.',
+	'macrodeck.app:WebClient.KeepAwake.AwaitingTap': 'Tap anywhere to keep the display awake.',
 	'macrodeck.app:WebClient.KeepAwake.Denied': 'The browser or operating system refused to keep the display awake (e.g. battery saver).',
 	'macrodeck.app:WebClient.KeepAwake.Description': 'Prevents the tablet from sleeping while this deck is open. Uses more battery.',
 	'macrodeck.app:WebClient.KeepAwake.InsecureOrigin': 'This address can\'t keep the display awake. Open Macro Deck at its https:// address and trust its certificate on this device.',

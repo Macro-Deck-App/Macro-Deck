@@ -91,7 +91,40 @@ public partial class PluginWebSocketEndpointDispatchTests
 		{
 			Assert.That(failure.Type, Is.EqualTo(MessageTypes.ProtocolError));
 			Assert.That(failure.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InternalError));
+			Assert.That(failure.CorrelationId, Is.EqualTo("first"));
 			Assert.That(occurrence.Parameters["value"], Is.EqualTo(2L), "the dispatch lane still runs");
+		});
+
+		await pair.Plugin.CloseAsync(WebSocketCloseStatus.NormalClosure, null, Timeout());
+		await running.WaitAsync(_closeTestTimeout);
+	}
+
+	[TestCase("""{"value":1e400}""")]
+	[TestCase("""{"value":-1e400}""")]
+	[TestCase("""{"label":"x","reading":{"value":1e400}}""")]
+	[TestCase("""{"readings":[1.5,[-1e400]]}""")]
+	public async Task An_event_publish_with_a_number_beyond_double_range_is_rejected_and_not_published(
+		string parameters)
+	{
+		var events = new FakeEventBus();
+		var (endpoint, _) = CreateSocketEndpoint(new ManualTimeProvider(), eventBus: events);
+		using var pair = await PluginWebSocketConnectionPair.CreateAsync();
+		var running = endpoint.RunConnectionAsync(pair.Host, ClosePluginId, CloseSessionId);
+		await SendHelloAsync(pair.Plugin);
+		Assert.That((await ReceiveEnvelopeAsync(pair.Plugin))?.Type, Is.EqualTo(MessageTypes.SessionWelcome));
+
+		await SendTextAsync(pair.Plugin, EventPublish("non-finite", parameters));
+		var rejection = await ReceiveAnswerAsync(pair.Plugin, "non-finite");
+
+		await SendTextAsync(pair.Plugin, EventPublish("finite", """{"value":1.5}"""));
+		var occurrence = await events.Reader.ReadAsync(Timeout());
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(rejection.Type, Is.EqualTo(MessageTypes.ProtocolError));
+			Assert.That(rejection.Error?.Code, Is.EqualTo(ProtocolErrorCodes.InvalidPayload));
+			Assert.That(rejection.CorrelationId, Is.EqualTo("non-finite"));
+			Assert.That(occurrence.Parameters["value"], Is.EqualTo(1.5d), "the rejected event was published");
 		});
 
 		await pair.Plugin.CloseAsync(WebSocketCloseStatus.NormalClosure, null, Timeout());

@@ -11,6 +11,7 @@ mod appearance;
 mod appimage;
 mod backup_download;
 mod bridge;
+mod cli;
 mod deep_links;
 mod dock_icon;
 mod external_url;
@@ -34,6 +35,7 @@ mod notifications;
 mod opened_files;
 mod post_update_changelog;
 mod quit_after_update;
+mod quit_request;
 mod redact;
 mod release_notes;
 mod tray_badge;
@@ -235,14 +237,36 @@ fn main() {
     // A relaunch races the instance that started it: the single-instance lock is only released once
     // that process is gone, and claiming it too early makes this instance forward its argv to a
     // dying process and exit - the app would simply disappear.
-    if std::env::var_os(host::RELAUNCH_MARKER_ENVIRONMENT_VARIABLE).is_some() {
+    let relaunched = std::env::var_os(host::RELAUNCH_MARKER_ENVIRONMENT_VARIABLE).is_some();
+    if relaunched {
         std::thread::sleep(host::RELAUNCH_SETTLE_DELAY);
+    }
+
+    let context = tauri::generate_context!();
+    let args: Vec<std::ffi::OsString> = std::env::args_os().collect();
+    // Before the single-instance lock, so the information options also answer while the app runs.
+    if let Some(option) = cli::info_option(&args) {
+        let resource_dir =
+            tauri::utils::platform::resource_dir(context.package_info(), &tauri::Env::default())
+                .ok();
+        std::process::exit(cli::run_info(option, resource_dir));
+    }
+    if cli::plugins_disabled() && !relaunched {
+        if let Some(code) = cli::already_running_exit_code() {
+            std::process::exit(code);
+        }
     }
 
     tauri::Builder::default()
         // Must stay registered before single_instance: a second instance exits inside its setup.
         .plugin(launch_handoff::plugin())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            if quit_request::requested(&argv) {
+                launch_handoff::clear(app);
+                logging::info("[app] another launch asked to quit");
+                request_quit(app);
+                return;
+            }
             if let Some(executable) = launch_handoff::take_target(app) {
                 launch_handoff::hand_over(app, executable, argv, cwd);
                 return;
@@ -337,6 +361,12 @@ fn main() {
                 handle.exit(0);
                 return Ok(());
             }
+            if quit_request::requested(&deep_links::launch_arguments()) {
+                logging::info("[app] --quit with no running instance; exiting");
+                mark_quitting(&handle);
+                handle.exit(0);
+                return Ok(());
+            }
             // A launch from the mounted DMG is not an install - no tray, no
             // host, no window; just the move prompt (issue #355). The dialog
             // has to run off the main thread, hence the spawned task.
@@ -359,7 +389,7 @@ fn main() {
             tauri::async_runtime::spawn(async move { startup(handle).await });
             Ok(())
         })
-        .build(tauri::generate_context!())
+        .build(context)
         .expect("error while building Macro Deck Bootstrapper")
         // Must stay the last thing main does: the runtime installs this
         // callback before it starts pumping events, and an Opened that arrives

@@ -1496,6 +1496,7 @@ export {
   type WeatherStatePayload,
 } from './protocol/messages/weather';
 export {
+  type CopyWidgetStyleResponse,
   type CreateWidgetFromApplicationRequest,
   type CreateWidgetItem,
   type CreateWidgetRequest,
@@ -1511,6 +1512,8 @@ export {
   type IpcWidgetType,
   type LabelImagePreviewRequest,
   type LabelTextUpdatedEvent,
+  type PasteWidgetStyleRequest,
+  type PasteWidgetStyleResponse,
   type SetWidgetPinnedRequest,
   type SetWidgetPinnedResponse,
   type SetWidgetsPinnedRequest,

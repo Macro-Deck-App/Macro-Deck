@@ -5,6 +5,7 @@ import {
   Input,
   Output,
   Injector,
+  OnDestroy,
   computed,
   inject,
   signal,
@@ -110,12 +111,25 @@ import { ActionOptionsService } from '../../services/action-options.service';
         @case ('widget-target') {
           <shared-widget-target-picker
             [value]="stringValue"
-            [options]="widgetOptions()"
-            [loading]="widgetOptionsLoading()"
+            [options]="sourceOptions()"
+            [loading]="sourceOptionsLoading()"
             [hasOwnerWidget]="false"
             (valueChange)="emit($event)"
-            (filterChange)="loadWidgetOptions($event)"
-            (opened)="loadWidgetOptions()" />
+            (filterChange)="loadSourceOptions($event)"
+            (opened)="loadSourceOptions()" />
+        }
+        @case ('autocomplete') {
+          <shared-combobox
+            [ariaLabel]="(field.label ?? field.name) | localizedText"
+            [value]="stringValue"
+            [placeholder]="field.placeholder | localizedText"
+            [options]="autocompleteOptions"
+            [loading]="sourceOptionsLoading()"
+            [filterLocally]="!field.optionsSourceId"
+            [clearable]="!field.required"
+            (valueChange)="emit($event)"
+            (filterChange)="onAutocompleteFilterChange($event)"
+            (opened)="loadSourceOptions(stringValue || undefined)" />
         }
         @case ('hotkey') {
           <shared-hotkey-recorder [value]="hotkeyValue" (valueChange)="emit($event)" />
@@ -244,7 +258,7 @@ import { ActionOptionsService } from '../../services/action-options.service';
   `,
   styleUrls: ['./config-field.component.scss'],
 })
-export class ConfigFieldComponent {
+export class ConfigFieldComponent implements OnDestroy {
   @Input({ required: true }) field!: ActionParameterDef;
   @Input() value: unknown;
   @Input() error: string | null = null;
@@ -255,11 +269,14 @@ export class ConfigFieldComponent {
 
   secretRevealed = false;
 
-  readonly widgetOptions = signal<ComboboxOption[]>([]);
-  readonly widgetOptionsLoading = signal(false);
+  readonly sourceOptions = signal<ComboboxOption[]>([]);
+  readonly sourceOptionsLoading = signal(false);
 
-  // Resolved on demand rather than in a field: only a widget-target field ever needs it, and injecting
-  // it eagerly would put the whole API stack behind every config field a flow renders.
+  private filterDebounce: ReturnType<typeof setTimeout> | null = null;
+  private latestOptionsRequest = 0;
+
+  // Resolved on demand rather than in a field: only a field with an options source ever needs it, and
+  // injecting it eagerly would put the whole API stack behind every config field a flow renders.
   private readonly injector = inject(Injector);
   private readonly localization = inject(LocalizationService);
 
@@ -275,7 +292,7 @@ export class ConfigFieldComponent {
     this.localization.translateKey(AppStrings.ConfigFlow.ClearStoredSecret));
 
   get controlType(): 'secret' | 'choice' | 'boolean' | 'number' | 'multiselect' | 'widget-target' | 'hotkey' | 'file' | 'folder' | 'folder-list' | 'text-list'
-    | 'keyboard-combo' | 'keyboard-sequence' | 'text' {
+    | 'keyboard-combo' | 'keyboard-sequence' | 'autocomplete' | 'text' {
     switch (this.field.type) {
       case ActionParameterType.Password:
       case ActionParameterType.Secret:
@@ -290,6 +307,8 @@ export class ConfigFieldComponent {
         return 'multiselect';
       case ActionParameterType.WidgetTarget:
         return 'widget-target';
+      case ActionParameterType.Autocomplete:
+        return 'autocomplete';
       case ActionParameterType.Hotkey:
         return 'hotkey';
       case ActionParameterType.KeyboardCombo:
@@ -321,6 +340,10 @@ export class ConfigFieldComponent {
 
   get options(): SelectOption[] {
     return (this.field.options ?? []).map(o => ({ value: o.value, label: this.resolveOptionLabel(o.label, o.value) }));
+  }
+
+  get autocompleteOptions(): ComboboxOption[] {
+    return this.field.optionsSourceId ? this.sourceOptions() : this.options;
   }
 
   get multiSelectOptions(): MultiSelectOption[] {
@@ -371,11 +394,22 @@ export class ConfigFieldComponent {
     this.valueChange.emit(value === '' || Number.isNaN(parsed) ? null : parsed);
   }
 
-  async loadWidgetOptions(filter?: string): Promise<void> {
+  ngOnDestroy(): void {
+    if (this.filterDebounce) clearTimeout(this.filterDebounce);
+  }
+
+  onAutocompleteFilterChange(filter: string): void {
+    if (!this.field.optionsSourceId) return;
+    if (this.filterDebounce) clearTimeout(this.filterDebounce);
+    this.filterDebounce = setTimeout(() => this.loadSourceOptions(filter), 250);
+  }
+
+  async loadSourceOptions(filter?: string): Promise<void> {
     const optionsSourceId = this.field.optionsSourceId;
     if (!optionsSourceId) return;
 
-    this.widgetOptionsLoading.set(true);
+    const request = ++this.latestOptionsRequest;
+    this.sourceOptionsLoading.set(true);
     try {
       const response = await this.injector.get(ActionOptionsService).getOptions({
         integrationId: '',
@@ -385,14 +419,15 @@ export class ConfigFieldComponent {
         parameterName: this.field.name,
         filter,
       });
-      this.widgetOptions.set(
+      if (request !== this.latestOptionsRequest) return;
+      this.sourceOptions.set(
         (response.options ?? []).map(o => ({ value: o.value, label: this.resolveOptionLabel(o.label, o.value) })),
       );
     } catch {
-      // The picker shows "no widgets" rather than the dialog dying on an unhandled rejection.
-      this.widgetOptions.set([]);
+      // The picker shows "no suggestions" rather than the dialog dying on an unhandled rejection.
+      if (request === this.latestOptionsRequest) this.sourceOptions.set([]);
     } finally {
-      this.widgetOptionsLoading.set(false);
+      if (request === this.latestOptionsRequest) this.sourceOptionsLoading.set(false);
     }
   }
 }

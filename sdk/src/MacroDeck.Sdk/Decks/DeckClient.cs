@@ -12,4 +12,11 @@ public sealed class DeckClient
 	public required string ProfileId { get; init; }
 
 	public required string FolderId { get; init; }
+
+	/// <summary>
+	/// <c>true</c> when the client is a device connected through a device provider: the provider draws the deck
+	/// itself, so the client never shows Macro Deck's own UI, such as notification dialogs. <c>false</c> for a
+	/// web or app client, and for every client a Macro Deck that predates this member reports.
+	/// </summary>
+	public bool IsDeviceSession { get; init; }
 }

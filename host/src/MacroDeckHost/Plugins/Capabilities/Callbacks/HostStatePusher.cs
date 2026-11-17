@@ -393,7 +393,8 @@ public sealed class HostStatePusher(
 			ClientId = client.ClientId,
 			DeviceId = client.DeviceId,
 			ProfileId = client.ProfileId,
-			FolderId = client.FolderId
+			FolderId = client.FolderId,
+			IsDeviceSession = client.IsDeviceSession
 		};
 	}
 

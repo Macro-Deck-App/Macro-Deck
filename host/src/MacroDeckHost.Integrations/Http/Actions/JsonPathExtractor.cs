@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using MacroDeck.Sdk.Variables;
 
@@ -36,30 +35,13 @@ internal static class JsonPathExtractor
 	private static bool TryNavigate(JsonElement root, string path, out JsonElement result)
 	{
 		result = root;
-
-		var trimmed = path.Trim();
-		if (trimmed.Length == 0)
+		if (!JsonPathSyntax.TryParse(path, out var segments))
 		{
 			return false;
 		}
 
-		if (trimmed[0] == '$')
-		{
-			trimmed = trimmed[1..];
-			if (trimmed.StartsWith('.'))
-			{
-				trimmed = trimmed[1..];
-			}
-		}
-
-		if (trimmed.Length == 0)
-		{
-			result = root;
-			return true;
-		}
-
 		var current = root;
-		foreach (var segment in trimmed.Split('.'))
+		foreach (var segment in segments)
 		{
 			if (!TryDescend(current, segment, out current))
 			{
@@ -71,59 +53,26 @@ internal static class JsonPathExtractor
 		return true;
 	}
 
-	private static bool TryDescend(JsonElement current, string segment, out JsonElement result)
+	private static bool TryDescend(JsonElement current, JsonPathSegment segment, out JsonElement result)
 	{
 		result = current;
-
-		var bracketIndex = segment.IndexOf('[', StringComparison.Ordinal);
-		var name = bracketIndex < 0 ? segment : segment[..bracketIndex];
-		var indices = bracketIndex < 0 ? string.Empty : segment[bracketIndex..];
-
-		if (name.Length > 0)
+		if (segment.IsIndex)
 		{
-			if (current.ValueKind != JsonValueKind.Object || !current.TryGetProperty(name, out var property))
+			if (current.ValueKind != JsonValueKind.Array || segment.Index >= current.GetArrayLength())
 			{
 				return false;
 			}
 
-			current = property;
+			result = current[segment.Index];
+			return true;
 		}
-		else if (indices.Length == 0)
+
+		if (current.ValueKind != JsonValueKind.Object || !current.TryGetProperty(segment.Property!, out var property))
 		{
 			return false;
 		}
 
-		var position = 0;
-		while (position < indices.Length)
-		{
-			if (indices[position] != '[')
-			{
-				return false;
-			}
-
-			var close = indices.IndexOf(']', position);
-			if (close < 0)
-			{
-				return false;
-			}
-
-			var digits = indices[(position + 1)..close];
-			if (digits.Length == 0
-				|| !int.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out var index))
-			{
-				return false;
-			}
-
-			if (current.ValueKind != JsonValueKind.Array || index >= current.GetArrayLength())
-			{
-				return false;
-			}
-
-			current = current[index];
-			position = close + 1;
-		}
-
-		result = current;
+		result = property;
 		return true;
 	}
 

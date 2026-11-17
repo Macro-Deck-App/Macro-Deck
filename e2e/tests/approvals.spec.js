@@ -77,3 +77,52 @@ test('a secret-using step changed outside the app waits for approval in the desk
     .toEqual(['/approval Bearer token-from-the-store', '/changed-on-disk Bearer token-from-the-store']);
   await web.context.close();
 });
+
+// E2E-AUTH-02, reject path.
+test('declining a secret-using step changed outside the app keeps it from running', async ({ page, browser, api, host }) => {
+  test.setTimeout(180_000);
+  const profile = await api.profile('E2E Declines', { columns: 3, rows: 2 });
+  await api.variable('e2e_declined_runs', { type: 'numeric', value: 0 });
+  const secret = await api.post('/api/secrets', { value: 'token-to-keep', kind: 'Secret' });
+  const button = await api.actionButton(profile.rootFolder.id, {
+    label: 'declined step',
+    flows: [flow.shortPress(
+      flow.action('app.macro-deck.http', 'send-request', {
+        method: 'POST',
+        url: echo.url('/decline-original'),
+        bodyType: 'none',
+        authType: 'bearer',
+        authSecret: { $secret: secret.id },
+      }),
+      flow.setVariable('e2e_declined_runs', 1, 'add'),
+    )],
+  });
+  const declineRequests = () => requestsSent().filter(request => request.startsWith('/decline-'));
+
+  await host.stop();
+  const profileFile = join(host.dataDir, 'data', 'profiles', `${profile.id}.json`);
+  const stored = readFileSync(profileFile, 'utf8');
+  writeFileSync(profileFile, stored.replace(echo.url('/decline-original'), echo.url('/decline-changed-on-disk')));
+  await host.start();
+  await expect.poll(async () => (await api.get('/api/secret-approvals')).count).toBe(1);
+
+  await openDesktop(page, host);
+  await page.getByRole('link', { name: 'Approvals' }).click();
+  const card = page.getByTestId('approval-card');
+  await expect(card).toHaveCount(1);
+  await card.getByRole('button', { name: 'Decline' }).click();
+  await expect(card).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Approvals' })).toHaveCount(0);
+  expect((await api.get('/api/secret-approvals')).count).toBe(0);
+
+  const web = await connectWebClient(browser, host, api);
+  await api.openProfileOnDevice(web.device.id, profile.id);
+  await pressWebTile(web, button.id);
+  await expect.poll(() => api.variableValue('e2e_declined_runs')).toBe('1');
+  await web.context.close();
+
+  await host.stop();
+  await host.start();
+  expect((await api.get('/api/secret-approvals')).count).toBe(0);
+  expect(declineRequests()).toEqual([]);
+});

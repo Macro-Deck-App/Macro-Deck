@@ -45,7 +45,8 @@ internal sealed class InProcessHost : IAsyncDisposable
 	public static async Task<InProcessHost> StartAsync(
 		Action<IServiceCollection>? configureServices = null,
 		IReadOnlyList<Type>? hostedServices = null,
-		string? dataDirectory = null)
+		string? dataDirectory = null,
+		string? webRoot = null)
 	{
 		var directory = dataDirectory
 			?? Path.Combine(Path.GetTempPath(), "macro-deck-tests", Guid.NewGuid().ToString("N"));
@@ -58,6 +59,11 @@ internal sealed class InProcessHost : IAsyncDisposable
 			{
 				builder.UseTestServer();
 				builder.UseStartup<Startup>();
+				if (webRoot is not null)
+				{
+					builder.UseWebRoot(webRoot);
+				}
+
 				builder.ConfigureTestServices(services =>
 				{
 					services.RemoveAll<IHostedService>();

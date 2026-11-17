@@ -40,6 +40,10 @@ is open.
 If what a press starts fails, or the computer refuses it, for example because it is locked, the app says why in a
 short message: a toast at the bottom on Android, a banner over the deck on iOS.
 
+A press on a widget that is still loading, right after opening a folder or reconnecting, waits up to two seconds and
+then goes through once. If the widget is not ready by then, or you leave the folder first, the press is not run and
+the same message appears.
+
 ## Several computers at once
 
 Leaving a deck does not close its connection. Every computer you opened stays connected while the app runs,
@@ -154,6 +158,13 @@ needs a desktop that reports its lock to Macro Deck. Otherwise the deck stays vi
 
 ## When the connection drops
 
-If Macro Deck quits or the network goes away, the deck says it is reconnecting and keeps trying. It comes
-back on its own once the computer answers again. On Android, the **Background connection** keeps trying even
-while the app is in the background; see [Android](/guide/companion-app/android/).
+If Macro Deck quits or the network goes away, a full screen **Connecting to Macro Deck…** notice covers the
+deck, and any dialog open on it, while the app keeps trying. Nothing under the notice reacts while it shows.
+When the computer answers again the notice goes away and the deck comes back as you left it, with the same
+dialog open.
+
+To leave instead, tap **Close** on the notice, or use Back on Android. The connection keeps trying, and an open
+dialog stays unanswered until you return. Swiping with three fingers to another computer is not available
+while the notice shows.
+
+On Android, the **Background connection** keeps trying even while the app is in the background; see [Android](/guide/companion-app/android/).

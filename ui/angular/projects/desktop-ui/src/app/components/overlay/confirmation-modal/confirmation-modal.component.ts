@@ -47,6 +47,7 @@ export class ConfirmationModalComponent {
   }
   @Input() altText = '';
   @Input() danger = false;
+  @Input() maxWidth?: string;
 
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();

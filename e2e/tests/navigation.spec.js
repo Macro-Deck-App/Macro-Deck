@@ -1,6 +1,16 @@
 import { expect, test, useIsolatedHost } from './support/fixtures.js';
 import { flow } from './support/seed.js';
-import { connectWebClient, pressWebTile, webDeck, webTile } from './support/pages.js';
+import {
+  connectWebClient,
+  createDesktopFolder,
+  deleteDesktopFolder,
+  deleteDesktopProfile,
+  openDesktopProfile,
+  pressWebTile,
+  renameDesktopFolder,
+  webDeck,
+  webTile,
+} from './support/pages.js';
 
 useIsolatedHost('navigation', { prepare: api => api.completeOnboarding() });
 
@@ -18,12 +28,26 @@ function reportedFolder(client) {
   return reports[reports.length - 1]?.payload?.folderId ?? null;
 }
 
+async function folderNamed(api, profileId, name) {
+  let found = null;
+  await expect.poll(async () => {
+    found = (await api.folders(profileId)).find(folder => folder.name === name) ?? null;
+    return found !== null;
+  }, { message: `folder ${name} exists` }).toBe(true);
+  return found;
+}
+
 // E2E-NAV-01: folders can be created, renamed and walked in the Web Client, and deleting the folder
 // or the profile a Web Client shows moves it somewhere that still exists, without an error.
-test('folder navigation survives renaming and deleting what the Web Client shows', async ({ browser, api, host }) => {
+test('folder navigation survives renaming and deleting what the Web Client shows', async ({ page, browser, api, host }) => {
   const profile = await api.profile('E2E Navigation', { columns: 3, rows: 2 });
-  const sub = await api.folder(profile.id, 'Sub', profile.rootFolder.id);
-  const nested = await api.folder(profile.id, 'Nested', sub.id);
+  await openDesktopProfile(page, host, profile.name);
+  await createDesktopFolder(page, 'Sub', profile.rootFolder.name);
+  await createDesktopFolder(page, 'Nested', 'Sub');
+  const sub = await folderNamed(api, profile.id, 'Sub');
+  const nested = await folderNamed(api, profile.id, 'Nested');
+  expect(sub.parentId).toBe(profile.rootFolder.id);
+  expect(nested.parentId).toBe(sub.id);
   const openSub = await api.actionButton(profile.rootFolder.id, {
     label: 'Open Sub',
     flows: [flow.shortPress(flow.changeFolder(sub.id))],
@@ -36,7 +60,7 @@ test('folder navigation survives renaming and deleting what the Web Client shows
   });
   await api.actionButton(nested.id, { label: 'Deep' });
 
-  await api.put('/api/folders', { id: sub.id, profileId: profile.id, name: 'Sub Renamed', parentId: profile.rootFolder.id });
+  await renameDesktopFolder(page, 'Sub', 'Sub Renamed');
   await expect.poll(async () => (await api.folders(profile.id)).find(folder => folder.id === sub.id)?.name)
     .toBe('Sub Renamed');
 
@@ -50,7 +74,7 @@ test('folder navigation survives renaming and deleting what the Web Client shows
   await expect(webTile(web.page, openNested.id)).toBeVisible();
   await expect.poll(() => reportedFolder(web)).toBe(sub.id);
 
-  await api.delete(`/api/folders/${sub.id}`);
+  await deleteDesktopFolder(page, 'Sub Renamed');
   await expect(webTile(web.page, openSub.id)).toBeVisible({ timeout: 5_000 });
   await expect(webTile(web.page, openNested.id)).toHaveCount(0);
   await expect(errorToasts(web.page)).toHaveCount(0);
@@ -64,7 +88,7 @@ test('folder navigation survives renaming and deleting what the Web Client shows
 
   await api.openProfileOnDevice(web.device.id, profile.id);
   await expect(webTile(web.page, openSub.id)).toBeVisible();
-  await api.delete(`/api/profiles/${profile.id}`);
+  await deleteDesktopProfile(page, profile.name);
   await expect(webTile(web.page, openSub.id)).toHaveCount(0, { timeout: 5_000 });
   await expect(webDeck(web.page)).toBeVisible();
   await expect(web.page.getByText('Sign in to continue')).toHaveCount(0);

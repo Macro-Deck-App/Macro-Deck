@@ -393,7 +393,7 @@ public static class WidgetAppearanceJson
 		return true;
 	}
 
-	private static bool HoistLegacyMomentaryIcon(JsonObject data)
+	internal static bool HoistLegacyMomentaryIcon(JsonObject data)
 	{
 		if (data["states"] is not JsonArray states)
 		{

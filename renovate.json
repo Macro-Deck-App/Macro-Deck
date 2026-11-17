@@ -58,6 +58,16 @@
   ],
   "packageRules": [
     {
+      "description": "The oldest supported published SDK, pinned on purpose: the old-SDK test plugin proves binaries built against it still run.",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "MacroDeck.Plugin.Hosting"
+      ],
+      "enabled": false
+    },
+    {
       "description": "The .NET SDK pins in global.json and the workflows move together on their own, never bundled with packages.",
       "matchPackageNames": [
         "dotnet-sdk"

@@ -2,7 +2,7 @@ import { WritableSignal, provideZonelessChangeDetection, signal } from '@angular
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EMPTY } from 'rxjs';
 import { GetBackupRecoveryKeyStateResponse } from '@macro-deck/runtime';
-import { ApiService } from '@shared';
+import { ApiService, ToastService } from '@shared';
 import { BackupService } from '../../../../services/backup.service';
 import { BackupRecoveryKeySettingsComponent } from './backup-recovery-key-settings.component';
 
@@ -26,7 +26,8 @@ describe('BackupRecoveryKeySettingsComponent', () => {
 
   function configure(initial: GetBackupRecoveryKeyStateResponse | null): void {
     backupServiceSpy = jasmine.createSpyObj<BackupService>(
-      'BackupService', ['createRecoveryKey', 'revealRecoveryKey', 'acknowledgeRecoveryKey']);
+      'BackupService',
+      ['createRecoveryKey', 'revealRecoveryKey', 'acknowledgeRecoveryKey']);
     stateSignal = signal(initial);
     Object.defineProperty(backupServiceSpy, 'recoveryKey', { value: stateSignal });
 
@@ -115,6 +116,97 @@ describe('BackupRecoveryKeySettingsComponent', () => {
     fixture = create();
 
     expect(fixture.nativeElement.textContent as string).toContain('never been shown');
+  });
+
+  describe('when the stored key cannot be read', () => {
+    const missing = () => state({ availability: 'Missing', keyId: undefined });
+
+    function button(selector: string, text: string): HTMLButtonElement | undefined {
+      return Array.from(fixture.nativeElement.querySelectorAll(`${selector} shared-button button`))
+        .find(el => (el as HTMLElement).textContent?.trim() === text) as HTMLButtonElement | undefined;
+    }
+
+    async function confirmRegenerate(): Promise<void> {
+      button('', 'Create new recovery key')!.click();
+      fixture.detectChanges();
+      button('shared-confirmation-modal', 'Create new recovery key')!.click();
+      fixture.detectChanges();
+      jasmine.clock().tick(150);
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('offers to create a new key and asks before replacing anything', () => {
+      configure(missing());
+      fixture = create();
+
+      button('', 'Create new recovery key')!.click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('shared-confirmation-modal').textContent as string)
+        .toContain('Backups made before still need the recovery key you saved earlier');
+      expect(backupServiceSpy.createRecoveryKey).not.toHaveBeenCalled();
+    });
+
+    it('shows the new key to be stored once confirmed', async () => {
+      configure(missing());
+      backupServiceSpy.createRecoveryKey.and.resolveTo({
+        status: 'success', key: 'MDBK-NEW-0000', state: state({ exportedAt: undefined }),
+      });
+      fixture = create();
+
+      await confirmRegenerate();
+
+      expect(backupServiceSpy.createRecoveryKey).toHaveBeenCalledTimes(1);
+      const modal = fixture.nativeElement.querySelector('shared-recovery-key-modal');
+      expect(modal.textContent as string).toContain('MDBK-NEW-0000');
+      expect(modal.textContent as string).toContain('I have stored this key in a safe place');
+    });
+
+    it('cancelling leaves the key alone', () => {
+      configure(missing());
+      fixture = create();
+
+      button('', 'Create new recovery key')!.click();
+      fixture.detectChanges();
+      button('shared-confirmation-modal', 'Cancel')!.click();
+      fixture.detectChanges();
+      jasmine.clock().tick(150);
+
+      expect(backupServiceSpy.createRecoveryKey).not.toHaveBeenCalled();
+    });
+
+    it('shows a key that a backup created in the meantime, without reporting a failure', async () => {
+      configure(missing());
+      backupServiceSpy.createRecoveryKey.and.callFake(async () => {
+        const fromBackup = state({ keyId: 'k-from-backup', exportedAt: undefined });
+        stateSignal.set(fromBackup);
+        return { status: 'exists', state: fromBackup };
+      });
+      fixture = create();
+      const toasts = TestBed.inject(ToastService);
+      spyOn(toasts, 'show');
+
+      await confirmRegenerate();
+
+      expect(toasts.show).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelector('shared-recovery-key-modal')).toBeNull();
+      expect(button('', 'Create new recovery key')).toBeUndefined();
+      expect(showKeyButton()).toBeDefined();
+    });
+
+    it('reports a refused key and shows none', async () => {
+      configure(missing());
+      backupServiceSpy.createRecoveryKey.and.resolveTo({ status: 'error', message: 'Refused' });
+      fixture = create();
+      const toasts = TestBed.inject(ToastService);
+      spyOn(toasts, 'show');
+
+      await confirmRegenerate();
+
+      expect(toasts.show).toHaveBeenCalledWith('Refused', jasmine.objectContaining({ variant: 'error' }));
+      expect(fixture.nativeElement.querySelector('shared-recovery-key-modal')).toBeNull();
+    });
   });
 
   it('offers a create action, not a reveal, when no key exists yet', () => {

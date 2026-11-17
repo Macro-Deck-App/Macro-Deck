@@ -72,6 +72,16 @@ internal static class X11Windows
 		}
 	}
 
+	public static void CloseDisplay(IntPtr display)
+	{
+		_ = XCloseDisplay(display);
+	}
+
+	public static nuint DefaultRootWindow(IntPtr display)
+	{
+		return XDefaultRootWindow(display);
+	}
+
 	public static nuint InternAtom(IntPtr display, string name)
 	{
 		return XInternAtom(display, Encoding.UTF8.GetBytes(name + '\0'), true);
@@ -165,6 +175,12 @@ internal static class X11Windows
 
 	[DllImport(LibX11)]
 	private static extern int XCloseDisplay(IntPtr display);
+
+	[DllImport(LibX11)]
+	private static extern int XCloseDisplay(IntPtr display);
+
+	[DllImport(LibX11)]
+	private static extern nuint XDefaultRootWindow(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern nuint XInternAtom(

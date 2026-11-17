@@ -20,12 +20,16 @@ export class ActionOptionsService {
   private readonly cache = new Map<string, CacheEntry>();
   private readonly inFlight = new Map<string, Promise<GetActionParameterOptionsResponse>>();
   private readonly latest = new Map<string, object>();
+  private readonly keySources = new Map<string, string>();
 
   async getOptions(
     request: GetActionParameterOptionsRequest,
     options?: { forceRefresh?: boolean },
   ): Promise<GetActionParameterOptionsResponse> {
     const key = this.cacheKey(request);
+    if (request.optionsSourceId) {
+      this.keySources.set(key, request.optionsSourceId);
+    }
 
     if (!options?.forceRefresh) {
       const cached = this.cache.get(key);
@@ -78,6 +82,17 @@ export class ActionOptionsService {
       };
     } catch {
       return { options: [], error: this.localization.translateKey(AppStrings.ActionBuilder.Param.LoadOptionsFailed) };
+    }
+  }
+
+  invalidateOptionsSource(optionsSourceId: string): void {
+    for (const [key, source] of this.keySources) {
+      if (source !== optionsSourceId) continue;
+      this.cache.delete(key);
+      // A fetch already on its way answers from before the change, so it may neither fill the
+      // cache nor be joined by the next unforced caller.
+      this.latest.delete(key);
+      this.inFlight.delete(key);
     }
   }
 

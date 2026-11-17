@@ -4,6 +4,10 @@ using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Application.Triggers.Providers;
+using MacroDeckHost.Application.Variables;
+using MacroDeckHost.Domain.Entities;
+using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,11 +20,35 @@ internal sealed class EventDispatchTrailingRunTests
 {
 	private const string EventId = "obs::scene-changed";
 
-	private static string Flows(string triggerId = "t1")
+	private static string Flows(string triggerId = "t1", string providerId = "obs", string eventId = "scene-changed")
 	{
 		return $$"""
-				 [{"triggerId":"{{triggerId}}","triggerType":"onEvent","event":{"providerId":"obs","eventId":"scene-changed"},"children":[]}]
+				 [{"triggerId":"{{triggerId}}","triggerType":"onEvent","event":{"providerId":"{{providerId}}","eventId":"{{eventId}}"},"children":[]}]
 				 """;
+	}
+
+	private static VariableEntity Variable(string name, VariableScope scope, string? scopeRefId)
+	{
+		return new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = scope,
+			ScopeRefId = scopeRefId,
+			Type = VariableType.Text,
+			Classification = VariableClassification.User,
+			Value = string.Empty
+		};
+	}
+
+	private static EventOccurrence CountChanged(string value, VariableScope scope)
+	{
+		return new EventOccurrence(EventIds.Qualify(EventIds.VariableChanged),
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = "count", ["value"] = value },
+			null,
+			null,
+			0,
+			new EventVariableSource(scope, scope == VariableScope.Widget ? Guid.NewGuid().ToString() : null));
 	}
 
 	private static EventOccurrence Scene(string name, EventTarget? target = null, int depth = 0)
@@ -30,6 +58,19 @@ internal sealed class EventDispatchTrailingRunTests
 			target,
 			null,
 			depth);
+	}
+
+	[Test]
+	public async Task A_running_event_flow_is_cancelled_when_the_host_stops()
+	{
+		await using var world = await World.Start();
+		world.AddAutomation();
+		world.Publish(Scene("A"));
+		await world.Runner.WaitForRuns(1);
+
+		await world.Stop().WaitAsync(TimeSpan.FromSeconds(10));
+
+		await Until(() => !world.Runner.Active);
 	}
 
 	[Test]
@@ -135,6 +176,26 @@ internal sealed class EventDispatchTrailingRunTests
 	}
 
 	[Test]
+	public async Task A_widget_variable_named_like_a_global_one_cannot_displace_the_waiting_global_change()
+	{
+		await using var world = await World.Start();
+		world.Variables.Upsert(Variable("count", VariableScope.Global, null));
+		world.AddAutomation(Flows(providerId: CoreEventProvider.ProviderIdValue, eventId: EventIds.VariableChanged));
+
+		world.Publish(CountChanged("1", VariableScope.Global));
+		await world.Runner.WaitForRuns(1);
+		world.Publish(CountChanged("2", VariableScope.Global));
+		world.Publish(CountChanged("widget", VariableScope.Widget));
+		await world.Drained();
+		world.Runner.Release();
+		await world.Runner.WaitForRuns(2);
+		world.Runner.Release();
+		await world.Idle();
+
+		Assert.That(world.Runner.Values, Is.EqualTo(new[] { "1", "2" }));
+	}
+
+	[Test]
 	public async Task Different_triggers_do_not_wait_for_each_other()
 	{
 		await using var world = await World.Start();
@@ -163,6 +224,8 @@ internal sealed class EventDispatchTrailingRunTests
 		public IReadOnlyList<string> Scenes => [.. _runs.Select(run => (string)run.Parameters["sceneName"]!)];
 
 		public IReadOnlyList<int> Depths => [.. _runs.Select(run => run.CascadeDepth)];
+
+		public IReadOnlyList<string> Values => [.. _runs.Select(run => (string)run.Parameters["value"]!)];
 
 		public async Task<FlowExecutionResult> Run(
 			EventSubscription subscription,
@@ -216,16 +279,20 @@ internal sealed class EventDispatchTrailingRunTests
 			StubAutomationCache automations,
 			EventSubscriptionIndex index,
 			EventBus bus,
+			VariableRegistry variables,
 			GatedRunner runner)
 		{
 			_host = host;
 			_automations = automations;
 			_index = index;
 			_bus = bus;
+			Variables = variables;
 			Runner = runner;
 		}
 
 		public GatedRunner Runner { get; }
+
+		public VariableRegistry Variables { get; }
 
 		public static async Task<World> Start()
 		{
@@ -236,6 +303,7 @@ internal sealed class EventDispatchTrailingRunTests
 			readiness.MarkCachesReady();
 			readiness.MarkVariablesReady();
 			var runner = new GatedRunner();
+			var variables = new VariableRegistry();
 			var builtInRegistration = new BuiltInIntegrationRegistration();
 			builtInRegistration.Complete();
 
@@ -248,18 +316,19 @@ internal sealed class EventDispatchTrailingRunTests
 					services.AddSingleton(builtInRegistration);
 					services.AddSingleton<Serilog.ILogger>(Serilog.Core.Logger.None);
 					services.AddScoped<IEventTriggerRunner>(_ => runner);
+					services.AddSingleton<IVariableEventAudience>(new VariableEventAudience(variables));
 					services.AddHostedService<EventDispatchBackgroundService>();
 				})
 				.Build();
 			await host.StartAsync();
 			await readiness.WhenEventDispatchReady.WaitAsync(TimeSpan.FromSeconds(5));
 
-			return new World(host, automations, index, bus, runner);
+			return new World(host, automations, index, bus, variables, runner);
 		}
 
-		public Guid AddAutomation()
+		public Guid AddAutomation(string? flows = null)
 		{
-			var automation = _automations.Add(Flows());
+			var automation = _automations.Add(flows ?? Flows());
 			_index.ReindexAutomation(automation.Id, automation.Flows, true);
 			return automation.Id;
 		}
@@ -289,6 +358,11 @@ internal sealed class EventDispatchTrailingRunTests
 		{
 			await Task.Delay(50);
 			await Until(() => !Runner.Active);
+		}
+
+		public async Task Stop()
+		{
+			await _host.StopAsync();
 		}
 
 		public async ValueTask DisposeAsync()

@@ -35,12 +35,24 @@ describe('HostSessionService', () => {
 
   afterEach(() => sessionStorage.clear());
 
-  async function connect(sessionId: string, restoreApplied = false): Promise<void> {
-    apiSpy.getHostSession.and.resolveTo({ sessionId, restoreApplied });
+  async function connect(sessionId: string, restoreApplied = false, pluginsDisabledAtStartup?: boolean): Promise<void> {
+    apiSpy.getHostSession.and.resolveTo({ sessionId, restoreApplied, pluginsDisabledAtStartup });
     connectionState$.next('connected');
     await Promise.resolve();
     await Promise.resolve();
   }
+
+  it('reports whether the host it is connected to started with plugins disabled', async () => {
+    service.start();
+
+    await connect('session-1', false, true);
+    const disabled = service.pluginsDisabledAtStartup();
+    connectionState$.next('disconnected');
+    await connect('session-1');
+
+    expect(disabled).toBeTrue();
+    expect(service.pluginsDisabledAtStartup()).toBeFalse();
+  });
 
   it('does not reload the first time it sees a host', async () => {
     service.start();

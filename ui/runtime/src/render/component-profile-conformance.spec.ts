@@ -81,6 +81,7 @@ const ASSERTED_KEYS = new Set([
   'ariaLabel', 'ariaDescription', 'ariaRole', 'ariaDisabled', 'overflow', 'clipPath', 'maskImage',
   'touchAction', 'refusesEvents',
   'cell', 'cornerRadius', 'glyphEdge', 'arcRadius', 'arcStrokeWidth', 'toggleTrack', 'knobLeft', 'segmentFace',
+  'trackRadius', 'faceRadius',
 ]);
 
 const ROLE_COLOR: Record<string, string> = {
@@ -1108,6 +1109,56 @@ describe('component-profile conformance fixtures: video stream tree', () => {
   }
 });
 
+describe('component-profile conformance fixtures: vertical segmented tree', () => {
+  interface VerticalCase {
+    basis: number;
+    tile: { width: number; height: number };
+    nodes: Record<string, {
+      width: number;
+      height: number;
+      trackRadius: number;
+      segmentFace: { left: number; top: number; width: number; height: number };
+      faceRadius: number;
+    }>;
+  }
+
+  const tree = loadTree('conformance-segmented-vertical-tree.json');
+  const layout = loadJson<{ cases: VerticalCase[]; withoutSegmentedVersion2: { draws: string; notDrawn: string } }>(
+    'conformance-segmented-vertical-layout.json');
+
+  for (const testCase of layout.cases) {
+    describe(`tile ${testCase.tile.width}x${testCase.tile.height}`, () => {
+      beforeEach(() => mount(tree, testCase.tile, testCase.basis));
+
+      for (const [id, spec] of Object.entries(testCase.nodes)) {
+        it(`resolves ${id}`, () => {
+          const el = byId(id);
+          const track = el.querySelector('.widget-segmented-track') as HTMLElement;
+          const face = el.querySelector('.widget-segmented-face') as HTMLElement;
+          expect(num(el.style.width)).withContext(`${id}.width`).toBeCloseTo(spec.width, 2);
+          expect(num(el.style.height)).withContext(`${id}.height`).toBeCloseTo(spec.height, 2);
+          expect(num(track.style.borderRadius)).withContext(`${id}.trackRadius`).toBeCloseTo(spec.trackRadius, 2);
+          expect(num(face.style.left)).withContext(`${id}.segmentFace.left`).toBeCloseTo(spec.segmentFace.left, 2);
+          expect(num(face.style.top)).withContext(`${id}.segmentFace.top`).toBeCloseTo(spec.segmentFace.top, 2);
+          expect(num(face.style.width)).withContext(`${id}.segmentFace.width`).toBeCloseTo(spec.segmentFace.width, 2);
+          expect(num(face.style.height)).withContext(`${id}.segmentFace.height`)
+            .toBeCloseTo(spec.segmentFace.height, 2);
+          expect(num(face.style.borderRadius)).withContext(`${id}.faceRadius`).toBeCloseTo(spec.faceRadius, 2);
+        });
+      }
+    });
+  }
+
+  it('draws the one-row fallback on a reader without segmented version 2', () => {
+    const registry = createUiComponentRegistry(...UI_CORE_COMPONENTS.map(definition =>
+      definition.type === 'ui.segmented' ? { ...definition, version: { minimum: 1, maximum: 1 } } : definition));
+    renderUiNode(container, tree, { width: 240, height: 240 }, null, 240, testHost(), { registry });
+
+    expect(has(layout.withoutSegmentedVersion2.notDrawn)).toBeFalse();
+    expect(has(layout.withoutSegmentedVersion2.draws)).toBeTrue();
+  });
+});
+
 describe('component-profile conformance fixtures: coverage', () => {
   const LAYOUT_FILES = [
     'conformance-layout.json',
@@ -1123,6 +1174,7 @@ describe('component-profile conformance fixtures: coverage', () => {
     'conformance-modifier-layout.json',
     'conformance-anchored-list-layout.json',
     'conformance-video-stream-layout.json',
+    'conformance-segmented-vertical-layout.json',
   ];
 
   it('records every fixture key exactly once, as asserted or as a documented omission', () => {
@@ -1153,6 +1205,7 @@ describe('component-profile conformance fixtures: coverage', () => {
       'conformance-building-blocks-tree.json', 'conformance-container-length-tree.json',
       'conformance-modifier-tree.json', 'conformance-chat-tree.json', 'conformance-anchored-list-tree.json',
       'conformance-video-stream-tree.json', 'conformance-first-fit-tree.json',
+      'conformance-segmented-vertical-tree.json',
     ];
     for (const name of exercised) expect(() => loadTree(name)).not.toThrow();
   });

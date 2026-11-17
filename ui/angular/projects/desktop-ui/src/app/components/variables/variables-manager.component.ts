@@ -19,7 +19,7 @@ import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrollin
 import { AppStrings, VariableCatalogNode, resolveLocalizedText } from '@macro-deck/runtime';
 import { ButtonComponent, ButtonGroupComponent, ErrorBannerComponent, InputComponent, LocalizationService, ModalComponent, ToggleSwitchComponent, TranslatePipe, VariableService, dismissModal } from '@shared';
 import type { Variable, VariableClassification, VariableScope, VariableType } from '@macro-deck/runtime';
-import { VariableGroup, VariableSourceFilter, groupVariablesBySource, isEventParameter, matchesVariableSource, scopeLabelKey, variableTypeLabels } from '../../domain/variable-source.util';
+import { VariableGroup, VariableSourceFilter, groupVariablesBySource, isEventParameter, matchesVariableSource, scopeLabelKey } from '../../domain/variable-source.util';
 import { ConfirmationModalComponent } from '../overlay/confirmation-modal/confirmation-modal.component';
 import { DropdownMenuComponent } from '../overlay/dropdown-menu/dropdown-menu.component';
 import { EmptyStateComponent } from '../feedback/empty-state/empty-state.component';
@@ -33,23 +33,10 @@ import { templateVariableErrorMessage } from '../../domain/template-variable-err
 import { VariableCatalogService } from '../../services/variable-catalog.service';
 import { IntegrationService } from '../../services/integration.service';
 import { VariableCatalogIdInputComponent } from './variable-catalog-id-input.component';
+import { VariableCreateDialogComponent } from './variable-create-dialog.component';
 import { VariableCatalogRow, createVariableCatalogRows } from './variable-catalog-rows';
 import { VariableGroupHeaderComponent } from './variable-group-header.component';
 import { VARIABLE_ROW_HEIGHT, VARIABLE_ROW_INDENT, VariableRowComponent } from './variable-row.component';
-
-type VariableSource = 'value' | 'file' | 'template';
-
-interface CreateForm {
-  rawName: string;
-  scope: VariableScope;
-  source: VariableSource;
-  type: VariableType;
-  initialValue: string;
-  decimalPlaces: number;
-  filePath: string;
-  allowWriteBack: boolean;
-  template: string;
-}
 
 interface TemplateSettingsForm {
   variableId: string;
@@ -79,8 +66,6 @@ const CLASSIFICATION_LABEL_KEYS: Record<VariableClassification, string> = {
   widget: AppStrings.Variables.Manager.ClassificationWidget,
 };
 
-const DEFAULT_COLOR_VALUE = '#000000';
-
 @Component({
   selector: 'shared-variables-manager',
   standalone: true,
@@ -103,6 +88,7 @@ const DEFAULT_COLOR_VALUE = '#000000';
     ToggleSwitchComponent,
     TranslatePipe,
     VariableCatalogIdInputComponent,
+    VariableCreateDialogComponent,
     VariableGroupHeaderComponent,
     VariableRowComponent,
   ],
@@ -177,27 +163,11 @@ export class VariablesManagerComponent implements OnInit {
   private readonly scopeLabelState = computed(() =>
     this.scopeLabelOverride() ?? this.localization.translateKey(scopeLabelKey(this.localScopeState())));
 
-  readonly typeLabels = computed(() => variableTypeLabels(key => this.localization.translateKey(key)));
   readonly classificationLabels = computed<Record<VariableClassification, string>>(() => ({
     user: this.localization.translateKey(CLASSIFICATION_LABEL_KEYS.user),
     integration: this.localization.translateKey(CLASSIFICATION_LABEL_KEYS.integration),
     widget: this.localization.translateKey(CLASSIFICATION_LABEL_KEYS.widget),
   }));
-  readonly types: VariableType[] = ['text', 'numeric', 'boolean', 'color'];
-
-  readonly typeOptions = computed<SelectOption[]>(() =>
-    this.types.map(t => ({ value: t, label: this.typeLabels()[t] })));
-
-  readonly scopeOptions = computed<SelectOption[]>(() => [
-    { value: this.localScopeState(), label: this.scopeLabelState() },
-    { value: 'global', label: this.localization.translateKey(AppStrings.Variables.Manager.GlobalScope) },
-  ]);
-
-  readonly canChooseScope = computed(() => this.scopeRefIdState() !== null);
-
-  setFormScope(scope: VariableScope): void {
-    this.createForm.update(f => ({ ...f, scope }));
-  }
   readonly booleanOptions = computed<SelectOption[]>(() => [
     { value: 'false', label: this.localization.translateKey(AppStrings.Variables.Manager.False) },
     { value: 'true', label: this.localization.translateKey(AppStrings.Variables.Manager.True) },
@@ -225,28 +195,8 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Manager.ToggleValue));
   readonly editValueLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.EditValue));
-  readonly nameFieldLabel = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.NameField));
-  readonly namePlaceholder = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.NamePlaceholder));
-  readonly nameHint = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.NameHint));
-  readonly scopeFieldLabel = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.ScopeField));
-  readonly scopeHintLocal = computed(() => {
-    const M = AppStrings.Variables.Manager;
-    const scope = this.localScopeState();
-    return this.localization.translateKey(
-      scope === 'script' ? M.ScopeHintScript : scope === 'automation' ? M.ScopeHintAutomation : M.ScopeHintWidget);
-  });
-  readonly scopeHintGlobal = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.ScopeHintGlobal));
-  readonly typeFieldLabel = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.TypeField));
   readonly decimalPlacesLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.DecimalPlaces));
-  readonly initialValueLabel = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.InitialValue));
   readonly deleteHeading = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.DeleteHeading));
   readonly unbindActionLabel = computed(() =>
@@ -257,25 +207,12 @@ export class VariablesManagerComponent implements OnInit {
     this.localization.translateKey(AppStrings.Variables.Manager.UnbindHeading));
   readonly unbindFailedMessage = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.UnbindFailed));
-  readonly sourceFieldLabel = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.SourceField));
-  readonly sourceOptions = computed<SelectOption[]>(() => [
-    { value: 'value', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceOwnValue) },
-    { value: 'file', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceFile) },
-    { value: 'template', label: this.localization.translateKey(AppStrings.Variables.Manager.SourceTemplate) },
-  ]);
-  readonly sourceHintTemplate = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.SourceHintTemplate));
   readonly templateFieldLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.TemplateField));
   readonly templateSettingsLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.TemplateSettings));
   readonly templateResultLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.TemplateResult));
-  readonly sourceHintValue = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.SourceHintOwnValue));
-  readonly sourceHintFile = computed(() =>
-    this.localization.translateKey(AppStrings.Variables.Manager.SourceHintFile));
   readonly fileFieldLabel = computed(() =>
     this.localization.translateKey(AppStrings.Variables.Manager.FileField));
   readonly allowWriteBackLabel = computed(() =>
@@ -327,23 +264,11 @@ export class VariablesManagerComponent implements OnInit {
     return this.listed().find(v => v.id === id) ?? null;
   });
 
-  readonly createForm = signal<CreateForm>(this.defaultCreateForm());
-  readonly createError = signal<string | null>(null);
   readonly fileSettings = signal<FileSettingsForm | null>(null);
   readonly fileSettingsError = signal<string | null>(null);
   readonly templateSettings = signal<TemplateSettingsForm | null>(null);
   readonly templateSettingsError = signal<string | null>(null);
 
-  readonly canSubmitCreate = computed(() => {
-    const form = this.createForm();
-    return this.nameSanitized().isValid &&
-      (form.source !== 'file' || form.filePath.trim().length > 0) &&
-      (form.source !== 'template' || form.template.trim().length > 0);
-  });
-  readonly nameSanitized = signal<{ sanitized: string; isValid: boolean }>({
-    sanitized: '',
-    isValid: false,
-  });
 
   readonly listed = computed<Variable[]>(() => {
     const base = this.variablesOverride() ?? this.variableService.globalVariables();
@@ -617,99 +542,11 @@ export class VariablesManagerComponent implements OnInit {
   }
 
   openCreate(): void {
-    this.createForm.set(this.defaultCreateForm());
-    this.createError.set(null);
-    this.nameSanitized.set({ sanitized: '', isValid: false });
     this.showCreateModal.set(true);
   }
 
-  closeCreate(): void {
-    dismissModal(this.modal, () => this.showCreateModal.set(false));
-  }
-
-  async onNameInput(raw: string): Promise<void> {
-    this.createForm.update(f => ({ ...f, rawName: raw }));
-    this.nameSanitized.set(this.variableService.sanitizeNameLocal(raw));
-  }
-
-  setFormType(type: VariableType): void {
-    this.createForm.update(f => ({ ...f, type, initialValue: initialValueFor(type) }));
-  }
-
-  setFormDecimalPlaces(value: number): void {
-    this.createForm.update(f => ({ ...f, decimalPlaces: Number(value) || 0 }));
-  }
-
-  setFormInitialValue(value: string): void {
-    this.createForm.update(f => ({ ...f, initialValue: value }));
-  }
-
-  setFormSource(source: VariableSource): void {
-    this.createForm.update(f => ({ ...f, source }));
-  }
-
-  setFormFilePath(filePath: string): void {
-    this.createForm.update(f => ({ ...f, filePath }));
-  }
-
-  setFormTemplate(template: string): void {
-    this.createForm.update(f => ({ ...f, template }));
-  }
-
-  readonly createScoped = computed(() =>
-    this.createForm().scope !== 'global' && this.scopeRefIdState() !== null);
-
-  readonly createScopeRefId = computed(() =>
-    this.createScoped() ? this.scopeRefIdState() ?? undefined : undefined);
-
-  readonly createTemplateVariables = computed(() => this.createScoped()
-    ? this.variableService.visibleForContext(this.localScopeState(), this.createScopeRefId())
-    : this.variableService.visibleForContext('global'));
-
-  readonly createTemplateOptions = computed(() => {
-    const form = this.createForm();
-    return {
-      decimalPlaces: form.type === 'numeric' ? form.decimalPlaces : undefined,
-      variableName: this.nameSanitized().sanitized || undefined,
-    };
-  });
-
-  setFormAllowWriteBack(allowWriteBack: boolean): void {
-    this.createForm.update(f => ({ ...f, allowWriteBack }));
-  }
-
-  async submitCreate(): Promise<void> {
-    const form = this.createForm();
-    const { sanitized, isValid } = this.variableService.sanitizeNameLocal(form.rawName);
-    if (!isValid || !this.canSubmitCreate()) return;
-    const fromFile = form.source === 'file';
-    const fromTemplate = form.source === 'template';
-
-    const initialValue = form.type === 'boolean'
-      ? (form.initialValue === 'true' ? 'true' : 'false')
-      : form.initialValue;
-
-    const scopeRefId = this.scopeRefIdState() ?? undefined;
-    const scoped = form.scope !== 'global' && scopeRefId !== undefined;
-    this.createError.set(null);
-    const result = await this.variableService.create({
-      name: sanitized,
-      scope: scoped ? this.localScopeState() : 'global',
-      scopeRefId: scoped ? scopeRefId : undefined,
-      type: form.type,
-      initialValue: fromFile || fromTemplate ? undefined : initialValue,
-      decimalPlaces: form.type === 'numeric' ? form.decimalPlaces : undefined,
-      fileSource: fromFile ? { path: form.filePath.trim(), allowWriteBack: form.allowWriteBack } : undefined,
-      templateSource: fromTemplate ? { template: form.template } : undefined,
-    });
-
-    if (result.variable) {
-      dismissModal(this.modal, () => this.showCreateModal.set(false));
-    } else {
-      this.createError.set(this.saveErrorMessage(result.errorCode, AppStrings.Variables.Manager.CreateFailed,
-        result.errorMessage));
-    }
-  }
+  readonly createScopeRefIdInput = computed(() => this.scopeRefIdState());
+  readonly scopeLabelInput = computed(() => this.scopeLabelOverride());
 
   openTemplateSettings(variable: Variable): void {
     if (!variable.templateSource) return;
@@ -736,13 +573,9 @@ export class VariablesManagerComponent implements OnInit {
 
   private readonly templatePreviewEffect = effect(() => {
     const settings = this.templateSettings();
-    const form = this.createForm();
     if (settings) {
       this.scheduleTemplatePreview(settings.template, settings.scope, settings.scopeRefId,
         { resultType: settings.type, ...this.templateSettingsOptions() });
-    } else if (this.showCreateModal() && form.source === 'template') {
-      this.scheduleTemplatePreview(form.template, this.createScoped() ? this.localScopeState() : 'global', this.createScopeRefId(),
-        { resultType: form.type, ...this.createTemplateOptions() });
     } else {
       this.scheduleTemplatePreview('', 'global', undefined, null);
     }
@@ -1018,33 +851,5 @@ export class VariablesManagerComponent implements OnInit {
 
   private integrationDisplayName(integrationId: string): string {
     return this.integrationService.displayName(integrationId);
-  }
-
-  private defaultCreateForm(): CreateForm {
-    // Opened from an editor, default to its scope: keying off the selected source would default to
-    // global, since the browser opens on the all source. Global is one click away in the field.
-    const scoped = this.scopeRefIdState() !== null;
-    return {
-      rawName: '',
-      scope: scoped ? this.localScopeState() : 'global',
-      source: 'value',
-      type: 'text',
-      initialValue: '',
-      decimalPlaces: 0,
-      filePath: '',
-      allowWriteBack: false,
-      template: '',
-    };
-  }
-}
-
-function initialValueFor(type: VariableType): string {
-  switch (type) {
-    case 'boolean':
-      return 'false';
-    case 'color':
-      return DEFAULT_COLOR_VALUE;
-    default:
-      return '';
   }
 }

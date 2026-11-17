@@ -1,6 +1,6 @@
 import { ActionBlockParameter, ComparisonOperator, EventDefinition, eventPayloadVariables } from '@macro-deck/runtime';
 import type { Variable } from '@macro-deck/runtime';
-import { BOOLEAN_VALUE_OPTIONS, VARIABLES_OPTIONS_SOURCE_ID, filterOperatorsFor, refineEventConfigurationParameters, supportsFilterOperator } from './event-parameter-refinement.util';
+import { BOOLEAN_VALUE_OPTIONS, EVENT_VARIABLES_OPTIONS_SOURCE_ID, VARIABLES_OPTIONS_SOURCE_ID, filterOperatorsFor, refineEventConfigurationParameters, supportsFilterOperator } from './event-parameter-refinement.util';
 
 function variable(name: string, type: Variable['type']): Variable {
   return {
@@ -21,7 +21,7 @@ const variableChanged: EventDefinition = {
   name: 'Variable Changed',
   deliveryKind: 'push',
   configurationParameters: [
-    { name: 'variable', type: 'autocomplete', label: 'Variable', optionsSourceId: VARIABLES_OPTIONS_SOURCE_ID },
+    { name: 'variable', type: 'autocomplete', label: 'Variable', optionsSourceId: EVENT_VARIABLES_OPTIONS_SOURCE_ID },
     { name: 'value', type: 'string', label: 'Changed to' },
     { name: 'previousValue', type: 'string', label: 'Changed from' },
   ],
@@ -32,14 +32,14 @@ const variableChanged: EventDefinition = {
   ],
 };
 
-function parameters(watched: string): ActionBlockParameter[] {
+function parameters(watched: string, optionsSourceId = EVENT_VARIABLES_OPTIONS_SOURCE_ID): ActionBlockParameter[] {
   return [
     {
       name: 'variable',
       type: 'autocomplete',
       label: 'Variable',
       value: watched,
-      optionsSourceId: VARIABLES_OPTIONS_SOURCE_ID,
+      optionsSourceId,
     },
     { name: 'value', type: 'string', label: 'Changed to', value: '' },
     { name: 'previousValue', type: 'string', label: 'Changed from', value: '' },
@@ -94,7 +94,17 @@ describe('refineEventConfigurationParameters', () => {
     );
 
     expect(refined[0].type).toBe('autocomplete');
-    expect(refined[0].optionsSourceId).toBe(VARIABLES_OPTIONS_SOURCE_ID);
+    expect(refined[0].optionsSourceId).toBe(EVENT_VARIABLES_OPTIONS_SOURCE_ID);
+  });
+
+  it('refines a plugin event whose picker uses the public variables source', () => {
+    const refined = refineEventConfigurationParameters(
+      variableChanged,
+      parameters('system_cpu_usage_percent', VARIABLES_OPTIONS_SOURCE_ID),
+      variables,
+    );
+
+    expect(refined[1].type).toBe('number');
   });
 
   it('leaves everything alone until a variable is chosen', () => {

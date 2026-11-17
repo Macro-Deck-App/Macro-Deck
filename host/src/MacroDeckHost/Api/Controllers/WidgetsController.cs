@@ -47,6 +47,9 @@ public class WidgetsController : ControllerBase
 	private readonly IUiTransportMessageHandler<SetWidgetTypeFavoriteRequest, SetWidgetTypeFavoriteResponse>
 		_setWidgetTypeFavorite;
 
+	private readonly IUiTransportMessageHandler<CopyWidgetStyleRequest, CopyWidgetStyleResponse> _copyWidgetStyle;
+	private readonly IUiTransportMessageHandler<PasteWidgetStyleRequest, PasteWidgetStyleResponse> _pasteWidgetStyle;
+
 	private readonly IWidgetPortabilityService _portability;
 
 	public WidgetsController(
@@ -67,7 +70,9 @@ public class WidgetsController : ControllerBase
 		IWidgetPortabilityService portability,
 		IUiTransportMessageHandler<GetWidgetTypeFavoritesRequest, GetWidgetTypeFavoritesResponse>
 			getWidgetTypeFavorites,
-		IUiTransportMessageHandler<SetWidgetTypeFavoriteRequest, SetWidgetTypeFavoriteResponse> setWidgetTypeFavorite)
+		IUiTransportMessageHandler<SetWidgetTypeFavoriteRequest, SetWidgetTypeFavoriteResponse> setWidgetTypeFavorite,
+		IUiTransportMessageHandler<CopyWidgetStyleRequest, CopyWidgetStyleResponse> copyWidgetStyle,
+		IUiTransportMessageHandler<PasteWidgetStyleRequest, PasteWidgetStyleResponse> pasteWidgetStyle)
 	{
 		_createWidget = createWidget;
 		_createWidgetFromApplication = createWidgetFromApplication;
@@ -85,6 +90,8 @@ public class WidgetsController : ControllerBase
 		_portability = portability;
 		_getWidgetTypeFavorites = getWidgetTypeFavorites;
 		_setWidgetTypeFavorite = setWidgetTypeFavorite;
+		_copyWidgetStyle = copyWidgetStyle;
+		_pasteWidgetStyle = pasteWidgetStyle;
 	}
 
 	[HttpGet("schemas")]
@@ -179,6 +186,18 @@ public class WidgetsController : ControllerBase
 	public Task<SetWidgetsPinnedResponse> SetPinnedMany(SetWidgetsPinnedRequest body, CancellationToken ct)
 	{
 		return _setWidgetsPinned.Handle(body, ct).AsTask();
+	}
+
+	[HttpGet("{widgetId}/style")]
+	public Task<CopyWidgetStyleResponse> CopyStyle(string widgetId, CancellationToken ct)
+	{
+		return _copyWidgetStyle.Handle(new CopyWidgetStyleRequest { WidgetId = widgetId }, ct).AsTask();
+	}
+
+	[HttpPost("style/paste")]
+	public Task<PasteWidgetStyleResponse> PasteStyle(PasteWidgetStyleRequest body, CancellationToken ct)
+	{
+		return _pasteWidgetStyle.Handle(body, ct).AsTask();
 	}
 
 	[HttpDelete("{id}")]

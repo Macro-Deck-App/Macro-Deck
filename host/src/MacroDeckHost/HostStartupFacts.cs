@@ -11,4 +11,6 @@ public static class HostStartupFacts
 	public static bool RestoreApplied { get; set; }
 
 	public static RestoreFailure RestoreFailure { get; set; }
+
+	public static bool PluginsDisabled { get; set; }
 }

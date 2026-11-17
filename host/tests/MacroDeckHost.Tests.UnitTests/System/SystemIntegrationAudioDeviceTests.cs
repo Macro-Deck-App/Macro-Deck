@@ -563,7 +563,7 @@ public class SystemIntegrationAudioDeviceTests
 
 		public IIntegrationConfig Config => throw new NotSupportedException();
 
-		public IDeckNavigator Deck => throw new NotSupportedException();
+		public IDeckNavigator Deck { get; } = new RecordingDeckNavigator();
 
 		public IScriptApi Scripts => throw new NotSupportedException();
 

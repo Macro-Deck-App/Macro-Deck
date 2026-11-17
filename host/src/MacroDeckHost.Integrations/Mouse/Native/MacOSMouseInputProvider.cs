@@ -177,6 +177,15 @@ public sealed class MacOsMouseInputProvider : IMouseInputProvider
 
 	public void Scroll(ScrollAxis axis, int notches)
 	{
+		var direction = Math.Sign(notches);
+		for (var i = 0; i < Math.Abs(notches); i++)
+		{
+			PostScroll(axis, direction);
+		}
+	}
+
+	private static void PostScroll(ScrollAxis axis, int notches)
+	{
 		var vertical = axis == ScrollAxis.Vertical ? notches : 0;
 		var horizontal = axis == ScrollAxis.Horizontal ? notches : 0;
 

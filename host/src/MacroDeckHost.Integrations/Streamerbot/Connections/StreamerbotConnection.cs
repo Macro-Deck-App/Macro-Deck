@@ -311,7 +311,7 @@ internal sealed class StreamerbotConnection : IDisposable
 				await client.RequestAsync("GetInfo", cancellationToken: cancellationToken).ConfigureAwait(false);
 				return;
 			}
-			catch (StreamerbotRequestException ex)
+			catch (StreamerbotRequestException ex) when (ex.Rejected)
 			{
 				throw new StreamerbotAuthenticationException(
 					"Streamer.bot requires a WebSocket password. Enter it in the integration setup.",
@@ -328,7 +328,7 @@ internal sealed class StreamerbotConnection : IDisposable
 					cancellationToken)
 				.ConfigureAwait(false);
 		}
-		catch (StreamerbotRequestException ex)
+		catch (StreamerbotRequestException ex) when (ex.Rejected)
 		{
 			throw new StreamerbotAuthenticationException("Streamer.bot rejected the configured WebSocket password.",
 				ex);

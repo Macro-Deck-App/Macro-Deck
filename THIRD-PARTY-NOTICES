@@ -479,6 +479,11 @@ npm packages (configuration UI and web client)
   URL: https://code.haverbeke.berlin/codemirror/state
   Texts: [36]
 
+@codemirror/streamparser
+  License: MIT
+  URL: https://code.haverbeke.berlin/codemirror/streamparser
+  Texts: [36]
+
 @codemirror/view
   License: MIT
   URL: https://code.haverbeke.berlin/codemirror/view
@@ -496,12 +501,12 @@ npm packages (configuration UI and web client)
 
 @lezer/common
   License: MIT
-  URL: https://github.com/lezer-parser/common
+  URL: https://code.haverbeke.berlin/lezer/common
   Texts: [39]
 
 @lezer/highlight
   License: MIT
-  URL: https://github.com/lezer-parser/highlight
+  URL: https://code.haverbeke.berlin/lezer/highlight
   Texts: [39]
 
 @lezer/json
@@ -614,6 +619,11 @@ fast-deep-equal
   URL: https://github.com/epoberezkin/fast-deep-equal
   Texts: [58]
 
+fast-uri
+  License: BSD-3-Clause
+  URL: https://github.com/fastify/fast-uri
+  Texts: [59]
+
 find-up
   License: MIT
   URL: https://github.com/sindresorhus/find-up
@@ -622,12 +632,12 @@ find-up
 get-caller-file
   License: ISC
   URL: https://github.com/stefanpenner/get-caller-file
-  Texts: [59]
+  Texts: [60]
 
 idn-hostname
   License: MIT
   URL: https://github.com/SorinGFS/idn-hostname
-  Texts: [60]
+  Texts: [61]
 
 is-fullwidth-code-point
   License: MIT
@@ -647,7 +657,7 @@ locate-path
 marked
   License: MIT
   URL: https://github.com/markedjs/marked
-  Texts: [61]
+  Texts: [62]
 
 p-limit
   License: MIT
@@ -667,7 +677,7 @@ p-try
 parse5
   License: MIT
   URL: https://github.com/inikulin/parse5
-  Texts: [62]
+  Texts: [63]
 
 path-exists
   License: MIT
@@ -677,12 +687,12 @@ path-exists
 performance-now
   License: MIT
   URL: https://github.com/braveg1rl/performance-now
-  Texts: [63]
+  Texts: [64]
 
 pngjs
   License: MIT
   URL: https://github.com/lukeapage/pngjs
-  Texts: [64]
+  Texts: [65]
 
 punycode
   License: MIT
@@ -692,42 +702,42 @@ punycode
 qrcode
   License: MIT
   URL: https://github.com/soldair/node-qrcode
-  Texts: [65]
+  Texts: [66]
 
 raf
   License: MIT
   URL: https://github.com/chrisdickinson/raf
-  Texts: [66]
+  Texts: [67]
 
 regenerator-runtime
   License: MIT
   URL: https://github.com/facebook/regenerator/tree/main/packages/runtime
-  Texts: [67]
+  Texts: [68]
 
 require-directory
   License: MIT
   URL: https://github.com/troygoode/node-require-directory
-  Texts: [68]
+  Texts: [69]
 
 require-main-filename
   License: ISC
   URL: ssh://git@github.com/yargs/require-main-filename
-  Texts: [69]
+  Texts: [70]
 
 resize-observer-polyfill
   License: MIT
   URL: https://github.com/que-etc/resize-observer-polyfill
-  Texts: [70]
+  Texts: [71]
 
 rxjs
   License: Apache-2.0
   URL: https://github.com/reactivex/rxjs
-  Texts: [71]
+  Texts: [72]
 
 set-blocking
   License: ISC
   URL: https://github.com/yargs/set-blocking
-  Texts: [69]
+  Texts: [70]
 
 string-width
   License: MIT
@@ -741,17 +751,12 @@ strip-ansi
 
 style-mod
   License: MIT
-  URL: https://github.com/marijnh/style-mod
-  Texts: [72]
+  URL: https://code.haverbeke.berlin/marijn/style-mod
+  Texts: [73]
 
 tslib
   License: 0BSD
   URL: https://github.com/Microsoft/tslib
-  Texts: [73]
-
-uri-js
-  License: BSD-2-Clause
-  URL: http://github.com/garycourt/uri-js
   Texts: [74]
 
 uuid
@@ -797,7 +802,7 @@ yargs
 yargs-parser
   License: ISC
   URL: https://github.com/yargs/yargs-parser
-  Texts: [69]
+  Texts: [70]
 
 zod
   License: MIT
@@ -2598,6 +2603,13 @@ try-lock
   URL: https://github.com/seanmonstar/try-lock
   Texts: [247]
 
+typed-path
+  License: MIT
+  Declared: MIT OR Apache-2.0
+  URL: https://github.com/chipsenkbeil/typed-path
+  Platforms: Windows
+  Texts: [83]
+
 typeid
   License: MIT
   Declared: MIT OR Apache-2.0
@@ -2643,6 +2655,12 @@ utf8_iter
   License: MIT
   Declared: Apache-2.0 OR MIT
   URL: https://github.com/hsivonen/utf8_iter
+  Texts: [253]
+
+utf_types
+  License: MIT
+  Declared: Apache-2.0 OR MIT
+  URL: https://github.com/hsivonen/utf_types
   Texts: [253]
 
 uuid
@@ -2787,13 +2805,6 @@ windows-sys
   Platforms: Windows
   Texts: [264]
 
-windows-targets
-  License: MIT
-  Declared: MIT OR Apache-2.0
-  URL: https://github.com/microsoft/windows-rs
-  Platforms: Windows
-  Texts: [264]
-
 windows-threading
   License: MIT
   Declared: MIT OR Apache-2.0
@@ -2802,13 +2813,6 @@ windows-threading
   Texts: [264]
 
 windows-version
-  License: MIT
-  Declared: MIT OR Apache-2.0
-  URL: https://github.com/microsoft/windows-rs
-  Platforms: Windows
-  Texts: [264]
-
-windows_x86_64_msvc
   License: MIT
   Declared: MIT OR Apache-2.0
   URL: https://github.com/microsoft/windows-rs
@@ -10209,7 +10213,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[36] @codemirror/autocomplete, @codemirror/commands, @codemirror/lang-json, @codemirror/language, @codemirror/lint, @codemirror/search, @codemirror/state, @codemirror/view
+[36] @codemirror/autocomplete, @codemirror/commands, @codemirror/lang-json, @codemirror/language, @codemirror/lint, @codemirror/search, @codemirror/state, @codemirror/streamparser, @codemirror/view
 --------------------------------------------------------------------------------
 MIT License
 
@@ -10694,7 +10698,40 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[59] get-caller-file
+[59] fast-uri
+--------------------------------------------------------------------------------
+Copyright (c) 2011-2021, Gary Court until https://github.com/garycourt/uri-js/commit/a1acf730b4bba3f1097c9f52e7d9d3aba8cdcaae
+Copyright (c) 2021-present The Fastify team <https://github.com/fastify/fastify#team>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * The names of any contributors may not be used to endorse or promote
+      products derived from this software without specific prior written
+      permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS AND CONTRIBUTORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+                                  *   *   *
+
+The complete list of contributors can be found at:
+- https://github.com/garycourt/uri-js/graphs/contributors
+
+[60] get-caller-file
 --------------------------------------------------------------------------------
 ISC License (ISC)
 Copyright 2018 Stefan Penner
@@ -10703,7 +10740,7 @@ Permission to use, copy, modify, and/or distribute this software for any purpose
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-[60] idn-hostname
+[61] idn-hostname
 --------------------------------------------------------------------------------
 MIT License
 
@@ -10727,7 +10764,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[61] marked
+[62] marked
 --------------------------------------------------------------------------------
 # License information
 
@@ -10774,7 +10811,7 @@ Redistribution and use in source and binary forms, with or without modification,
 
 This software is provided by the copyright holders and contributors “as is” and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the copyright owner or contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
 
-[62] parse5
+[63] parse5
 --------------------------------------------------------------------------------
 Copyright (c) 2013-2019 Ivan Nikulin (ifaaan@gmail.com, https://github.com/inikulin)
 
@@ -10796,7 +10833,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[63] performance-now
+[64] performance-now
 --------------------------------------------------------------------------------
 Copyright (c) 2013 Braveg1rl
 
@@ -10806,7 +10843,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[64] pngjs
+[65] pngjs
 --------------------------------------------------------------------------------
 pngjs2 original work Copyright (c) 2015 Luke Page & Original Contributors
 pngjs derived work Copyright (c) 2012 Kuba Niegowski
@@ -10829,7 +10866,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[65] qrcode
+[66] qrcode
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10841,7 +10878,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[66] raf
+[67] raf
 --------------------------------------------------------------------------------
 Copyright 2013 Chris Dickinson <chris@neversaw.us>
 
@@ -10851,7 +10888,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[67] regenerator-runtime
+[68] regenerator-runtime
 --------------------------------------------------------------------------------
 MIT License
 
@@ -10875,7 +10912,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[68] require-directory
+[69] require-directory
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10900,7 +10937,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-[69] require-main-filename, set-blocking, yargs-parser
+[70] require-main-filename, set-blocking, yargs-parser
 --------------------------------------------------------------------------------
 Copyright (c) 2016, Contributors
 
@@ -10917,7 +10954,7 @@ OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
 WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
 ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-[70] resize-observer-polyfill
+[71] resize-observer-polyfill
 --------------------------------------------------------------------------------
 The MIT License (MIT)
 
@@ -10941,7 +10978,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[71] rxjs
+[72] rxjs
 --------------------------------------------------------------------------------
                                Apache License
                          Version 2.0, January 2004
@@ -11145,7 +11182,7 @@ SOFTWARE.
  See the License for the specific language governing permissions and
  limitations under the License.
 
-[72] style-mod
+[73] style-mod
 --------------------------------------------------------------------------------
 Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
 
@@ -11167,7 +11204,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-[73] tslib
+[74] tslib
 --------------------------------------------------------------------------------
 Copyright (c) Microsoft Corporation.
 
@@ -11181,20 +11218,6 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-
-[74] uri-js
---------------------------------------------------------------------------------
-Copyright 2011 Gary Court. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1.	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-2.	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY GARY COURT "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL GARY COURT OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-The views and conclusions contained in the software and documentation are those of the authors and should not be interpreted as representing official policies, either expressed or implied, of Gary Court.
 
 [75] uuid
 --------------------------------------------------------------------------------
@@ -11356,7 +11379,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[83] adler2, anyhow, async-channel, async-executor, async-io, async-lock, async-process, async-signal, async-task, atomic-waker, blocking, camino, cargo-platform, cargo_metadata, concurrent-queue, dtoa, dyn-clone, endi, erased-serde, event-listener, event-listener-strategy, fastrand, futures-lite, itoa, linux-raw-sys, once_cell, ordered-stream, parking, pin-project-lite, piper, polling, proc-macro2, quote, ref-cast, rustc-hash, rustix, semver, serde, serde-untagged, serde_core, serde_json, servo_arc, syn, thiserror, typeid, unicode-ident, x11, x11-dl, zmij, zvariant_utils
+[83] adler2, anyhow, async-channel, async-executor, async-io, async-lock, async-process, async-signal, async-task, atomic-waker, blocking, camino, cargo-platform, cargo_metadata, concurrent-queue, dtoa, dyn-clone, endi, erased-serde, event-listener, event-listener-strategy, fastrand, futures-lite, itoa, linux-raw-sys, once_cell, ordered-stream, parking, pin-project-lite, piper, polling, proc-macro2, quote, ref-cast, rustc-hash, rustix, semver, serde, serde-untagged, serde_core, serde_json, servo_arc, syn, thiserror, typed-path, typeid, unicode-ident, x11, x11-dl, zmij, zvariant_utils
 --------------------------------------------------------------------------------
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -18285,7 +18308,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[253] utf8_iter
+[253] utf8_iter, utf_types
 --------------------------------------------------------------------------------
 Copyright Mozilla Foundation
 
@@ -18600,7 +18623,7 @@ PackageDownloadLocation: git+https://github.com/tauri-apps/window-vibrancy.git
 PackageDownloadLocation: git+ssh://github.com/tauri-apps/window-vibrancy.git
 Creator: Person: Daniel Thompson-Yvetot
 
-[264] windows, windows-collections, windows-core, windows-future, windows-link, windows-numerics, windows-registry, windows-result, windows-strings, windows-sys, windows-targets, windows-threading, windows-version, windows_x86_64_msvc
+[264] windows, windows-collections, windows-core, windows-future, windows-link, windows-numerics, windows-registry, windows-result, windows-strings, windows-sys, windows-threading, windows-version
 --------------------------------------------------------------------------------
     MIT License
 
@@ -18799,9 +18822,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-Some files in the "tests/data" subdirectory of this repository are under other
-licences; see files named LICENSE.*.txt for details.
 
 [272] zlib-rs
 --------------------------------------------------------------------------------

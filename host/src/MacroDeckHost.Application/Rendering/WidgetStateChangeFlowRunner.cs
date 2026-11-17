@@ -55,8 +55,8 @@ public sealed class WidgetStateChangeFlowRunner
 		Enter(widgetId);
 		try
 		{
-			// The caller may hold no deadline of its own, a press does not, so an inline run gets the same
-			// bounds as a detached one.
+			// The caller may hold no deadline of its own, a state action does not, so an inline run gets the
+			// same bounds as a detached one.
 			using var runCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
 				_lifetime.ApplicationStopping);
 			runCts.CancelAfter(_maxRunDuration);

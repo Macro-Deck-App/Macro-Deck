@@ -11,6 +11,9 @@ pub const DEFAULT_CULTURE: &str = "en";
 #[rustfmt::skip]
 #[allow(dead_code)]
 pub mod keys {
+    pub const CLI_ALREADY_RUNNING: &str = "Bootstrapper.Cli.AlreadyRunning";
+    pub const CLI_HOST_FAILED: &str = "Bootstrapper.Cli.HostFailed";
+    pub const CLI_HOST_MISSING: &str = "Bootstrapper.Cli.HostMissing";
     pub const ERRORS_COULD_NOT_BE_MOVED_TITLE: &str = "Bootstrapper.Errors.CouldNotBeMovedTitle";
     pub const ERRORS_COULD_NOT_RESTART_TITLE: &str = "Bootstrapper.Errors.CouldNotRestartTitle";
     pub const ERRORS_COULD_NOT_START_TITLE: &str = "Bootstrapper.Errors.CouldNotStartTitle";
@@ -123,6 +126,9 @@ pub mod keys {
 #[rustfmt::skip]
 pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
     ("ar", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck قيد التشغيل بالفعل. أغلق Macro Deck أولًا، ثم شغّله مجددًا باستخدام {option}."),
+        ("Bootstrapper.Cli.HostFailed", "تعذّر تشغيل مضيف Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "لم يُعثر على مضيف Macro Deck. أعد تثبيت Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "تعذّر نقل Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "تعذّرت إعادة تشغيل Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "تعذّر تشغيل Macro Deck"),
@@ -235,6 +241,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("cs", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck už běží. Nejprve ukončete Macro Deck a pak jej spusťte znovu s {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Hostitele Macro Deck nelze spustit: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Hostitel Macro Deck nebyl nalezen. Přeinstalujte Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck se nepodařilo přesunout"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck se nepodařilo restartovat"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck se nepodařilo spustit"),
@@ -347,6 +356,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("de", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck läuft bereits. Beende Macro Deck zuerst und starte es dann mit {option} erneut."),
+        ("Bootstrapper.Cli.HostFailed", "Der Macro Deck Host konnte nicht ausgeführt werden: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Der Macro Deck Host wurde nicht gefunden. Installiere Macro Deck neu."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck konnte nicht verschoben werden"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck konnte nicht neu gestartet werden"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck konnte nicht gestartet werden"),
@@ -459,6 +471,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("en", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck is already running. Quit Macro Deck first, then start it again with {option}."),
+        ("Bootstrapper.Cli.HostFailed", "The Macro Deck host could not be run: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "The Macro Deck host was not found. Reinstall Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck could not be moved"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck could not restart"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck could not start"),
@@ -571,6 +586,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("es", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck ya se está ejecutando. Cierra Macro Deck primero y vuelve a iniciarlo con {option}."),
+        ("Bootstrapper.Cli.HostFailed", "No se pudo ejecutar el host de Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "No se encontró el host de Macro Deck. Reinstala Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "No se pudo mover Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "No se pudo reiniciar Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "No se pudo iniciar Macro Deck"),
@@ -683,6 +701,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("fr", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck est déjà en cours d'exécution. Quitte d'abord Macro Deck, puis redémarre-le avec {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Impossible d'exécuter l'hôte de Macro Deck : {error}"),
+        ("Bootstrapper.Cli.HostMissing", "L'hôte de Macro Deck est introuvable. Réinstalle Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck n'a pas pu être déplacé"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck n'a pas pu redémarrer"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck n'a pas pu démarrer"),
@@ -795,6 +816,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("hi", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck पहले से चल रहा है। पहले Macro Deck बंद करें, फिर उसे {option} के साथ दोबारा शुरू करें।"),
+        ("Bootstrapper.Cli.HostFailed", "Macro Deck होस्ट चलाया नहीं जा सका: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Macro Deck होस्ट नहीं मिला। Macro Deck फिर से इंस्टॉल करें।"),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck को स्थानांतरित नहीं किया जा सका"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck फिर से शुरू नहीं हो सका"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck शुरू नहीं हो सका"),
@@ -907,6 +931,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("id", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck sudah berjalan. Tutup Macro Deck terlebih dahulu, lalu jalankan lagi dengan {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Host Macro Deck tidak dapat dijalankan: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Host Macro Deck tidak ditemukan. Pasang ulang Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck tidak dapat dipindahkan"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck tidak dapat dimulai ulang"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck tidak dapat dimulai"),
@@ -1019,6 +1046,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("it", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck è già in esecuzione. Chiudi prima Macro Deck, poi riavvialo con {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Impossibile eseguire l'host di Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Host di Macro Deck non trovato. Reinstalla Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Impossibile spostare Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Impossibile riavviare Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Impossibile avviare Macro Deck"),
@@ -1131,6 +1161,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("ja", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck はすでに実行中です。先に Macro Deck を終了してから、{option} を付けて再起動してください。"),
+        ("Bootstrapper.Cli.HostFailed", "Macro Deck のホストを実行できませんでした: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Macro Deck のホストが見つかりません。Macro Deck を再インストールしてください。"),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck を移動できませんでした"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck を再起動できませんでした"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck を起動できませんでした"),
@@ -1243,6 +1276,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("ko", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck이 이미 실행 중입니다. 먼저 Macro Deck을 종료한 다음 {option}(으)로 다시 시작하세요."),
+        ("Bootstrapper.Cli.HostFailed", "Macro Deck 호스트를 실행할 수 없습니다: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Macro Deck 호스트를 찾을 수 없습니다. Macro Deck을 다시 설치하세요."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck을 이동할 수 없습니다"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck을 다시 시작할 수 없습니다"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck을 시작할 수 없습니다"),
@@ -1355,6 +1391,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("nl", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck draait al. Sluit Macro Deck eerst af en start het daarna opnieuw met {option}."),
+        ("Bootstrapper.Cli.HostFailed", "De Macro Deck-host kan niet worden uitgevoerd: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "De Macro Deck-host is niet gevonden. Installeer Macro Deck opnieuw."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck kon niet worden verplaatst"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck kon niet opnieuw worden gestart"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck kon niet worden gestart"),
@@ -1467,6 +1506,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("pl", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck już działa. Najpierw zamknij Macro Deck, a następnie uruchom go ponownie z {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Nie można uruchomić hosta Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Nie znaleziono hosta Macro Deck. Zainstaluj Macro Deck ponownie."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Nie udało się przenieść Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Nie udało się ponownie uruchomić Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Nie udało się uruchomić Macro Deck"),
@@ -1579,6 +1621,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("pt-BR", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "O Macro Deck já está em execução. Feche o Macro Deck primeiro e inicie-o novamente com {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Não foi possível executar o host do Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "O host do Macro Deck não foi encontrado. Reinstale o Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Não foi possível mover o Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Não foi possível reiniciar o Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Não foi possível iniciar o Macro Deck"),
@@ -1691,6 +1736,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("ru", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck уже запущен. Сначала закройте Macro Deck, затем запустите его снова с {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Не удалось запустить хост Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Хост Macro Deck не найден. Переустановите Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Не удалось переместить Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Не удалось перезапустить Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Не удалось запустить Macro Deck"),
@@ -1803,6 +1851,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("tr", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck zaten çalışıyor. Önce Macro Deck'ten çıkın, ardından {option} ile yeniden başlatın."),
+        ("Bootstrapper.Cli.HostFailed", "Macro Deck ana bilgisayarı çalıştırılamadı: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Macro Deck ana bilgisayarı bulunamadı. Macro Deck'i yeniden yükleyin."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck taşınamadı"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck yeniden başlatılamadı"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck başlatılamadı"),
@@ -1915,6 +1966,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("uk", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck уже запущено. Спочатку закрийте Macro Deck, потім запустіть його знову з {option}."),
+        ("Bootstrapper.Cli.HostFailed", "Не вдалося запустити хост Macro Deck: {error}"),
+        ("Bootstrapper.Cli.HostMissing", "Хост Macro Deck не знайдено. Перевстановіть Macro Deck."),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "Macro Deck не вдалося перемістити"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck не вдалося перезапустити"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck не вдалося запустити"),
@@ -2027,6 +2081,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("zh", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck 已在运行。请先退出 Macro Deck，然后使用 {option} 重新启动。"),
+        ("Bootstrapper.Cli.HostFailed", "无法运行 Macro Deck 主机：{error}"),
+        ("Bootstrapper.Cli.HostMissing", "未找到 Macro Deck 主机。请重新安装 Macro Deck。"),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "无法移动 Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "Macro Deck 无法重新启动"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "Macro Deck 无法启动"),
@@ -2139,6 +2196,9 @@ pub static CATALOG: &[(&str, &[(&str, &str)])] = &[
         ("Bootstrapper.UpdateWindow.VersionHeading", "Macro Deck {version}"),
     ]),
     ("zh-TW", &[
+        ("Bootstrapper.Cli.AlreadyRunning", "Macro Deck 已在執行中。請先結束 Macro Deck，然後使用 {option} 重新啟動。"),
+        ("Bootstrapper.Cli.HostFailed", "無法執行 Macro Deck 主機：{error}"),
+        ("Bootstrapper.Cli.HostMissing", "找不到 Macro Deck 主機。請重新安裝 Macro Deck。"),
         ("Bootstrapper.Errors.CouldNotBeMovedTitle", "無法移動 Macro Deck"),
         ("Bootstrapper.Errors.CouldNotRestartTitle", "無法重新啟動 Macro Deck"),
         ("Bootstrapper.Errors.CouldNotStartTitle", "無法啟動 Macro Deck"),

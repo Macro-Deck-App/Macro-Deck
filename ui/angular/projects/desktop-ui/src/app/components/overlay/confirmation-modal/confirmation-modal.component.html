@@ -3,7 +3,7 @@
      translated - German runs about a third longer than the English this was first sized for - and it
      stays bounded by the viewport either way. -->
 <shared-modal [heading]="heading" [showFooter]="true"
-              [maxWidth]="altText ? 'min(92vw, 46rem)' : '450px'" (close)="onCancel()">
+              [maxWidth]="maxWidth ?? (altText ? 'min(92vw, 46rem)' : '450px')" (close)="onCancel()">
   <p class="confirmation-message">{{ message }}</p>
   <!-- Optional extra body content (e.g. per-choice checkboxes) a caller projects in; empty for every
        plain yes/no confirmation, which is why this renders nothing by default. -->

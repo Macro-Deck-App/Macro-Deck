@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
 import { GridWidget, WidgetType, computeCellDimensions, iconSizeBucket, parseWidgetData } from '@macro-deck/runtime';
-import { IconPrefetchService, ProfileService, WidgetClipboardService } from '@shared';
+import { IconPrefetchService, ProfileService, WidgetClipboardService, WidgetStyleClipboardService } from '@shared';
 import { IconPackService } from '../../../services/icon-pack.service';
 import { PortabilityService } from '../../../services/portability.service';
 import { WidgetSelectionService } from '../../../services/widget-selection.service';
@@ -616,5 +616,188 @@ describe('DeckPageComponent keyboard shortcuts and batch actions', () => {
     fireKeyDown(component, { key: 'Delete' });
 
     expect(component.showDeleteConfirm()).toBeFalse();
+  });
+});
+
+describe('DeckPageComponent copy and paste style', () => {
+  let folderStub: {
+    selectedFolderId: jasmine.Spy;
+    selectedFolder: jasmine.Spy;
+    folders: jasmine.Spy;
+    currentWidgets: jasmine.Spy;
+    currentCols: jasmine.Spy;
+    currentRows: jasmine.Spy;
+    pasteWidget: jasmine.Spy;
+    pasteWidgets: jasmine.Spy;
+    copyWidgetStyle: jasmine.Spy;
+    pasteWidgetStyle: jasmine.Spy;
+  };
+  let clipboard: WidgetClipboardService;
+  let styleClipboard: WidgetStyleClipboardService;
+  let selection: WidgetSelectionService;
+  let widgets: GridWidget[];
+
+  function fireKeyDown(component: DeckPageComponent, init: KeyboardEventInit & { key: string }): KeyboardEvent {
+    const event = new KeyboardEvent('keydown', { cancelable: true, ...init });
+    (component as unknown as { onKeyDown: (e: KeyboardEvent) => void }).onKeyDown(event);
+    return event;
+  }
+
+  async function settle(): Promise<void> {
+    for (let i = 0; i < 5; i++) {
+      await Promise.resolve();
+    }
+  }
+
+  function deckError(component: DeckPageComponent): string | null {
+    return (component as unknown as { deckError: () => string | null }).deckError();
+  }
+
+  function createComponent(): DeckPageComponent {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        { provide: FolderService, useValue: folderStub },
+        { provide: ProfileService, useValue: { isCurrentProfileLocked: () => false, selectedProfileId: () => 'p1' } },
+        { provide: PortabilityService, useValue: {} },
+        { provide: IconPackService, useValue: {} },
+        { provide: IconPrefetchService, useValue: { prefetch: jasmine.createSpy('prefetch') } },
+        { provide: FileOpenService, useValue: { pending: signal([]), claim: () => null } },
+        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+      ],
+    });
+    clipboard = TestBed.inject(WidgetClipboardService);
+    styleClipboard = TestBed.inject(WidgetStyleClipboardService);
+    selection = TestBed.inject(WidgetSelectionService);
+    return TestBed.createComponent(DeckPageComponent).componentInstance;
+  }
+
+  beforeEach(() => {
+    widgets = [
+      widget({ id: 'w1', folderId: 'f1', x: 0, y: 0, w: 1, h: 1 }),
+      widget({ id: 'w2', folderId: 'f1', x: 1, y: 0, w: 1, h: 1 }),
+      widget({ id: 'w3', folderId: 'f1', x: 2, y: 0, w: 1, h: 1 }),
+    ];
+    folderStub = {
+      selectedFolderId: jasmine.createSpy('selectedFolderId').and.returnValue('f1'),
+      selectedFolder: jasmine.createSpy('selectedFolder').and.returnValue({ id: 'f1' }),
+      folders: jasmine.createSpy('folders').and.returnValue([]),
+      currentWidgets: jasmine.createSpy('currentWidgets').and.callFake(() => widgets),
+      currentCols: jasmine.createSpy('currentCols').and.returnValue(5),
+      currentRows: jasmine.createSpy('currentRows').and.returnValue(3),
+      pasteWidget: jasmine.createSpy('pasteWidget').and.resolveTo(widget({ id: 'pasted' })),
+      pasteWidgets: jasmine.createSpy('pasteWidgets').and.resolveTo({ success: true }),
+      copyWidgetStyle: jasmine.createSpy('copyWidgetStyle').and.resolveTo({ success: true, data: 'style-1' }),
+      pasteWidgetStyle: jasmine.createSpy('pasteWidgetStyle').and.resolveTo({ success: true }),
+    };
+  });
+
+  for (const modifier of [{ ctrlKey: true }, { metaKey: true }]) {
+    const name = 'ctrlKey' in modifier ? 'Ctrl' : 'Cmd';
+
+    it(`${name}+Shift+C copies the style of the selected widget and leaves the widget clipboard alone`, async () => {
+      const component = createComponent();
+      selection.selectOnly('w2');
+
+      const event = fireKeyDown(component, { key: 'C', shiftKey: true, ...modifier });
+      await settle();
+
+      expect(folderStub.copyWidgetStyle).toHaveBeenCalledOnceWith('w2');
+      expect(styleClipboard.style()).toBe('style-1');
+      expect(clipboard.hasContent()).toBeFalse();
+      expect(event.defaultPrevented).toBeTrue();
+    });
+
+    it(`${name}+Shift+V pastes the style onto every selected widget in one request and creates none`, async () => {
+      const component = createComponent();
+      styleClipboard.set('style-1');
+      clipboard.copyMany(widgets, 'f1');
+      selection.selectAll(widgets);
+
+      const event = fireKeyDown(component, { key: 'V', shiftKey: true, ...modifier });
+      await settle();
+
+      expect(folderStub.pasteWidgetStyle).toHaveBeenCalledOnceWith('style-1', ['w1', 'w2', 'w3']);
+      expect(folderStub.pasteWidget).not.toHaveBeenCalled();
+      expect(folderStub.pasteWidgets).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBeTrue();
+    });
+  }
+
+  it('Ctrl+Shift+C with several widgets selected copies neither a style nor the widgets', async () => {
+    const component = createComponent();
+    selection.selectAll(widgets);
+
+    const event = fireKeyDown(component, { key: 'C', shiftKey: true, ctrlKey: true });
+    await settle();
+
+    expect(folderStub.copyWidgetStyle).not.toHaveBeenCalled();
+    expect(clipboard.hasContent()).toBeFalse();
+    expect(event.defaultPrevented).toBeTrue();
+  });
+
+  it('Ctrl+Shift+V without a copied style changes nothing and pastes no widgets', async () => {
+    const component = createComponent();
+    clipboard.copyMany(widgets, 'f1');
+    selection.selectAll(widgets);
+
+    const event = fireKeyDown(component, { key: 'V', shiftKey: true, ctrlKey: true });
+    await settle();
+
+    expect(folderStub.pasteWidgetStyle).not.toHaveBeenCalled();
+    expect(folderStub.pasteWidgets).not.toHaveBeenCalled();
+    expect(event.defaultPrevented).toBeTrue();
+  });
+
+  it('Ctrl+Shift+X still cuts the selection', () => {
+    const component = createComponent();
+    selection.selectAll(widgets);
+
+    fireKeyDown(component, { key: 'X', shiftKey: true, ctrlKey: true });
+
+    expect(clipboard.entries().length).toBe(3);
+    expect(clipboard.entries().every(e => e.isCut)).toBeTrue();
+  });
+
+  it('Paste Style from the menu targets the whole selection the widget belongs to', async () => {
+    const component = createComponent();
+    styleClipboard.set('style-1');
+    selection.selectAll(widgets);
+
+    await component.onWidgetPasteStyle(widgets[1]);
+
+    expect(folderStub.pasteWidgetStyle).toHaveBeenCalledOnceWith('style-1', ['w1', 'w2', 'w3']);
+  });
+
+  it('Paste Style from the menu targets only the clicked widget when it is outside the selection', async () => {
+    const component = createComponent();
+    styleClipboard.set('style-1');
+    selection.setMany(['w1', 'w2'], false);
+
+    await component.onWidgetPasteStyle(widgets[2]);
+
+    expect(folderStub.pasteWidgetStyle).toHaveBeenCalledOnceWith('style-1', ['w3']);
+  });
+
+  it('shows the host message when the paste is refused', async () => {
+    const component = createComponent();
+    styleClipboard.set('style-1');
+    folderStub.pasteWidgetStyle.and.resolveTo({ success: false, error: { code: 'VALIDATION_ERROR', message: 'nope' } });
+
+    await component.onWidgetPasteStyle(widgets[0]);
+
+    expect(deckError(component)).toBe('nope');
+  });
+
+  it('shows an error and keeps the previous style when the copy fails', async () => {
+    const component = createComponent();
+    styleClipboard.set('style-1');
+    folderStub.copyWidgetStyle.and.resolveTo({ success: false });
+
+    await component.onWidgetCopyStyle(widgets[0]);
+
+    expect(deckError(component)).toBeTruthy();
+    expect(styleClipboard.style()).toBe('style-1');
   });
 });

@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Tests.Support;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.Native;
 
 [Platform("Win")]
+[Category("Interactive")]
 [SupportedOSPlatform("windows")]
 public class ForegroundActivationWindowsTests
 {
@@ -16,7 +18,7 @@ public class ForegroundActivationWindowsTests
 		var foreground = Win32Windows.GetForegroundWindow();
 		if (foreground == nint.Zero)
 		{
-			Assert.Ignore("No foreground window in this session (headless or locked desktop).");
+			Interactive.Require("No foreground window in this session (headless or locked desktop).");
 		}
 
 		Assert.That(Win32Foreground.TryActivate(foreground), Is.True);
@@ -37,7 +39,7 @@ public class ForegroundActivationWindowsTests
 		var foreground = Win32Windows.GetForegroundWindow();
 		if (foreground == nint.Zero)
 		{
-			Assert.Ignore("No foreground window in this session (headless or locked desktop).");
+			Interactive.Require("No foreground window in this session (headless or locked desktop).");
 		}
 
 		var before = ReadForegroundLockTimeout();

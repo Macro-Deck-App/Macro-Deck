@@ -177,4 +177,35 @@ internal sealed class JsonPathExtractorTests
 	{
 		Assert.That(JsonPathExtractor.TryExtract("not json", "$", out _, out _), Is.False);
 	}
+
+	[TestCase("a..b")]
+	[TestCase("list[0]x")]
+	[TestCase("list[0")]
+	[TestCase("list[x]")]
+	[TestCase("list[-1]")]
+	[TestCase("list[]")]
+	[TestCase("list[99999999999]")]
+	[TestCase("   ")]
+	[TestCase("")]
+	[TestCase("text.")]
+	public void A_malformed_path_is_a_miss(string path)
+	{
+		Assert.That(JsonPathExtractor.TryExtract(Document, path, out _, out _), Is.False);
+	}
+
+	[Test]
+	public void A_dollar_without_a_dot_is_still_stripped()
+	{
+		Assert.That(JsonPathExtractor.TryExtract(Document, "$text", out _, out var value), Is.True);
+
+		Assert.That(value, Is.EqualTo("hello"));
+	}
+
+	[Test]
+	public void A_closing_bracket_without_an_opening_one_is_part_of_the_property_name()
+	{
+		Assert.That(JsonPathExtractor.TryExtract("""{"a]":"bracketed"}""", "a]", out _, out var value), Is.True);
+
+		Assert.That(value, Is.EqualTo("bracketed"));
+	}
 }

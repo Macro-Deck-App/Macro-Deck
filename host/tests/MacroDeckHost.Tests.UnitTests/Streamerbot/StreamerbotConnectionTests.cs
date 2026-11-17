@@ -155,6 +155,25 @@ internal sealed class StreamerbotConnectionTests
 		Assert.That(_factory.Created, Has.Count.EqualTo(1));
 	}
 
+	[TestCase("secret", "Authenticate")]
+	[TestCase(null, "GetInfo")]
+	public async Task A_connection_that_drops_while_authenticating_retries_without_asking_for_the_password(
+		string? password,
+		string request)
+	{
+		_factory.Configure = client =>
+		{
+			client.Hello = new StreamerbotHello(_info, new StreamerbotChallenge("c2FsdA==", "Y2hhbGxlbmdl"));
+			client.DroppingRequests.Add(request);
+		};
+
+		using var connection = Create(password);
+		connection.Start();
+
+		await WaitForAsync(() => _factory.Created.Count >= 2, "a reconnect attempt");
+		Assert.That(connection.NeedsAuthentication, Is.False);
+	}
+
 	[Test]
 	public async Task A_server_that_challenges_but_does_not_enforce_connects_without_a_password()
 	{

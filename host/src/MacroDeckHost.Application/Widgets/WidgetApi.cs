@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MacroDeckHost.Application.Widgets;
@@ -68,6 +69,6 @@ public sealed class WidgetApi : IWidgetApi, IWidgetAppearanceOutcomeApi
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		return await scope.ServiceProvider.GetRequiredService<IActionButtonStateService>()
-			.AdvanceAsync(id, cancellationToken);
+			.AdvanceAsync(id, StateChangeFlowDispatch.Inline, cancellationToken);
 	}
 }

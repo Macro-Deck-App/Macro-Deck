@@ -509,7 +509,7 @@ internal sealed class DiscordConnection : IDisposable
 			NeedsReauthorization = true;
 			DetachClient();
 		}
-		// An HttpClient timeout is an OperationCanceledException too; only disposal may end the retries.
+		// Only disposal may end the retries; any other cancellation is retried like a failure.
 		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 		{
 			DetachClient();

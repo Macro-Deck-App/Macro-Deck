@@ -8,12 +8,14 @@ internal sealed class RecordingDeckNavigator : IDeckNavigator
 	public List<DeckProfile> Profiles { get; init; } = [];
 	public List<DeckClient> Clients { get; init; } = [];
 	public List<(string Action, string? OriginClientId)> Calls { get; } = [];
+	public List<(string FolderId, string? OriginClientId)> FolderChanges { get; } = [];
 
 	public Task ChangeFolderAsync(
 		string folderId,
 		string? originClientId = null,
 		CancellationToken cancellationToken = default)
 	{
+		FolderChanges.Add((folderId, originClientId));
 		return Record("change-folder", originClientId);
 	}
 
