@@ -21,6 +21,21 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	private const uint MapVkVscToVkEx = 3;
 	private const ushort PrintScreenScanCode = 0x37;
 
+	private readonly Func<IntPtr> _foregroundLayout;
+	private readonly Action<IReadOnlyCollection<Input>> _send;
+	private readonly Dictionary<KeyCode, Keybdinput> _pressed = [];
+
+	public WindowsKeyboardInputProvider()
+		: this(() => LayoutOf(Win32Windows.GetForegroundWindow()), Win32Input.Send)
+	{
+	}
+
+	internal WindowsKeyboardInputProvider(Func<IntPtr> foregroundLayout, Action<IReadOnlyCollection<Input>> send)
+	{
+		_foregroundLayout = foregroundLayout;
+		_send = send;
+	}
+
 	public string PlatformName => "Windows (SendInput)";
 
 	public bool IsSupported => OperatingSystem.IsWindows();
@@ -39,18 +54,39 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 	public void KeyDown(KeyCode key)
 	{
-		SendKey(key, false);
+		if (!_pressed.TryGetValue(key, out var down))
+		{
+			if (!TryBuildKeyInput(key, _foregroundLayout(), false, out down))
+			{
+				return;
+			}
+
+			_pressed[key] = down;
+		}
+
+		SendKeyInput(down);
 	}
 
 	public void KeyUp(KeyCode key)
 	{
-		SendKey(key, true);
+		Keybdinput up;
+		if (_pressed.Remove(key, out var down))
+		{
+			up = down;
+			up.dwFlags |= KeyEventFKeyUp;
+		}
+		else if (!TryBuildKeyInput(key, _foregroundLayout(), true, out up))
+		{
+			return;
+		}
+
+		SendKeyInput(up);
 	}
 
 	public void TypeUnicode(string text)
 	{
 		var inputs = new List<Input>(text.Length * 2);
-		var layout = LayoutOf(Win32Windows.GetForegroundWindow());
+		var layout = _foregroundLayout();
 		TypedLineBreaks.Walk(text,
 			run =>
 			{
@@ -66,7 +102,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 				AddKeyInput(inputs, KeyCode.Enter, layout, true);
 			});
 
-		Send(inputs);
+		_send(inputs);
 	}
 
 	public bool SupportsWindowTargeting => OperatingSystem.IsWindows();
@@ -111,17 +147,17 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			}
 		}
 
-		return windows.Count == 0 ? null : new WindowsTargetWindow(windows);
+		return windows.Count == 0 ? null : new WindowsTargetWindow(windows, LayoutOf, PostToWindow);
 	}
 
-	private static void SendKey(KeyCode key, bool isUp)
+	private static void PostToWindow(IntPtr window, uint message, nuint wParam, nint lParam)
 	{
-		if (!TryBuildKeyInput(key, LayoutOf(Win32Windows.GetForegroundWindow()), isUp, out var keyboard))
-		{
-			return;
-		}
+		_ = PostMessage(window, message, wParam, lParam);
+	}
 
-		Send([new Input { type = InputKeyboard, union = new InputUnion { keyboard = keyboard } }]);
+	private void SendKeyInput(Keybdinput keyboard)
+	{
+		_send([new Input { type = InputKeyboard, union = new InputUnion { keyboard = keyboard } }]);
 	}
 
 	private static void AddKeyInput(List<Input> inputs, KeyCode key, IntPtr layout, bool isUp)
@@ -177,11 +213,6 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 				}
 			}
 		};
-	}
-
-	private static void Send(IReadOnlyCollection<Input> inputs)
-	{
-		Win32Input.Send(inputs);
 	}
 
 	internal static bool IsExtendedKey(KeyCode key)
@@ -348,7 +379,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	[return: MarshalAs(UnmanagedType.Bool)]
 	private static extern bool PostMessage(IntPtr hWnd, uint message, nuint wParam, nint lParam);
 
-	private sealed class WindowsTargetWindow : IKeyboardTargetWindow
+	internal sealed class WindowsTargetWindow : IKeyboardTargetWindow
 	{
 		// A target matching several processes must not multiply the wait: every attempt shares one budget.
 		private const int ActivationBudgetMs = 500;
@@ -358,10 +389,18 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 		private const uint WmChar = 0x0102;
 
 		private readonly IReadOnlyList<IntPtr> _windows;
+		private readonly Func<IntPtr, IntPtr> _layoutOf;
+		private readonly Action<IntPtr, uint, nuint, nint> _post;
+		private readonly Dictionary<(IntPtr Window, KeyCode Key), (ushort Vk, ushort Scan)> _pressed = [];
 
-		public WindowsTargetWindow(IReadOnlyList<IntPtr> windows)
+		internal WindowsTargetWindow(
+			IReadOnlyList<IntPtr> windows,
+			Func<IntPtr, IntPtr> layoutOf,
+			Action<IntPtr, uint, nuint, nint> post)
 		{
 			_windows = windows;
+			_layoutOf = layoutOf;
+			_post = post;
 		}
 
 		public IDisposable? Focus()
@@ -410,7 +449,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			{
 				foreach (var window in _windows)
 				{
-					_ = PostMessage(window, WmChar, unit, 0);
+					_post(window, WmChar, unit, 0);
 				}
 			}
 		}
@@ -420,11 +459,35 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			var message = isUp ? WmKeyUp : WmKeyDown;
 			foreach (var window in _windows)
 			{
-				if (TryMapKey(key, LayoutOf(window), out var vk, out var scan) && vk != 0)
+				if (TryResolve(window, key, isUp, out var vk, out var scan))
 				{
-					_ = PostMessage(window, message, vk, BuildLParam(scan, IsExtendedKey(key), isUp));
+					_post(window, message, vk, BuildLParam(scan, IsExtendedKey(key), isUp));
 				}
 			}
+		}
+
+		private bool TryResolve(IntPtr window, KeyCode key, bool isUp, out ushort vk, out ushort scan)
+		{
+			var entry = (window, key);
+			(ushort Vk, ushort Scan) pressed;
+			var held = isUp ? _pressed.Remove(entry, out pressed) : _pressed.TryGetValue(entry, out pressed);
+			if (held)
+			{
+				(vk, scan) = pressed;
+				return true;
+			}
+
+			if (!TryMapKey(key, _layoutOf(window), out vk, out scan) || vk == 0)
+			{
+				return false;
+			}
+
+			if (!isUp)
+			{
+				_pressed[entry] = (vk, scan);
+			}
+
+			return true;
 		}
 
 		private static nint BuildLParam(ushort scan, bool extended, bool isUp)
