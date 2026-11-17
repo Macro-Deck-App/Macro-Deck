@@ -23,6 +23,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private const nint SubstructureNotifyMask = 1 << 19;
 	private const nint SubstructureRedirectMask = 1 << 20;
 	private const uint ShiftMask = 1 << 0;
+	private const uint LockMask = 1 << 1;
 	private const uint ControlMask = 1 << 2;
 	private const uint Mod1Mask = 1 << 3; // Alt
 	private const uint Mod4Mask = 1 << 6; // Super/Meta
@@ -90,17 +91,66 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		var layout = ReadLayout(_display);
 		var level3Mask = layout.Level3Keycode == 0 ? 0 : layout.Level3Mask;
 		var shiftMask = layout.ShiftKeycode == 0 ? 0 : ShiftMask;
-		TypeKeysyms(ToKeysyms(text),
-			CreateSpareKeycode(_display, _spareKeycode),
-			keysym => ResolveLayoutKey(_display, layout, _spareKeycode, shiftMask, level3Mask, keysym),
-			key => TypeKey(layout, key),
-			keycode =>
+		TypeWithCapsLockReleased(layout.LockedModifiers,
+			(affect, values) => LockModifiers(_display, affect, values),
+			() => ReadLockedModifiers(_display),
+			() =>
 			{
-				FakeKey(keycode, true);
-				FakeKey(keycode, false);
-			});
+				TypeKeysyms(ToKeysyms(text),
+					CreateSpareKeycode(_display, _spareKeycode),
+					keysym => ResolveLayoutKey(_display, layout, _spareKeycode, shiftMask, level3Mask, keysym),
+					key => TypeKey(layout, key),
+					keycode =>
+					{
+						FakeKey(keycode, true);
+						FakeKey(keycode, false);
+					});
 
-		_ = XFlush(_display);
+				_ = XFlush(_display);
+			});
+	}
+
+	// The server stamps locked modifiers on every XTest event and receivers recase letters under Lock,
+	// so Caps Lock is released while typing and locked again after the server handled every event.
+	internal static void TypeWithCapsLockReleased(
+		uint lockedModifiers,
+		Action<uint, uint> lockModifiers,
+		Func<uint> readLockedModifiers,
+		Action type)
+	{
+		if ((lockedModifiers & LockMask) == 0)
+		{
+			type();
+			return;
+		}
+
+		lockModifiers(LockMask, 0);
+		if ((readLockedModifiers() & LockMask) != 0)
+		{
+			type();
+			return;
+		}
+
+		try
+		{
+			type();
+		}
+		finally
+		{
+			lockModifiers(LockMask, LockMask);
+		}
+	}
+
+	private static void LockModifiers(IntPtr display, uint affect, uint values)
+	{
+		_ = XSync(display, false);
+		_ = XkbLockModifiers(display, XkbUseCoreKbd, affect, values);
+		_ = XSync(display, false);
+	}
+
+	private static uint ReadLockedModifiers(IntPtr display)
+	{
+		return XkbGetState(display, XkbUseCoreKbd, out var state) == 0 ? state.LockedMods : 0u;
 	}
 
 	internal static void TypeKeysyms(
@@ -304,6 +354,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 		var hasState = XkbGetState(display, XkbUseCoreKbd, out var state) == 0;
 		return new TypingLayout(hasState ? state.Group : 0u,
 			hasState ? state.Mods : 0u,
+			hasState ? state.LockedMods : 0u,
 			XkbKeysymToModifiers(display, IsoLevel3ShiftKeysym),
 			XKeysymToKeycode(display, ShiftLeftKeysym),
 			XKeysymToKeycode(display, IsoLevel3ShiftKeysym),
@@ -573,6 +624,10 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private static extern int XkbGetState(IntPtr display, uint deviceSpec, out XkbState state);
 
 	[DllImport(LibX11)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static extern bool XkbLockModifiers(IntPtr display, uint deviceSpec, uint affect, uint values);
+
+	[DllImport(LibX11)]
 	private static extern uint XkbKeysymToModifiers(IntPtr display, nuint keysym);
 
 	[DllImport(LibX11)]
@@ -736,6 +791,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 	private readonly record struct TypingLayout(
 		uint Group,
 		uint ActiveModifiers,
+		uint LockedModifiers,
 		uint Level3Mask,
 		uint ShiftKeycode,
 		uint Level3Keycode,
