@@ -2758,6 +2758,10 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Gagal memuat peristiwa</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Nilai “{parameter}” harus berupa angka terbatas</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Peristiwa “{eventId}” tidak ditemukan</value>
     <comment>[eventId:string]</comment>

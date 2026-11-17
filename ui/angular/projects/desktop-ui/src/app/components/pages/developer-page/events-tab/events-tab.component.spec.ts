@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { Subject } from 'rxjs';
-import { ActionParameterType, EventDefinitionDto } from '@macro-deck/runtime';
+import { ActionParameterType, ApiError, EventDefinitionDto } from '@macro-deck/runtime';
 import { ApiService } from '@shared';
 import { SelectComponent } from '../../../forms/select/select.component';
 import { EventCatalogService } from '../../../../services/event-catalog.service';
@@ -134,6 +134,29 @@ describe('EventsTabComponent', () => {
     const error = fixture.nativeElement.querySelector('.trigger-result-error')?.textContent;
     expect(error).toContain('INTEGRATION_DISABLED');
     expect(error).toContain('The integration is disabled');
+  });
+
+  it('resolves a localized host error message instead of printing the object', async () => {
+    await setUp([eventDto('obs::scene-changed', 'Scene Changed')]);
+    apiSpy.triggerEvent.and.resolveTo({
+      success: false,
+      queuedSubscriptions: 0,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: {
+          $localized: { scope: 'macrodeck.app', key: 'Errors.Events.NonFiniteParameter', arguments: { parameter: 'volume' } },
+        },
+      } as unknown as ApiError,
+    });
+    select('obs::scene-changed');
+
+    await component['trigger']();
+    fixture.detectChanges();
+
+    const error = fixture.nativeElement.querySelector('.trigger-result-error')?.textContent;
+    expect(error).toContain('VALIDATION_ERROR');
+    expect(error).toContain("The value of 'volume' must be a finite number");
+    expect(error).not.toContain('[object Object]');
   });
 
   it('titles the pane after the selected provider', async () => {

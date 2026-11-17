@@ -1079,6 +1079,7 @@ export const AppStrings = {
 			LoadFailed: 'macrodeck.app:Errors.Event.LoadFailed',
 		},
 		Events: {
+			NonFiniteParameter: 'macrodeck.app:Errors.Events.NonFiniteParameter',
 			NotFoundWithId: 'macrodeck.app:Errors.Events.NotFoundWithId',
 		},
 		FileSave: {
@@ -11031,6 +11032,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Config.VariableNamesUnavailable': 'A unique variable name could not be created. Rename the configuration and try again.',
 	'macrodeck.app:Errors.Device.LoadFailed': 'Failed to load devices',
 	'macrodeck.app:Errors.Event.LoadFailed': 'Failed to load events',
+	'macrodeck.app:Errors.Events.NonFiniteParameter': 'The value of \'{parameter}\' must be a finite number',
 	'macrodeck.app:Errors.Events.NotFoundWithId': 'Event \'{eventId}\' not found',
 	'macrodeck.app:Errors.FileSave.SaveFailed': 'The file could not be saved',
 	'macrodeck.app:Errors.FileSave.WriteFailed': 'The file could not be written',

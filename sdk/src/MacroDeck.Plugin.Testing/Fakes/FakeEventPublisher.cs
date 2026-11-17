@@ -26,6 +26,8 @@ public sealed class FakeEventPublisher : IEventPublisher
 	/// Records the call. <paramref name="parameters" /> is serialized through the same
 	/// <see cref="PluginProtocolJson.Options" /> the wire protocol uses, so <see cref="Published" />
 	/// reflects what a real plugin's parameters would look like once they cross the process boundary.
+	/// Parameters the serializer rejects, such as a number that is not finite, are recorded as
+	/// <see langword="null" />; the real publisher sends nothing to the host in that case.
 	/// </summary>
 	public void Publish(string eventId, IReadOnlyDictionary<string, object?>? parameters = null)
 	{
@@ -64,7 +66,7 @@ public sealed class FakeEventPublisher : IEventPublisher
 		{
 			return JsonSerializer.SerializeToElement(parameters, PluginProtocolJson.Options);
 		}
-		catch (Exception ex) when (ex is JsonException or NotSupportedException)
+		catch (Exception ex) when (ex is not OutOfMemoryException)
 		{
 			// Publish must never throw into the caller (see IEventPublisher) - a parameter value the
 			// serializer rejects is recorded as absent rather than taking the caller down with it.

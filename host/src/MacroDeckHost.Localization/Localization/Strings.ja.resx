@@ -2758,6 +2758,10 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>イベントを読み込めませんでした</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>「{parameter}」の値は有限の数値である必要があります</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>イベント「{eventId}」が見つかりません</value>
     <comment>[eventId:string]</comment>

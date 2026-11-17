@@ -866,6 +866,24 @@ internal sealed class CallbackContractTests
 		Assert.That(_eventBus.Published.Single().EventId, Does.StartWith(PluginId));
 	}
 
+	[TestCase(double.NaN)]
+	[TestCase(double.PositiveInfinity)]
+	[TestCase(double.NegativeInfinity)]
+	public async Task Publish_with_a_non_finite_number_neither_throws_nor_reaches_the_host(double value)
+	{
+		Assert.DoesNotThrow(() => _context.Events.Publish("bad-reading",
+			new Dictionary<string, object?> { ["value"] = value }));
+		Assert.DoesNotThrow(() => _context.Events.Publish("bad-reading",
+			new Dictionary<string, object?> { ["values"] = new List<object?> { 1, value } }));
+		_context.Events.Publish("good-reading", new Dictionary<string, object?> { ["value"] = 1 });
+
+		await WaitForAsync(() => _eventBus.Published.Count > 0);
+		await Task.Delay(200);
+
+		Assert.That(_eventBus.Published.Select(occurrence => occurrence.EventId),
+			Is.EqualTo(new[] { $"{PluginId}::good-reading" }));
+	}
+
 	[Test]
 	public void Publish_never_throws_into_the_caller_even_when_there_is_no_connection()
 	{

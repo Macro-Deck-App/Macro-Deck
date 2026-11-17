@@ -2758,6 +2758,10 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Не удалось загрузить события</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Значение «{parameter}» должно быть конечным числом</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Событие «{eventId}» не найдено</value>
     <comment>[eventId:string]</comment>

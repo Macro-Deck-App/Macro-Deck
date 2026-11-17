@@ -2759,6 +2759,10 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Caricamento degli eventi non riuscito</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Il valore di '{parameter}' deve essere un numero finito</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Evento '{eventId}' non trovato</value>
     <comment>[eventId:string]</comment>
