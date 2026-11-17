@@ -443,6 +443,9 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 			return;
 		}
 
+		// Xlib applies a layout change to its cached keymap only once it reads the server's mapping event,
+		// so read everything pending before resolving or a press right after a switch uses the old layout.
+		_ = XSync(_display, false);
 		var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(_display, keysym));
 		if (keycode == 0)
 		{
@@ -886,6 +889,7 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 		private void Send(KeyCode key, bool press)
 		{
+			_ = XSync(_display, false);
 			var keycode = ResolveKeycode(key, keysym => XKeysymToKeycode(_display, keysym));
 			if (keycode == 0)
 			{

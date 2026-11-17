@@ -23,6 +23,8 @@ public sealed class WeatherIntegration
 		IWeatherStations, IDisposable
 {
 	private static readonly TimeSpan _defaultRefreshInterval = TimeSpan.FromMinutes(15);
+	private static readonly TimeSpan _firstRetryDelay = TimeSpan.FromSeconds(30);
+	private static readonly TimeSpan _maxRetryDelay = TimeSpan.FromMinutes(5);
 
 	public const string IntegrationId = "app.macro-deck.weather";
 
@@ -31,6 +33,7 @@ public sealed class WeatherIntegration
 
 	private readonly IOpenMeteoClient _client;
 	private readonly TimeSpan _refreshInterval;
+	private readonly TimeProvider _time;
 	private readonly WeatherDetailsUiProvider _details;
 
 	private IIntegrationContext? _context;
@@ -41,10 +44,11 @@ public sealed class WeatherIntegration
 	{
 	}
 
-	internal WeatherIntegration(IOpenMeteoClient client, TimeSpan? refreshInterval = null)
+	internal WeatherIntegration(IOpenMeteoClient client, TimeSpan? refreshInterval = null, TimeProvider? time = null)
 	{
 		_client = client;
 		_refreshInterval = refreshInterval ?? _defaultRefreshInterval;
+		_time = time ?? TimeProvider.System;
 
 		// Handed the live instance list rather than the integration itself, so the action reads the
 		// stations as they are when a user opens its options rather than as they were at construction.
@@ -267,33 +271,52 @@ public sealed class WeatherIntegration
 
 	private async Task RefreshLoop(CancellationToken ct)
 	{
-		using var timer = new PeriodicTimer(_refreshInterval);
+		var retryDelay = _firstRetryDelay;
 		try
 		{
-			do
+			while (true)
 			{
-				await RefreshAll(ct);
-			} while (await timer.WaitForNextTickAsync(ct));
+				TimeSpan delay;
+				if (await RefreshAll(ct))
+				{
+					delay = _refreshInterval;
+					retryDelay = _firstRetryDelay;
+				}
+				else
+				{
+					delay = retryDelay < _refreshInterval ? retryDelay : _refreshInterval;
+					retryDelay = retryDelay * 2 < _maxRetryDelay ? retryDelay * 2 : _maxRetryDelay;
+					_logger.Information("Weather refresh failed; retrying in {Delay}", delay);
+				}
+
+				await Task.Delay(delay, _time, ct);
+			}
 		}
 		catch (OperationCanceledException)
 		{
 		}
 	}
 
-	private async Task RefreshAll(CancellationToken ct)
+	private async Task<bool> RefreshAll(CancellationToken ct)
 	{
+		var succeeded = true;
 		foreach (var station in _stations)
 		{
 			try
 			{
-				await station.Station.RefreshAsync(ct);
+				if (!await station.Station.RefreshAsync(ct))
+				{
+					succeeded = false;
+					_logger.Warning("Weather provider returned no data for {Location}", station.Station.DisplayName);
+				}
 			}
-			catch (OperationCanceledException)
+			catch (OperationCanceledException) when (ct.IsCancellationRequested)
 			{
 				throw;
 			}
 			catch (Exception ex)
 			{
+				succeeded = false;
 				_logger.Warning(ex, "Failed to refresh weather for {Location}", station.Station.DisplayName);
 			}
 		}
@@ -305,6 +328,8 @@ public sealed class WeatherIntegration
 			_ = context.Variables.RequestRefreshAsync(CancellationToken.None);
 			_ = context.WeatherProvider.NotifySnapshotsChangedAsync(CancellationToken.None);
 		}
+
+		return succeeded;
 	}
 
 	public void Dispose()
