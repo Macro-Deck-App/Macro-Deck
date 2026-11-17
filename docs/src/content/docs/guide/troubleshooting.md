@@ -321,6 +321,20 @@ apps that run through XWayland:
 The **Keyboard** and **System** integrations show a warning for this, and so does the Automatic activation dialog.
 To avoid these limits, log in to an X11 session if your desktop offers one, or run the app through XWayland.
 
+## Keyboard and mouse stop working after the X server restarts
+
+On Linux, Macro Deck keeps running when the X server it uses goes away, for example when the display server
+restarts or you log out without quitting Macro Deck. While no X server is reachable, keyboard and mouse actions
+fail, and the **Keyboard** and **Mouse** integrations show that simulation is unavailable. Once an X server is
+back on the same display, they work again within a few seconds, without restarting Macro Deck.
+
+Two cases still close Macro Deck:
+
+- distributions with libX11 older than 1.7, such as Red Hat Enterprise Linux 8 and its rebuilds;
+- rarely, an X server that goes away at the very moment Macro Deck is typing text.
+
+Start Macro Deck again in that case.
+
 ## A reverse proxy or firewall blocks a connection to a service
 
 Some reverse proxies and anti-bot protections reject requests they take for automated traffic, so an

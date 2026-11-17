@@ -363,9 +363,14 @@ public sealed class MouseInputService : IMouseInputService
 	{
 		if (!_provider.IsSupported)
 		{
-			throw new PlatformNotSupportedException(
-				$"Mouse input simulation is not available on this platform/session ({_provider.PlatformName}).");
+			throw Unavailable(_provider.PlatformName);
 		}
+	}
+
+	internal static PlatformNotSupportedException Unavailable(string platformName)
+	{
+		return new PlatformNotSupportedException(
+			$"Mouse input simulation is not available on this platform/session ({platformName}).");
 	}
 
 	private enum TargetResolution

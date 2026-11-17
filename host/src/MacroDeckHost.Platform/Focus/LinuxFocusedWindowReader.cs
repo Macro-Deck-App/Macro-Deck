@@ -9,20 +9,22 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 {
 	private const string LibX11 = "libX11.so.6";
 
-	private readonly IntPtr _display;
-	private readonly nuint _root;
-	private bool _disposed;
+	private readonly X11Connection _connection;
+	private nuint _root;
 
 	public LinuxFocusedWindowReader()
+		: this(null)
 	{
-		_display = OperatingSystem.IsLinux() ? SafeOpenDisplay() : IntPtr.Zero;
-		if (_display != IntPtr.Zero)
-		{
-			_root = XDefaultRootWindow(_display);
-		}
 	}
 
-	public bool IsSupported => _display != IntPtr.Zero;
+	internal LinuxFocusedWindowReader(string? displayName)
+	{
+		_connection = new X11Connection(Attach,
+			() => new PlatformNotSupportedException("The X11 display is not available."),
+			displayName);
+	}
+
+	public bool IsSupported => _connection.IsAvailable;
 
 	public string? UnsupportedReason => IsSupported
 		? null
@@ -32,20 +34,9 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 
 	public FocusedAppInfo? Read()
 	{
-		if (_display == IntPtr.Zero)
-		{
-			return null;
-		}
-
 		try
 		{
-			var window = X11Windows.GetActiveWindow(_display, _root);
-			if (window == 0)
-			{
-				return null;
-			}
-
-			if (X11Windows.GetWindowPid(_display, window) is not { } pid)
+			if (_connection.RunIfConnected(ReadActivePid, null) is not { } pid)
 			{
 				return null;
 			}
@@ -94,31 +85,22 @@ public sealed class LinuxFocusedWindowReader : IFocusedWindowReader, IDisposable
 		}
 	}
 
-	private static IntPtr SafeOpenDisplay()
+	private bool Attach(IntPtr display)
 	{
-		try
-		{
-			return X11Windows.OpenDisplay();
-		}
-		catch (DllNotFoundException)
-		{
-			return IntPtr.Zero;
-		}
+		_root = XDefaultRootWindow(display);
+		return true;
+	}
+
+	private int? ReadActivePid(IntPtr display)
+	{
+		var window = X11Windows.GetActiveWindow(display, _root);
+		return window == 0 ? null : X11Windows.GetWindowPid(display, window);
 	}
 
 	public void Dispose()
 	{
-		if (_disposed || _display == IntPtr.Zero)
-		{
-			return;
-		}
-
-		_disposed = true;
-		_ = XCloseDisplay(_display);
+		_connection.Dispose();
 	}
-
-	[DllImport(LibX11)]
-	private static extern int XCloseDisplay(IntPtr display);
 
 	[DllImport(LibX11)]
 	private static extern nuint XDefaultRootWindow(IntPtr display);
