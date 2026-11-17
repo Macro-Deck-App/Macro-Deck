@@ -911,7 +911,7 @@ All three are plugin → host and **fire-and-forget** - no reply message.
 | Type | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
 | `event.publish` | `eventId` | string | yes | Unqualified id; the host qualifies it with the authenticated plugin id. |
-| | `parameters` | object | no | Parameter values; a nested object or array reaches triggers and templates as its JSON text. |
+| | `parameters` | object | no | Parameter values; a nested object or array reaches triggers and templates as its JSON text. Since Macro Deck 3.0.3 the host drops an occurrence with a top-level number beyond the range of a 64-bit float, such as `1e400`, and logs a warning. |
 | `log.publish` | `events` | array of `LogEventDto` | yes | A batch of structured log events (≤ 64). |
 | | `dropped` | integer | no | Events the plugin's sink dropped since the previous batch. |
 | `state.update` | `kind` | string | yes | The kind whose snapshot is stale - re-describe it. Not data-carrying. |

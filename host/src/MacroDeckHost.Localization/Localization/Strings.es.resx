@@ -2759,6 +2759,10 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>No se pudieron cargar los eventos</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>El valor de '{parameter}' debe ser un número finito</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>No se encontró el evento '{eventId}'</value>
     <comment>[eventId:string]</comment>

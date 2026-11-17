@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActionBlock, ActionBlockParameter, AppStrings, EventDefinition, ParameterValue, defaultParameterValue } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, AppStrings, EventDefinition, LocalizedText, ParameterValue, defaultParameterValue } from '@macro-deck/runtime';
 import { ButtonComponent, InputComponent, LocalizationService, LocalizedTextPipe, TranslatePipe } from '@shared';
 import { ParamRowComponent } from '../../../action-builder/action-card/param-list/param-row.component';
 import { ActionFlowStore } from '../../../action-builder/services/action-flow.store';
@@ -14,7 +14,7 @@ import { EventCatalogService } from '../../../../services/event-catalog.service'
 interface TriggerResult {
   success: boolean;
   queuedSubscriptions: number;
-  error?: { code: string; message: string };
+  error?: { code: string; message: LocalizedText };
 }
 
 @Component({

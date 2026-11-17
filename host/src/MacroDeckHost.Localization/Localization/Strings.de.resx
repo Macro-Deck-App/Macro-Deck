@@ -2758,6 +2758,10 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Ereignisse konnten nicht geladen werden</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Der Wert von „{parameter}“ muss eine endliche Zahl sein</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Ereignis „{eventId}“ wurde nicht gefunden</value>
     <comment>[eventId:string]</comment>

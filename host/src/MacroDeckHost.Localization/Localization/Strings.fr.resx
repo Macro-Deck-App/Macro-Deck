@@ -2759,6 +2759,10 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Échec du chargement des événements</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>La valeur de '{parameter}' doit être un nombre fini</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Événement '{eventId}' introuvable</value>
     <comment>[eventId:string]</comment>

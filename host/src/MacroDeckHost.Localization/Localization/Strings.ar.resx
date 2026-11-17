@@ -2758,6 +2758,10 @@
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>تعذّر تحميل الأحداث</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>يجب أن تكون قيمة '{parameter}' رقمًا محدودًا</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>الحدث '{eventId}' غير موجود</value>
     <comment>[eventId:string]</comment>

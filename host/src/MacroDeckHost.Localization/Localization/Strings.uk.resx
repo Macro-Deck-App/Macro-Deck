@@ -2758,6 +2758,10 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Не вдалося завантажити події</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Значення «{parameter}» має бути скінченним числом</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Подію «{eventId}» не знайдено</value>
     <comment>[eventId:string]</comment>
