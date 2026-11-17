@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Plugin.Hosting.Logging;
 using MacroDeck.Plugin.Hosting.Transport;
@@ -14,14 +15,15 @@ namespace MacroDeck.Plugin.Hosting.Integrations.HostApis;
 /// Proxies <see cref="IEventPublisher"/> over <c>event.publish</c> - the dedicated message type
 /// <see cref="MessageTypes.EventPublish"/> already carries, not a <c>host.invoke</c>/<c>host.result</c>
 /// round trip. <see cref="Publish"/> must never throw into the caller by contract, so a missing
-/// connection or a failed send is logged and swallowed, exactly like a dropped occurrence nobody
-/// subscribed to.
+/// connection, parameters the serializer rejects (a non-finite number among them) or a failed send is
+/// logged and swallowed, exactly like a dropped occurrence nobody subscribed to.
 /// </summary>
 internal sealed class RemoteEventPublisher : IEventPublisher
 {
 	private readonly PluginConnectionState _state;
 	private readonly HostStateCache _stateCache;
 	private readonly ILogger _logger;
+	private readonly ConcurrentDictionary<string, byte> _rejectedEventIds = new(StringComparer.Ordinal);
 
 	public RemoteEventPublisher(PluginConnectionState state, HostStateCache stateCache, ILogger logger)
 	{
@@ -69,19 +71,28 @@ internal sealed class RemoteEventPublisher : IEventPublisher
 			return;
 		}
 
-		var envelope = new ProtocolEnvelope
+		ProtocolEnvelope envelope;
+		try
 		{
-			Type = MessageTypes.EventPublish,
-			Id = Guid.CreateVersion7().ToString(),
-			Payload = JsonSerializer.SerializeToElement(new EventPublishPayload
-				{
-					EventId = eventId,
-					Parameters = parameters is null
-						? null
-						: JsonSerializer.SerializeToElement(parameters, PluginProtocolJson.Options)
-				},
-				PluginProtocolJson.Options)
-		};
+			envelope = new ProtocolEnvelope
+			{
+				Type = MessageTypes.EventPublish,
+				Id = Guid.CreateVersion7().ToString(),
+				Payload = JsonSerializer.SerializeToElement(new EventPublishPayload
+					{
+						EventId = eventId,
+						Parameters = parameters is null
+							? null
+							: JsonSerializer.SerializeToElement(parameters, PluginProtocolJson.Options)
+					},
+					PluginProtocolJson.Options)
+			};
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			_logger.EventParametersRejected(eventId, _rejectedEventIds.TryAdd(eventId, 0), exception);
+			return;
+		}
 
 		_ = PublishBestEffortAsync(connection, envelope, eventId);
 	}

@@ -2758,6 +2758,10 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Gebeurtenissen laden is mislukt</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>De waarde van ‘{parameter}’ moet een eindig getal zijn</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Gebeurtenis ‘{eventId}’ niet gevonden</value>
     <comment>[eventId:string]</comment>

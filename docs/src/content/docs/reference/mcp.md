@@ -281,6 +281,8 @@ input that an approved secret-using block reads asks the user first (`steering-v
 Result: `{ triggered, queuedTriggers }`. Every action of the automations and widget triggers listening to
 the event is checked against the action policy, and payload values that an approved secret-using block
 reads ask the user first.
+A number payload value that is not finite (`NaN`, `Infinity`, or a number beyond the range of a 64-bit
+float) is refused with `VALIDATION_ERROR` and nothing is triggered.
 
 ## Action policy
 

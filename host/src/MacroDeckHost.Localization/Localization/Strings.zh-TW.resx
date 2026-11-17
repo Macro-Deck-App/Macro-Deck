@@ -2758,6 +2758,10 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>無法載入事件</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>「{parameter}」的值必須是有限數字</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>找不到事件「{eventId}」</value>
     <comment>[eventId:string]</comment>

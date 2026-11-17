@@ -2758,6 +2758,10 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>इवेंट लोड करना विफल रहा</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>'{parameter}' का मान एक परिमित संख्या होना चाहिए</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>इवेंट '{eventId}' नहीं मिला</value>
     <comment>[eventId:string]</comment>

@@ -2759,6 +2759,10 @@ Stáhněte jej z webu Macro Deck a aktualizujte nainstalovaný AppImage, DEB neb
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Načtení událostí se nezdařilo</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Hodnota „{parameter}“ musí být konečné číslo</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Událost „{eventId}“ nebyla nalezena</value>
     <comment>[eventId:string]</comment>

@@ -2758,6 +2758,10 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Não foi possível carregar os eventos</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>O valor de '{parameter}' deve ser um número finito</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Evento '{eventId}' não encontrado</value>
     <comment>[eventId:string]</comment>

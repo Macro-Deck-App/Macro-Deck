@@ -30,6 +30,8 @@ public sealed class EventBus : IEventBus
 
 	private long _dropped;
 	private DateTimeOffset _lastDropLog = DateTimeOffset.MinValue;
+	private long _refused;
+	private DateTimeOffset _lastRefusalLog = DateTimeOffset.MinValue;
 
 	public EventBus(IEventSubscriptionIndex index, EventSampleStore samples, ILogger logger)
 	{
@@ -42,6 +44,12 @@ public sealed class EventBus : IEventBus
 
 	public void Publish(EventOccurrence occurrence)
 	{
+		if (EventParameterValues.FindNonFinite(occurrence.Parameters) is { } parameterName)
+		{
+			RecordRefusal(occurrence.EventId, parameterName);
+			return;
+		}
+
 		_samples.Record(occurrence);
 
 		if (occurrence.Target is null && !_index.HasSubscribers(occurrence.EventId))
@@ -57,6 +65,32 @@ public sealed class EventBus : IEventBus
 		if (!_channel.Writer.TryWrite(occurrence))
 		{
 			RecordDrop(occurrence.EventId);
+		}
+	}
+
+	private void RecordRefusal(string eventId, string parameterName)
+	{
+		long total;
+		var shouldLog = false;
+
+		lock (_dropLock)
+		{
+			total = ++_refused;
+			var now = DateTimeOffset.UtcNow;
+			if (now - _lastRefusalLog >= _dropLogInterval)
+			{
+				_lastRefusalLog = now;
+				shouldLog = true;
+			}
+		}
+
+		if (shouldLog)
+		{
+			_logger.Warning("Dropped an occurrence of {EventId}: parameter {ParameterName} is not a finite number "
+				+ "({RefusedTotal} dropped for this reason in total)",
+				eventId,
+				parameterName,
+				total);
 		}
 	}
 

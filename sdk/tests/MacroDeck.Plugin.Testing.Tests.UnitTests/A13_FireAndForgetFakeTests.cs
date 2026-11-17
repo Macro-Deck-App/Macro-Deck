@@ -43,6 +43,25 @@ public class A13FireAndForgetFakeTests
 	}
 
 	[Test]
+	public void FakeEventPublisher_records_a_non_finite_number_as_a_call_without_parameters()
+	{
+		var events = new FakeEventPublisher();
+
+		Assert.DoesNotThrow(() => events.Publish("not-a-number",
+			new Dictionary<string, object?> { ["value"] = double.NaN }));
+		Assert.DoesNotThrow(() => events.Publish("nested-infinity",
+			new Dictionary<string, object?> { ["values"] = new[] { double.PositiveInfinity } }));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(events.Published, Has.Count.EqualTo(2));
+			Assert.That(events.Published[0].EventId, Is.EqualTo("not-a-number"));
+			Assert.That(events.Published[1].EventId, Is.EqualTo("nested-infinity"));
+			Assert.That(events.Published.Select(e => e.Parameters), Is.All.Null);
+		});
+	}
+
+	[Test]
 	public async Task FakeWidgetApi_reports_false_for_unknown_id_and_empty_patch_true_for_a_real_change()
 	{
 		var widgets = new FakeWidgetApi();
