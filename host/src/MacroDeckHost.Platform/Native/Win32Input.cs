@@ -12,8 +12,9 @@ internal static class Win32Input
 	public const uint InputKeyboard = 1;
 
 	private const long BlockedReportIntervalMs = 30_000;
+	private const long NeverReported = long.MinValue;
 
-	private static long _lastBlockedReportTicks = long.MinValue;
+	private static long _lastBlockedReportTicks = NeverReported;
 
 	public static void Send(IReadOnlyCollection<Input> inputs)
 	{
@@ -73,7 +74,8 @@ internal static class Win32Input
 	private static bool TryClaimReport()
 	{
 		var now = Environment.TickCount64;
-		if (now - Interlocked.Read(ref _lastBlockedReportTicks) < BlockedReportIntervalMs)
+		var last = Interlocked.Read(ref _lastBlockedReportTicks);
+		if (last != NeverReported && now - last < BlockedReportIntervalMs)
 		{
 			return false;
 		}
