@@ -20,6 +20,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	private const uint MapVkVkToVsc = 0;
 	private const uint MapVkVscToVkEx = 3;
 	private const ushort PrintScreenScanCode = 0x37;
+	private const int ErrorAccessDenied = 5;
 
 	private readonly Func<IntPtr> _foregroundLayout;
 	private readonly Action<IReadOnlyCollection<Input>> _send;
@@ -152,7 +153,12 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 
 	private static void PostToWindow(IntPtr window, uint message, nuint wParam, nint lParam)
 	{
-		_ = PostMessage(window, message, wParam, lParam);
+		// UIPI refuses a message posted to a window of a higher integrity level with access denied.
+		if (!PostMessage(window, message, wParam, lParam) && Marshal.GetLastWin32Error() == ErrorAccessDenied)
+		{
+			_ = Win32Windows.GetWindowThreadProcessId(window, out var processId);
+			Win32Input.ReportBlockedByIntegrity(processId);
+		}
 	}
 
 	private void SendKeyInput(Keybdinput keyboard)
@@ -375,7 +381,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	[DllImport("user32.dll")]
 	private static extern IntPtr GetKeyboardLayout(uint idThread);
 
-	[DllImport("user32.dll")]
+	[DllImport("user32.dll", SetLastError = true)]
 	[return: MarshalAs(UnmanagedType.Bool)]
 	private static extern bool PostMessage(IntPtr hWnd, uint message, nuint wParam, nint lParam);
 

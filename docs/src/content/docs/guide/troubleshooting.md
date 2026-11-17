@@ -300,6 +300,13 @@ updates from the plugin's own publisher. If the plugin really changed hands, or 
 other publisher's package, uninstall the plugin first and tick **Also delete the plugin's stored data**,
 then install it again.
 
+## Keyboard actions do nothing in an app started as administrator
+
+Windows does not let an app pass keys or text to an app that runs with higher privileges. If Macro Deck runs
+normally and the app you type into was started as administrator, keyboard actions do nothing there, in every
+target mode. Macro Deck writes a warning naming the app to its log. Start both the same way: run Macro Deck as
+administrator too, or start the other app without administrator rights.
+
 ## Keyboard actions or Automatic activation do not reach an app on Wayland
 
 Most Linux desktops use Wayland by default. Macro Deck works through X11 there, using XWayland, so it only sees
