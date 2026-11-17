@@ -77,6 +77,18 @@ public class GaugesWidgetSessionTests
 	}
 
 	[Test]
+	public async Task A_minute_updates_a_gauge_name_that_reads_the_time()
+	{
+		await using var session = await Open(new
+			{ id = "a", variable = "cpu_metric", max = 100, name = "{{ date.utc_now.ticks }}" });
+		session.DrainPatches();
+
+		_notifier.Publish(TemplateClock.Name);
+
+		Assert.That(session.DrainPatches(), Is.Not.Empty);
+	}
+
+	[Test]
 	public async Task A_change_to_an_unrelated_variable_sends_nothing()
 	{
 		await using var session = await Open();

@@ -270,7 +270,7 @@ public class WidgetBatchNotificationFanOutTests
 		var ids = new List<Guid>();
 		while (_renderQueue.Reader.TryRead(out var widgetId))
 		{
-			ids.Add(widgetId);
+			ids.Add(widgetId.WidgetId);
 		}
 
 		return ids;

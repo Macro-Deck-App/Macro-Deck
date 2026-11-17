@@ -10,6 +10,8 @@ public sealed class LabelSubscriptionTracker
 	private readonly Dictionary<string, HashSet<(string WidgetId, string State)>> _keysByConnection
 		= new(StringComparer.Ordinal);
 
+	private readonly Dictionary<(string WidgetId, string State), LabelTexts> _lastPushed = new();
+
 	public void Add(string connectionId, string widgetId, string state)
 	{
 		state = LabelGroups.Normalize(state);
@@ -74,6 +76,29 @@ public sealed class LabelSubscriptionTracker
 		}
 	}
 
+	public void RecordPushed(string widgetId, string state, LabelTexts texts)
+	{
+		state = LabelGroups.Normalize(state);
+		lock (_lock)
+		{
+			if (_connectionsByWidgetState.TryGetValue(widgetId, out var states) && states.ContainsKey(state))
+			{
+				_lastPushed[(widgetId, state)] = texts;
+			}
+		}
+	}
+
+	public bool WasPushed(string widgetId, string state, LabelTexts texts)
+	{
+		state = LabelGroups.Normalize(state);
+		lock (_lock)
+		{
+			return _lastPushed.TryGetValue((widgetId, state), out var pushed)
+				&& string.Equals(pushed.Primary, texts.Primary, StringComparison.Ordinal)
+				&& pushed.Extras.SequenceEqual(texts.Extras, StringComparer.Ordinal);
+		}
+	}
+
 	/// <summary>The state ids of <paramref name="widgetId" /> that currently have at least one subscriber.</summary>
 	public IReadOnlyCollection<string> SubscribedStates(string widgetId)
 	{
@@ -92,6 +117,7 @@ public sealed class LabelSubscriptionTracker
 			if (connections.Count == 0)
 			{
 				states.Remove(state);
+				_lastPushed.Remove((widgetId, state));
 				if (states.Count == 0)
 				{
 					_connectionsByWidgetState.Remove(widgetId);

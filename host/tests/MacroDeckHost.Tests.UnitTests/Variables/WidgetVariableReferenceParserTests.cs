@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using MacroDeckHost.Application.Variables;
 
 namespace MacroDeckHost.Tests.UnitTests.Variables;
@@ -5,6 +6,74 @@ namespace MacroDeckHost.Tests.UnitTests.Variables;
 [TestFixture]
 public class WidgetVariableReferenceParserTests
 {
+	[Test]
+	public void A_label_that_only_reads_the_time_is_recorded_as_reading_the_clock()
+	{
+		var references = WidgetVariableReferenceParser.Parse("{\"label\":\"{{ 'now' | date: '%H:%M' }}\"}");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(references.IsEmpty, Is.False);
+			Assert.That(references.LabelNames, Is.EquivalentTo([TemplateClock.Name]));
+			Assert.That(references.StateMappingNames, Is.Empty);
+		});
+	}
+
+	[TestCase("{\"label\":\"{{ date.now | date.to_string '%H' }}\"}")]
+	[TestCase("{\"label\":\"{{ date.utc_now.year }}\"}")]
+	[TestCase("{\"label\":\"{{ \\\"today\\\" | date }}\"}")]
+	public void Every_way_of_reading_the_time_is_recognised(string data)
+	{
+		Assert.That(WidgetVariableReferenceParser.Parse(data).LabelNames, Does.Contain(TemplateClock.Name));
+	}
+
+	[Test]
+	public void A_time_label_is_still_recognised_after_the_host_rewrites_the_widget_data()
+	{
+		var stored = JsonNode.Parse("{\"label\":\"{{ 'now' | date: '%H:%M' }} {{ \\\"today\\\" | date }}\"}")!
+			.ToJsonString();
+
+		var references = WidgetVariableReferenceParser.Parse(stored);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stored, Does.Contain("\\u0027now\\u0027"));
+			Assert.That(references.LabelNames, Does.Contain(TemplateClock.Name));
+		});
+	}
+
+	[Test]
+	public void A_state_mapping_reading_the_time_is_recorded_as_reading_the_clock()
+	{
+		var data = "{\"label\":\"{{ vars.cpu }}\","
+			+ "\"stateMapping\":{\"rules\":[{\"when\":\"{{ date.now.hour }}\"}]}}";
+
+		var references = WidgetVariableReferenceParser.Parse(data);
+
+		Assert.That(references.StateMappingNames, Is.SupersetOf(new[] { "cpu", TemplateClock.Name }));
+	}
+
+	[Test]
+	public void A_label_that_does_not_read_the_time_is_not_recorded_as_reading_the_clock()
+	{
+		var data = "{\"label\":\"{{ '2016-01-05' | date: '%Y' }} {{ vars.cpu }}\"}";
+
+		var references = WidgetVariableReferenceParser.Parse(data);
+
+		Assert.That(references.LabelNames, Is.EquivalentTo(["cpu"]));
+	}
+
+	[Test]
+	public void Referenced_names_of_a_widget_text_include_the_clock_when_it_reads_the_time()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(WidgetVariableReferenceParser.ReferencedNames("{{ date.now.hour }} {{ vars.cpu }}"),
+				Is.EquivalentTo(new[] { "cpu", TemplateClock.Name }));
+			Assert.That(WidgetVariableReferenceParser.ReferencedNames("{{ vars.cpu }}"), Is.EquivalentTo(["cpu"]));
+		});
+	}
+
 	[Test]
 	public void LiquidLabelReference_isFound()
 	{

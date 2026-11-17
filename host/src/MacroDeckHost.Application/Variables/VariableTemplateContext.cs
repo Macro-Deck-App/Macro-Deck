@@ -14,6 +14,15 @@ namespace MacroDeckHost.Application.Variables;
 // container itself answer instead of the value.
 public sealed class VariableTemplateContext : LiquidTemplateContext
 {
+	public VariableTemplateContext(TimeProvider clock)
+	{
+		Clock = clock;
+	}
+
+	internal TimeProvider Clock { get; }
+
+	internal bool ReadsClock { get; set; }
+
 	public override bool ToBool(SourceSpan span, object? value)
 	{
 		return base.ToBool(span, VariableTemplateValue.Unwrap(value));
