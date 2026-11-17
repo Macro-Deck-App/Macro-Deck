@@ -344,7 +344,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 	[DllImport("user32.dll")]
 	private static extern IntPtr GetKeyboardLayout(uint idThread);
 
-	[DllImport("user32.dll")]
+	[DllImport("user32.dll", SetLastError = true)]
 	[return: MarshalAs(UnmanagedType.Bool)]
 	private static extern bool PostMessage(IntPtr hWnd, uint message, nuint wParam, nint lParam);
 
@@ -356,6 +356,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 		private const uint WmKeyDown = 0x0100;
 		private const uint WmKeyUp = 0x0101;
 		private const uint WmChar = 0x0102;
+		private const int ErrorAccessDenied = 5;
 
 		private readonly IReadOnlyList<IntPtr> _windows;
 
@@ -410,7 +411,7 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			{
 				foreach (var window in _windows)
 				{
-					_ = PostMessage(window, WmChar, unit, 0);
+					PostOrReport(window, WmChar, unit, 0);
 				}
 			}
 		}
@@ -422,8 +423,18 @@ public sealed class WindowsKeyboardInputProvider : IKeyboardInputProvider
 			{
 				if (TryMapKey(key, LayoutOf(window), out var vk, out var scan) && vk != 0)
 				{
-					_ = PostMessage(window, message, vk, BuildLParam(scan, IsExtendedKey(key), isUp));
+					PostOrReport(window, message, vk, BuildLParam(scan, IsExtendedKey(key), isUp));
 				}
+			}
+		}
+
+		private static void PostOrReport(IntPtr window, uint message, nuint wParam, nint lParam)
+		{
+			// UIPI refuses a message posted to a window of a higher integrity level with access denied.
+			if (!PostMessage(window, message, wParam, lParam) && Marshal.GetLastWin32Error() == ErrorAccessDenied)
+			{
+				_ = Win32Windows.GetWindowThreadProcessId(window, out var processId);
+				Win32Input.ReportBlockedByIntegrity(processId);
 			}
 		}
 

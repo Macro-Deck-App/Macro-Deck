@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Serilog;
@@ -27,21 +28,67 @@ internal static class Win32Input
 		if (sent < array.Length)
 		{
 			ReportBlockedInput(array.Length - (int)sent, array.Length, error);
+			return;
+		}
+
+		// UIPI discards keyboard input to a higher-integrity foreground window without shortening the count
+		// or setting an error. Mouse input goes to the window under its own point instead, so it is not judged.
+		if (array.All(input => input.type == InputKeyboard))
+		{
+			ReportIfForegroundOutranks();
 		}
 	}
 
-	// UIPI blocks injection into a higher-integrity foreground window: the call succeeds from our side but
-	// nothing reaches the target, so the loss is only visible through this log. It stays blocked for as long
-	// as that window is focused, and mouse input is sent per movement, hence the throttle.
-	private static void ReportBlockedInput(int blocked, int total, int error)
+	public static void ReportBlockedByIntegrity(uint processId)
 	{
-		var now = Environment.TickCount64;
-		if (now - Interlocked.Read(ref _lastBlockedReportTicks) < BlockedReportIntervalMs)
+		if (!TryClaimReport())
 		{
 			return;
 		}
 
+		var path = Win32Windows.TryQueryFullProcessImagePath(processId);
+		var application = path is null ? processId.ToString(CultureInfo.InvariantCulture) : Path.GetFileName(path);
+		Log.ForContext(typeof(Win32Input))
+			.Warning("Windows may block input to {Application}: it may be running with higher privileges than "
+				+ "Macro Deck, for example elevated as administrator",
+				application);
+	}
+
+	private static void ReportIfForegroundOutranks()
+	{
+		_ = Win32Windows.GetWindowThreadProcessId(Win32Windows.GetForegroundWindow(), out var processId);
+		if (processId == 0)
+		{
+			return;
+		}
+
+		if (Win32Integrity.Outranks(Win32Integrity.Read(processId), Win32Integrity.Current))
+		{
+			ReportBlockedByIntegrity(processId);
+		}
+	}
+
+	// A blocked target stays blocked for as long as it is focused, and input is sent per key or movement,
+	// hence the throttle.
+	private static bool TryClaimReport()
+	{
+		var now = Environment.TickCount64;
+		if (now - Interlocked.Read(ref _lastBlockedReportTicks) < BlockedReportIntervalMs)
+		{
+			return false;
+		}
+
 		Interlocked.Exchange(ref _lastBlockedReportTicks, now);
+		return true;
+	}
+
+	private static void ReportBlockedInput(int blocked, int total, int error)
+	{
+		if (!TryClaimReport())
+		{
+			return;
+		}
+
 		Log.ForContext(typeof(Win32Input))
 			.Warning("Windows blocked {Blocked} of {Total} injected input event(s) (error {Error}); "
 				+ "the foreground application may be running elevated",
