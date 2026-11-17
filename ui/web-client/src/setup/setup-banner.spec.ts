@@ -1,4 +1,4 @@
-import { HttpClient, LocalizationCatalog, type GetDeviceSetupResponse } from '@macro-deck/runtime';
+import { ClientAppStrings, HttpClient, LocalizationCatalog, type GetDeviceSetupResponse } from '@macro-deck/runtime';
 import { DeviceSetupService, type DeviceSetupLocation } from './device-setup';
 import { DismissibleHints, type HintStorage } from './dismissible-hints';
 import { createSetupBanner, SETUP_BANNER_HINT } from './setup-banner';
@@ -148,6 +148,36 @@ describe('setup banner', () => {
       .querySelectorAll<HTMLButtonElement>('.wc-setup-banner-actions .wc-btn')[0].click();
 
     expect(opens).toBe(1);
+  });
+  it('switches to a new language while it is showing', async () => {
+    const setup = service(info(), refused);
+    const localization = new LocalizationCatalog();
+    const handle = createSetupBanner({
+      deviceSetup: setup,
+      localization: localization,
+      hints: new DismissibleHints(memoryStorage()),
+      onOpen: () => undefined,
+      httpsPage: () => true,
+    });
+    await setup.load();
+    const buttons = handle.element.querySelectorAll<HTMLButtonElement>('.wc-setup-banner-actions .wc-btn');
+
+    localization.apply({
+      culture: 'de',
+      translations: {
+        [ClientAppStrings.WebClient.DeviceSetup.BannerMessage]: 'Dieses Gerät vertraut Macro Deck noch nicht.',
+        [ClientAppStrings.WebClient.DeviceSetup.BannerAction]: 'Einrichten',
+        [ClientAppStrings.WebClient.DeviceSetup.BannerDismiss]: 'Nicht jetzt',
+      },
+    });
+    handle.repaint();
+
+    expect(shown(handle.element)).toBeTrue();
+    expect(handle.element.querySelector('.wc-setup-banner-message')!.textContent)
+      .toBe('Dieses Gerät vertraut Macro Deck noch nicht.');
+    expect(buttons[0].textContent).toBe('Einrichten');
+    expect(buttons[1].textContent).toBe('Nicht jetzt');
+    expect(buttons[1].getAttribute('aria-label')).toBe('Nicht jetzt');
   });
 });
 

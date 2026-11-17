@@ -63,10 +63,23 @@ public class MacroDeckPaths : IMacroDeckPaths
 	}
 
 	public MacroDeckPaths(DataRootEnvironment environment)
+		: this(environment, true)
+	{
+	}
+
+	private MacroDeckPaths(DataRootEnvironment environment, bool createDirectories)
 	{
 		BaseDirectory = environment.BaseDirectory;
 		DataRootDirectory = MacroDeckDataRootResolver.Resolve(environment);
-		EnsureDirectoriesExist();
+		if (createDirectories)
+		{
+			EnsureDirectoriesExist();
+		}
+	}
+
+	public static MacroDeckPaths WithoutCreatingDirectories(DataRootEnvironment environment)
+	{
+		return new MacroDeckPaths(environment, false);
 	}
 
 	public void EnsureDirectoriesExist()

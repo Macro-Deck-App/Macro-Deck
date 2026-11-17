@@ -12,6 +12,7 @@ internal static class MacOsRunningApplication
 {
 	private const string LibObjC = "/usr/lib/libobjc.dylib";
 	private const string AppKit = "/System/Library/Frameworks/AppKit.framework/AppKit";
+	private const nint ProhibitedActivationPolicy = 2;
 
 	public static MacOsRunningApplicationInfo? TryReadFrontmost()
 	{
@@ -78,6 +79,36 @@ internal static class MacOsRunningApplication
 
 			_ = objc_msgSend_noArgs(app, sel_registerName(Utf8("terminate")));
 			return true;
+		}
+		catch
+		{
+			return false;
+		}
+		finally
+		{
+			objc_autoreleasePoolPop(pool);
+		}
+	}
+
+	// Helper and daemon processes have the prohibited policy and no windows; asking AX about them only waits.
+	public static bool CanOwnWindows(int processId)
+	{
+		var pool = objc_autoreleasePoolPush();
+		try
+		{
+			if (!NativeLibrary.TryLoad(AppKit, out _))
+			{
+				return false;
+			}
+
+			var applicationClass = objc_getClass(Utf8("NSRunningApplication"));
+			var app = applicationClass == IntPtr.Zero
+				? IntPtr.Zero
+				: objc_msgSend_pid(applicationClass,
+					sel_registerName(Utf8("runningApplicationWithProcessIdentifier:")),
+					processId);
+			return app != IntPtr.Zero
+				&& objc_msgSend_intRet(app, sel_registerName(Utf8("activationPolicy"))) != ProhibitedActivationPolicy;
 		}
 		catch
 		{

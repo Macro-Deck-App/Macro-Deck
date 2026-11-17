@@ -40,6 +40,8 @@ public class WidgetTypesEndpointTests
 			null!,
 			null!,
 			null!,
+			null!,
+			null!,
 			null!);
 	}
 

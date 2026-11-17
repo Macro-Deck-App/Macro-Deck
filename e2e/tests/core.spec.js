@@ -7,7 +7,7 @@ import {
   openDesktop,
   openProfileMenu,
   openWebClient,
-  pressWebTile,
+  pressWebTileAndExpect,
   selectDesktopProfile,
   signInWebClient,
   watchForUnexpectedFailures,
@@ -175,6 +175,25 @@ test.describe('Macro Deck core E2E', () => {
     await context.close();
   });
 
+  test('@smoke presses an Action Button on the Web Client and runs its flow', async ({ browser, api, host }) => {
+    await api.variable('e2e_smoke_presses', { type: 'numeric', value: 0 });
+    const pressProfile = await api.profile('E2E Press', { columns: 3, rows: 2 });
+    const button = await api.actionButton(pressProfile.rootFolder.id, {
+      label: 'Press',
+      flows: [flow.shortPress(flow.setVariable('e2e_smoke_presses', 1, 'add'))],
+    });
+
+    const web = await connectWebClient(browser, host, api);
+    const assertNoUnexpectedFailures = watchForUnexpectedFailures(web.page);
+    await api.openProfileOnDevice(web.device.id, pressProfile.id);
+    await expectLivePush(web.page, api, button.id);
+
+    await pressWebTileAndExpect(web, api, button.id, 'e2e_smoke_presses', { before: '0', after: '1' });
+
+    assertNoUnexpectedFailures();
+    await web.context.close();
+  });
+
   // E2E-CONN-01: a Web Client that only looks connected after the restart cannot pass, because the
   // label change and the press both have to cross the new socket.
   test('@smoke persists profile, widget, and grid state across a real host restart and reconnects the Web Client', async ({ page, api, host, browser }) => {
@@ -214,8 +233,7 @@ test.describe('Macro Deck core E2E', () => {
         await adminReloaded;
       }));
 
-    await pressWebTile(web, counter.id);
-    await expect.poll(() => api.variableValue('e2e_restart_presses')).toBe('1');
+    await pressWebTileAndExpect(web, api, counter.id, 'e2e_restart_presses', { before: '0', after: '1' });
 
     await selectDesktopProfile(page, RENAMED_PROFILE_NAME);
     await expect(page.getByText(`${PROFILE_COLUMNS} × ${PROFILE_ROWS} Grid`)).toBeVisible();

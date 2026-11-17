@@ -16,6 +16,7 @@
         <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Windows" />
         <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.MacOS" />
         <InternalsVisibleTo Include="MacroDeckHost.Tests.UnitTests.Linux" />
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.PlatformInput" />
     </ItemGroup>
 
 </Project>

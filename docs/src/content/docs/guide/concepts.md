@@ -33,6 +33,19 @@ listed on the right. A button with **Change Folder to** opens a subfolder, **Go 
 behind it, so with **Device** empty it moves every connected device. Pick a device there to move only
 that one. If it is not connected at that moment, the action reports an error instead of moving the others.
 
+**Next Folder** and **Previous Folder** step through folders without one action per folder, so adding,
+removing or moving a folder needs no changes to them. **Order** decides the sequence:
+
+- **Folder order**: every folder of the profile that is open, as the folder list shows them, each folder
+  followed by its subfolders.
+- **Alphabetical**: every folder of the profile that is open, sorted by name.
+- **Custom**: only the folders ticked under **Folders**, in the order you ticked them. They can belong to
+  different profiles. From a folder that is not in the list, Next goes to the first and Previous to the last.
+
+**Wrap around**, on by default, continues from the last folder to the first and the other way round. With it
+off, nothing happens at either end. They have the same **Device** setting. With **Device** empty, an
+automation moves every connected device one step on from the folder that device has open.
+
 ## Widgets
 
 The tiles in a folder:
@@ -502,6 +515,13 @@ A user variable is **Text**, **Numeric**, **Boolean** or **Color**. A Color vari
 `#3366ff` that widgets, folder backgrounds and the accent color can follow, see
 [Colors from a variable](/guide/tips/#colors-from-a-variable).
 
+An action field that stores its result in a user variable, such as the **Answer variable** of
+**Ask a question** or **Save output to variable** of **Run Command**, lists your variables and also takes a
+new name, which the action creates the first time it writes to it. To pick the new variable's type and
+initial value instead, click **+** next to the field: **New variable** opens with what you typed as the
+name, and after **Create** the field holds the new variable. In a widget, script or automation it starts
+as that item's own variable; choose **Global** under **Scope** for one every flow can use.
+
 Every speaker and microphone gets its own volume and mute variable, named after the device, for
 example `system_audio_input_usb_mic_volume_percent`. An unplugged device keeps its variables; they
 read as unavailable until it is back. Macro Deck remembers up to 64 devices; after that, the oldest
@@ -580,6 +600,45 @@ example the current OBS scene or `system_cpu_usage_percent`, create an automatio
 **Variable Changed** watching that variable runs **Write Variable to File** for the same variable.
 Every change then lands in the file.
 
+### Application variables
+
+The System integration tells you whether an application runs and how its windows are shown, for
+example to show other buttons while a game is in fullscreen or only while an app is minimized.
+
+The application in front gets two variables of its own: `system_focused_app_window_state` and
+`system_focused_app_instances`, next to `system_focused_app`.
+
+To watch an application whether it is in front or not, open **Integrations**, choose **System** and
+add a configuration: give it a **Configuration name**, for example `Game`, and pick the **Application**
+from the running processes, or enter its process name or the path to the program. You can watch up to 16
+applications. Each one gets four variables, named after the configuration:
+
+| Variable | Shows |
+| --- | --- |
+| `system_app_game_running` | Whether the application runs. |
+| `system_app_game_instances` | How many of its processes run. Browsers and many other apps start several processes for a single window, so use the window count to know how many are open. |
+| `system_app_game_windows` | How many windows it has open, minimized ones included. |
+| `system_app_game_window_state` | `fullscreen`, `maximized`, `normal` or `minimized`; `no_window` while it runs without a window, and `not_running`. |
+
+With several windows, the most visible one counts: one fullscreen window makes the application
+`fullscreen`, and it is `minimized` only when all of its windows are. A process name such as `chrome`
+counts every process with that name; a program path counts only that program.
+
+Some limits apply:
+
+- **macOS** needs Accessibility access to read windows. Until you allow Macro Deck under System Settings,
+  Privacy & Security, Accessibility, the window state and window count are unavailable, and the
+  focused application's window state stays empty. A hidden app counts as `minimized`, and a window that
+  fills the screen apart from the menu bar and the Dock counts as `maximized`. Windows on another Space,
+  including a fullscreen app's own Space, may not be counted while you are on a different one.
+- **Linux** reads windows on X11 only. On Wayland the window state and window count are unavailable.
+  Windows of programs that do not report their process are not counted.
+- **Windows** shows apps from the Microsoft Store as `no_window`, because their windows belong to a
+  separate system process.
+
+Watched applications are settings of this computer: a profile or deck you import on another computer
+shows these variables only once you add the same configuration there.
+
 ### Variables of a widget, script or automation
 
 The variables on the **Variables** page are global: every button, script and automation sees them. A
@@ -603,8 +662,17 @@ A script started with **Run Script** sees only its own variables, not those of t
 automation that started it; pass values to it as inputs instead.
 
 **Variable Changed**, **Variable Created** and **Variable Deleted** do not run for the variables of a script
-or an automation. They do run for the variables of a widget, also when a global variable has the same
-name, because the event only knows the name.
+or an automation. For a widget's variables they follow the same order as a step:
+
+- A widget's own trigger runs for that widget's variable, and for a global one only when the widget has
+  no variable of that name.
+- An automation, and any other widget without a variable of that name, run for a widget's variable
+  only when no global variable has that name, as with the
+  [countdown, stopwatch](#countdown-and-stopwatch) and [calendar](#calendar-widget) variables. With a
+  global `count`, a widget's `count` runs none of them.
+
+This also holds for a trigger that does not pick a variable. Their variable picker lists only names
+these events can run for.
 
 Deleting a widget, script or automation deletes its variables, and duplicating one copies them. When you
 export or share widgets, the scripts they use bring their variables along. The **Variables** page still
@@ -855,12 +923,59 @@ button, automation or flow runs it.
 This is different from **Send Notification**, which shows a notification of your operating system instead
 of one inside Macro Deck.
 
+### Ask a question in a flow
+
+The action **Ask a question** (System integration) pauses the flow, shows a dialog and goes on with the
+answer, for example to confirm before shutting down, to pick an OBS scene or to type a stream title.
+
+| Setting | What it does |
+| --- | --- |
+| **Question type** | **Yes or no**, **Choose from a list** or **Enter text**. |
+| **Question** and **Message** | The dialog's text. Both accept [template variables](#template-variables). |
+| **Choices** | For a list: one choice per line, or a JSON array. Insert a variable, for example `{{ vars.scenes }}`, to take the list from it. At most 50 choices of up to 100 characters each. |
+| **Placeholder** and **Default text** | For text: what the empty field shows, and the text it starts with. An answer can be up to 1000 characters long. |
+| **Ask on** | **The device that pressed the widget**, **A chosen device** or **Every connected client**. |
+| **Timeout** | How long the question waits, at most 9 minutes. The dialog says when it closes. |
+| **Answer variable** | Gets `true` or `false`, the chosen item or the text. |
+| **Index variable** | For a list: the position of the chosen item, starting at `0`. |
+| **Outcome variable** | How the question ended, see below. |
+
+Each of the three variable fields has a **+** button that creates the variable right there, see [Variables](#variables).
+
+The first screen that answers wins, and the dialog closes everywhere else. The outcome variable gets one of
+these values, so an **If / Else** after the question can react to it:
+
+| Value | When |
+| --- | --- |
+| `answered` | Somebody answered. |
+| `cancelled` | Somebody pressed **Cancel** or closed the dialog. |
+| `timedOut` | Nobody answered in time. |
+| `noClient` | No screen could show the question, so it was not asked. |
+
+Without an answer the answer variable gets `false` for a yes or no question and an empty text otherwise, and
+the index variable gets `-1`, so an earlier answer is never used by mistake.
+
+- **No screen to ask:** a hardware deck cannot show dialogs, and an automation or a flow started by an AI
+  client has no pressing device. With **The device that pressed the widget**, both end as `noClient` right
+  away. Choose **A chosen device** or **Every connected client** for those.
+- **The desktop app:** a question asked from a widget pressed in the desktop app appears in the desktop app
+  and in every web client signed in as administrator.
+- **Stopping the flow:** every flow stops after 10 minutes in total, counting the steps before the question
+  too, and a flow you stop yourself stops right away. Either way the dialog closes and the steps after the
+  question do not run.
+- **Trying it out:** running the flow from the flow editor stops it after 2 minutes, and running the action
+  on its own, also from an AI client, after 30 seconds. Keep the timeout below that while you test, or press
+  the widget, which gets the full 10 minutes.
+- **The answer is typed by a person:** Macro Deck stores it exactly as entered and never runs it as a
+  template. Check it before you pass it on, for example to **Run Command**.
+
 ## Integrations and the Store
 
 Integrations connect Macro Deck to other apps: OBS, Home Assistant, Voicemeeter, Spotify,
 [SoundPad](/guide/soundpad/), [AutoHotkey](/guide/autohotkey/), Twitch, [YouTube](/guide/youtube/), [Jellyfin](/guide/jellyfin/), Discord,
 [Discord Webhooks](/guide/discord-webhooks/), Google Calendar,
-Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/) and more. Turn on the ones you use under **Integrations**.
+Outlook Calendar, [email over IMAP](#connect-an-imap-account), [AdGuard Home](/guide/adguard-home/), [Steam](/guide/steam/), [Ping](/guide/ping/),
+[Wake on LAN](/guide/wake-on-lan/) and more. Turn on the ones you use under **Integrations**.
 
 ![The Integrations page listing ADB, Discord, Email (IMAP), Google Calendar, Home Assistant, HTTP, Jellyfin and Keyboard, with HTTP, Jellyfin and Keyboard turned on](../../../assets/guide/integrations.png)
 
@@ -899,9 +1014,12 @@ The **⋮** menu at the top right of the Store has **Refresh Store** and **Store
 fetches the latest catalog and opens a log of each step as it happens. Macro Deck also refreshes on its own
 a few seconds after it starts and then once an hour. While a refresh runs, the Store header says
 **Refreshing…** in every window, and choosing **Refresh Store** again opens the log of that refresh instead of
-starting a second one. If the store registry is being updated while a refresh runs, the log says so and Macro
-Deck tries again a few times over about five minutes before it reports a failure. **Store settings** opens
-**Settings > Store**.
+starting a second one. If the Store still hands out an older catalog than the one Macro Deck already has, as
+can happen right after the Store was updated, the log says so and Macro Deck tries again a few times over about
+five minutes before it reports a failure. When the log says nothing is new, **Force refresh** at the bottom of
+the log discards the copy of the catalog on your computer and downloads it again, for example when the Store
+shows entries that look outdated. The old copy stays in use until the new one has been checked. **Store
+settings** opens **Settings > Store**.
 
 **Installed** at the top of the Store lists the Store's plugins and icon packs you have installed, with their
 version and any update waiting for them. While updates are waiting, **Installed** shows how many. Update one

@@ -360,9 +360,9 @@ with `Parameters` set to `null`; the real publisher sends nothing to the host in
 
 Events are one provider-shaped capability per plugin: `describe` returns the merged catalogue of every
 `IEventProvider` in the process, `options` routes to `IDynamicEventOptionsProvider`. The catalogue is
-snapshot-backed. Occurrences travel as the fire-and-forget
-[`event.publish`](/reference/websocket/#events-logs-and-state) message; the host qualifies the id with
-the authenticated plugin id. What the user bound arrives as the push-only
+snapshot-backed. Occurrences travel as the
+[`event.publish`](/reference/websocket/#events-logs-and-state) message, which gets no reply unless
+the host refuses it; the host qualifies the id with the authenticated plugin id. What the user bound arrives as the push-only
 [`host.state`](/reference/websocket/#host-callbacks) api `event-bindings`, scoped to the plugin's own
 events and sent on registration and whenever that list changes. See
 [capability parity](/reference/capability-parity/).

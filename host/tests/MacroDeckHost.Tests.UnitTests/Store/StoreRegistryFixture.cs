@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.IO.Compression;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -12,6 +14,12 @@ namespace MacroDeckHost.Tests.UnitTests.Store;
 internal sealed class StoreRegistryFixture
 {
 	public const string BaseUrl = "https://registry.test/main/";
+
+	public const string ArchiveUrl = "https://archive.test/zip/refs/heads/main";
+
+	public const string ArchivePath = "archive.zip";
+
+	private const string ArchiveRoot = "Registry-main";
 
 	private static readonly JsonSerializerOptions _json =
 		new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
@@ -67,6 +75,8 @@ internal sealed class StoreRegistryFixture
 	public TaskCompletionSource ManifestRequested { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
 	public int ManifestRequests => _manifestRequests;
+
+	public ConcurrentQueue<string> Requested { get; } = new();
 
 	private int _manifestRequests;
 
@@ -296,8 +306,29 @@ internal sealed class StoreRegistryFixture
 
 	public IReadOnlyDictionary<string, byte[]> BuiltTree { get; private set; } = new Dictionary<string, byte[]>();
 
+	public static byte[] Zip(IReadOnlyDictionary<string, byte[]> tree, string root = ArchiveRoot)
+	{
+		using var buffer = new MemoryStream();
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+		{
+			zip.CreateEntry($"{root}/");
+			foreach (var (path, body) in tree.OrderBy(file => file.Key, StringComparer.Ordinal))
+			{
+				using var stream = zip.CreateEntry($"{root}/{path}").Open();
+				stream.Write(body);
+			}
+		}
+
+		return buffer.ToArray();
+	}
+
 	public static HttpResponseMessage Serve(IReadOnlyDictionary<string, byte[]> tree, string relative)
 	{
+		if (relative == ArchivePath)
+		{
+			return new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Zip(tree)) };
+		}
+
 		return tree.TryGetValue(relative, out var body)
 			? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(body) }
 			: new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new ByteArrayContent([]) };
@@ -360,9 +391,12 @@ internal sealed class StoreRegistryFixture
 
 				var path = request.RequestUri!.AbsolutePath;
 				const string prefix = "/main/";
-				var relative = path.StartsWith(prefix, StringComparison.Ordinal)
-					? path[prefix.Length..]
-					: path.TrimStart('/');
+				var relative = request.RequestUri.ToString() == ArchiveUrl
+					? ArchivePath
+					: path.StartsWith(prefix, StringComparison.Ordinal)
+						? path[prefix.Length..]
+						: path.TrimStart('/');
+				_fixture.Requested.Enqueue(relative);
 
 				if (_fixture.ServeOverride?.Invoke(relative) is { } overridden)
 				{

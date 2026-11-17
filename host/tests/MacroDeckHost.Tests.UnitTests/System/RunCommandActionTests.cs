@@ -108,7 +108,54 @@ public class RunCommandActionTests
 		{
 			Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Failed));
 			Assert.That(result.ErrorCode, Is.EqualTo("EXIT_CODE"));
+			Assert.That(result.ErrorMessage.Localized?.Arguments["code"], Is.EqualTo(3));
 		});
+	}
+
+	[Test]
+	public async Task RunCommand_runs_every_line_of_a_multi_line_command()
+	{
+		var output = await CaptureAsync("default", "echo one\necho two");
+
+		Assert.That(Lines(output), Is.EqualTo(new[] { "one", "two" }));
+	}
+
+	[Test]
+	[Platform(Exclude = "Win")]
+	public async Task RunCommand_passes_quoted_arguments_to_the_shell_unchanged()
+	{
+		var output = await CaptureAsync("default", "printf '%s\\n' \"a b\" 'c  d' \"e'f\"");
+
+		Assert.That(Lines(output), Is.EqualTo(new[] { "a b", "c  d", "e'f" }));
+	}
+
+	[Test]
+	[Platform(Exclude = "Win")]
+	public async Task RunCommand_with_output_capture_stops_the_command_when_the_run_is_cancelled()
+	{
+		using var pidFile = new PidFile();
+		using var targets = new ActionVariableTargets(SystemIntegration.IntegrationId);
+		using var cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+		var action = new RunCommandActionDefinition(new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		});
+
+		Assert.That(async () => await action.CreateExecutor()
+				.ExecuteAsync(new ActionExecutionContext
+				{
+					Parameters = new Dictionary<string, object>
+					{
+						["shell"] = "default",
+						["command"] = pidFile.LongRunningCommand,
+						["outputVariable"] = "result",
+						["timeout"] = 30
+					},
+					CancellationToken = cancellation.Token
+				}),
+			Throws.InstanceOf<OperationCanceledException>());
+		Assert.That(await pidFile.HasStopped(), Is.True);
 	}
 
 	[Test]
@@ -283,6 +330,36 @@ public class RunCommandActionTests
 		{
 			File.Delete(path);
 		}
+	}
+
+	private static async Task<string> CaptureAsync(string shell, string command)
+	{
+		using var targets = new ActionVariableTargets(SystemIntegration.IntegrationId);
+		var action = new RunCommandActionDefinition(new VariableApiAccessor
+		{
+			Current = targets.IntegrationVariables,
+			UserVariables = targets.UserVariables
+		});
+
+		var result = await action.CreateExecutor()
+			.ExecuteAsync(new ActionExecutionContext
+			{
+				Parameters = new Dictionary<string, object>
+				{
+					["shell"] = shell,
+					["command"] = command,
+					["outputVariable"] = "result",
+					["timeout"] = 30
+				}
+			});
+
+		Assert.That(result.Status, Is.EqualTo(ActionResultStatus.Succeeded), result.ErrorCode);
+		return (await targets.ValueOf("result"))?.ToString() ?? string.Empty;
+	}
+
+	private static string[] Lines(string output)
+	{
+		return output.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 	}
 
 	private sealed class PidFile : IDisposable

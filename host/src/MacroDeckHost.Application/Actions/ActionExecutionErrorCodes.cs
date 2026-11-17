@@ -36,4 +36,6 @@ public static class ActionExecutionErrorCodes
 	public const string HostLocked = "HOST_LOCKED";
 
 	public const string SecretApprovalPending = "SECRET_APPROVAL_PENDING";
+
+	public const string SecretApprovalDeclined = "SECRET_APPROVAL_DECLINED";
 }

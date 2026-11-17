@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { FileOpenService, FolderService } from '../../../services';
 import { ActionButtonTriggerType, AppStrings, type EmptyCellStyle, GridRect, GridWidget, PinScope, WidgetType, WidgetClipboardEntry, collectIconPrefetchTargets, rectsOverlap, canPlaceGroup, LocalizedText, resolveLocalizedText, WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
-import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService, WidgetTypeFavoritesService } from '@shared';
+import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, WidgetStyleClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService, WidgetTypeFavoritesService } from '@shared';
 import { DeckEditorGridComponent } from '../../deck-editor/deck-editor-grid.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { ArchivePreviewModalComponent } from '../../portable/archive-preview-modal/archive-preview-modal.component';
@@ -33,6 +33,7 @@ export class DeckPageComponent {
   protected readonly folderService = inject(FolderService);
   protected readonly profileService = inject(ProfileService);
   protected readonly clipboard = inject(WidgetClipboardService);
+  protected readonly styleClipboard = inject(WidgetStyleClipboardService);
   protected readonly selection = inject(WidgetSelectionService);
   private readonly portability = inject(PortabilityService);
   private readonly iconPacks = inject(IconPackService);
@@ -359,6 +360,34 @@ export class DeckPageComponent {
     this.clipboard.cut(widget, folderId);
   }
 
+  async onWidgetCopyStyle(widget: GridWidget): Promise<void> {
+    this.pageError.set(null);
+    const result = await this.folderService.copyWidgetStyle(widget.id);
+    if (!result.success || !result.data) {
+      this.pageError.set(result.error?.message || this.localization.translateKey(AppStrings.Deck.CopyStyleFailed));
+      return;
+    }
+    this.styleClipboard.set(result.data);
+  }
+
+  async onWidgetPasteStyle(widget: GridWidget): Promise<void> {
+    const ids = this.selection.count() > 1 && this.selection.has(widget.id)
+      ? [...this.selection.ids()]
+      : [widget.id];
+    await this.pasteStyle(ids);
+  }
+
+  private async pasteStyle(widgetIds: readonly string[]): Promise<void> {
+    const style = this.styleClipboard.style();
+    if (style === null || widgetIds.length === 0) return;
+
+    this.pageError.set(null);
+    const result = await this.folderService.pasteWidgetStyle(style, widgetIds);
+    if (!result.success) {
+      this.pageError.set(result.error?.message || this.localization.translateKey(AppStrings.Deck.PasteStyleFailed));
+    }
+  }
+
   protected selectedWidgets(): GridWidget[] {
     return this.folderService.currentWidgets().filter(w => this.selection.has(w.id));
   }
@@ -501,6 +530,17 @@ export class DeckPageComponent {
     if (event.key.toLowerCase() === 'a') {
       event.preventDefault();
       this.selection.selectAll(this.folderService.currentWidgets());
+      return;
+    }
+
+    if (event.shiftKey && (event.key.toLowerCase() === 'c' || event.key.toLowerCase() === 'v')) {
+      event.preventDefault();
+      const widgets = this.selectedWidgets();
+      if (event.key.toLowerCase() === 'v') {
+        void this.pasteStyle(widgets.map(w => w.id));
+      } else if (widgets.length === 1) {
+        void this.onWidgetCopyStyle(widgets[0]);
+      }
       return;
     }
 

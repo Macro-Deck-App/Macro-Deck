@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using System.Text.Json;
 using MacroDeckHost.Integrations.StreamlabsDesktop.Protocol;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.StreamlabsDesktop;
 

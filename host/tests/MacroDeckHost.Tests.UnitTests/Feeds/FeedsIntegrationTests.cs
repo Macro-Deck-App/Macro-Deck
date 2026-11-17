@@ -89,6 +89,33 @@ internal sealed class FeedsIntegrationTests
 	}
 
 	[Test]
+	public async Task A_feed_served_with_a_public_doctype_is_read()
+	{
+		_server.ServeXml(NewsUrl,
+			"""
+			<?xml version="1.0"?>
+			<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"
+			  "http://my.netscape.com/publish/formats/rss-0.91.dtd">
+			<rss version="0.91">
+			  <channel>
+			    <title>Netscape</title>
+			    <item><title>First</title><link>https://news.example.com/1</link></item>
+			  </channel>
+			</rss>
+			""");
+		var (integration, _) = await StartAsync(feeds => feeds.AddFeed("News", NewsUrl, "news", id: _newsId));
+
+		await integration.RefreshAsync(_newsId);
+
+		var feed = integration.Feeds.Find(_newsId)!;
+		Assert.Multiple(() =>
+		{
+			Assert.That(feed.Status, Is.EqualTo(FeedStatus.Ok));
+			Assert.That(feed.Items.Select(item => item.Title), Is.EqualTo(new[] { "First" }));
+		});
+	}
+
+	[Test]
 	public async Task A_restart_fires_nothing_for_articles_seen_before()
 	{
 		_server.ServeXml(NewsUrl, News(First, Second));

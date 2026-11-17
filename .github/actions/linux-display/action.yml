@@ -1,0 +1,31 @@
+name: Linux display
+description: >
+  Starts Xvfb with an EWMH window manager (openbox), or headless weston with XWayland, and exports
+  DISPLAY (plus WAYLAND_DISPLAY and XDG_RUNTIME_DIR for wayland) for the following steps.
+
+inputs:
+  mode:
+    description: x11 or wayland
+    required: false
+    default: x11
+
+runs:
+  using: composite
+  steps:
+    - name: Install display packages
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+      run: |
+        packages=(xvfb openbox x11-utils x11-xkb-utils)
+        if [ "$MODE" = "wayland" ]; then
+          packages+=(weston xwayland)
+        fi
+        sudo apt-get update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${packages[@]}"
+
+    - name: Start the display
+      shell: bash
+      env:
+        MODE: ${{ inputs.mode }}
+      run: bash "$GITHUB_WORKSPACE/ci/scripts/linux-display.sh" start "$MODE"

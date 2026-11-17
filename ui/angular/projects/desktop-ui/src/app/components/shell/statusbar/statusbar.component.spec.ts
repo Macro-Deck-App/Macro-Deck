@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslatePipe } from '@shared';
 import { NotificationCenterService } from '../../../services/notification-center.service';
 import { NavigationService } from '../../../services';
+import { HostSessionService } from '../../../services/host-session.service';
 import { StatusbarComponent } from './statusbar.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
@@ -10,6 +11,10 @@ const notificationCenterStub = {
   hasNotifications: signal(false),
   hasActiveProgress: signal(false),
   badgeText: signal('0'),
+};
+
+const hostSessionStub = {
+  pluginsDisabledAtStartup: signal(false),
 };
 
 describe('StatusbarComponent', () => {
@@ -22,6 +27,7 @@ describe('StatusbarComponent', () => {
     // other specs set it on the shared document. Clearing it here pins these
     // measurements to the browser default (issue #306).
     document.documentElement.style.removeProperty('font-size');
+    hostSessionStub.pluginsDisabledAtStartup.set(false);
 
     await TestBed.configureTestingModule({
       imports: [StatusbarComponent],
@@ -29,6 +35,7 @@ describe('StatusbarComponent', () => {
         provideZonelessChangeDetection(),
         ...provideLocalizationTesting(),
         { provide: NotificationCenterService, useValue: notificationCenterStub },
+        { provide: HostSessionService, useValue: hostSessionStub },
       ],
     })
       .overrideComponent(StatusbarComponent, { set: { imports: [TranslatePipe], schemas: [NO_ERRORS_SCHEMA] } })
@@ -60,6 +67,19 @@ describe('StatusbarComponent', () => {
     const badge = shellFixture.nativeElement.querySelector('.build-channel-badge') as HTMLElement;
     expect(badge).toBeTruthy();
     expect(badge.textContent?.trim()).toBe('Development Build');
+  });
+
+  it('tells the user that plugins were not started when the host started with them disabled', () => {
+    hostSessionStub.pluginsDisabledAtStartup.set(true);
+    fixture.detectChanges();
+
+    const badge = fixture.nativeElement.querySelector('.plugins-disabled-badge') as HTMLElement;
+    expect(badge.textContent?.trim()).toBe('Plugins disabled');
+    expect(badge.getAttribute('title')).toContain('Developer Tools');
+  });
+
+  it('shows no plugins badge in a normal session', () => {
+    expect(fixture.nativeElement.querySelector('.plugins-disabled-badge')).toBeNull();
   });
 
   it('does not render a Development Build badge for a Production UI', () => {

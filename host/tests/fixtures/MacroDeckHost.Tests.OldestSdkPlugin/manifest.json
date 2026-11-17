@@ -1,0 +1,13 @@
+{
+  "manifestVersion": 1,
+  "id": "app.macro-deck.oldest-sdk-test-plugin",
+  "name": "Oldest SDK Test Plugin",
+  "version": "1.0.0",
+  "description": "Built against the oldest supported published Macro Deck SDK, for the host's compatibility system tests.",
+  "entrypoints": {
+    "win-x64": { "executable": "MacroDeckHost.Tests.OldestSdkPlugin.exe" },
+    "osx-arm64": { "executable": "MacroDeckHost.Tests.OldestSdkPlugin" },
+    "osx-x64": { "executable": "MacroDeckHost.Tests.OldestSdkPlugin" },
+    "linux-x64": { "executable": "MacroDeckHost.Tests.OldestSdkPlugin" }
+  }
+}

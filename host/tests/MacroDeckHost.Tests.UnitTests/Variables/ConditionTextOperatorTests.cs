@@ -90,6 +90,8 @@ public class ConditionTextOperatorTests
 	[TestCase("{\"$var\":\"scaled\"}", "contains", "\"1.50\"", ExpectedResult = true)]
 	[TestCase("{\"$var\":\"zero_padded\"}", "startsWith", "\"00\"", ExpectedResult = true)]
 	[TestCase("\"a1.5\"", "contains", "1.5", ExpectedResult = true)]
+	[TestCase("{\"$var\":\"track\"}", "==", "\"007\"", ExpectedResult = true)]
+	[TestCase("{\"$var\":\"track\"}", "contains", "\"007\"", ExpectedResult = true)]
 	public bool Text_comparison_reads_a_number_the_same_on_a_comma_culture_host(
 		string left,
 		string op,

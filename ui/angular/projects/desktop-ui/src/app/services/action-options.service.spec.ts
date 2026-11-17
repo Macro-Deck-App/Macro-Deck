@@ -85,6 +85,59 @@ describe('ActionOptionsService', () => {
     expect(apiSpy.getActionParameterOptions).toHaveBeenCalledTimes(3);
   });
 
+  describe('after the options of a source changed', () => {
+    const answer = (values: string[]): GetActionParameterOptionsResponse => ({
+      options: values.map(value => ({ value })),
+      allowsCustomValue: true,
+      cacheSeconds: 5,
+    });
+    const userVariables = (parameterName: string, filter?: string): GetActionParameterOptionsRequest => ({
+      integrationId: 'app.macro-deck.system',
+      actionId: 'ask-question',
+      parameterName,
+      optionsSourceId: 'macrodeck.user-variables',
+      filter,
+    });
+    const devices: GetActionParameterOptionsRequest = {
+      integrationId: 'adb',
+      actionId: 'screenshot',
+      parameterName: 'device',
+      optionsSourceId: 'macrodeck.devices',
+    };
+
+    it('asks the host again for every field and filter fed by that source, and only those', async () => {
+      apiSpy.getActionParameterOptions.and.resolveTo(answer([]));
+      await service.getOptions(userVariables('answerVariable', 'score'));
+      await service.getOptions(userVariables('outcomeVariable'));
+      await service.getOptions(devices);
+      apiSpy.getActionParameterOptions.and.resolveTo(answer(['score']));
+
+      service.invalidateOptionsSource('macrodeck.user-variables');
+
+      expect((await service.getOptions(userVariables('answerVariable', 'score'))).options.map(o => o.value))
+        .toEqual(['score']);
+      expect((await service.getOptions(userVariables('outcomeVariable'))).options.map(o => o.value))
+        .toEqual(['score']);
+      expect((await service.getOptions(devices)).options).toEqual([]);
+    });
+
+    it('does not let an answer already on its way fill the cache with the old options', async () => {
+      let answerStale!: (response: GetActionParameterOptionsResponse) => void;
+      apiSpy.getActionParameterOptions.and.returnValue(new Promise(resolve => answerStale = resolve));
+      const stale = service.getOptions(userVariables('answerVariable'));
+
+      service.invalidateOptionsSource('macrodeck.user-variables');
+      apiSpy.getActionParameterOptions.and.resolveTo(answer(['score']));
+      const fresh = service.getOptions(userVariables('answerVariable'));
+      answerStale(answer([]));
+      await stale;
+      await fresh;
+
+      expect((await service.getOptions(userVariables('answerVariable'))).options.map(o => o.value))
+        .toEqual(['score']);
+    });
+  });
+
   describe('loadLabeledOptions', () => {
     it('names an option by its value when the host sent no label', async () => {
       apiSpy.getActionParameterOptions.and.resolveTo({ options: [{ value: 'guid-1', label: '' }], allowsCustomValue: false });

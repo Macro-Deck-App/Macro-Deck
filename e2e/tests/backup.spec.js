@@ -1,7 +1,15 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test, useIsolatedHost } from './support/fixtures.js';
-import { connectWebClient, expectLivePush, webDeck } from './support/pages.js';
+import {
+  connectWebClient,
+  createDesktopBackup,
+  expectLivePush,
+  openDesktop,
+  openDesktopBackups,
+  restoreDesktopBackup,
+  webDeck,
+} from './support/pages.js';
 
 useIsolatedHost('backup', { prepare: api => api.completeOnboarding() });
 
@@ -45,7 +53,7 @@ async function restore(api, host, backupId, components) {
 
 // E2E-BAK-01: a restore and its restart bring deleted data back, a partial restore keeps the account
 // and paired devices, and neither leaves a failed restore behind in the data directory.
-test('a full restore brings deleted data back and keeps the paired Web Client signed in', async ({ browser, api, host }) => {
+test('a full restore brings deleted data back and keeps the paired Web Client signed in', async ({ page, browser, api, host }) => {
   test.setTimeout(240_000);
   // A profile of its own to keep, so deleting the backed-up one is never refused as the last one.
   await api.profile('E2E Keeper');
@@ -55,13 +63,14 @@ test('a full restore brings deleted data back and keeps the paired Web Client si
   const web = await connectWebClient(browser, host, api);
   await api.openProfileOnDevice(web.device.id, profile.id);
 
-  const backup = await createBackup(api);
+  await openDesktop(page, host);
+  await openDesktopBackups(page);
+  const backupId = await createDesktopBackup(page, api);
   await api.delete(`/api/profiles/${profile.id}`);
   await api.deleteVariable('e2e_backed_up');
   expect((await api.profiles()).some(item => item.id === profile.id)).toBe(false);
 
-  const catalog = (await api.get('/api/backups')).backups.find(item => item.id === backup.id);
-  await restore(api, host, backup.id, catalog.components);
+  await restoreDesktopBackup(page, host, backupId);
 
   await expect.poll(async () => (await api.profiles()).some(item => item.id === profile.id), { timeout: 30_000 })
     .toBe(true);
@@ -96,5 +105,30 @@ test('restoring only integrations keeps the account and the paired Web Client', 
     data: { username: 'e2e-user', password: 'macro-deck-e2e-password', scope: 'client' },
   });
   expect(login.ok()).toBe(true);
+  await web.context.close();
+});
+
+// The UI adds the groups a choice depends on, and Integrations needs Accounts, so the UI picks Variables.
+test('a partial restore chosen in the desktop UI keeps the account and the paired Web Client', async ({ page, browser, api, host }) => {
+  test.setTimeout(240_000);
+  const profile = await api.profile('E2E Partial UI Restore', { columns: 3, rows: 2 });
+  const button = await api.actionButton(profile.rootFolder.id, { label: 'partial ui' });
+  await api.variable('e2e_partial_ui', { value: 'from the backup' });
+  await openDesktop(page, host);
+  await openDesktopBackups(page);
+  const backupId = await createDesktopBackup(page, api);
+  await api.setVariable('e2e_partial_ui', 'changed later');
+  const web = await connectWebClient(browser, host, api);
+  await api.openProfileOnDevice(web.device.id, profile.id);
+
+  const prepared = await restoreDesktopBackup(page, host, backupId, ['Variables']);
+  expect(prepared.components).toEqual(['Variables']);
+  expect(failedLeftovers(host.dataDir)).toEqual([]);
+  expect(await api.variableValue('e2e_partial_ui')).toBe('from the backup');
+
+  await waitUntilOnline(api, web.device.id);
+  await expect(web.page.getByText('Sign in to continue')).toHaveCount(0);
+  await api.openProfileOnDevice(web.device.id, profile.id);
+  await expectLivePush(web.page, api, button.id, undefined, 30_000);
   await web.context.close();
 });

@@ -1,0 +1,14 @@
+{
+  "manifestVersion": 1,
+  "id": "app.macro-deck.e2e-fixture-plugin",
+  "name": "E2E Fixture Plugin",
+  "version": "1.0.0",
+  "description": "Offers an action, a variable and a widget type for the end-to-end tests.",
+  "entrypoints": {
+    "win-x64": { "executable": "MacroDeckHost.Tests.E2EPlugin.dll", "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" } },
+    "linux-x64": { "executable": "MacroDeckHost.Tests.E2EPlugin.dll", "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" } },
+    "linux-arm64": { "executable": "MacroDeckHost.Tests.E2EPlugin.dll", "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" } },
+    "osx-x64": { "executable": "MacroDeckHost.Tests.E2EPlugin.dll", "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" } },
+    "osx-arm64": { "executable": "MacroDeckHost.Tests.E2EPlugin.dll", "runtime": { "kind": "FrameworkDependent", "dotnetVersion": "10.0" } }
+  }
+}

@@ -35,11 +35,15 @@ Backups are encrypted with a recovery key. Without it, a backup can only be rest
 that made it. Show it in **Settings > Backups > Recovery key** with **Show recovery key** and keep it
 somewhere safe, separate from your backups.
 
+When Macro Deck shows a newly created key, the window stays open until you tick that you have stored the key
+and choose **Done**, also during the first setup.
+
 When you regenerate the recovery key, backups made before that still need the old key.
 
-If Macro Deck can no longer read the stored recovery key, the next backup creates a new one, and **Recovery
-key** says that the key has never been shown. Show the new key and keep it as well: backups made before
-still need the key you saved earlier.
+If Macro Deck can no longer read the stored recovery key, **Recovery key** says so. Choose **Create new
+recovery key** to make a new key and save it right away. Otherwise the next backup creates one, and
+**Recovery key** says that the key has never been shown. Either way, keep the new key as well: backups
+made before still need the key you saved earlier.
 
 ## Restore a backup
 

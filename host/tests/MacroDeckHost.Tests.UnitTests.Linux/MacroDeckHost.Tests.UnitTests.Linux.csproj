@@ -31,6 +31,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\MacroDeckHost.Tests.PlatformInput\Support\Interactive.cs" Link="TestSupport\Interactive.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Using Include="NUnit.Framework" />
         <Using Include="MacroDeck.Sdk.Input" />
     </ItemGroup>

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Serialization;
+using MacroDeck.Sdk.Decks;
 
 namespace MacroDeck.Plugin.Protocol.Tests.UnitTests.Callbacks;
 
@@ -18,6 +19,26 @@ public class DeckStateDtoTests
 			Assert.That(state.Clients, Is.Empty);
 			Assert.That(state.Revision, Is.Zero);
 		});
+	}
+
+	[Test]
+	public void A_client_from_a_host_that_predates_device_sessions_reads_as_not_a_device_session()
+	{
+		var state = JsonSerializer.Deserialize<DeckStateDto>(
+			"""{"clients":[{"clientId":"device:d1","deviceId":"d1","profileId":"p1","folderId":"f1"}]}""",
+			PluginProtocolJson.Options)!;
+
+		Assert.That(state.Clients.Single().IsDeviceSession, Is.False);
+	}
+
+	[Test]
+	public void A_device_session_travels_under_its_wire_name()
+	{
+		var json = JsonSerializer.SerializeToElement(
+			new DeckClientDto { ClientId = "device:d1", IsDeviceSession = true },
+			PluginProtocolJson.Options);
+
+		Assert.That(json.GetProperty("isDeviceSession").GetBoolean(), Is.True);
 	}
 
 	[Test]
@@ -42,5 +63,54 @@ public class DeckStateDtoTests
 			Assert.That(client.GetProperty("profileId").GetString(), Is.EqualTo("p1"));
 			Assert.That(client.GetProperty("folderId").GetString(), Is.EqualTo("f1"));
 		});
+	}
+
+	[Test]
+	public void A_folder_from_an_older_host_reads_with_no_tree_position()
+	{
+		var state = JsonSerializer.Deserialize<DeckStateDto>("""{"folders":[{"id":"f1","label":"Home"}]}""",
+			PluginProtocolJson.Options)!;
+
+		var folder = state.Folders.Single();
+		Assert.Multiple(() =>
+		{
+			Assert.That(folder.Id, Is.EqualTo("f1"));
+			Assert.That(folder.ProfileId, Is.Null);
+			Assert.That(folder.ParentId, Is.Null);
+			Assert.That(folder.Order, Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_folders_tree_position_travels_under_its_wire_names()
+	{
+		var json = JsonSerializer.SerializeToElement(new DeckStateDto
+			{
+				Folders =
+				[
+					new DeckFolder { Id = "f2", Label = "Scenes", ProfileId = "p1", ParentId = "f1", Order = 3 }
+				]
+			},
+			PluginProtocolJson.Options);
+
+		var folder = json.GetProperty("folders")[0];
+		Assert.Multiple(() =>
+		{
+			Assert.That(folder.GetProperty("profileId").GetString(), Is.EqualTo("p1"));
+			Assert.That(folder.GetProperty("parentId").GetString(), Is.EqualTo("f1"));
+			Assert.That(folder.GetProperty("order").GetInt32(), Is.EqualTo(3));
+		});
+	}
+
+	[Test]
+	public void A_top_level_folder_omits_its_parent_on_the_wire()
+	{
+		var json = JsonSerializer.SerializeToElement(new DeckStateDto
+			{
+				Folders = [new DeckFolder { Id = "f1", Label = "Home", ProfileId = "p1", Order = 0 }]
+			},
+			PluginProtocolJson.Options);
+
+		Assert.That(json.GetProperty("folders")[0].TryGetProperty("parentId", out _), Is.False);
 	}
 }

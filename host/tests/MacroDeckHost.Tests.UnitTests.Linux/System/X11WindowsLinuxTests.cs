@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Tests.Support;
 
 namespace MacroDeckHost.Tests.UnitTests.Linux.System;
 
 [Platform("Linux")]
+[Category("Interactive")]
 [SupportedOSPlatform("linux")]
 public class X11WindowsLinuxTests
 {
@@ -14,7 +16,7 @@ public class X11WindowsLinuxTests
 	public void Reading_a_window_that_was_just_closed_returns_nothing_instead_of_terminating_the_process()
 	{
 		var display = TryOpenDisplay();
-		Assume.That(display, Is.Not.EqualTo(IntPtr.Zero), "needs libX11 and an X11 display, for example Xvfb");
+		Interactive.Require(display != IntPtr.Zero, "needs libX11 and an X11 display, for example Xvfb");
 
 		try
 		{

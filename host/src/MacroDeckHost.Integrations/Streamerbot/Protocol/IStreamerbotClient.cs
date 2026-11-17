@@ -26,6 +26,7 @@ internal sealed class StreamerbotRequestException : Exception
 		: base($"Streamer.bot rejected '{request}': {error ?? "unknown error"}")
 	{
 		Request = request;
+		Rejected = true;
 	}
 
 	public StreamerbotRequestException(string message)
@@ -41,6 +42,8 @@ internal sealed class StreamerbotRequestException : Exception
 	}
 
 	public string Request { get; }
+
+	public bool Rejected { get; }
 }
 
 internal sealed class StreamerbotAuthenticationException : Exception

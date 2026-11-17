@@ -31,6 +31,16 @@
   color: var(--color-text-muted);
 }
 
+.managed-plugins-disabled-notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 42%, transparent);
+  border-radius: var(--radius-md);
+  background-color: var(--color-warning-muted);
+  color: var(--color-text-primary);
+  cursor: default;
+}
+
 .managed-plugins-error {
   display: block;
 }

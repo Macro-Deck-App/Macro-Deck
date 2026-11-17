@@ -8,6 +8,7 @@ import {
 import { ErrorBannerComponent, LocalizationService, ToastService, TranslatePipe } from '@shared';
 import { EmptyStateComponent } from '../../../../../feedback/empty-state/empty-state.component';
 import { DropdownMenuComponent } from '../../../../../overlay/dropdown-menu/dropdown-menu.component';
+import { HostSessionService } from '../../../../../../services/host-session.service';
 import { PluginRuntimeService } from '../../../../../../services/plugin-runtime.service';
 
 const STARTABLE_STATES = new Set(['stopped', 'failed']);
@@ -29,6 +30,7 @@ const RESTARTABLE_STATES = new Set(['starting', 'running', 'backoff', 'failed'])
 })
 export class ManagedPluginsSectionComponent {
   protected readonly runtimeService = inject(PluginRuntimeService);
+  protected readonly hostSession = inject(HostSessionService);
   private readonly toastService = inject(ToastService);
   private readonly localization = inject(LocalizationService);
 

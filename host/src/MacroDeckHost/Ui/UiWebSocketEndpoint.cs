@@ -83,6 +83,7 @@ public sealed class UiWebSocketEndpoint(
 		UiWebSocketDispatcher? dispatcher = null;
 		IServiceScope? connectionScope = null;
 		var dispatcherStarted = false;
+		var opened = false;
 
 		ValueTask<bool> Enqueue(UiWebSocketEnvelope message, CancellationToken token)
 		{
@@ -137,6 +138,8 @@ public sealed class UiWebSocketEndpoint(
 				new UiWebSocketEnvelope(UiWebSocketProtocol.Version, "welcome", null, null, hello.Id, null, null),
 				cancellation.Token);
 			transport.Add(connectionId, Enqueue);
+			opened = true;
+			_logger.Information("UI connection {ConnectionId} opened", connectionId);
 			await dispatcher.ActivateAsync();
 
 			while (!cancellation.IsCancellationRequested && socket.State == WebSocketState.Open)
@@ -251,6 +254,10 @@ public sealed class UiWebSocketEndpoint(
 			transport.Remove(connectionId);
 			outbound.Writer.TryComplete();
 			await IgnoreFailures(Task.WhenAll(writer, heartbeat));
+			if (opened)
+			{
+				_logger.Information("UI connection {ConnectionId} closed", connectionId);
+			}
 		}
 	}
 

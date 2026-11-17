@@ -60,6 +60,7 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 	private readonly UiState<bool> _uploadFailed = new(false);
 	private readonly UiState<bool> _dirty = new(false);
 	private readonly UiState<AutoHotkeyRunSnapshot?> _run = new(null);
+	private readonly Lock _runGate = new();
 	private readonly UiState<string> _description = new(string.Empty);
 	private readonly UiState<bool> _startWithMacroDeck = new(false);
 	private readonly UiState<bool> _includeHelper = new(true);
@@ -83,6 +84,7 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 	private string _draft = string.Empty;
 	private byte[]? _draftBytes;
 	private string? _resourceName;
+	private AutoHotkeyRunSnapshot? _shownRun;
 	private bool _disposed;
 
 	public AutoHotkeyScriptsPage(IAutoHotkeyPageHost host, string? culture, ILogger logger)
@@ -1032,7 +1034,7 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 				_scriptStatus.Value = result.Status == AutoHotkeyRunStatus.Failed
 					? new AutoHotkeyPageStatus("error", result.ErrorMessage)
 					: null;
-				_run.Value = _runs.LatestRun(id);
+				ShowRun(_runs.LatestRun(id));
 			},
 			_scriptStatus);
 	}
@@ -1123,7 +1125,7 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 		_uploadFailed.Value = false;
 		_dirty.Value = false;
 		LoadSettings(script);
-		_run.Value = _runs.LatestRun(id);
+		ShowRun(_runs.LatestRun(id));
 		var source = await _store.ReadSourceAsync(id, cancellationToken).ConfigureAwait(false);
 		_sourceReadOnly.Value = !source.IsWritable;
 		_savedSource = source.Text;
@@ -1136,7 +1138,7 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 	private async Task ClearSelectionAsync()
 	{
 		_selected.Value = [];
-		_run.Value = null;
+		ShowRun(null);
 		_savedSource = string.Empty;
 		_draft = string.Empty;
 		_draftBytes = null;
@@ -1230,7 +1232,7 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 			}
 			else
 			{
-				_run.Value = _runs.LatestRun(id);
+				ShowRun(_runs.LatestRun(id));
 				await PublishAsync(_draftBytes ?? Encoding.UTF8.GetBytes(_draft), CancellationToken.None)
 					.ConfigureAwait(false);
 			}
@@ -1423,10 +1425,48 @@ internal sealed class AutoHotkeyScriptsPage : IAsyncDisposable
 	{
 		if (snapshot.ScriptId is { } scriptId && scriptId == SelectedId)
 		{
-			_run.Value = snapshot;
+			ShowRun(snapshot);
 		}
 
 		_rows.Value = Rows();
+	}
+
+	private void ShowRun(AutoHotkeyRunSnapshot? snapshot)
+	{
+		// A snapshot read on one thread can arrive after a newer one of the same run raised on another.
+		lock (_runGate)
+		{
+			if (snapshot is not null && _shownRun is { } shown && IsOlder(snapshot, shown))
+			{
+				return;
+			}
+
+			_shownRun = snapshot;
+		}
+
+		// A state write can flush views on this thread, so it never runs under the gate: the last writer
+		// rereads and writes again until the newest snapshot is the one shown.
+		AutoHotkeyRunSnapshot? written;
+		do
+		{
+			written = ShownRun();
+			_run.Value = written;
+		}
+		while (!ReferenceEquals(written, ShownRun()));
+	}
+
+	private AutoHotkeyRunSnapshot? ShownRun()
+	{
+		lock (_runGate)
+		{
+			return _shownRun;
+		}
+	}
+
+	private static bool IsOlder(AutoHotkeyRunSnapshot snapshot, AutoHotkeyRunSnapshot shown)
+	{
+		return snapshot.RunId == shown.RunId
+			&& (snapshot.EndedAt is null && shown.EndedAt is not null || snapshot.OutputVersion < shown.OutputVersion);
 	}
 
 	private void Refresh()

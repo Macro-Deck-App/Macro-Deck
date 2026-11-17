@@ -11,4 +11,6 @@ public sealed class GetHostSessionResponse
 	/// but describing an installation that no longer exists.
 	/// </summary>
 	public bool RestoreApplied { get; set; }
+
+	public bool PluginsDisabledAtStartup { get; set; }
 }

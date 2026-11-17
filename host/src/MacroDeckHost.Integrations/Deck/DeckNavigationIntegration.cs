@@ -20,6 +20,8 @@ public sealed class DeckNavigationIntegration : IIntegration, ISystemIntegration
 		[
 			new ChangeFolderActionDefinition(() => _navigator),
 			new ChangeProfileActionDefinition(() => _navigator),
+			new CycleFolderActionDefinition(true, () => _navigator),
+			new CycleFolderActionDefinition(false, () => _navigator),
 			new DeckActionDefinition("go-to-parent",
 				AppStrings.Integrations.Deck.Actions.GoToParentName(),
 				AppStrings.Integrations.Deck.Actions.GoToParentDescription(),

@@ -52,6 +52,17 @@
   user-select: none;
 }
 
+.plugins-disabled-badge {
+  @include ds.badge;
+
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--color-warning) 42%, transparent);
+  background-color: var(--color-warning-muted);
+  color: var(--color-warning);
+  cursor: default;
+  user-select: none;
+}
+
 .toggle-btn {
   width: var(--control-height-compact);
   height: var(--control-height-compact);

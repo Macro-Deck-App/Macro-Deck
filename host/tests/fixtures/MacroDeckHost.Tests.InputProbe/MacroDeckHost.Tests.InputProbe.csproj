@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
+        <ProjectReference Include="..\..\..\src\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
+    </ItemGroup>
+
+</Project>

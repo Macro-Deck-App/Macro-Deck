@@ -83,10 +83,17 @@ export class IconPickerDialogComponent {
     return query ? icons.filter(i => i.name.toLowerCase().includes(query)) : icons;
   });
 
+  private readonly packsLoaded = signal(false);
+
   constructor() {
-    void this.iconPacks.loadPacks();
+    void this.iconPacks.loadPacks().finally(() => this.packsLoaded.set(true));
 
     effect(() => {
+      // A pack event can land before the list loads; choosing then would skip the default pack for good.
+      if (!this.packsLoaded()) {
+        return;
+      }
+
       const packs = this.iconPacks.packs();
       const selected = this.selectedPackId();
       if (packs.length > 0 && (!selected || !packs.some(p => p.id === selected))) {

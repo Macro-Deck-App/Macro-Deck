@@ -15,6 +15,8 @@ internal sealed class FakeStreamerbotClient : IStreamerbotClient
 
 	public HashSet<string> FailingRequests { get; } = new(StringComparer.Ordinal);
 
+	public HashSet<string> DroppingRequests { get; } = new(StringComparer.Ordinal);
+
 	public List<(string Request, IReadOnlyDictionary<string, object?>? Payload)> Requests { get; } = [];
 
 	public StreamerbotHello? Hello { get; set; }
@@ -64,6 +66,13 @@ internal sealed class FakeStreamerbotClient : IStreamerbotClient
 		if (FailingRequests.Contains(request))
 		{
 			return Task.FromException<JsonElement>(new StreamerbotRequestException(request, "refused"));
+		}
+
+		if (DroppingRequests.Contains(request))
+		{
+			Drop("connection reset");
+			return Task.FromException<JsonElement>(
+				new StreamerbotRequestException("Streamer.bot connection ended: connection reset"));
 		}
 
 		var body = Responses.GetValueOrDefault(request, """{ "status": "ok" }""");

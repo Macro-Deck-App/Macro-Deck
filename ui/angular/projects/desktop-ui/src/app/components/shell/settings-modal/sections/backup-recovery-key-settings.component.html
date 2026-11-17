@@ -15,6 +15,9 @@
         <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
         <span>{{ 'macrodeck.app:Settings.Backups.RecoveryKeyMissingWarning' | translate }}</span>
       </p>
+      <shared-button variant="primary" [loading]="working()" (click)="requestRegenerate()">
+        {{ 'macrodeck.app:Settings.Backups.RegenerateRecoveryKeyButton' | translate }}
+      </shared-button>
     } @else {
       @if (!s.exportedAt) {
         <p class="brk-warning">
@@ -43,6 +46,16 @@
         [cancelText]="'macrodeck:Common.Cancel' | translate"
         (confirm)="confirmReveal()"
         (cancel)="cancelReveal()" />
+    }
+    @case ('regenerateConfirm') {
+      <shared-confirmation-modal
+        [heading]="'macrodeck.app:Settings.Backups.RegenerateConfirmHeading' | translate"
+        [message]="'macrodeck.app:Settings.Backups.RegenerateConfirmMessage' | translate"
+        [confirmText]="'macrodeck.app:Settings.Backups.RegenerateRecoveryKeyButton' | translate"
+        [cancelText]="'macrodeck:Common.Cancel' | translate"
+        maxWidth="min(92vw, 36rem)"
+        (confirm)="confirmRegenerate()"
+        (cancel)="closeModal()" />
     }
     @case ('keyModal') {
       <shared-recovery-key-modal

@@ -171,7 +171,7 @@ internal sealed class BatteryStatePushTests
 
 	private static List<BatteryStateDto> BatteryPushes(FakePluginConnection connection)
 	{
-		return connection.Sent.ToList()
+		return connection.Sent
 			.Where(envelope => envelope.Type == MessageTypes.HostState)
 			.Select(envelope => envelope.Payload!.Value.Deserialize<HostStatePayload>(PluginProtocolJson.Options)!)
 			.Where(payload => payload.Api == HostApis.Batteries)

@@ -143,7 +143,8 @@ internal sealed class PluginSupervisorTests
 
 	private PluginSupervisor CreateSupervisor(
 		UserSessionEnd? sessionEnd = null,
-		IDotnetMuxerLocator? muxerLocator = null)
+		IDotnetMuxerLocator? muxerLocator = null,
+		IPluginRuntimeStateStore? stateStore = null)
 	{
 		var services = new ServiceCollection()
 			.AddSingleton<Mediator.IMediator>(_mediator)
@@ -155,7 +156,7 @@ internal sealed class PluginSupervisorTests
 
 		return new PluginSupervisor(_manifestReader,
 			_catalog,
-			_stateStore,
+			stateStore ?? _stateStore,
 			_journal,
 			_launcher,
 			muxerLocator ?? _muxerLocator,
@@ -992,6 +993,76 @@ internal sealed class PluginSupervisorTests
 			Assert.That(_launcher.Requests.Select(request => request.Environment["MACRO_DECK_PLUGIN_ID"]),
 				Is.EquivalentTo(new[] { PluginId }));
 		});
+	}
+
+	[Test]
+	public async Task With_plugins_disabled_at_startup_a_plugin_set_to_start_automatically_stays_stopped()
+	{
+		_stateStore.States[PluginId] = true;
+		var supervisor = CreateSupervisor(stateStore: new SessionPluginRuntimeStateStore(_stateStore));
+
+		await supervisor.Reconcile();
+		_time.Advance(TimeSpan.FromMinutes(5));
+		await supervisor.Reconcile();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_launcher.Requests, Is.Empty);
+			Assert.That(supervisor.Snapshot().Single(entry => entry.PluginId == PluginId).State,
+				Is.EqualTo(PluginRuntimeState.Stopped));
+			Assert.That(_stateStore.States[PluginId], Is.True);
+		});
+	}
+
+	[Test]
+	public async Task With_plugins_disabled_at_startup_a_manual_start_runs_the_plugin_without_saving_auto_start()
+	{
+		_stateStore.States[PluginId] = false;
+		var supervisor = CreateSupervisor(stateStore: new SessionPluginRuntimeStateStore(_stateStore));
+		await supervisor.Reconcile();
+
+		var started = await supervisor.Start(PluginId);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(started.Success, Is.True, started.Message);
+			Assert.That(_launcher.Requests, Has.Count.EqualTo(1));
+			Assert.That(_stateStore.States[PluginId], Is.False);
+		});
+	}
+
+	[Test]
+	public async Task With_plugins_disabled_at_startup_a_manual_stop_keeps_the_saved_auto_start()
+	{
+		_stateStore.States[PluginId] = true;
+		var supervisor = CreateSupervisor(stateStore: new SessionPluginRuntimeStateStore(_stateStore));
+		await supervisor.Start(PluginId);
+		var process = _launcher.StartedProcesses[0];
+		process.ExitsOnKill = true;
+
+		var stopTask = supervisor.Stop(PluginId, PluginStopReason.UserRequested);
+		process.CompleteExit(0);
+		await stopTask;
+		await supervisor.Reconcile();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_launcher.Requests, Has.Count.EqualTo(1));
+			Assert.That(_stateStore.States[PluginId], Is.True);
+		});
+	}
+
+	[Test]
+	public async Task With_plugins_disabled_at_startup_uninstalling_still_drops_the_saved_auto_start()
+	{
+		_stateStore.States[PluginId] = true;
+		var supervisor = CreateSupervisor(stateStore: new SessionPluginRuntimeStateStore(_stateStore));
+		await supervisor.Reconcile();
+
+		_catalog.Plugins.Clear();
+		await supervisor.Forget(PluginId);
+
+		Assert.That(_stateStore.States.ContainsKey(PluginId), Is.False);
 	}
 
 	[Test]

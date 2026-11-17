@@ -7,9 +7,14 @@ public sealed record StoreRegistryOptions
 
 	public static readonly string OfficialOrigin = OfficialBaseUrl.GetLeftPart(UriPartial.Path);
 
+	public static readonly Uri OfficialArchiveUrl =
+		new("https://codeload.github.com/Macro-Deck-App/Macro-Deck-Store-Registry/zip/refs/heads/main");
+
 	public static readonly StoreRegistryOptions Default = new();
 
 	public Uri BaseUrl { get; init; } = OfficialBaseUrl;
+
+	public Uri ArchiveUrl { get; init; } = OfficialArchiveUrl;
 
 	public string Origin => BaseUrl.GetLeftPart(UriPartial.Path);
 
@@ -28,8 +33,8 @@ public sealed record StoreRegistryOptions
 
 	public TimeSpan DownloadTimeout { get; init; } = TimeSpan.FromMinutes(10);
 
-	// The origin caches every registry path on its own for up to 300 s, so right after a publish the snapshot
-	// and its files can disagree until those entries expire. The waits add up to more than that.
+	// The raw origin caches the manifest for up to 300 s while the archive is served separately, so right after
+	// a publish the two can disagree until that entry expires. The waits add up to more than that.
 	public IReadOnlyList<TimeSpan> UpdateRaceRetryDelays { get; init; } =
 		[TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(210)];
 
@@ -43,6 +48,8 @@ public sealed record StoreRegistryOptions
 	public long MaxRegistryTotalBytes { get; init; } = 64L * 1024 * 1024;
 
 	public int MaxRegistryFiles { get; init; } = 10_000;
+
+	public long MaxRegistryArchiveBytes { get; init; } = 64L * 1024 * 1024;
 
 	public long MaxArtifactBytes { get; init; } = 256L * 1024 * 1024;
 

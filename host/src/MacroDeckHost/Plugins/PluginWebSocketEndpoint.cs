@@ -688,7 +688,7 @@ public sealed class PluginWebSocketEndpoint
 				break;
 
 			case MessageTypes.EventPublish:
-				HandleEventPublish(pluginId, envelope);
+				await HandleEventPublishAsync(connection, pluginId, envelope, cancellationToken);
 				break;
 
 			case MessageTypes.CapabilityDeclare:
@@ -1151,7 +1151,11 @@ public sealed class PluginWebSocketEndpoint
 		}
 	}
 
-	internal void HandleEventPublish(string pluginId, ProtocolEnvelope envelope)
+	internal async Task HandleEventPublishAsync(
+		IPluginConnection connection,
+		string pluginId,
+		ProtocolEnvelope envelope,
+		CancellationToken cancellationToken)
 	{
 		EventPublishPayload? payload;
 		try
@@ -1168,8 +1172,27 @@ public sealed class PluginWebSocketEndpoint
 			return;
 		}
 
+		if (payload.Parameters is { } values && ContainsNonFiniteNumber(values))
+		{
+			await SendProtocolErrorAsync(connection, ProtocolErrorCodes.InvalidPayload, envelope.Id, cancellationToken);
+			return;
+		}
+
 		var parameters = ToParameterDictionary(payload.Parameters);
 		new IntegrationEventPublisher(pluginId, _eventBus, Serilog.Log.Logger).Publish(payload.EventId, parameters);
+	}
+
+	// JSON has no NaN or Infinity, but a literal beyond double range such as 1e400 parses to Infinity,
+	// which consumers could not serialize again. Nested values count too: they reach consumers as JSON text.
+	private static bool ContainsNonFiniteNumber(JsonElement element)
+	{
+		return element.ValueKind switch
+		{
+			JsonValueKind.Number => !element.TryGetInt64(out _) && !double.IsFinite(element.GetDouble()),
+			JsonValueKind.Object => element.EnumerateObject().Any(property => ContainsNonFiniteNumber(property.Value)),
+			JsonValueKind.Array => element.EnumerateArray().Any(ContainsNonFiniteNumber),
+			_ => false
+		};
 	}
 
 	private static Dictionary<string, object?>? ToParameterDictionary(JsonElement? element)

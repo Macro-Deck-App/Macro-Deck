@@ -1,10 +1,12 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Integrations.Keyboard.Native;
+using MacroDeckHost.Tests.Support;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.Keyboard;
 
 [Platform("Win")]
+[Category("Interactive")]
 [SupportedOSPlatform("windows")]
 public class WindowsKeyInputResolutionTests
 {
@@ -62,7 +64,7 @@ public class WindowsKeyInputResolutionTests
 		var layout = LoadKeyboardLayout(layoutId, KlfNoTellShell);
 		if (layout == IntPtr.Zero)
 		{
-			Assert.Inconclusive($"Keyboard layout {layoutId} cannot be loaded");
+			Interactive.Require($"Keyboard layout {layoutId} cannot be loaded");
 		}
 
 		if (!before.Contains(layout))
