@@ -10,7 +10,6 @@ public sealed class X11ResilienceTests
 	private const string PrivateDisplay = ":97";
 
 	[Test]
-	[Ignore("Red today: #1710 the host exits when its X server goes away")]
 	public void The_host_stays_alive_when_the_x_server_goes_away()
 	{
 		using var server = StartPrivateServer();
