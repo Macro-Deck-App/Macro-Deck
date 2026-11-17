@@ -1,8 +1,12 @@
-using MacroDeckHost.Application.MusicPlayer;
-using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeck.Sdk.MusicPlayer;
+using MacroDeckHost.Application.MusicPlayer;
+using MacroDeckHost.Application.Ui.Resources;
+using MacroDeckHost.Infrastructure.MusicPlayer;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 using Serilog;
 using Serilog.Events;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace MacroDeckHost.Tests.UnitTests.MusicPlayer;
 
@@ -51,7 +55,7 @@ public class MusicPlayerArtworkServiceTests
 	}
 
 	[Test]
-	public async Task GetImage_ReencodedArtwork_ServesWebpMasterWithETag()
+	public async Task GetImage_ReencodedArtwork_ServesProcessedMasterWithETag()
 	{
 		var service = CreateService();
 
@@ -61,8 +65,45 @@ public class MusicPlayerArtworkServiceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Content, Is.EqualTo(_processor.Master));
-			Assert.That(result.ContentType, Is.EqualTo("image/webp"));
-			Assert.That(result.ETag, Is.EqualTo($"\"{ArtworkId}-master\""));
+			Assert.That(result.ContentType, Is.EqualTo("image/jpeg"));
+			Assert.That(result.ETag, Is.EqualTo(service.GetETag(ArtworkId, null)));
+			Assert.That(result.ETag,
+				Is.Not.EqualTo($"\"{ArtworkId}-master\""),
+				"an older client may hold WebP bytes under that tag");
+		});
+	}
+
+	[Test]
+	public async Task A_jpeg_cover_reaches_a_ui_resource_as_jpeg_that_safari_before_14_can_draw()
+	{
+		byte[] cover;
+		using (var image = new Image<Rgba32>(600, 600, new Rgba32(200, 40, 40)))
+		{
+			using var stream = new MemoryStream();
+			await image.SaveAsJpegAsync(stream);
+			cover = stream.ToArray();
+		}
+
+		_player.Artwork = new MusicPlayerArtwork(cover, "image/jpeg");
+		var logger = new LoggerConfiguration().CreateLogger();
+		var service = new MusicPlayerArtworkService(_registry, new ImageSharpArtworkProcessor(logger), logger);
+		var store = new UiResourceStore();
+		var resources = new BuiltInUiResources("app.macro-deck.example", store, null, service);
+
+		var full = await resources.RegisterMusicPlayerArtworkAsync("cover", InstanceId, ArtworkId);
+		var small = await resources.RegisterMusicPlayerArtworkAsync("small", InstanceId, ArtworkId, 128);
+
+		Assert.That(full, Is.Not.Null);
+		Assert.That(small, Is.Not.Null);
+		Assert.That(store.TryGet(full.ResourceId, out var servedFull), Is.True);
+		Assert.That(store.TryGet(small.ResourceId, out var servedSmall), Is.True);
+		Assert.Multiple(() =>
+		{
+			foreach (var served in new[] { servedFull, servedSmall })
+			{
+				Assert.That(served.MediaType, Is.EqualTo("image/jpeg"));
+				Assert.That(served.Content.ToArray().Take(3), Is.EqualTo(new byte[] { 0xFF, 0xD8, 0xFF }));
+			}
 		});
 	}
 
@@ -77,7 +118,9 @@ public class MusicPlayerArtworkServiceTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Content, Is.EqualTo(_processor.Variants[128]));
-			Assert.That(result.ETag, Is.EqualTo($"\"{ArtworkId}-100\""));
+			Assert.That(result.ETag, Is.EqualTo(service.GetETag(ArtworkId, 100)));
+			Assert.That(result.ETag, Is.Not.EqualTo(service.GetETag(ArtworkId, null)));
+			Assert.That(result.ETag, Is.Not.EqualTo($"\"{ArtworkId}-100\""));
 		});
 	}
 
@@ -245,7 +288,7 @@ public class MusicPlayerArtworkServiceTests
 
 		public Task<ProcessedArtworkResult?> Process(byte[] original, CancellationToken cancellationToken)
 		{
-			return Task.FromResult(ReturnNull ? null : new ProcessedArtworkResult(Master, Variants));
+			return Task.FromResult(ReturnNull ? null : new ProcessedArtworkResult(Master, Variants, "image/jpeg"));
 		}
 	}
 

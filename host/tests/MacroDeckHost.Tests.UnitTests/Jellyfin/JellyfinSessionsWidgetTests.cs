@@ -242,7 +242,8 @@ internal sealed partial class JellyfinSessionsWidgetTests
 		public Task<ProcessedArtworkResult?> Process(byte[] original, CancellationToken cancellationToken)
 		{
 			return Task.FromResult<ProcessedArtworkResult?>(new ProcessedArtworkResult([9, 9, 9, 9],
-				new Dictionary<int, byte[]> { [128] = [1], [256] = _cover256 }));
+				new Dictionary<int, byte[]> { [128] = [1], [256] = _cover256 },
+				"image/jpeg"));
 		}
 	}
 }

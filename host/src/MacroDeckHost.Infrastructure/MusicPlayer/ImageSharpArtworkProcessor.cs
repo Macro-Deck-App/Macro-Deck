@@ -1,7 +1,10 @@
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Infrastructure.Icons;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using ILogger = Serilog.ILogger;
 
@@ -44,11 +47,15 @@ public sealed class ImageSharpArtworkProcessor : IArtworkProcessor
 
 	private static async Task<ProcessedArtworkResult> Encode(byte[] bytes, CancellationToken cancellationToken)
 	{
-		using var image = Image.Load(ImageSharpDecoding.Options, bytes);
+		using var image = Image.Load<Rgba32>(ImageSharpDecoding.Options, bytes);
 		while (image.Frames.Count > 1)
 		{
 			image.Frames.RemoveFrame(1);
 		}
+
+		// Bake the EXIF orientation into the pixels so every client draws the cover the same way.
+		image.Mutate(ctx => ctx.AutoOrient());
+		image.Metadata.ExifProfile = null;
 
 		if (Math.Max(image.Width, image.Height) > MaxMasterEdge)
 		{
@@ -59,7 +66,10 @@ public sealed class ImageSharpArtworkProcessor : IArtworkProcessor
 			}));
 		}
 
-		var encoder = new WebpEncoder { FileFormat = WebpFileFormatType.Lossy, Quality = Quality };
+		// Never WebP: every client gets this one image and Safari before 14 draws WebP blank.
+		var opaque = IsOpaque(image);
+		IImageEncoder encoder = opaque ? new JpegEncoder { Quality = Quality } : new PngEncoder();
+		var contentType = opaque ? "image/jpeg" : "image/png";
 		var master = await EncodeToBytes(image, encoder, cancellationToken);
 
 		var variants = new Dictionary<int, byte[]>();
@@ -78,12 +88,32 @@ public sealed class ImageSharpArtworkProcessor : IArtworkProcessor
 			variants[size] = await EncodeToBytes(variant, encoder, cancellationToken);
 		}
 
-		return new ProcessedArtworkResult(master, variants);
+		return new ProcessedArtworkResult(master, variants, contentType);
+	}
+
+	private static bool IsOpaque(Image<Rgba32> image)
+	{
+		var opaque = true;
+		image.ProcessPixelRows(accessor =>
+		{
+			for (var y = 0; y < accessor.Height && opaque; y++)
+			{
+				foreach (var pixel in accessor.GetRowSpan(y))
+				{
+					if (pixel.A != byte.MaxValue)
+					{
+						opaque = false;
+						break;
+					}
+				}
+			}
+		});
+		return opaque;
 	}
 
 	private static async Task<byte[]> EncodeToBytes(
 		Image image,
-		WebpEncoder encoder,
+		IImageEncoder encoder,
 		CancellationToken cancellationToken)
 	{
 		using var stream = new MemoryStream();
