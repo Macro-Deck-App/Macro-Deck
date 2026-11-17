@@ -91,6 +91,8 @@ describe('FolderService widget layout', () => {
       'updateFolder',
       'updateWidget',
       'setWidgetsPinned',
+      'copyWidgetStyle',
+      'pasteWidgetStyle',
       'onWidgetTypeCatalogChanged',
       'getWidgetTypes',
     ]);
@@ -913,6 +915,34 @@ describe('FolderService widget layout', () => {
       await service.setWidgetBorderRadius(null);
       expect(service.folders()[0].borderRadius).toBeNull();
       expect(apiSpy.updateFolder).toHaveBeenCalledWith({ id: folderId, widgetBorderRadius: -1 });
+    });
+  });
+
+  describe('widget style', () => {
+    const notFound = { code: 'NOT_FOUND', message: { $localized: { scope: 'macrodeck.app', key: 'Errors.Widgets.NotFound' } } };
+
+    it('hands back the copied style of a widget', async () => {
+      apiSpy.copyWidgetStyle.and.resolveTo({ success: true, style: 'style-1' });
+
+      expect(await service.copyWidgetStyle('w1')).toEqual({ success: true, data: 'style-1' });
+    });
+
+    it('reports a refused paste with the host message as readable text', async () => {
+      apiSpy.pasteWidgetStyle.and.resolveTo({ success: false, error: notFound as never });
+
+      const result = await service.pasteWidgetStyle('style-1', ['w1', 'w2']);
+
+      expect(apiSpy.pasteWidgetStyle).toHaveBeenCalledOnceWith({ widgetIds: ['w1', 'w2'], style: 'style-1' });
+      expect(result.success).toBeFalse();
+      expect(result.error?.message).toBe('Widget not found');
+    });
+
+    it('reports a failed request instead of throwing', async () => {
+      apiSpy.copyWidgetStyle.and.rejectWith(new Error('offline'));
+      apiSpy.pasteWidgetStyle.and.rejectWith(new Error('offline'));
+
+      expect((await service.copyWidgetStyle('w1')).success).toBeFalse();
+      expect((await service.pasteWidgetStyle('style-1', ['w1'])).success).toBeFalse();
     });
   });
 

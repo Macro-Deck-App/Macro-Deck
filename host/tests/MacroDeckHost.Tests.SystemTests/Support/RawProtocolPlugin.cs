@@ -103,6 +103,16 @@ internal sealed class RawProtocolPlugin : IAsyncDisposable
 		return await AnswerToAsync(id);
 	}
 
+	public async Task<JsonNode> PublishEventAnsweredAsync(string eventId, string parametersJson)
+	{
+		var id = NewId();
+		await SendAsync($$$"""
+						   {"type":"event.publish","id":"{{{id}}}","protocolVersion":{{{NegotiatedVersion}}},
+						    "payload":{"eventId":"{{{eventId}}}","parameters":{{{parametersJson}}}}}
+						   """);
+		return await AnswerToAsync(id);
+	}
+
 	public async Task GoodbyeAsync()
 	{
 		await SendAsync($$$"""

@@ -1,4 +1,6 @@
-<shared-modal [heading]="heading()" size="small" (close)="onClose()">
+<shared-modal [heading]="heading()" size="small"
+              [showClose]="!showAcknowledgementCheckbox" [closeOnOverlay]="!showAcknowledgementCheckbox"
+              (close)="onClose()">
   <div class="rkm">
     @if (mode === 'created') {
       <p class="rkm-warning">

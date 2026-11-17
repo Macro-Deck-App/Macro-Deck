@@ -1,3 +1,5 @@
+using System.IO.Compression;
+using System.Net;
 using MacroDeck.Signing.Certificates;
 using MacroDeck.Signing.TestSupport;
 using MacroDeckHost.Application.Events;
@@ -65,24 +67,28 @@ internal sealed class StoreRegistryRefresherTests
 		StoreRegistryFixture fixture,
 		TimeSpan? maxSnapshotAge = null,
 		IReadOnlyList<TimeSpan>? retryDelays = null,
-		Mediator.IMediator? mediator = null)
+		Mediator.IMediator? mediator = null,
+		long? maxArchiveBytes = null)
 	{
-		return Create(fixture.Build(), maxSnapshotAge, retryDelays, mediator);
+		return Create(fixture.Build(), maxSnapshotAge, retryDelays, mediator, maxArchiveBytes);
 	}
 
 	private StoreRegistryRefresher Create(
 		IHttpClientFactory transport,
 		TimeSpan? maxSnapshotAge = null,
 		IReadOnlyList<TimeSpan>? retryDelays = null,
-		Mediator.IMediator? mediator = null)
+		Mediator.IMediator? mediator = null,
+		long? maxArchiveBytes = null)
 	{
 		return new StoreRegistryRefresher(transport,
 			StoreRegistryOptions.Default with
 			{
 				BaseUrl = new Uri(StoreRegistryFixture.BaseUrl),
+				ArchiveUrl = new Uri(StoreRegistryFixture.ArchiveUrl),
 				RootPublicKeyOverride = TestPki.Root.PublicKey,
 				MaxSnapshotAge = maxSnapshotAge ?? StoreRegistryOptions.Default.MaxSnapshotAge,
-				UpdateRaceRetryDelays = retryDelays ?? []
+				UpdateRaceRetryDelays = retryDelays ?? [],
+				MaxRegistryArchiveBytes = maxArchiveBytes ?? StoreRegistryOptions.Default.MaxRegistryArchiveBytes
 			},
 			_state,
 			new StoreRegistryReader(Log.Logger),
@@ -1022,7 +1028,6 @@ internal sealed class StoreRegistryRefresherTests
 				{
 					StoreRegistryRefreshStep.Started,
 					StoreRegistryRefreshStep.FetchingManifest,
-					StoreRegistryRefreshStep.FetchingSignature,
 					StoreRegistryRefreshStep.DownloadingFiles,
 					StoreRegistryRefreshStep.Verifying,
 					StoreRegistryRefreshStep.ReadingCatalog,
@@ -1036,7 +1041,6 @@ internal sealed class StoreRegistryRefresherTests
 				{
 					StoreRegistryRefreshStep.Started,
 					StoreRegistryRefreshStep.FetchingManifest,
-					StoreRegistryRefreshStep.FetchingSignature,
 					StoreRegistryRefreshStep.UpToDate
 				}));
 		});
@@ -1083,62 +1087,66 @@ internal sealed class StoreRegistryRefresherTests
 		});
 	}
 
-	[TestCase(ChangedFile, TestName = "A_file_already_from_the_next_update_is_waited_out_and_that_update_applied")]
-	[TestCase("registry-signature.json",
-		TestName = "A_signature_already_from_the_next_update_is_waited_out_and_that_update_applied")]
-	[TestCase(DeletedFile, TestName = "A_file_the_next_update_deleted_is_waited_out_and_that_update_applied")]
-	public async Task A_refresh_that_straddles_a_registry_update_waits_for_the_update_and_applies_it(string servedEarly)
+	[Test]
+	public async Task A_manifest_ahead_of_the_archive_applies_what_the_archive_holds_and_waits_for_nothing()
 	{
 		var (older, newer) = Generations();
-		var switched = false;
-		older.ServeOverride = relative => switched || relative == servedEarly
+		var refresher = Create(older, retryDelays: _productionDelays);
+		await refresher.Refresh();
+		var armed = _time.ScheduledCount;
+		older.ServeOverride = relative => relative == "registry-manifest.json"
 			? StoreRegistryFixture.Serve(newer.BuiltTree, relative)
 			: null;
-		var refresher = Create(older, retryDelays: _productionDelays);
 
-		var armed = _time.ScheduledCount;
-		var pending = refresher.Refresh();
-		await _time.WaitForScheduleAsync(armed).WaitAsync(TimeSpan.FromSeconds(10));
-		switched = true;
-		_time.Advance(TimeSpan.FromSeconds(30));
-		var result = await pending.WaitAsync(TimeSpan.FromSeconds(10));
+		var lagging = await refresher.Refresh().WaitAsync(TimeSpan.FromSeconds(10));
+		var stillOlder = _state.Load(StoreRegistryFixture.BaseUrl)?.AcceptedSequence;
+		older.ServeOverride = relative => StoreRegistryFixture.Serve(newer.BuiltTree, relative);
+		var caughtUp = await refresher.Refresh().WaitAsync(TimeSpan.FromSeconds(10));
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(lagging.Success, Is.True, lagging.ErrorMessage);
+			Assert.That(stillOlder, Is.EqualTo(1));
+			Assert.That(_time.ScheduledCount, Is.EqualTo(armed));
+			Assert.That(caughtUp.Success, Is.True, caughtUp.ErrorMessage);
 			Assert.That(_state.Load(StoreRegistryFixture.BaseUrl)?.AcceptedSequence, Is.EqualTo(2));
 			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History[0].Changelog,
 				Is.EqualTo(ChangedChangelog));
-			Assert.That(_tracker.Current!.Entries
-					.Where(entry => entry.Step == StoreRegistryRefreshStep.WaitingForRegistryUpdate)
-					.Select(entry => entry.Count),
-				Is.EqualTo(new int?[] { 30 }));
-			Assert.That(_tracker.Current.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
 		});
 	}
 
 	[TestCase(ChangedFile, RegistryRefreshError.SizeMismatch)]
-	[TestCase(DeletedFile, RegistryRefreshError.NetworkFailure)]
-	public async Task A_mismatch_that_outlasts_every_wait_still_fails_with_its_own_error(
-		string servedEarly,
+	[TestCase(DeletedFile, RegistryRefreshError.Malformed)]
+	public async Task An_archive_that_disagrees_with_its_own_manifest_fails_at_once_without_waiting(
+		string path,
 		RegistryRefreshError expected)
 	{
 		var (older, newer) = Generations();
-		older.ServeOverride = relative => relative == servedEarly
-			? StoreRegistryFixture.Serve(newer.BuiltTree, relative)
+		older.Build();
+		var tree = new Dictionary<string, byte[]>(older.BuiltTree, StringComparer.Ordinal);
+		if (newer.BuiltTree.TryGetValue(path, out var replacement))
+		{
+			tree[path] = replacement;
+		}
+		else
+		{
+			tree.Remove(path);
+		}
+
+		older.ServeOverride = relative => relative == StoreRegistryFixture.ArchivePath
+			? StoreRegistryFixture.Serve(tree, relative)
 			: null;
 		var refresher = Create(older, retryDelays: _productionDelays);
+		var armed = _time.ScheduledCount;
 
-		var result = await RefreshThroughWaits(refresher);
+		var result = await refresher.Refresh().WaitAsync(TimeSpan.FromSeconds(10));
 
 		Assert.Multiple(() =>
 		{
 			Assert.That(result.Error, Is.EqualTo(expected));
 			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
 			Assert.That(_state.Load(StoreRegistryFixture.BaseUrl), Is.Null);
-			Assert.That(_tracker.Current!.Entries.Count(entry
-					=> entry.Step == StoreRegistryRefreshStep.WaitingForRegistryUpdate),
-				Is.EqualTo(_productionDelays.Length));
+			Assert.That(_time.ScheduledCount, Is.EqualTo(armed));
 		});
 	}
 
@@ -1185,10 +1193,11 @@ internal sealed class StoreRegistryRefresherTests
 		Shutting_down_while_waiting_for_a_registry_update_ends_the_run_as_cancelled_and_announces_nothing()
 	{
 		var (older, newer) = Generations();
-		older.ServeOverride = relative => relative == ChangedFile
-			? StoreRegistryFixture.Serve(newer.BuiltTree, relative)
-			: null;
-		var refresher = Create(older, retryDelays: _productionDelays);
+		older.Build();
+		var refresher = Create(newer, retryDelays: _productionDelays);
+		await refresher.Refresh();
+		var announced = _mediator.Published.Count;
+		newer.ServeOverride = relative => StoreRegistryFixture.Serve(older.BuiltTree, relative);
 
 		var armed = _time.ScheduledCount;
 		var pending = refresher.Refresh();
@@ -1199,7 +1208,7 @@ internal sealed class StoreRegistryRefresherTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(_tracker.Current!.State, Is.EqualTo(StoreRegistryRefreshRunState.Cancelled));
-			Assert.That(_mediator.Published, Is.Empty);
+			Assert.That(_mediator.Published, Has.Count.EqualTo(announced));
 		});
 	}
 
@@ -1207,11 +1216,12 @@ internal sealed class StoreRegistryRefresherTests
 	public async Task A_refresh_whose_caller_stopped_waiting_still_announces_its_outcome_once()
 	{
 		var (older, newer) = Generations();
+		older.Build();
+		var refresher = Create(newer, retryDelays: _productionDelays);
+		await refresher.Refresh();
+		var before = _mediator.Published.Count;
 		var switched = false;
-		older.ServeOverride = relative => switched || relative == ChangedFile
-			? StoreRegistryFixture.Serve(newer.BuiltTree, relative)
-			: null;
-		var refresher = Create(older, retryDelays: _productionDelays);
+		newer.ServeOverride = relative => switched ? null : StoreRegistryFixture.Serve(older.BuiltTree, relative);
 		using var leaving = new CancellationTokenSource();
 
 		var armed = _time.ScheduledCount;
@@ -1221,14 +1231,14 @@ internal sealed class StoreRegistryRefresherTests
 		Assert.CatchAsync<OperationCanceledException>(async () => await abandoned);
 		switched = true;
 		_time.Advance(TimeSpan.FromSeconds(30));
-		await Eventually(() => _mediator.Published.Count > 0);
+		await Eventually(() => _mediator.Published.Count > before);
 
-		var announced = _mediator.Published.OfType<StoreRegistryRefreshedNotification>().Single();
+		var announced = _mediator.Published.Skip(before).OfType<StoreRegistryRefreshedNotification>().Single();
 		Assert.Multiple(() =>
 		{
 			Assert.That(announced.Status.Sequence, Is.EqualTo(2));
 			Assert.That(announced.Status.LastError, Is.Null);
-			Assert.That(_mediator.Published, Has.Count.EqualTo(1));
+			Assert.That(_mediator.Published, Has.Count.EqualTo(before + 1));
 		});
 	}
 
@@ -1255,6 +1265,172 @@ internal sealed class StoreRegistryRefresherTests
 		{
 			Assert.That(result.Success, Is.True);
 			Assert.That(_tracker.Current!.State, Is.EqualTo(StoreRegistryRefreshRunState.Succeeded));
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+		});
+	}
+
+	[Test]
+	public async Task A_changed_registry_is_fetched_as_one_archive_without_requesting_any_file_on_its_own()
+	{
+		var fixture = Registry();
+		using var refresher = Create(fixture);
+
+		var result = await refresher.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+			Assert.That(fixture.Requested,
+				Is.EqualTo(new[] { "registry-manifest.json", StoreRegistryFixture.ArchivePath }));
+		});
+	}
+
+	[Test]
+	public async Task An_unchanged_registry_is_confirmed_from_its_manifest_without_downloading_the_archive()
+	{
+		var fixture = Registry();
+		using var refresher = Create(fixture);
+		await refresher.Refresh();
+
+		var result = await refresher.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_tracker.Current!.Entries[^1].Step, Is.EqualTo(StoreRegistryRefreshStep.UpToDate));
+			Assert.That(fixture.Requested.Count(path => path == StoreRegistryFixture.ArchivePath), Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public async Task An_archive_entry_the_manifest_does_not_declare_never_reaches_the_cached_registry()
+	{
+		var fixture = Registry();
+		fixture.Build();
+		var tree = new Dictionary<string, byte[]>(fixture.BuiltTree, StringComparer.Ordinal)
+		{
+			["scripts/publish.sh"] = "echo not registry data"u8.ToArray()
+		};
+		fixture.ServeOverride = relative => relative == StoreRegistryFixture.ArchivePath
+			? StoreRegistryFixture.Serve(tree, relative)
+			: null;
+		using var refresher = Create(fixture);
+
+		var result = await refresher.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(File.Exists(Path.Combine(_paths.StoreRegistryCurrentDirectory, "scripts", "publish.sh")),
+				Is.False);
+		});
+	}
+
+	[TestCase("outside-root", TestName = "An_archive_entry_outside_the_archive_root_folder_is_refused")]
+	[TestCase("duplicate", TestName = "An_archive_that_holds_a_registry_file_twice_is_refused")]
+	[TestCase("not-a-zip", TestName = "A_download_that_is_not_a_zip_archive_is_refused")]
+	public async Task An_archive_that_is_not_one_unambiguous_registry_tree_is_refused(string defect)
+	{
+		var fixture = Registry();
+		fixture.Build();
+		var archive = defect switch
+		{
+			"outside-root" => ZipWith(fixture.BuiltTree, ("Other-main/index.json", fixture.BuiltTree["index.json"])),
+			"duplicate" => ZipWith(fixture.BuiltTree, ("Registry-main/index.json", fixture.BuiltTree["index.json"])),
+			_ => "not a zip archive"u8.ToArray()
+		};
+		fixture.ServeOverride = relative => relative == StoreRegistryFixture.ArchivePath
+			? new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(archive) }
+			: null;
+		using var refresher = Create(fixture);
+
+		var result = await refresher.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.Malformed));
+			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task An_archive_above_the_download_budget_is_refused_before_anything_is_extracted()
+	{
+		using var refresher = Create(Registry(), maxArchiveBytes: 512);
+
+		var result = await refresher.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.BudgetExceeded));
+			Assert.That(_catalog.Snapshot.Entries, Is.Empty);
+			Assert.That(Directory.Exists(_paths.StoreRegistryCurrentDirectory), Is.False);
+		});
+	}
+
+	[Test]
+	public async Task A_forced_refresh_of_an_unchanged_registry_replaces_the_cached_registry_with_a_fresh_download()
+	{
+		var fixture = Registry();
+		using var refresher = Create(fixture);
+		await refresher.Refresh();
+		var leftover = Path.Combine(_paths.StoreRegistryCurrentDirectory, "leftover.json");
+		await File.WriteAllTextAsync(leftover, "{}");
+
+		var result = await refresher.Refresh(StoreRegistryRefreshTrigger.Manual, true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_tracker.Current!.Entries.Select(entry => entry.Step),
+				Does.Contain(StoreRegistryRefreshStep.Applied).And.Not.Contain(StoreRegistryRefreshStep.UpToDate));
+			Assert.That(fixture.Requested.Count(path => path == StoreRegistryFixture.ArchivePath), Is.EqualTo(2));
+			Assert.That(File.Exists(leftover), Is.False);
+			Assert.That(_state.Load(StoreRegistryFixture.BaseUrl)?.AcceptedSequence, Is.EqualTo(1));
+			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
+		});
+	}
+
+	[Test]
+	public async Task A_forced_refresh_never_accepts_an_older_archive_and_keeps_the_verified_catalog()
+	{
+		var (older, newer) = Generations();
+		older.Build();
+		using var refresher = Create(newer);
+		await refresher.Refresh();
+		newer.ServeOverride = relative => relative == StoreRegistryFixture.ArchivePath
+			? StoreRegistryFixture.Serve(older.BuiltTree, relative)
+			: null;
+
+		var result = await refresher.Refresh(StoreRegistryRefreshTrigger.Manual, true);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(RegistryRefreshError.SequenceRollback));
+			Assert.That(_state.Load(StoreRegistryFixture.BaseUrl)?.AcceptedSequence, Is.EqualTo(2));
+			Assert.That(_catalog.Snapshot.Entries.Single(entry => entry.Id == "com.acme.hue").History[0].Changelog,
+				Is.EqualTo(ChangedChangelog));
+		});
+	}
+
+	[Test]
+	public async Task A_cache_discarded_at_startup_is_downloaded_again_although_the_registry_did_not_change()
+	{
+		var fixture = Registry();
+		await Create(fixture).Refresh();
+		var indexPath = Path.Combine(_paths.StoreRegistryCurrentDirectory, "index.json");
+		await File.AppendAllTextAsync(indexPath, " ");
+		var restarted = Create(fixture);
+		_catalog.Swap(StoreCatalogSnapshot.Empty);
+		await restarted.LoadCachedRegistry();
+
+		var result = await restarted.Refresh();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True, result.ErrorMessage);
+			Assert.That(_tracker.Current!.Entries[^1].Step, Is.EqualTo(StoreRegistryRefreshStep.Applied));
 			Assert.That(_catalog.Snapshot.Entries.Select(entry => entry.Id), Is.EquivalentTo(_seededIds));
 		});
 	}
@@ -1289,6 +1465,21 @@ internal sealed class StoreRegistryRefresherTests
 		}
 
 		return await pending.WaitAsync(TimeSpan.FromSeconds(10));
+	}
+
+	private static byte[] ZipWith(IReadOnlyDictionary<string, byte[]> tree, params (string Name, byte[] Body)[] extra)
+	{
+		using var buffer = new MemoryStream();
+		using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, true))
+		{
+			foreach (var (name, body) in tree.Select(file => ($"Registry-main/{file.Key}", file.Value)).Concat(extra))
+			{
+				using var stream = zip.CreateEntry(name).Open();
+				stream.Write(body);
+			}
+		}
+
+		return buffer.ToArray();
 	}
 
 	private static async Task Eventually(Func<bool> condition)

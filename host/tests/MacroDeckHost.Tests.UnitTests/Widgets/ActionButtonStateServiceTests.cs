@@ -55,9 +55,9 @@ public class ActionButtonStateServiceTests
 	{
 		var fixture = new Fixture(ThreeStates);
 
-		var first = await fixture.Service.AdvanceAsync(fixture.WidgetId); // away -> off
-		var second = await fixture.Service.AdvanceAsync(fixture.WidgetId); // off -> on
-		var third = await fixture.Service.AdvanceAsync(fixture.WidgetId); // on -> away (wraps)
+		var first = await fixture.Service.AdvanceAsync(fixture.WidgetId, StateChangeFlowDispatch.Inline);
+		var second = await fixture.Service.AdvanceAsync(fixture.WidgetId, StateChangeFlowDispatch.Inline);
+		var third = await fixture.Service.AdvanceAsync(fixture.WidgetId, StateChangeFlowDispatch.Inline);
 
 		Assert.Multiple(() =>
 		{
@@ -99,7 +99,7 @@ public class ActionButtonStateServiceTests
 			+ "\"fallbackStateId\":\"off\"}}";
 		var fixture = new Fixture(data);
 
-		var result = await fixture.Service.AdvanceAsync(fixture.WidgetId);
+		var result = await fixture.Service.AdvanceAsync(fixture.WidgetId, StateChangeFlowDispatch.Inline);
 
 		Assert.Multiple(() =>
 		{
@@ -123,7 +123,7 @@ public class ActionButtonStateServiceTests
 			+ "\"activeStateId\":\"a\",\"stateMapping\":{\"rules\":[],\"fallbackStateId\":\"a\"}}";
 		var fixture = new Fixture(data);
 
-		var result = await fixture.Service.AdvanceAsync(fixture.WidgetId);
+		var result = await fixture.Service.AdvanceAsync(fixture.WidgetId, StateChangeFlowDispatch.Inline);
 
 		Assert.Multiple(() =>
 		{
@@ -215,7 +215,7 @@ public class ActionButtonStateServiceTests
 		fixture.Flow.OnFlowExecuting = () =>
 		{
 			fixture.Flow.OnFlowExecuting = null; // one-shot: simulate a single widget action, not a loop
-			return fixture.Service.AdvanceAsync(fixture.WidgetId);
+			return fixture.Service.AdvanceAsync(fixture.WidgetId, StateChangeFlowDispatch.Inline);
 		};
 
 		var write = fixture.Service.SetAsync(fixture.WidgetId, "on");

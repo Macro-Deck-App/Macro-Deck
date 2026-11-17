@@ -40,6 +40,13 @@
       "cases": [{ "tile": { "width": 240, "height": 240 }, "basis": 240 }]
     },
     {
+      "tree": "conformance-segmented-vertical-tree.json",
+      "cases": [
+        { "tile": { "width": 240, "height": 240 }, "basis": 240 },
+        { "tile": { "width": 20, "height": 240 }, "basis": 240 }
+      ]
+    },
+    {
       "tree": "conformance-text-fit-tree.json",
       "cases": [
         { "tile": { "width": 240, "height": 240 }, "basis": 240 },

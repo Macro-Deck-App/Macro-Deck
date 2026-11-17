@@ -7,26 +7,31 @@ namespace MacroDeckHost.Tests.UnitTests.Linux.System;
 [SupportedOSPlatform("linux")]
 public class FocusedWindowReaderLinuxTests
 {
+	private static bool HasDisplay => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISPLAY"));
+
 	[Test]
-	public void No_display_reports_unsupported_with_a_reason()
+	public void Support_is_reported_exactly_when_a_display_is_reachable_with_a_reason_when_not()
 	{
 		using var reader = new LinuxFocusedWindowReader();
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(reader.IsSupported, Is.False);
-			Assert.That(reader.UnsupportedReason, Is.Not.Null.And.Not.Empty);
+			Assert.That(reader.IsSupported, Is.EqualTo(HasDisplay));
+			Assert.That(string.IsNullOrEmpty(reader.UnsupportedReason), Is.EqualTo(reader.IsSupported));
 		});
 	}
 
 	[Test]
-	public void No_display_read_returns_null_without_throwing()
+	public void Reading_without_a_display_returns_nothing_without_throwing()
 	{
 		using var reader = new LinuxFocusedWindowReader();
 
 		FocusedAppInfo? info = null;
 		Assert.DoesNotThrow(() => info = reader.Read());
-		Assert.That(info, Is.Null);
+		if (!HasDisplay)
+		{
+			Assert.That(info, Is.Null);
+		}
 	}
 
 	[Test]

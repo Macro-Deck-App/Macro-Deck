@@ -124,6 +124,17 @@ export interface SetWidgetsPinnedResponse extends ResultResponse {
   widgets?: IpcWidget[];
 }
 
+export interface CopyWidgetStyleResponse extends ResultResponse {
+  style?: string;
+}
+
+export interface PasteWidgetStyleRequest {
+  widgetIds: string[];
+  style: string;
+}
+
+export interface PasteWidgetStyleResponse extends ResultResponse {}
+
 export interface UpdateWidgetResponse extends ResultResponse {
   widget?: IpcWidget;
 }

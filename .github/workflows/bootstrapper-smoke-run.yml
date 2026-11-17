@@ -1,0 +1,188 @@
+name: Bootstrapper smoke run
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
+  # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
+  DOTNET_VERSION: 10.0.402
+  # The Angular CLI declares a node floor of 22.22.3, and a bare major can resolve below it.
+  NODE_VERSION: '^22.22.3'
+  RUST_TOOLCHAIN: '1.99.1'
+  BUILD_CHANNEL: Production
+  # Its own identifier keeps the smoke build's config dir and single-instance lock apart from an
+  # installed Macro Deck on the same machine.
+  SMOKE_IDENTIFIER: app.macro-deck.macrodeck.smoke
+
+jobs:
+  stage:
+    name: Stage hosts
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-smoke-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: nuget-smoke-${{ runner.os }}-
+
+      - name: Version
+        id: version
+        run: echo "version=3.1.0-smoke.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build production UIs
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
+          npm run build:web-client
+
+      - name: Stage hosts
+        run: |
+          set -euo pipefail
+          for rid in linux-x64 win-x64; do
+            ./ci/scripts/stage-host.sh "$rid" "${{ steps.version.outputs.version }}" "${{ env.BUILD_CHANNEL }}"
+            tar czf "host-$rid.tar.gz" -C ui/bootstrapper/host-publish .
+          done
+
+      - name: Build fixture plugin
+        run: |
+          dotnet build sdk/tests/fixtures/MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin -c Release
+          tar czf fixture-plugin.tar.gz \
+            -C sdk/tests/fixtures/MacroDeck.Plugin.Testing.Tests.WellBehavedPlugin/bin/Release/net10.0 .
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: smoke-payload-${{ github.run_id }}
+          path: |
+            host-linux-x64.tar.gz
+            host-win-x64.tar.gz
+            fixture-plugin.tar.gz
+          retention-days: 1
+          if-no-files-found: error
+
+  smoke:
+    name: Bootstrapper smoke (${{ matrix.os }})
+    needs: stage
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: blacksmith-2vcpu-ubuntu-2204
+            rid: linux-x64
+          # GitHub-hosted: it runs in an interactive desktop session with a shell, which the app's tray
+          # and window need to exit; on a runner without one the app never ends after app.exit.
+          - os: windows
+            runner: windows-2025
+            rid: win-x64
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: ui/bootstrapper
+          key: smoke
+
+      - name: Install Linux build dependencies
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev \
+            librsvg2-dev patchelf libxdo-dev file
+
+      - name: Start the display
+        if: matrix.os == 'linux'
+        uses: ./.github/actions/linux-display
+
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: smoke-payload-${{ github.run_id }}
+          path: smoke-payload
+
+      - name: Unpack host and fixture plugin
+        run: |
+          set -euo pipefail
+          # Relative paths: Git Bash's tar reads C:\... as a remote host.
+          rm -rf ui/bootstrapper/host-publish ui/bootstrapper/target/release/host smoke-fixture-plugin
+          mkdir -p ui/bootstrapper/host-publish smoke-fixture-plugin
+          tar xzf "smoke-payload/host-${{ matrix.rid }}.tar.gz" -C ui/bootstrapper/host-publish
+          tar xzf smoke-payload/fixture-plugin.tar.gz -C smoke-fixture-plugin
+
+      # cargo copies host-publish next to the binary (bundle.resources), where a release build looks first.
+      - name: Build release bootstrapper
+        working-directory: ui/bootstrapper
+        env:
+          MACRODECK_BUILD_CHANNEL: ${{ env.BUILD_CHANNEL }}
+          # Differs from the host's version on purpose: the replace case needs a host the app does not
+          # adopt, and the app compares versions as plain strings.
+          MACRODECK_RELEASE_VERSION: ${{ needs.stage.outputs.version }}+shell
+          TAURI_CONFIG: '{"identifier":"${{ env.SMOKE_IDENTIFIER }}"}'
+        run: cargo build --release
+
+      - name: Run the smoke test
+        env:
+          SMOKE_RUN_DIR: smoke-run
+          SMOKE_PLUGIN_BUILD_DIR: ${{ github.workspace }}/smoke-fixture-plugin
+          WEBKIT_DISABLE_DMABUF_RENDERER: '1'
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.os }}" == "linux" ]]; then
+            # One session bus for the whole run: the single-instance lock lives on it, and the app's
+            # relaunch must find the same bus as the --quit launch after it.
+            dbus-run-session -- node --test --test-reporter=spec ui/bootstrapper/smoke/boot-01.test.mjs
+          else
+            node --test --test-reporter=spec ui/bootstrapper/smoke/boot-01.test.mjs
+          fi
+
+      # Logs only: the data and config dirs hold the account, key ring and loopback secret.
+      - name: Collect logs
+        if: always()
+        run: |
+          mkdir -p smoke-logs
+          for run in smoke-run/bs-*; do
+            [[ -d "$run" ]] || continue
+            name=$(basename "$run")
+            cp "$run"/*.log smoke-logs/ 2>/dev/null || true
+            for log in "$run"/data/logs/*.log; do
+              [[ -f "$log" ]] && cp "$log" "smoke-logs/$name-$(basename "$log")"
+            done
+          done
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: bootstrapper-smoke-logs-${{ matrix.os }}-${{ github.run_id }}
+          path: smoke-logs/
+          retention-days: 14
+          if-no-files-found: warn

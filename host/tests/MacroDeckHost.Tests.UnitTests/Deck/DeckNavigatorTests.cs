@@ -264,6 +264,51 @@ public class DeckNavigatorTests
 	}
 
 	[Test]
+	public async Task ChangeFolderAsync_WithADeviceOrigin_NamesTheStoredFoldersProfileSoTheSessionCanSwitchToIt()
+	{
+		var profileId = Guid.NewGuid();
+		await _cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "Other" });
+		var folder = new FolderEntity { Id = Guid.NewGuid(), ProfileId = profileId, Name = "F", Order = 0 };
+		await _folderCache.AddOrUpdate(folder);
+
+		await _navigator.ChangeFolderAsync(folder.Id.ToString(), DeviceOrigin.For(Guid.NewGuid()));
+
+		Assert.That(_deviceSurfaces.Navigations.Single().Command.ProfileId, Is.EqualTo(profileId.ToString()));
+	}
+
+	[Test]
+	public async Task ChangeFolderAsync_WithADeviceOriginAndAnUnstoredFolder_LeavesTheProfileToTheSession()
+	{
+		await _navigator.ChangeFolderAsync("obs::folder-1", DeviceOrigin.For(Guid.NewGuid()));
+
+		Assert.That(_deviceSurfaces.Navigations.Single().Command.ProfileId, Is.Null);
+	}
+
+	[Test]
+	public async Task GetFolders_DescribesWhereEachFolderSitsInItsProfilesTree()
+	{
+		var profileId = Guid.NewGuid();
+		await _cache.AddOrUpdate(new ProfileEntity { Id = profileId, Name = "P" });
+		var parent = new FolderEntity { Id = Guid.NewGuid(), ProfileId = profileId, Name = "Home", Order = 0 };
+		var child = new FolderEntity
+		{
+			Id = Guid.NewGuid(), ProfileId = profileId, ParentId = parent.Id, Name = "Scenes", Order = 3
+		};
+		await _folderCache.AddOrUpdate(parent);
+		await _folderCache.AddOrUpdate(child);
+
+		var folders = _navigator.GetFolders().ToDictionary(folder => folder.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(folders[parent.Id.ToString()].ProfileId, Is.EqualTo(profileId.ToString()));
+			Assert.That(folders[parent.Id.ToString()].ParentId, Is.Null);
+			Assert.That(folders[child.Id.ToString()].ParentId, Is.EqualTo(parent.Id.ToString()));
+			Assert.That(folders[child.Id.ToString()].Order, Is.EqualTo(3));
+		});
+	}
+
+	[Test]
 	public async Task ChangeProfileAsync_WithADeviceOrigin_NavigatesThatSessionAndNoWebSocketClient()
 	{
 		_profileRegistry.AddProfile("p1", "Profile One")

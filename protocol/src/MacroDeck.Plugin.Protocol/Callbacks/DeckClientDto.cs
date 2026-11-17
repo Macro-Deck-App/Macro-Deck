@@ -10,4 +10,6 @@ public sealed record DeckClientDto
 	public string ProfileId { get; init; } = string.Empty;
 
 	public string FolderId { get; init; } = string.Empty;
+
+	public bool IsDeviceSession { get; init; }
 }

@@ -204,7 +204,7 @@ public class EventRegistryTests
 		{
 			Assert.That(variable.Required, Is.True);
 			Assert.That(variable.Type, Is.EqualTo(ActionParameterType.Autocomplete));
-			Assert.That(variable.OptionsSourceId, Is.EqualTo("macrodeck.variables"));
+			Assert.That(variable.OptionsSourceId, Is.EqualTo("macrodeck.event-variables"));
 		});
 	}
 

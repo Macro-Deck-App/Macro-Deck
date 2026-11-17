@@ -167,7 +167,7 @@ internal sealed class DisablingAnIntegrationTests
 		var registration = await _widgetTypes.Register("com.example.plugin", ProvidingIntegration.Gauge);
 		var keptWhileDisabled = Offers("com.example.plugin::gauge");
 
-		_connection.Sent.Clear();
+		_connection.ClearSent();
 		await SetEnabledAsync("com.example.plugin", true);
 		var askedToReinitialize = _connection.Sent.Any(envelope => envelope.Type == MessageTypes.HostState);
 		await _widgetTypes.Register("com.example.plugin", ProvidingIntegration.Gauge);

@@ -169,6 +169,30 @@ describe('BackupService', () => {
       expect(service.pendingRestore()?.restartSupported).toBeFalse();
     });
   });
+  describe('creating the recovery key', () => {
+    it('reports a key that already exists as such, not as a failure', async () => {
+      apiSpy.createBackupRecoveryKey.and.resolveTo({
+        success: true, availability: 'Available', keyId: 'k-backup', createdAt: '2026-11-01T00:00:00Z',
+      });
+
+      const outcome = await service.createRecoveryKey();
+
+      expect(outcome.status).toBe('exists');
+      expect(service.recoveryKey()).toEqual(
+        { availability: 'Available', keyId: 'k-backup', createdAt: '2026-11-01T00:00:00Z', exportedAt: undefined });
+    });
+
+    it('still reports a refused create as a failure', async () => {
+      apiSpy.createBackupRecoveryKey.and.resolveTo({
+        success: false, error: { code: 'RecoveryKeyMissing', message: 'Refused' }, availability: 'Missing',
+      });
+
+      const outcome = await service.createRecoveryKey();
+
+      expect(outcome).toEqual({ status: 'error', message: 'Refused' });
+    });
+  });
+
   describe('downloading a backup', () => {
     const shellWindow = window as { macroDeckShell?: unknown };
     let saveBackup: jasmine.Spy;

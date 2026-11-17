@@ -145,6 +145,14 @@
   mask-image: url('./icons/clipboard.svg');
   -webkit-mask-image: url('./icons/clipboard.svg');
 }
+.icon-paintbrush {
+  mask-image: url('./icons/paintbrush.svg');
+  -webkit-mask-image: url('./icons/paintbrush.svg');
+}
+.icon-paint-roller {
+  mask-image: url('./icons/paint-roller.svg');
+  -webkit-mask-image: url('./icons/paint-roller.svg');
+}
 .icon-trash {
   mask-image: url('./icons/trash.svg');
   -webkit-mask-image: url('./icons/trash.svg');

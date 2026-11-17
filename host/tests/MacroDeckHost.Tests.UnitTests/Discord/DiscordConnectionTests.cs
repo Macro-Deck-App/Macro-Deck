@@ -3,6 +3,7 @@ using MacroDeckHost.Integrations.Discord.Auth;
 using MacroDeckHost.Integrations.Discord.Connections;
 using MacroDeckHost.Integrations.Discord.Protocol;
 using MacroDeckHost.Integrations.Discord.State;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Discord;
 
@@ -286,9 +287,9 @@ internal sealed class DiscordConnectionTests
 	[Test]
 	public async Task A_token_endpoint_timeout_is_retried_instead_of_ending_the_reconnects()
 	{
-		using var endpoint = new FakeDiscordTokenEndpoint()
+		using var endpoint = new FakeTokenEndpoint()
 			.Hangs()
-			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+			.Answers(HttpStatusCode.OK, FakeTokenEndpoint.FreshTokens);
 		using var http = new HttpClient(endpoint, false) { Timeout = TimeSpan.FromMilliseconds(100) };
 		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
 			TimeSpan.FromMilliseconds(20),
@@ -312,9 +313,9 @@ internal sealed class DiscordConnectionTests
 	public async Task A_transient_token_endpoint_failure_is_retried_without_asking_to_authorize_again(
 		HttpStatusCode status)
 	{
-		using var endpoint = new FakeDiscordTokenEndpoint()
+		using var endpoint = new FakeTokenEndpoint()
 			.Answers(status, "<html>error code: 1015</html>")
-			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+			.Answers(HttpStatusCode.OK, FakeTokenEndpoint.FreshTokens);
 		using var http = new HttpClient(endpoint, false);
 		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
 			TimeSpan.FromMilliseconds(20),
@@ -335,9 +336,9 @@ internal sealed class DiscordConnectionTests
 	[Test]
 	public async Task Disposing_during_a_token_refresh_does_not_retry()
 	{
-		using var endpoint = new FakeDiscordTokenEndpoint()
+		using var endpoint = new FakeTokenEndpoint()
 			.Hangs()
-			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+			.Answers(HttpStatusCode.OK, FakeTokenEndpoint.FreshTokens);
 		using var http = new HttpClient(endpoint, false);
 		var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
 			TimeSpan.FromMilliseconds(20),
@@ -361,9 +362,9 @@ internal sealed class DiscordConnectionTests
 	[TestCase("""{"error":"invalid_client"}""")]
 	public async Task A_rejected_token_request_still_asks_to_authorize_again(string body)
 	{
-		using var endpoint = new FakeDiscordTokenEndpoint()
+		using var endpoint = new FakeTokenEndpoint()
 			.Answers(HttpStatusCode.BadRequest, body)
-			.Answers(HttpStatusCode.OK, FakeDiscordTokenEndpoint.FreshTokens);
+			.Answers(HttpStatusCode.OK, FakeTokenEndpoint.FreshTokens);
 		using var http = new HttpClient(endpoint, false);
 		using var connection = Create(DateTimeOffset.UtcNow.AddMinutes(-1),
 			TimeSpan.FromMilliseconds(20),

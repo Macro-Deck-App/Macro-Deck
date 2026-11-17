@@ -145,13 +145,13 @@ export class StoreCatalogService {
     }
   }
 
-  async refreshRegistry(): Promise<void> {
+  async refreshRegistry(force = false): Promise<void> {
     if (this.refreshing()) {
       return;
     }
 
     try {
-      const response = await this.api.refreshStoreRegistry();
+      const response = await this.api.refreshStoreRegistry(force);
       this.registry.set(response.registry);
       if (response.refreshRun) {
         this.applyRefreshRun(response.refreshRun);

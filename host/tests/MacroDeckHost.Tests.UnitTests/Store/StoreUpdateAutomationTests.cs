@@ -1,5 +1,6 @@
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Backups;
+using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Application.Notifications;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Plugins.Runtime;
@@ -34,6 +35,7 @@ internal sealed class StoreUpdateAutomationTests
 	private UserNotificationStore _notifications = null!;
 	private AppPreferenceService _preferences = null!;
 	private ServiceProvider _provider = null!;
+	private HostSession _session = null!;
 	private StoreAutoUpdater _autoUpdater = null!;
 	private StoreUpdateNotifier _notifier = null!;
 
@@ -57,6 +59,7 @@ internal sealed class StoreUpdateAutomationTests
 		services.AddSingleton(TestLocalization.Resolver);
 		_provider = services.BuildServiceProvider();
 		var scopeFactory = _provider.GetRequiredService<IServiceScopeFactory>();
+		_session = new HostSession();
 
 		_autoUpdater = new StoreAutoUpdater(_installations,
 			_plugins,
@@ -64,6 +67,7 @@ internal sealed class StoreUpdateAutomationTests
 			_tracker,
 			_notifications,
 			scopeFactory,
+			_session,
 			Serilog.Core.Logger.None);
 		_notifier = new StoreUpdateNotifier(_notifications, _autoUpdater, scopeFactory);
 	}
@@ -226,6 +230,28 @@ internal sealed class StoreUpdateAutomationTests
 			Assert.That(summary.Title, Is.EqualTo("2 extensions updated automatically"));
 			Assert.That(summary.Message, Does.Contain("Hue Bridge 1.1.0").And.Contain("Material 2.0.0"));
 		});
+	}
+
+	[Test]
+	public async Task Plugins_are_not_updated_automatically_in_a_session_started_with_plugins_disabled()
+	{
+		_session.MarkPluginsDisabledAtStartup();
+		await EnableAutoUpdate();
+		InstallFromStore("1.0.0");
+		SaveRecord(StoreExtensionKind.IconPack, IconPackId, "1.0.0");
+		var iconUpdate = new StoreAvailableUpdate
+		{
+			Kind = StoreExtensionKind.IconPack,
+			PackageId = IconPackId,
+			Name = "Material",
+			InstalledVersion = "1.0.0",
+			LatestVersion = "2.0.0"
+		};
+
+		await _autoUpdater.Apply([PluginUpdate("1.1.0"), iconUpdate]);
+
+		Assert.That(_installer.Started.Select(operation => operation.ExtensionKind),
+			Is.EqualTo(new[] { StoreExtensionKind.IconPack }));
 	}
 
 	[Test]

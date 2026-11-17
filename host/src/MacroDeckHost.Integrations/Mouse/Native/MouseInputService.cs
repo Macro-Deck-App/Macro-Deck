@@ -249,6 +249,17 @@ public sealed class MouseInputService : IMouseInputService
 					}
 				}
 
+				if (delay == 0)
+				{
+					cancellationToken.ThrowIfCancellationRequested();
+					lock (_gate)
+					{
+						_provider.Scroll(axis, notches);
+					}
+
+					return;
+				}
+
 				for (var i = 0; i < count; i++)
 				{
 					cancellationToken.ThrowIfCancellationRequested();
@@ -257,7 +268,7 @@ public sealed class MouseInputService : IMouseInputService
 						_provider.Scroll(axis, direction);
 					}
 
-					if (i < count - 1 && delay > 0)
+					if (i < count - 1)
 					{
 						await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
 					}

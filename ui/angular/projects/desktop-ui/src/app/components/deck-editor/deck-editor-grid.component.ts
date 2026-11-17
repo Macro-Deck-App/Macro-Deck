@@ -70,6 +70,7 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
   @Input() emptyCellStyle: EmptyCellStyle = 'visible';
   @Input() shadows = true;
   @Input() canPaste = false;
+  @Input() canPasteStyle = false;
   @Input() cutWidgetIds: ReadonlySet<string> = new Set();
   @Input() dropTargetCell: { x: number; y: number } | null = null;
   @Input() busyCell: { x: number; y: number } | null = null;
@@ -81,6 +82,8 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
   @Output() widgetRun = new EventEmitter<GridWidget>();
   @Output() widgetCopy = new EventEmitter<GridWidget>();
   @Output() widgetCut = new EventEmitter<GridWidget>();
+  @Output() widgetCopyStyle = new EventEmitter<GridWidget>();
+  @Output() widgetPasteStyle = new EventEmitter<GridWidget>();
   @Output() widgetPaste = new EventEmitter<{ x: number; y: number }>();
   @Output() widgetExport = new EventEmitter<GridWidget>();
   @Output() widgetPinnedChange = new EventEmitter<{ widget: GridWidget; pinned: boolean; scope?: PinScope }>();
@@ -466,6 +469,12 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
         break;
       case 'cut':
         this.widgetCut.emit(widget);
+        break;
+      case 'copy-style':
+        this.widgetCopyStyle.emit(widget);
+        break;
+      case 'paste-style':
+        this.widgetPasteStyle.emit(widget);
         break;
       case 'export':
         this.widgetExport.emit(widget);

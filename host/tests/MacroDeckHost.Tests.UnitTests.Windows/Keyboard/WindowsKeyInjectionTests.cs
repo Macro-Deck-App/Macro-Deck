@@ -2,10 +2,12 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MacroDeckHost.Integrations.Keyboard.Native;
 using MacroDeckHost.Platform.Native;
+using MacroDeckHost.Tests.Support;
 
 namespace MacroDeckHost.Tests.UnitTests.Windows.Keyboard;
 
 [Platform("Win")]
+[Category("Interactive")]
 [SupportedOSPlatform("windows")]
 public class WindowsKeyInjectionTests
 {
@@ -96,7 +98,7 @@ public class WindowsKeyInjectionTests
 	{
 		if (Win32Windows.GetForegroundWindow() == IntPtr.Zero)
 		{
-			Assert.Ignore("No foreground window in this session (headless or locked desktop).");
+			Interactive.Require("No foreground window in this session (headless or locked desktop).");
 		}
 
 		var events = new List<KeyEvent>();
@@ -118,7 +120,7 @@ public class WindowsKeyInjectionTests
 		var hook = SetWindowsHookEx(WhKeyboardLl, callback, GetModuleHandle(null), 0);
 		if (hook == IntPtr.Zero)
 		{
-			Assert.Ignore("A low-level keyboard hook cannot be installed in this session.");
+			Interactive.Require("A low-level keyboard hook cannot be installed in this session.");
 		}
 
 		try
@@ -134,7 +136,7 @@ public class WindowsKeyInjectionTests
 
 		if (events.Count == 0)
 		{
-			Assert.Ignore("No injected input arrived (no input desktop, or an elevated foreground window).");
+			Interactive.Require("No injected input arrived (no input desktop, or an elevated foreground window).");
 		}
 
 		return events;

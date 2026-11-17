@@ -36,6 +36,14 @@ export class StorePageHeaderComponent {
   });
 
   async refresh(): Promise<void> {
+    await this.startRefresh(false);
+  }
+
+  async forceRefresh(): Promise<void> {
+    await this.startRefresh(true);
+  }
+
+  private async startRefresh(force: boolean): Promise<void> {
     this.menuOpen.set(false);
     this.refreshLogOpen.set(true);
     if (this.catalog.refreshing()) {
@@ -43,7 +51,7 @@ export class StorePageHeaderComponent {
     }
 
     this.supersededRunId.set(this.catalog.refreshRun()?.id ?? null);
-    await this.catalog.refreshRegistry();
+    await this.catalog.refreshRegistry(force);
     this.refreshed.emit();
   }
 

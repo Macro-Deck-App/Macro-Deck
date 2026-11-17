@@ -771,10 +771,10 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	[Test]
-	public void Event_publish_delivers_object_and_array_parameters_as_their_json_text()
+	public async Task Event_publish_delivers_object_and_array_parameters_as_their_json_text()
 	{
 		var events = new FakeEventBus();
-		var (endpoint, _, _) = CreateEndpoint(events);
+		var (endpoint, connection, _) = CreateEndpoint(events);
 		var parameters = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
 			{
 				["combo"] = new { modifiers = new[] { "Ctrl", "Shift" }, key = "F3" },
@@ -785,7 +785,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 			},
 			PluginProtocolJson.Options);
 
-		endpoint.HandleEventPublish("com.example.plugin",
+		await endpoint.HandleEventPublishAsync(connection,
+			"com.example.plugin",
 			new ProtocolEnvelope
 			{
 				Type = MessageTypes.EventPublish,
@@ -793,7 +794,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 				Payload = JsonSerializer.SerializeToElement(
 					new EventPublishPayload { EventId = "hotkey-pressed", Parameters = parameters },
 					PluginProtocolJson.Options)
-			});
+			},
+			CancellationToken.None);
 
 		Assert.That(events.Reader.TryRead(out var occurrence), Is.True);
 		Assert.Multiple(() =>
@@ -807,16 +809,22 @@ public partial class PluginWebSocketEndpointDispatchTests
 	}
 
 	[Test]
-	public void Event_publish_with_a_number_beyond_double_range_is_not_published()
+	public async Task Event_publish_with_a_number_beyond_double_range_is_not_published()
 	{
 		var samples = new EventSampleStore();
 		var bus = new EventBus(new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache()),
 			samples,
 			Serilog.Core.Logger.None);
-		var (endpoint, _, _) = CreateEndpoint(bus);
+		var (endpoint, connection, _) = CreateEndpoint(bus);
 
-		endpoint.HandleEventPublish("com.example.plugin", RawEventPublish("too-large", """{"value":1e400}"""));
-		endpoint.HandleEventPublish("com.example.plugin", RawEventPublish("in-range", """{"value":1.7e308}"""));
+		await endpoint.HandleEventPublishAsync(connection,
+			"com.example.plugin",
+			RawEventPublish("too-large", """{"value":1e400}"""),
+			CancellationToken.None);
+		await endpoint.HandleEventPublishAsync(connection,
+			"com.example.plugin",
+			RawEventPublish("in-range", """{"value":1.7e308}"""),
+			CancellationToken.None);
 
 		Assert.Multiple(() =>
 		{
@@ -838,6 +846,41 @@ public partial class PluginWebSocketEndpointDispatchTests
 				},
 				PluginProtocolJson.Options)
 		};
+	}
+
+	[Test]
+	public async Task Event_publish_passes_finite_numbers_up_to_the_edge_of_double_range_without_a_reply()
+	{
+		var events = new FakeEventBus();
+		var (endpoint, connection, _) = CreateEndpoint(events);
+		using var payload = JsonDocument.Parse("""
+											   {"eventId":"reading","parameters":{"max":1.7976931348623157e308,
+											    "tiny":1e-400,"ratio":2.5,"count":9007199254740993,"word":"Infinity",
+											    "nested":{"values":[-1.7976931348623157e308,0]}}}
+											   """);
+
+		await endpoint.HandleEventPublishAsync(connection,
+			"com.example.plugin",
+			new ProtocolEnvelope
+			{
+				Type = MessageTypes.EventPublish,
+				Id = "1",
+				Payload = payload.RootElement.Clone()
+			},
+			CancellationToken.None);
+
+		Assert.That(events.Reader.TryRead(out var occurrence), Is.True);
+		Assert.Multiple(() =>
+		{
+			Assert.That(connection.Sent, Is.Empty);
+			Assert.That(occurrence!.Parameters["max"], Is.EqualTo(double.MaxValue));
+			Assert.That(occurrence.Parameters["tiny"], Is.EqualTo(0d));
+			Assert.That(occurrence.Parameters["ratio"], Is.EqualTo(2.5d));
+			Assert.That(occurrence.Parameters["count"], Is.EqualTo(9007199254740993L));
+			Assert.That(occurrence.Parameters["word"], Is.EqualTo("Infinity"));
+			Assert.That(occurrence.Parameters["nested"],
+				Is.EqualTo("""{"values":[-1.7976931348623157e308,0]}"""));
+		});
 	}
 
 	[Test]

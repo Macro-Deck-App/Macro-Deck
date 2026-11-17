@@ -37,6 +37,7 @@ import {
   CompleteUiModalRequest,
   CompleteUiModalResponse,
   ConnectSessionChangedNotification,
+  CopyWidgetStyleResponse,
   CreateAutomationRequest,
   CreateAutomationResponse,
   CreateBackupRequest,
@@ -262,6 +263,8 @@ import {
   OpenWidgetUiSessionRequest,
   OpenWidgetUiSessionResponse,
   PairingCodeResponse,
+  PasteWidgetStyleRequest,
+  PasteWidgetStyleResponse,
   PluginInstallActionResponse,
   PluginPairingActionResponse,
   PluginRuntimeOperationResponse,
@@ -1073,8 +1076,8 @@ export class ApiService {
     return this.http('GET', '/api/store/status');
   }
 
-  refreshStoreRegistry(): Promise<RefreshStoreRegistryResponse> {
-    return this.http('POST', '/api/store/registry/refresh');
+  refreshStoreRegistry(force = false): Promise<RefreshStoreRegistryResponse> {
+    return this.http('POST', force ? '/api/store/registry/refresh?force=true' : '/api/store/registry/refresh');
   }
 
   getStoreCatalog(options?: {
@@ -1900,6 +1903,14 @@ export class ApiService {
     return this.http('PUT', '/api/widgets/pinned/batch', request);
   }
 
+  copyWidgetStyle(widgetId: string): Promise<CopyWidgetStyleResponse> {
+    return this.http('GET', `/api/widgets/${encodeURIComponent(widgetId)}/style`);
+  }
+
+  pasteWidgetStyle(request: PasteWidgetStyleRequest): Promise<PasteWidgetStyleResponse> {
+    return this.http('POST', '/api/widgets/style/paste', request);
+  }
+
   createWidgetFromApplication(request: CreateWidgetFromApplicationRequest): Promise<CreateWidgetResponse> {
     return this.http('POST', '/api/widgets/from-application', request);
   }
@@ -2033,6 +2044,10 @@ export class ApiService {
 
   approveSecretBlock(request: ApproveSecretBlockRequest): Promise<ApproveSecretBlockResponse> {
     return this.http('POST', '/api/secret-approvals/approve', request);
+  }
+
+  declineSecretBlock(request: ApproveSecretBlockRequest): Promise<ApproveSecretBlockResponse> {
+    return this.http('POST', '/api/secret-approvals/decline', request);
   }
 
   renderLabelPreview(request: LabelImagePreviewRequest): Promise<string | null> {

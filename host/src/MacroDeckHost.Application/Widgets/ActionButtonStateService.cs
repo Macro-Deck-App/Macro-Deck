@@ -12,14 +12,16 @@ public interface IActionButtonStateService
 {
 	Task<WidgetStateWriteResult> SetAsync(Guid widgetId, string stateId, CancellationToken cancellationToken = default);
 
-	Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default);
+	Task<WidgetStateWriteResult> AdvanceAsync(
+		Guid widgetId,
+		StateChangeFlowDispatch dispatch,
+		CancellationToken cancellationToken = default);
 }
 
 /// <summary>
 /// Backs the explicit "Set Button State"/"Cycle Button State" actions (issue #612). Each write takes
 /// the per-widget lock, validates and persists, then - only after releasing the lock - reconciles
-/// inline so <c>vars.state</c> is committed and any <c>onStateChange</c> flow has already run by the
-/// time this call returns.
+/// so <c>vars.state</c> is committed by the time this call returns.
 /// </summary>
 public sealed class ActionButtonStateService : IActionButtonStateService
 {
@@ -56,21 +58,27 @@ public sealed class ActionButtonStateService : IActionButtonStateService
 				ActionButtonStateJson.SetActiveState(data, stateId);
 				return (stateId, null);
 			},
+			StateChangeFlowDispatch.Inline,
 			cancellationToken);
 	}
 
-	public Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default)
+	public Task<WidgetStateWriteResult> AdvanceAsync(
+		Guid widgetId,
+		StateChangeFlowDispatch dispatch,
+		CancellationToken cancellationToken = default)
 	{
 		return Write(widgetId,
 			(data, _) => ActionButtonStateJson.AdvanceState(data) is { } next
 				? (next, null)
 				: (null, WidgetStateWriteError.UnknownState),
+			dispatch,
 			cancellationToken);
 	}
 
 	private async Task<WidgetStateWriteResult> Write(
 		Guid widgetId,
 		Func<JsonObject, ActionButtonStateModel, (string? NewStateId, WidgetStateWriteError? Error)> mutate,
+		StateChangeFlowDispatch dispatch,
 		CancellationToken cancellationToken)
 	{
 		string? newStateId;
@@ -132,9 +140,7 @@ public sealed class ActionButtonStateService : IActionButtonStateService
 		// The lock is released before Reconcile runs, deliberately: the onStateChange flow it may fire
 		// can contain a widget action that targets this same button and takes the same per-widget
 		// lock, and reconciling while still holding it would deadlock that action against this call.
-		// Reconciling inline (not just enqueuing) is what guarantees vars.state is committed, and the
-		// flow has already run, before this call returns.
-		await _reconciler.Reconcile(widgetId, cancellationToken);
+		await _reconciler.Reconcile(widgetId, dispatch, cancellationToken);
 		return WidgetStateWriteResult.Succeeded(newStateId);
 	}
 

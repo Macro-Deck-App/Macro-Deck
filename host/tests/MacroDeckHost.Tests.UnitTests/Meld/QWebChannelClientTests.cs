@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using MacroDeckHost.Integrations.Meld.Protocol;
+using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Meld;
 
@@ -266,6 +267,15 @@ internal sealed class QWebChannelClientTests
 
 		_client.Dispose();
 		Assert.That(Volatile.Read(ref disconnects), Is.EqualTo(1));
+	}
+
+	[Test]
+	public void An_init_handshake_that_is_never_answered_fails_as_a_handshake_error_within_the_init_timeout()
+	{
+		_pair.StallHandshake();
+
+		Assert.ThrowsAsync<QWebChannelHandshakeException>(async () =>
+			await _client.ConnectAsync(_uri, CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(3)));
 	}
 
 	[Test]

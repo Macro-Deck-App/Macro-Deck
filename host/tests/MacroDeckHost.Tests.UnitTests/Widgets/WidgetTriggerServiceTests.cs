@@ -1,5 +1,6 @@
 using MacroDeck.Sdk.Widgets;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
@@ -145,11 +146,10 @@ public class WidgetTriggerServiceTests
 		var service = CreateService(coordinator, stateService, out var services);
 		using var _ = services;
 
-		await service.ExecuteAsync(
-			Widget("""
-				   {"stateMode":true,"states":[{"id":"a"},{"id":"b"}],
-				    "stateMapping":{"rules":[],"fallbackStateId":"a"}}
-				   """),
+		await service.ExecuteAsync(Widget("""
+										  {"stateMode":true,"states":[{"id":"a"},{"id":"b"}],
+										   "stateMapping":{"rules":[],"fallbackStateId":"a"}}
+										  """),
 			WidgetTriggerTypes.ShortPress,
 			"client-1",
 			null,
@@ -274,7 +274,10 @@ public class WidgetTriggerServiceTests
 			return Task.FromResult(WidgetStateWriteResult.Failed(WidgetStateWriteError.NotFound));
 		}
 
-		public Task<WidgetStateWriteResult> AdvanceAsync(Guid widgetId, CancellationToken cancellationToken = default)
+		public Task<WidgetStateWriteResult> AdvanceAsync(
+			Guid widgetId,
+			StateChangeFlowDispatch dispatch,
+			CancellationToken cancellationToken = default)
 		{
 			AdvanceCalls++;
 			OnAdvance?.Invoke();
