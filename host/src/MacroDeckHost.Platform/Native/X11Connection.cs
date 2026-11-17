@@ -222,8 +222,8 @@ internal sealed class X11Connection : IDisposable
 		return true;
 	}
 
-	// XCloseDisplay on a lost display crashes inside Xlib, so a lost display is left open: its
-	// memory and socket leak once per server loss.
+	// XCloseDisplay on a lost display has crashed the host inside Xlib, so a lost display is left
+	// open: its memory and socket leak once per server loss.
 	private bool DropIfLost()
 	{
 		if (_display == IntPtr.Zero || !X11Windows.IsLost(_display))

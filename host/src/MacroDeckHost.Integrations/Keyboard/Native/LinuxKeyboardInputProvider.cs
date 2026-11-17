@@ -455,7 +455,11 @@ public sealed class LinuxKeyboardInputProvider : IKeyboardInputProvider, IDispos
 
 	private static void FakeKey(IntPtr display, uint keycode, bool press)
 	{
-		_ = XTestFakeKeyEvent(display, keycode, press, 0);
+		// An XTest request on a lost display corrupts libXext's display list for every later connection.
+		if (!X11Windows.IsLost(display))
+		{
+			_ = XTestFakeKeyEvent(display, keycode, press, 0);
+		}
 	}
 
 	internal static uint ResolveKeycode(KeyCode key, Func<nuint, uint> keysymToKeycode)
