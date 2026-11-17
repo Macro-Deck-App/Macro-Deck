@@ -1087,6 +1087,15 @@ Advertised at runtime in the protocol descriptor and again in the session respon
 | `maxUiSessionsPerProvider` | 8 |
 | `maxUiWidgetSessionsPerProvider` | 128 |
 
+`maxConcurrentInvocations` is how many `capability.invoke` calls the host keeps outstanding to one plugin at
+a time. A call the host stopped waiting on, because its caller cancelled it or it timed out, no longer
+counts, even while your plugin is still running it. A call past the limit waits on the host for a free slot,
+within the call's own deadline, and the time it waited comes off the `deadlineMs` it is then sent with, so
+expect values below the 30 s default under load. When that deadline runs out before a slot frees, the
+host's caller gets a retryable `RATE_LIMITED` and the call is never sent. A deck that opens more of your
+tiles at once than the limit therefore reaches your plugin in turn. Hosts before 3.0.3 refused every call
+past the limit at once with `RATE_LIMITED`.
+
 `maxUiWidgetSessionsPerProvider` counts `widget` and `preview` sessions per viewer, and
 `maxUiSessionsPerProvider` counts `folder` and `screensaver` sessions per viewer and every other surface per
 provider; see [how the UI session limits are measured](/ui/views/sessions/#limits). The `maxUi*` limits are optional in the descriptor; a host predating the `ui` capability omits them.

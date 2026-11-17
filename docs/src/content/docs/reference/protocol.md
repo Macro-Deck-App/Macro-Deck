@@ -420,7 +420,8 @@ cancel keeps its result, so a retry replays it instead of running twice.
 
 Message size, queue depth, concurrency, timeouts and asset sizes are published in the descriptor and
 again in the session response (`limits`, `timeouts`). Read them at runtime; do not copy the numbers into
-plugin logic. The full current table is in the [WebSocket reference](/reference/websocket/#limits-and-timeouts).
+plugin logic. The full current table is in the [WebSocket reference](/reference/websocket/#limits-and-timeouts),
+which also says how the host queues calls past `maxConcurrentInvocations`.
 A message over `maxMessageBytes` is `MALFORMED_ENVELOPE`; a payload over a specific cap (UI tree, asset)
 is `PAYLOAD_TOO_LARGE` or `ASSET_TOO_LARGE`.
 
