@@ -35,10 +35,20 @@ repository, `MINIMUM_HOST_VERSION`, and its contract is `docs/integration/macro-
 An installed Companion keeps talking to every newer host, so the parts of the pairing API and of the UI socket
 (`/ws/ui`, [ADR 0062](../decisions/0062-ui-realtime-transport.md)) it uses are frozen here, as the host accepts
 and answers them. The vectors are the frames the Companion sends, taken from its sources (`network/UiSocket.kt`,
-`network/HostWire.kt`, `deck/DeckClient.kt`, `deck/WidgetSessions.kt`, `deck/SessionRecovery.kt`,
-`deck/CompanionReporter.kt`). How the app times out, retries and recovers is its own contract,
-`docs/integration/macro-deck-host.md` in the Companion repository. Every vector is replayed against a real host
-by [CompanionWireCompatibilityTests](../../host/tests/MacroDeckHost.Tests.SystemTests/CompanionWireCompatibilityTests.cs).
+`network/HostWire.kt`, `network/HostApi.kt`, `deck/DeckClient.kt`, `deck/DeckModels.kt`, `deck/WidgetSessions.kt`,
+`deck/SessionRecovery.kt`, `deck/CompanionReporter.kt`, `license/LicenseSync.kt`,
+`notifications/NotificationFeed.kt`, `video/VideoStreamClient.kt`, `video/VideoStreamWire.kt`). How the app times
+out, retries and recovers is its own contract, `docs/integration/macro-deck-host.md` in the Companion repository.
+Every vector is replayed against a real host by the `CompanionWireCompatibilityTests` system tests
+([pairing, socket and presses](../../host/tests/MacroDeckHost.Tests.SystemTests/CompanionWireCompatibilityTests.cs),
+[deck and sessions](../../host/tests/MacroDeckHost.Tests.SystemTests/CompanionWireCompatibilityTests.Deck.cs),
+[device, host state and REST](../../host/tests/MacroDeckHost.Tests.SystemTests/CompanionWireCompatibilityTests.Device.cs)),
+except where a section says otherwise.
+
+The Companion decodes the deck's widgets, folders and profiles strictly: a missing required field, a field of the
+wrong type or an explicit `null` in a field it does not allow to be null drops the whole message, and in
+`GET /api/folders` the whole read. The fields it needs are named below. Every other field is optional to it, and
+a field the host leaves out because it is null is read as missing.
 
 Changes are additive only: a new optional field, request or push is fine. Renaming or removing a field, changing
 its type, an answer's shape, a code string or a push's type name needs a Companion release that no longer reads
@@ -135,7 +145,11 @@ The session pushes:
 - `UiSessionClosedEvent` `{"sessionId","reason"}`: the session ended. A deleted widget's session ends with the
   reason `The widget was deleted.`. It is a diagnostic text, but the Companion compares it to tell that end apart,
   so it is frozen too.
-- `UiSessionInvalidatedEvent` `{"sessionId","code","message","retryable"}`: shape only, not replayed yet.
+- `UiSessionInvalidatedEvent`
+  `{"sessionId":"<id>","code":"WIDGET_RECONFIGURED","message":"<text>","retryable":true}`: the session's view is
+  gone. It reaches only the connections attached to that session. The Companion needs `sessionId`, drops the tree
+  and resyncs its sessions; `retryable` tells a folder view it may open again, and `code` is passed on for a
+  dialog's session. Replayed by changing the folder's corner radius under an open widget session.
 
 ### Presses
 
@@ -182,18 +196,181 @@ without a device answers `forbidden`. Unknown values are dropped and numbers and
 `null`. The first report of a connection is followed by `CompanionWakeOnLanEvent`
 `{"instanceName":"<string>","macAddresses":["..."]}`.
 
+### Deck changes
+
+These pushes reach every UI socket. A widget in them is the widget of `WidgetCreatedEvent` above: the Companion
+needs `id` and `type`, reads the geometry as integers, `data` as a JSON string, `isPinned` as a boolean and
+`pinScope` as a string, and replaces its stored widget with the one pushed.
+
+| Push | Payload |
+| --- | --- |
+| `WidgetsCreatedEvent` | `{"folderId":"<id>","widgets":[<widget>,...]}` |
+| `WidgetUpdatedEvent` | `{"folderId":"<id>","widget":<widget>}` |
+| `WidgetsUpdatedEvent` | `{"folderId":"<id>","widgets":[<widget>,...]}`, for example after a batch pin |
+| `WidgetPositionsUpdatedEvent` | `{"folderId":"<id>","widgets":[<widget>,...]}`, whole widgets, never positions alone |
+| `WidgetDeletedEvent` | `{"widgetId":"<id>","folderId":"<id>"}` |
+| `WidgetsDeletedEvent` | `{"folderId":"<id>","widgetIds":["<id>",...]}` |
+| `FolderUpdatedEvent` | `{"folder":<folder>}` |
+| `FolderDeletedEvent` | `{"folderId":"<id>"}` |
+| `ProfileUpdatedEvent` | `{"profile":<profile>}` |
+| `ProfileDeletedEvent` | `{"profileId":"<id>"}` |
+
+A folder is the folder of `FolderCreatedEvent`, for example
+`{"id":"<id>","name":"Home","profileId":"<id>","order":0,"isDefault":true,"viewId":"macrodeck.widget-grid","widgets":[]}`.
+The Companion needs `id`, reads `name`, `profileId`, `parentId`, `backgroundColor`, `emptyCellStyle`, `viewId` and
+`viewConfiguration` as strings, `order`, `rows`, `columns`, `widgetSpacing` and `widgetBorderRadius` as integers,
+`isDefault` as a boolean and `widgets` as an array of widgets, one malformed widget dropping the folder.
+
+A profile is the profile of `ProfileCreatedEvent`, for example
+`{"id":"<id>","name":"Deck","order":1,"defaultRows":2,"defaultColumns":3}`. The Companion needs `id`, reads `name` and
+`defaultEmptyCellStyle` as strings, `order`, `defaultColumns`, `defaultRows`, `defaultWidgetSpacing` and
+`defaultWidgetBorderRadius` as integers and `defaultWidgetShadows` as a boolean.
+
+### Navigation
+
+`FolderNavigationEvent` moves the deck:
+
+```json
+{"protocolVersion":1,"kind":"message","type":"FolderNavigationEvent","payload":{"command":"back"}}
+```
+
+`command` is `back`, `parent` or `changeTo`. A `changeTo` carries `folderId`, `profileId` and, while the host waits
+for the client to arrive, `navigationToken`, which the Companion sends back in its next `ReportFolderChanged` for
+that folder. A navigation an action runs without a client reaches every socket; one aimed at a device, such as
+`POST /api/devices/{id}/open-profile`, reaches only that device's sockets.
+
+### State and runs
+
+- `WidgetStateInvalidatedEvent` `{"widgetId":"<id>"}` reaches every socket when a widget's state changes from a
+  state the host already reconciled, or its set of states changes. The Companion forgets the tree it remembers for
+  that widget.
+- `ActionExecutionStatusEvent` reaches the client that started a run which outlasted its answer, by the id from
+  `RegisterClient`:
+  `{"executionId":"<id>","status":"Succeeded","durationMs":6010,"widgetId":"<id>","triggerType":"onShortPress","actions":[]}`.
+  `status` is one of the run statuses under [Presses](#presses). For `Failed`, `PartiallyFailed` and `Cancelled` the
+  Companion shows `error.message`, a LocalizedText, when `error` is present.
+
+### Dialogs
+
+A dialog opened for the client that pressed arrives as `UiModalOpenedEvent`
+`{"modalId":"<id>","title":{"$localized":{"scope":"macrodeck.app","key":"Widgets.Countdown.Dialog.Title"}}}`. The
+Companion needs `modalId`; `title` is a LocalizedText and may be missing.
+
+| Request and payload | Answer |
+| --- | --- |
+| `OpenModalUiSession` `[{"modalId":"<id>"}]` | `{"accepted":true,"sessionId":"<id>"}`, or `accepted: false` with `code`; then `AttachUiSession` as for a widget |
+| `CompleteUiModal` `[{"modalId":"<id>","cancelled":true}]` | `{"accepted":true}`; a value the dialog returns goes in `value` with `cancelled: false`. The Companion ignores the answer and sends no `CloseUiSession` |
+
+Replayed with a countdown that asks for its duration.
+
+### Folder views
+
+`OpenFolderUiSession` `[{"folderId":"<id>"}]` opens the session of a folder drawn by a folder view. For the widget
+grid, which the client draws itself, it answers
+`{"accepted":false,"sessionId":"","code":"INVALID_PAYLOAD","message":"<text>","viewId":"macrodeck.widget-grid"}`. The
+Companion reads `accepted`, `sessionId`, `viewId` as a string and `code`, retrying on `TOO_MANY_SESSIONS`. An accepted
+answer adds the session id and is followed by `AttachUiSession`; it is not replayed, see below.
+
+### Screensaver
+
+| Frame | Shape |
+| --- | --- |
+| `GetDeviceScreenSaver` `[]` | `{"enabled":false,"idleSeconds":300}`, read on every connect |
+| `DeviceScreenSaverChangedEvent` | `{"enabled":true,"idleSeconds":60}`, to the device's sockets |
+| `ShowDeviceScreenSaverEvent` | `{}`, to the device's sockets; the Companion shows the screensaver now |
+| `OpenScreenSaverUiSession` `[]` | `{"accepted":true,"sessionId":"<id>","screenSaverId":"app.macro-deck.screensavers::clock","interactive":false}`, then `AttachUiSession`; `TOO_MANY_SESSIONS` is retried |
+
+### Companion commands
+
+`CompanionCommandEvent` reaches a device that reported its state:
+
+```json
+{"protocolVersion":1,"kind":"message","type":"CompanionCommandEvent","payload":{"command":"vibrate"}}
+```
+
+`command` is `setBrightness` (`brightnessPercent`), `setOrientation` (`orientation`: `automatic`, `portrait` or
+`landscape`), `vibrate`, `screenOn`, `screenOff`, `focus`, `screenshot` (`requestId`, `screenshotMode` `deck` or
+`full`) or `cancelRequest` (`requestId`); `requestId` is optional on the others. The Companion drops an unknown
+command or one with a missing field. Replayed with `vibrate`.
+
+### License
+
+```json
+{"protocolVersion":1,"kind":"request","type":"SyncCompanionLicense","id":"3-license","payload":[
+ {"license":null,"proof":null,"trialDeviceId":"compat-trial-1","trialStarted":false}]}
+```
+
+The Companion writes all four keys. `proof` is `{"platform","productId",...}` with the store's optional receipt
+fields. The answer is `{"license":null,"trialStartedAt":null,"revokedLicenseIds":[]}`. Unlike every other answer it
+writes `license` and `trialStartedAt` even when they are null, and the Companion reads a null like a missing value.
+A token without a device answers `forbidden`, and `unknown_type` tells the Companion the host keeps no trials.
+
+`CompanionLicenseEvent` `{"license":"<token>"}` and `CompanionLicenseRevokedEvent` `{"licenseId":"<id>"}` reach the
+Companions that reported their state; a license issued for a purchase proof also reaches the connection that sent
+the proof. Only an answer from the Macro Deck Platform sends them, so they are not
+replayed end to end: their frames are pinned by
+[CompanionLicensePushFrameTests](../../host/tests/MacroDeckHost.Tests.UnitTests/Ui/CompanionLicensePushFrameTests.cs).
+
+### Notifications
+
+`RespondToNotification` `[{"id":"<id>","actionId":"<action>","values":{...}}]` answers a notification;
+`"actionId":null` without `values` dismisses it. The answer is `{"status":"<status>"}` with `accepted`,
+`already-closed`, `forbidden`, `invalid` or `not-found`; the Companion removes the notification on
+`already-closed` and `not-found` and marks the dialog's input rejected on `invalid`. Replayed with an unknown id.
+
+### Video streams
+
+| Request and payload | Answer |
+| --- | --- |
+| `GetVideoStreams` `[{}]` | `{"providers":[{"id":"<id>","streams":[{"id":"<id>","name":<LocalizedText>,"width":1920,"height":1080,"state":"connected"}]}]}`, `{"providers":[]}` without a provider; the Companion treats `unavailable` and `disconnected` as down |
+| `OpenVideoStream` `[{"providerId":"<id>","streamId":"<id>","acceptedTransports":["hls","mjpeg"]}]` | `{"sessionId":"<id>","revision":0,"state":"opening"}`, or an error with `unknown_provider`, `unknown_stream` or `transport_not_accepted` |
+| `KeepAliveVideoStream`, `SuspendVideoStream`, `ResumeVideoStream` `[{"sessionId":"<id>"}]` | a response, or the error `unknown_session` |
+| `CloseVideoStream` `[{"sessionId":"<id>"}]` | a response, also for an unknown session |
+
+Error codes are `error.code` strings. No built-in provider exists, so the replay covers the empty catalog and the
+refusals.
+
+### Host language, appearance and lock
+
+| Push | Payload |
+| --- | --- |
+| `LocalizationCultureChangedEvent` | `{"culture":"de","fallbackCulture":"en"}`; the Companion reads no field and reloads `GET /api/localization` |
+| `LocalizationCatalogChangedEvent` | `{"scope":"plugin:<plugin id>"}`; likewise |
+| `AppearanceChangedEvent` | `{"themeMode":"dark","accentColor":"#2196F3","fontFamily":""}`, each a string, each optional |
+| `HostLockStateChangedEvent` | `{"locked":false,"lockScreenEnabled":true,"supported":true}`, three booleans |
+
+### REST reads
+
+The Companion reads these with its client token on the public listener and accepts only a `200`:
+
+| Request | Fields it reads |
+| --- | --- |
+| `GET /api/folders?profileId=<id>` | `folders`, an array of folders as above |
+| `GET /api/profiles` | `profiles`, an array of profiles as above |
+| `GET /api/localization` | `culture` and `fallbackCulture` strings, `translations` with only string values, `hourCycle` string, `hourPadded` boolean |
+| `GET /api/settings/appearance` | `themeMode`, `accentColor` and `fontFamily` strings |
+| `GET /api/system/lock-state` | `locked`, `lockScreenEnabled` and `supported` booleans |
+| `GET /api/system/time` | `utcMs`, a number |
+| `GET /api/system/fonts` | `faces`, each with `faceId`, `family`, `slant` strings, `weight` integer, `remoteRenderable` and `userImported` booleans |
+| `GET /api/system/fonts/{faceId}/file` | the font's bytes with an `ETag`; the Companion sends `If-None-Match` and accepts `304` |
+| `GET /api/ui/resources/{resourceId}?v=<hash>&size=<int>&colorScheme=<scheme>&motion=<motion>` | the bytes, every query parameter optional; `404` for an unknown id. Replayed with `v` and `size`, not with `colorScheme` and `motion` |
+
+### Signing out
+
+After `POST /api/devices/{id}/logout` the device's token gets no new socket ticket. The Companion relies on that
+when it reconnects; how it learns about the sign-out is not frozen, see below.
+
 ### Relied on, not frozen yet
 
-The Companion also uses the following, which this page does not freeze yet:
+The Companion also uses the following, which this page does not freeze:
 
-- Requests: `GetDeviceScreenSaver`, `OpenScreenSaverUiSession`, `OpenFolderUiSession`, `OpenModalUiSession`,
-  `CompleteUiModal`, `SyncCompanionLicense`, `RespondToNotification` and the video stream requests.
-- Pushes: `UiSessionInvalidatedEvent` (shape above), `WidgetsCreatedEvent`, `WidgetUpdatedEvent`,
-  `WidgetsUpdatedEvent`, `WidgetDeletedEvent`, `WidgetsDeletedEvent`, `WidgetPositionsUpdatedEvent`,
-  `WidgetStateInvalidatedEvent`, `FolderUpdatedEvent`, `FolderDeletedEvent`, `FolderNavigationEvent`,
-  `ProfileUpdatedEvent`, `ProfileDeletedEvent`, `ActionExecutionStatusEvent`, `UiModalOpenedEvent`,
-  `LocalizationCultureChangedEvent`, `LocalizationCatalogChangedEvent`, `AppearanceChangedEvent`,
-  `HostLockStateChangedEvent`, `DeviceScreenSaverChangedEvent`, `ShowDeviceScreenSaverEvent`,
-  `DeviceSessionRevokedEvent`, `CompanionCommandEvent`, `CompanionLicenseEvent` and `CompanionLicenseRevokedEvent`.
-- REST reads: `/api/folders`, `/api/profiles`, `/api/localization`, `/api/settings/appearance`,
-  `/api/system/lock-state`, `/api/system/time`, `/api/system/fonts` and `/api/ui/resources`.
+- `DeviceSessionRevokedEvent` `{}`: the Companion signs out on it. The host queues it when a device is signed out or
+  removed or all sessions are ended, but aborts the device's sockets before the queued push is written, so it does
+  not arrive today. That is a host bug, to be fixed before the push is frozen.
+- The accepted answer of `OpenFolderUiSession`: no built-in folder view draws a folder as a session.
+- `HostLockStateChangedEvent` with `"locked":true`: only a locked desktop session sets it.
+- `NotificationShownEvent`, `NotificationUpdatedEvent` and `NotificationClosedEvent`, and the video stream pushes
+  `VideoStreamCatalogChangedEvent`, `VideoStreamSessionChangedEvent` and `VideoStreamSessionClosedEvent`.
+- `GET /api/system/version`, `GET /api/device-setup` and its certificate download, `/api/companion/scripts`,
+  `/api/companion/commands` and `/api/companion/screenshots`, and `POST /api/auth/login`, `/api/auth/refresh`,
+  `/api/auth/logout` and `/api/auth/identity`.
