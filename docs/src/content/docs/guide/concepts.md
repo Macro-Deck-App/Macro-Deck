@@ -778,6 +778,11 @@ Scripts and automations can keep variables of their own, for example a counter o
 choose **Variables** in the editor's toolbar. A script that runs on a widget also sees that widget's
 variables. See [Variables of a widget, script or automation](#variables-of-a-widget-script-or-automation).
 
+A field you fill by picking from a list, such as **Variable** in **Set Variable** or the scene and source of
+an OBS action, can take its value from a variable or a script input instead: choose **Variable** next to the
+field and pick one. A script with a text input then serves any number of buttons, each passing its own
+name. Event triggers accept this too. The script that **Run Script** runs always stays a fixed choice.
+
 A trigger runs one at a time. An event that arrives while its actions are still running waits, and they run
 once more for it when they finish. If several arrive, only the newest one waits, so a flow on **OBS Scene
 Changed** ends on the scene you switched to last, even when you skipped through others. A filter is checked

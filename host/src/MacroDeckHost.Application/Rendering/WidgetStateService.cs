@@ -2,7 +2,6 @@ using MacroDeckHost.Application.Actions;
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
-using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Entities;
@@ -127,7 +126,7 @@ public sealed class WidgetStateService : IWidgetStateService
 				provider.BlockId,
 				resolved.Value.IntegrationId,
 				resolved.Value.ActionId);
-		var snapshot = await TryReadProviderSnapshot(resolved, cancellationToken);
+		var snapshot = await TryReadProviderSnapshot(widgetId, resolved, cancellationToken);
 		// Read after the asynchronous provider call so an action that completed while the provider was
 		// answering wins over the stale snapshot that call may have captured.
 		var optimisticSnapshot = identity is null ? null : _optimisticStates?.Read(identity);
@@ -213,7 +212,8 @@ public sealed class WidgetStateService : IWidgetStateService
 		};
 	}
 
-	private static async Task<ActionStateSnapshot?> TryReadProviderSnapshot(
+	private async Task<ActionStateSnapshot?> TryReadProviderSnapshot(
+		Guid widgetId,
 		(ActionBlock Block, IStateProviderActionDefinition Action, string IntegrationId, string ActionId)? resolved,
 		CancellationToken cancellationToken)
 	{
@@ -224,8 +224,7 @@ public sealed class WidgetStateService : IWidgetStateService
 
 		// Never invoked through the executor: the block also runs as an ordinary action when its
 		// trigger fires, but reporting state must never itself perform the action's side effect.
-		var parameters = ActionParameterConverter.ToNullable(resolved.Value.Block.Parameters
-			.ToDictionary(p => p.Name, p => p.Value));
+		var parameters = await ProviderParameters.ResolveAsync(resolved.Value.Block, widgetId, _templateRenderer);
 
 		using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 		timeoutSource.CancelAfter(_providerReadTimeout);

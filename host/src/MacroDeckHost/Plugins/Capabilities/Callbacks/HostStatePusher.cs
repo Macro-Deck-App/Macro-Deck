@@ -61,6 +61,7 @@ public sealed class HostStatePusher(
 	IDisposable
 {
 	private readonly SemaphoreSlim _eventBindingsPush = new(1, 1);
+	private readonly Dictionary<string, string> _eventBindingsPushed = new(StringComparer.Ordinal);
 	private int _subscribedToBindings;
 	private readonly Lock _deckGate = new();
 	private long _deckRevision;
@@ -167,7 +168,7 @@ public sealed class HostStatePusher(
 		return Task.WhenAll(PushDeckAsync(pluginId, cancellationToken),
 			PushScriptsAsync(pluginId, cancellationToken),
 			PushWidgetsAsync(pluginId, cancellationToken),
-			PushEventBindingsAsync(pluginId, cancellationToken),
+			PushEventBindingsAsync(pluginId, true, cancellationToken),
 			PushAdbAsync(pluginId, cancellationToken),
 			PushBatteriesAsync(pluginId, [], cancellationToken),
 			PushHttpAsync(pluginId, cancellationToken),
@@ -350,24 +351,55 @@ public sealed class HostStatePusher(
 		var connected = sessionRegistry.Snapshot()
 			.Any(session => session.State == PluginSessionState.Connected && session.PluginId == pluginId);
 
-		return connected ? PushEventBindingsAsync(pluginId, CancellationToken.None) : Task.CompletedTask;
+		return connected ? PushEventBindingsAsync(pluginId, false, CancellationToken.None) : Task.CompletedTask;
 	}
 
 	// Read and sent under one lock so a registration push and a change push cannot overtake each other
 	// and leave the plugin holding the older list.
-	private async Task PushEventBindingsAsync(string pluginId, CancellationToken cancellationToken)
+	private async Task PushEventBindingsAsync(string pluginId, bool onRegistration, CancellationToken cancellationToken)
 	{
 		await _eventBindingsPush.WaitAsync(cancellationToken);
 		try
 		{
+			var bindings = bindingTracker.BindingsFor(pluginId);
+
+			// An older SDK raises BindingsChanged on every push, so a session that did not opt in never
+			// sees resolved values and gets no push when only one of them changed.
+			if (!sessionRegistry.HasHostApiFeature(pluginId, HostApiFeatures.EventBindingResolvedValue))
+			{
+				bindings = WithoutResolvedValues(bindings);
+			}
+
+			var json = JsonSerializer.Serialize(bindings, PluginProtocolJson.Options);
+			if (!onRegistration
+				&& _eventBindingsPushed.TryGetValue(pluginId, out var previous)
+				&& string.Equals(previous, json, StringComparison.Ordinal))
+			{
+				return;
+			}
+
 			await sessionRegistry.SendToPlugin(pluginId,
-				BuildEnvelope(HostApis.EventBindings, bindingTracker.BindingsFor(pluginId)),
+				BuildEnvelope(HostApis.EventBindings, bindings),
 				cancellationToken);
+			_eventBindingsPushed[pluginId] = json;
 		}
 		finally
 		{
 			_eventBindingsPush.Release();
 		}
+	}
+
+	private static IReadOnlyList<EventBindingDto> WithoutResolvedValues(IReadOnlyList<EventBindingDto> bindings)
+	{
+		return
+		[
+			.. bindings.Select(binding => binding with
+			{
+				Parameters = binding.Parameters.ToDictionary(pair => pair.Key,
+					pair => pair.Value with { ResolvedValue = null },
+					StringComparer.Ordinal)
+			})
+		];
 	}
 
 	// Revision and snapshot are taken together so a higher revision never carries older state; a
