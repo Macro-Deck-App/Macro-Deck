@@ -1069,6 +1069,9 @@ Finder में Macro Deck को स्वयं Applications फ़ोल्�
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} सेट नहीं है। सेटिंग्स &gt; AI क्लाइंट से Claude Desktop एक्सटेंशन फिर से इंस्टॉल करें।</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>इस एक्सटेंशन का ऐक्सेस टोकन इस कंप्यूटर पर सहेजा नहीं गया है। सेटिंग्स &gt; AI क्लाइंट में नया टोकन बनाएँ और एक्सटेंशन फिर से इंस्टॉल करें।</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck नहीं चल रहा है। Macro Deck शुरू करें और फिर से कोशिश करें।</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>इस ऐक्सेस टोकन का अब उपयोग नहीं किया जा सकता। एक्सटेंशन डाउनलोड करने के लिए नया टोकन बनाएँ।</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck ऐक्सेस टोकन को इस कंप्यूटर के क्रेडेंशियल स्टोर में सहेज नहीं सका, इसलिए एक्सटेंशन नहीं बनाया गया। फिर से कोशिश करें, या क्लाइंट कॉन्फ़िगरेशन से अपना क्लाइंट कनेक्ट करें।</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop एक्सटेंशन केवल macOS और Windows पर इंस्टॉल किए गए Macro Deck ऐप में उपलब्ध है।</value>
@@ -17602,7 +17608,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>Claude Desktop के लिए डाउनलोड करें</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Macro Deck इंस्टॉल करने के लिए डाउनलोड की गई फ़ाइल को Claude Desktop में खोलें। इस फ़ाइल में यह टोकन है, इसलिए इंस्टॉल करने के बाद इसे हटा दें।</value>
+    <value>Macro Deck इंस्टॉल करने के लिए डाउनलोड की गई फ़ाइल को Claude Desktop में खोलें। इस फ़ाइल में कोई टोकन नहीं है: Macro Deck उसे इस कंप्यूटर के क्रेडेंशियल स्टोर में रखता है।</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Claude Desktop एक्सटेंशन सहेजा नहीं जा सका</value>

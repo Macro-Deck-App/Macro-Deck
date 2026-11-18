@@ -1070,6 +1070,9 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>Zmienna {variable} nie jest ustawiona. Zainstaluj ponownie rozszerzenie dla Claude Desktop w Ustawienia &gt; Klienci AI.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Token dostępu dla tego rozszerzenia nie jest zapisany na tym komputerze. Utwórz nowy token w Ustawienia &gt; Klienci AI i zainstaluj rozszerzenie ponownie.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck nie jest uruchomiony. Uruchom Macro Deck i spróbuj ponownie.</value>
   </data>
@@ -2993,6 +2996,9 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Tego tokenu dostępu nie można już używać. Utwórz nowy token, aby pobrać rozszerzenie.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck nie mógł zapisać tokenu dostępu w magazynie poświadczeń tego komputera, dlatego rozszerzenie nie zostało utworzone. Spróbuj ponownie lub połącz klienta za pomocą konfiguracji klienta.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Rozszerzenie dla Claude Desktop jest dostępne tylko w zainstalowanej aplikacji Macro Deck w systemach macOS i Windows.</value>
@@ -17601,7 +17607,7 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
     <value>Pobierz dla Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Otwórz pobrany plik w Claude Desktop, aby zainstalować tam Macro Deck. Plik zawiera ten token, dlatego usuń go po instalacji.</value>
+    <value>Otwórz pobrany plik w Claude Desktop, aby zainstalować tam Macro Deck. Plik nie zawiera tokenu: Macro Deck przechowuje go w magazynie poświadczeń tego komputera.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Nie udało się zapisać rozszerzenia dla Claude Desktop</value>

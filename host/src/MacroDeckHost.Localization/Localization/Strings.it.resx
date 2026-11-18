@@ -1070,6 +1070,9 @@ Chiudi l'applicazione che utilizza la porta (o un Macro Deck ancora in esecuzion
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} non è impostata. Reinstalla l'estensione per Claude Desktop da Impostazioni &gt; Client IA.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Il token di accesso per questa estensione non è salvato su questo computer. Crea un nuovo token in Impostazioni &gt; Client IA e reinstalla l'estensione.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck non è in esecuzione. Avvia Macro Deck e riprova.</value>
   </data>
@@ -2993,6 +2996,9 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Questo token di accesso non può più essere usato. Crea un nuovo token per scaricare l'estensione.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck non è riuscito a salvare il token di accesso nell'archivio credenziali di questo computer, quindi l'estensione non è stata creata. Riprova oppure collega il tuo client con la configurazione del client.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>L'estensione per Claude Desktop è disponibile solo nell'app Macro Deck installata su macOS e Windows.</value>
@@ -17601,7 +17607,7 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
     <value>Scarica per Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Apri il file scaricato in Claude Desktop per installarvi Macro Deck. Il file contiene questo token, quindi eliminalo dopo l'installazione.</value>
+    <value>Apri il file scaricato in Claude Desktop per installarvi Macro Deck. Il file non contiene alcun token: Macro Deck lo conserva nell'archivio credenziali di questo computer.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Impossibile salvare l'estensione per Claude Desktop</value>

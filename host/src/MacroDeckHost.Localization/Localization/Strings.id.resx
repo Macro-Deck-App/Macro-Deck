@@ -1069,6 +1069,9 @@ Tutup aplikasi yang memakai port tersebut (atau Macro Deck yang masih berjalan) 
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} belum diatur. Instal ulang ekstensi Claude Desktop dari Pengaturan &gt; Klien AI.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Token akses untuk ekstensi ini tidak tersimpan di komputer ini. Buat token baru di Pengaturan &gt; Klien AI, lalu instal ulang ekstensi.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck tidak berjalan. Mulai Macro Deck, lalu coba lagi.</value>
   </data>
@@ -2992,6 +2995,9 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Token akses ini tidak dapat digunakan lagi. Buat token baru untuk mengunduh ekstensi.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck tidak dapat menyimpan token akses di penyimpanan kredensial komputer ini, jadi ekstensi tidak dibuat. Coba lagi, atau hubungkan klien dengan konfigurasi klien.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Ekstensi Claude Desktop hanya tersedia di aplikasi Macro Deck yang terpasang di macOS dan Windows.</value>
@@ -17602,7 +17608,7 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
     <value>Unduh untuk Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Buka berkas yang diunduh di Claude Desktop untuk memasang Macro Deck di sana. Berkas ini berisi token ini, jadi hapus setelah pemasangan.</value>
+    <value>Buka berkas yang diunduh di Claude Desktop untuk memasang Macro Deck di sana. Berkas ini tidak berisi token: Macro Deck menyimpannya di penyimpanan kredensial komputer ini.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Ekstensi Claude Desktop tidak dapat disimpan</value>

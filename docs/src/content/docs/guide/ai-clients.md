@@ -32,13 +32,19 @@ While the new token is shown, choose **Download for Claude Desktop** and save th
 as an extension. Macro Deck must be running whenever Claude uses it.
 
 The button appears only when Macro Deck runs as the installed app on macOS or Windows, the systems Claude
-Desktop runs on.
+Desktop runs on. A [portable copy](/guide/installation/#portable-mode-windows) does not offer it: connect
+Claude Desktop with the client configuration below instead.
 
-The file contains the token. Delete it once the extension is installed, and if you shared it with
-anyone, revoke the token.
+The file holds no secret. Macro Deck keeps the token in your system's credential store (the Keychain on
+macOS, Credential Manager on Windows), only on this computer, and the extension reads it from there. If
+Macro Deck cannot save it there, the download fails instead.
 
 The extension keeps working when Macro Deck restarts on a different port. After you revoke its token, it
 stops working: create a new token and install the extension again from the new download.
+
+Revoking or removing the token also deletes it from the credential store. Removing the extension in
+Claude Desktop or uninstalling Macro Deck does not, so revoke the token you no longer use, best before
+you uninstall.
 
 ## Connect Claude Code, VS Code and other clients
 

@@ -86,9 +86,12 @@ and writes the responses and server requests (elicitations included) to stdout. 
 - When the session is lost (the host restarted, also on another port), it re-initializes with the
   client's original `initialize` and replays a request only when it provably never reached the host. A
   request that was in flight is answered with a JSON-RPC error instead, so a tool call never runs twice.
+- Instead of `MACRODECK_MCP_TOKEN`, `MACRODECK_MCP_TOKEN_ID=<token id>` makes it read the token from the
+  operating system's credential store, where Macro Deck saved it for the Claude Desktop extension.
+  `MACRODECK_MCP_TOKEN` wins when both are set.
 - Without a host, with a rejected token (`401`) or while `/mcp` is unavailable (`404`), every request
-  gets a JSON-RPC error that says so, in the operating system's language. Without `MACRODECK_MCP_TOKEN`
-  it exits with status 2.
+  gets a JSON-RPC error that says so, in the operating system's language. Without either variable, or
+  when no token is stored for that id, it exits with status 2.
 - For development, a host started without the desktop app can be reached by setting both
   `MACRODECK_HOST_PORT` and `MACRODECK_LOOPBACK_SECRET_FILE` (a file holding that host's loopback secret).
   The pair is honoured only because the environment comes from the user's own client configuration, and
@@ -97,11 +100,23 @@ and writes the responses and server requests (elicitations included) to stdout. 
 
 **Download for Claude Desktop** in **Settings > AI clients** builds a
 [Claude Desktop Extension](https://github.com/modelcontextprotocol/mcpb) (`.mcpb`, manifest version 0.3)
-of type `binary` that runs this bridge from the installed app, with the new token in its `env`. It is
-offered on macOS and Windows when the host was started by the installed desktop app. The admin endpoint
-behind it is `POST /api/mcp/tokens/{id}/claude-desktop-extension` with `{ "token": "<plaintext>" }`;
-it answers `application/zip`, or the settings' JSON error body with `invalid_token`, `token_revoked` or
-`extension_unavailable`. `GET /api/mcp/endpoint` reports whether it is offered in `extensionAvailable`.
+of type `binary`, with the Macro Deck icon, that runs this bridge from the installed app. Its `env` holds only
+`MACRODECK_MCP_TOKEN_ID`; the token itself never goes into the file. It is offered on macOS and Windows
+when the host was started by the installed desktop app, and not in a portable installation. The admin
+endpoint behind it is `POST /api/mcp/tokens/{id}/claude-desktop-extension` with
+`{ "token": "<plaintext>" }`; it answers `application/zip`, or the settings' JSON error body with
+`invalid_token`, `token_revoked`, `extension_unavailable` or `secure_store_unavailable`.
+`GET /api/mcp/endpoint` reports whether it is offered in `extensionAvailable`.
+
+Before it answers, the host has the desktop app's executable save the token: on macOS as a generic
+password in the login keychain, never synchronized, created by that executable so the bridge reads it
+without a prompt; on Windows as a local-machine generic credential in Credential Manager, its value
+additionally DPAPI-protected for the current user. The entry is keyed by the token id and per build
+channel, so downloading again for the same token replaces it. `mcp-token store|delete <id>` is the
+host's internal call for this, not an interface for clients. Revoking or deleting the token deletes
+the entry. Nothing else does: an entry stays for every token whose extension was downloaded (even if the
+file was never saved or the extension was removed) until that token is revoked, and when the token
+disappears without a revoke, for example through a backup restore.
 
 ## Browser and DNS-rebinding protection
 

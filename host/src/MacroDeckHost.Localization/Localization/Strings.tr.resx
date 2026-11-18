@@ -1069,6 +1069,9 @@ Bağlantı noktasını kullanan uygulamayı (veya hâlâ çalışan bir Macro De
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} ayarlanmamış. Claude Desktop uzantısını Ayarlar &gt; Yapay zekâ istemcileri bölümünden yeniden yükleyin.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Bu uzantının erişim belirteci bu bilgisayarda kayıtlı değil. Ayarlar &gt; Yapay zekâ istemcileri bölümünde yeni bir belirteç oluşturun ve uzantıyı yeniden yükleyin.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck çalışmıyor. Macro Deck'i başlatıp yeniden deneyin.</value>
   </data>
@@ -2992,6 +2995,9 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Bu erişim belirteci artık kullanılamaz. Uzantıyı indirmek için yeni bir belirteç oluşturun.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck erişim belirtecini bu bilgisayarın kimlik bilgisi deposuna kaydedemedi, bu nedenle uzantı oluşturulmadı. Yeniden deneyin veya istemcinizi istemci yapılandırmasıyla bağlayın.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop uzantısı yalnızca macOS ve Windows'a yüklenmiş Macro Deck uygulamasında kullanılabilir.</value>
@@ -17602,7 +17608,7 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
     <value>Claude Desktop için indir</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Macro Deck'i yüklemek için indirilen dosyayı Claude Desktop'ta açın. Dosya bu belirteci içerdiğinden yüklemeden sonra silin.</value>
+    <value>Macro Deck'i yüklemek için indirilen dosyayı Claude Desktop'ta açın. Dosya herhangi bir belirteç içermez: Macro Deck belirteci bu bilgisayarın kimlik bilgisi deposunda saklar.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Claude Desktop uzantısı kaydedilemedi</value>

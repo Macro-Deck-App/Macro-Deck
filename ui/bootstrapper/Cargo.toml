@@ -45,6 +45,10 @@ base64 = "0.22"
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 
+# Already locked through rustls-platform-verifier; declared directly for the MCP token's keychain item.
+[target.'cfg(target_os = "macos")'.dependencies]
+security-framework = "3"
+
 # Same story as semver/url: tauri already pulls it in (locked at 0.18.2), declared directly because
 # the Wayland title bar needs its buttons handed back - see src/wayland_titlebar.rs.
 [target.'cfg(target_os = "linux")'.dependencies]
@@ -60,6 +64,8 @@ windows = { version = "0.61", features = [
     "Win32_Foundation",
     "Win32_Graphics_Gdi",
     "Win32_Security",
+    "Win32_Security_Credentials",
+    "Win32_Security_Cryptography",
     "Win32_System_Com",
     "Win32_System_Console",
     "Win32_System_JobObjects",

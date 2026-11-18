@@ -1069,6 +1069,9 @@
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>Переменная {variable} не задана. Установите расширение для Claude Desktop заново в разделе Настройки &gt; ИИ-клиенты.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Токен доступа для этого расширения не сохранён на этом компьютере. Создайте новый токен в разделе Настройки &gt; ИИ-клиенты и установите расширение заново.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck не запущен. Запустите Macro Deck и повторите попытку.</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Этот токен доступа больше нельзя использовать. Создайте новый токен, чтобы скачать расширение.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck не удалось сохранить токен доступа в хранилище учётных данных этого компьютера, поэтому расширение не создано. Повторите попытку или подключите клиент с помощью конфигурации клиента.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Расширение для Claude Desktop доступно только в установленном приложении Macro Deck для macOS и Windows.</value>
@@ -17602,7 +17608,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Скачать для Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Откройте скачанный файл в Claude Desktop, чтобы установить туда Macro Deck. Файл содержит этот токен, поэтому удалите его после установки.</value>
+    <value>Откройте скачанный файл в Claude Desktop, чтобы установить туда Macro Deck. Файл не содержит токена: Macro Deck хранит его в хранилище учётных данных этого компьютера.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Не удалось сохранить расширение для Claude Desktop</value>

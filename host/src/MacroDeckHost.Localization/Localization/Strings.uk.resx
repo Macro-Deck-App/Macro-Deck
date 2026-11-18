@@ -1069,6 +1069,9 @@
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>Змінну {variable} не задано. Установіть розширення для Claude Desktop знову в розділі Налаштування &gt; ШІ-клієнти.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Токен доступу для цього розширення не збережено на цьому комп'ютері. Створіть новий токен у розділі Налаштування &gt; ШІ-клієнти та встановіть розширення знову.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck не запущено. Запустіть Macro Deck і спробуйте ще раз.</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Цей токен доступу більше не можна використовувати. Створіть новий токен, щоб завантажити розширення.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck не вдалося зберегти токен доступу в сховищі облікових даних цього комп'ютера, тому розширення не створено. Спробуйте ще раз або підключіть клієнт за допомогою конфігурації клієнта.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Розширення для Claude Desktop доступне лише у встановленому застосунку Macro Deck для macOS і Windows.</value>
@@ -17602,7 +17608,7 @@ Macro Deck встановлено з репозиторію APT, тож післ
     <value>Завантажити для Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Відкрийте завантажений файл у Claude Desktop, щоб установити туди Macro Deck. Файл містить цей токен, тому видаліть його після встановлення.</value>
+    <value>Відкрийте завантажений файл у Claude Desktop, щоб установити туди Macro Deck. Файл не містить токена: Macro Deck зберігає його в сховищі облікових даних цього комп'ютера.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Не вдалося зберегти розширення для Claude Desktop</value>

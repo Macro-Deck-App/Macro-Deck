@@ -55,6 +55,9 @@ Portable mode differs from an installed Macro Deck in a few ways:
   Windows Firewall rule all come from the installer. If Windows asks whether to allow Macro Deck
   through the firewall on the first start, allow it so your devices can connect. Windows notifications
   may not appear either.
+- **Claude Desktop extension**: a portable copy does not offer **Download for Claude Desktop**,
+  because the extension's token would have to live in the system's credential store. Connect Claude
+  Desktop with the client configuration instead. See [AI clients](/guide/ai-clients/).
 - A portable copy and an installed Macro Deck cannot run at the same time.
 - Windows 10 and 11 include the WebView2 runtime Macro Deck needs. On a system without it, install it
   from Microsoft first.

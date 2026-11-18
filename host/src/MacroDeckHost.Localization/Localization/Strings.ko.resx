@@ -1069,6 +1069,9 @@ Finder에서 Macro Deck을 응용 프로그램 폴더(또는 홈 폴더의 응�
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable}이(가) 설정되지 않았습니다. 설정 &gt; AI 클라이언트에서 Claude Desktop 확장 프로그램을 다시 설치하세요.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>이 확장 프로그램의 액세스 토큰이 이 컴퓨터에 저장되어 있지 않습니다. 설정 &gt; AI 클라이언트에서 새 토큰을 만들고 확장 프로그램을 다시 설치하세요.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck이 실행 중이 아닙니다. Macro Deck을 시작한 후 다시 시도하세요.</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>이 액세스 토큰은 더 이상 사용할 수 없습니다. 확장 프로그램을 다운로드하려면 새 토큰을 만드세요.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck이 액세스 토큰을 이 컴퓨터의 자격 증명 저장소에 저장하지 못해 확장 프로그램을 만들지 않았습니다. 다시 시도하거나 클라이언트 구성으로 클라이언트를 연결하세요.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop 확장 프로그램은 macOS 및 Windows에 설치된 Macro Deck 앱에서만 사용할 수 있습니다.</value>
@@ -17602,7 +17608,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>Claude Desktop용 다운로드</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>다운로드한 파일을 Claude Desktop에서 열면 Macro Deck이 설치됩니다. 이 파일에는 이 토큰이 들어 있으므로 설치 후 삭제하세요.</value>
+    <value>다운로드한 파일을 Claude Desktop에서 열면 Macro Deck이 설치됩니다. 이 파일에는 토큰이 들어 있지 않습니다. Macro Deck은 토큰을 이 컴퓨터의 자격 증명 저장소에 보관합니다.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Claude Desktop 확장 프로그램을 저장할 수 없습니다</value>

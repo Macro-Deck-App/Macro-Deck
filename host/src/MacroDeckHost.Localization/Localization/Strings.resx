@@ -1069,6 +1069,9 @@ Close the application using the port (or a still-running Macro Deck) and try aga
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} is not set. Install the Claude Desktop extension from Settings &gt; AI clients again.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>The access token for this extension is not stored on this computer. Create a new token in Settings &gt; AI clients and install the extension again.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck is not running. Start Macro Deck and try again.</value>
   </data>
@@ -2992,6 +2995,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>This access token can no longer be used. Create a new token to download the extension.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck could not save the access token in this computer's credential store, so the extension was not created. Try again, or connect your client with the client configuration instead.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>The Claude Desktop extension is only available in the installed Macro Deck app on macOS and Windows.</value>
@@ -17605,7 +17611,7 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
     <value>Download for Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Open the downloaded file in Claude Desktop to install Macro Deck there. The file contains this token, so delete it after installing.</value>
+    <value>Open the downloaded file in Claude Desktop to install Macro Deck there. The file holds no token: Macro Deck keeps it in this computer's credential store.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Could not save the Claude Desktop extension</value>

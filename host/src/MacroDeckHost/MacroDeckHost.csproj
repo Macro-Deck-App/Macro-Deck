@@ -95,6 +95,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="..\..\..\ui\bootstrapper\icons\128x128@2x.png"
+                        LogicalName="MacroDeckHost.Mcp.ClaudeDesktopExtensionIcon.png"
+                        Visible="false" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Include="..\..\..\LICENSE;..\..\..\NOTICE;..\..\..\THIRD-PARTY-NOTICES"
             CopyToOutputDirectory="PreserveNewest"
             CopyToPublishDirectory="PreserveNewest"

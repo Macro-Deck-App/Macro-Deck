@@ -89,6 +89,7 @@ public class McpController : ControllerBase
 	private readonly McpTextResolver _text;
 	private readonly IMcpConfirmationStore _confirmations;
 	private readonly IMcpNetworkAccess _networkAccess;
+	private readonly IMcpExtensionTokenStore _extensionTokens;
 
 	public McpController(
 		IMcpTokenService tokenService,
@@ -97,7 +98,8 @@ public class McpController : ControllerBase
 		IIntegrationRegistry integrations,
 		McpTextResolver text,
 		IMcpConfirmationStore confirmations,
-		IMcpNetworkAccess networkAccess)
+		IMcpNetworkAccess networkAccess,
+		IMcpExtensionTokenStore extensionTokens)
 	{
 		_tokenService = tokenService;
 		_connections = connections;
@@ -106,6 +108,7 @@ public class McpController : ControllerBase
 		_text = text;
 		_confirmations = confirmations;
 		_networkAccess = networkAccess;
+		_extensionTokens = extensionTokens;
 	}
 
 	[HttpGet("policy")]
@@ -158,7 +161,7 @@ public class McpController : ControllerBase
 	{
 		var executable = ClaudeDesktopExtension.ShellExecutable();
 		var platform = ClaudeDesktopExtension.CurrentPlatform();
-		if (executable is null || platform is null)
+		if (executable is null || platform is null || !ClaudeDesktopExtension.IsAvailable())
 		{
 			return Conflict(Failure("extension_unavailable", AppStrings.Errors.Mcp.ExtensionUnavailable()));
 		}
@@ -174,10 +177,15 @@ public class McpController : ControllerBase
 			return Conflict(Failure("token_revoked", AppStrings.Errors.Mcp.ExtensionTokenInvalid()));
 		}
 
+		if (!await _extensionTokens.Store(id, body.Token!))
+		{
+			return Conflict(Failure("secure_store_unavailable", AppStrings.Errors.Mcp.ExtensionTokenNotStored()));
+		}
+
 		var description = await _text.Resolve(AppStrings.Mcp.Extension.Description()) ?? string.Empty;
 		var archive = ClaudeDesktopExtension.Build(new ClaudeDesktopExtensionContent(executable,
 			platform,
-			body.Token!,
+			id,
 			ClaudeDesktopExtension.VersionOf(typeof(McpController).Assembly.GetName().Version),
 			description));
 		Response.Headers.CacheControl = "no-store";

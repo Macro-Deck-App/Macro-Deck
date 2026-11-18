@@ -1069,6 +1069,9 @@ Sluit de app die de poort gebruikt (of een Macro Deck dat nog draait) en probeer
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} is niet ingesteld. Installeer de Claude Desktop-extensie opnieuw via Instellingen &gt; AI-clients.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Het toegangstoken voor deze extensie is niet op deze computer opgeslagen. Maak een nieuw token in Instellingen &gt; AI-clients en installeer de extensie opnieuw.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck is niet actief. Start Macro Deck en probeer het opnieuw.</value>
   </data>
@@ -2992,6 +2995,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Dit toegangstoken kan niet meer worden gebruikt. Maak een nieuw token om de extensie te downloaden.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck kon het toegangstoken niet opslaan in de referentieopslag van deze computer, dus de extensie is niet gemaakt. Probeer het opnieuw of verbind je client met de clientconfiguratie.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>De Claude Desktop-extensie is alleen beschikbaar in de geïnstalleerde Macro Deck-app op macOS en Windows.</value>
@@ -17602,7 +17608,7 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
     <value>Downloaden voor Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Open het gedownloade bestand in Claude Desktop om Macro Deck daar te installeren. Het bestand bevat dit token, dus verwijder het na de installatie.</value>
+    <value>Open het gedownloade bestand in Claude Desktop om Macro Deck daar te installeren. Het bestand bevat geen token: Macro Deck bewaart het in de referentieopslag van deze computer.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>De Claude Desktop-extensie kon niet worden opgeslagen</value>

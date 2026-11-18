@@ -1069,6 +1069,9 @@
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>未设置 {variable}。请在“设置 &gt; AI 客户端”中重新安装 Claude Desktop 扩展。</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>此计算机上未保存此扩展的访问令牌。请在“设置 &gt; AI 客户端”中创建新令牌，然后重新安装扩展。</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck 未运行。请启动 Macro Deck 后重试。</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>此访问令牌已无法使用。请创建新令牌以下载扩展。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck 无法将访问令牌保存到此计算机的凭据存储中，因此未创建扩展。请重试，或改用客户端配置连接客户端。</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop 扩展仅在 macOS 和 Windows 上安装的 Macro Deck 应用中可用。</value>
@@ -17602,7 +17608,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>下载 Claude Desktop 扩展</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>在 Claude Desktop 中打开下载的文件，即可在其中安装 Macro Deck。该文件包含此令牌，安装后请将其删除。</value>
+    <value>在 Claude Desktop 中打开下载的文件，即可在其中安装 Macro Deck。该文件不包含令牌：Macro Deck 会将令牌保存在此计算机的凭据存储中。</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>无法保存 Claude Desktop 扩展</value>

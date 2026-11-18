@@ -1069,6 +1069,9 @@ Finder で Macro Deck を「アプリケーション」フォルダー（また�
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} が設定されていません。[設定] &gt; [AI クライアント] から Claude Desktop 拡張機能をもう一度インストールしてください。</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>この拡張機能のアクセス トークンは、このコンピューターに保存されていません。[設定] &gt; [AI クライアント] で新しいトークンを作成し、拡張機能をもう一度インストールしてください。</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck が実行されていません。Macro Deck を起動してから、もう一度お試しください。</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>このアクセス トークンは使用できなくなりました。拡張機能をダウンロードするには、新しいトークンを作成してください。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck はアクセス トークンをこのコンピューターの資格情報ストアに保存できなかったため、拡張機能は作成されませんでした。もう一度お試しいただくか、クライアント構成でクライアントを接続してください。</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop 拡張機能は、macOS と Windows にインストールした Macro Deck アプリでのみ利用できます。</value>
@@ -17602,7 +17608,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>Claude Desktop 用にダウンロード</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>ダウンロードしたファイルを Claude Desktop で開くと、Macro Deck がインストールされます。このファイルにはこのトークンが含まれているため、インストール後に削除してください。</value>
+    <value>ダウンロードしたファイルを Claude Desktop で開くと、Macro Deck がインストールされます。このファイルにトークンは含まれません。Macro Deck はトークンをこのコンピューターの資格情報ストアに保存します。</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Claude Desktop 拡張機能を保存できませんでした</value>
