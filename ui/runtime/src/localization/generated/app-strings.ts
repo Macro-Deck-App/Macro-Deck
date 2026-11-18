@@ -1117,6 +1117,7 @@ export const AppStrings = {
 			LoadFailed: 'macrodeck.app:Errors.Event.LoadFailed',
 		},
 		Events: {
+			NonFiniteParameter: 'macrodeck.app:Errors.Events.NonFiniteParameter',
 			NotFoundWithId: 'macrodeck.app:Errors.Events.NotFoundWithId',
 		},
 		FileSave: {
@@ -1255,6 +1256,7 @@ export const AppStrings = {
 			SignerMismatch: 'macrodeck.app:Errors.Plugins.SignerMismatch',
 			TakenOverByDevelopmentBuild: 'macrodeck.app:Errors.Plugins.TakenOverByDevelopmentBuild',
 			TakeoverConfirmationRequired: 'macrodeck.app:Errors.Plugins.TakeoverConfirmationRequired',
+			TrustDowngrade: 'macrodeck.app:Errors.Plugins.TrustDowngrade',
 			UninstallDataNotDeleted: 'macrodeck.app:Errors.Plugins.UninstallDataNotDeleted',
 			UninstallStopFailed: 'macrodeck.app:Errors.Plugins.UninstallStopFailed',
 		},
@@ -11342,6 +11344,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Config.VariableNamesUnavailable': 'A unique variable name could not be created. Rename the configuration and try again.',
 	'macrodeck.app:Errors.Device.LoadFailed': 'Failed to load devices',
 	'macrodeck.app:Errors.Event.LoadFailed': 'Failed to load events',
+	'macrodeck.app:Errors.Events.NonFiniteParameter': 'The value of \'{parameter}\' must be a finite number',
 	'macrodeck.app:Errors.Events.NotFoundWithId': 'Event \'{eventId}\' not found',
 	'macrodeck.app:Errors.FileSave.SaveFailed': 'The file could not be saved',
 	'macrodeck.app:Errors.FileSave.WriteFailed': 'The file could not be written',
@@ -11444,6 +11447,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Errors.Plugins.SignerMismatch': 'This plugin is signed by a different publisher than the version you already have, so it was not installed.',
 	'macrodeck.app:Errors.Plugins.TakenOverByDevelopmentBuild': 'A development build has taken over this plugin. The installed version starts again when the takeover ends.',
 	'macrodeck.app:Errors.Plugins.TakeoverConfirmationRequired': 'Approving this request lets a development build take over an installed plugin. Confirm the takeover first.',
+	'macrodeck.app:Errors.Plugins.TrustDowngrade': 'A signed and verified version of this plugin is already installed, so a package that is not verified cannot replace it. To try a build before it is published, ask its creator to invite you as a tester.',
 	'macrodeck.app:Errors.Plugins.UninstallDataNotDeleted': 'Some of the plugin\'s stored data could not be deleted because a file is still in use, so the plugin was not uninstalled. Close any program that uses it and try again.',
 	'macrodeck.app:Errors.Plugins.UninstallStopFailed': 'The plugin could not be stopped, so nothing was removed. Try again.',
 	'macrodeck.app:Errors.Portability.ImportFailed': 'Import failed',

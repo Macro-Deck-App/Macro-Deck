@@ -48,7 +48,7 @@ internal sealed class WeatherStation : IWeatherStation
 			&& string.Equals(DisplayName, displayName, StringComparison.Ordinal);
 	}
 
-	public async Task RefreshAsync(CancellationToken ct)
+	public async Task<bool> RefreshAsync(CancellationToken ct)
 	{
 		var response = await _client.GetForecastAsync(_latitude, _longitude, _unit, ct);
 		if (response?.Current is null)
@@ -58,7 +58,7 @@ internal sealed class WeatherStation : IWeatherStation
 				_current = WeatherSnapshot.Unavailable(DisplayName);
 			}
 
-			return;
+			return false;
 		}
 
 		_current = new WeatherSnapshot
@@ -79,6 +79,8 @@ internal sealed class WeatherStation : IWeatherStation
 			Sunrise = FirstTime(response.Daily?.Sunrise),
 			Sunset = FirstTime(response.Daily?.Sunset)
 		};
+
+		return true;
 	}
 
 	private static List<WeatherHour> MapHours(OpenMeteoHourly? hourly)

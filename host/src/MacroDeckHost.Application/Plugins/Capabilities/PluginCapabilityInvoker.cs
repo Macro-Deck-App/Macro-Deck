@@ -17,6 +17,10 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	// correlation that could not possibly still receive a meaningful late reply does not linger either.
 	private const int MaxAbandonedEntries = 1024;
 
+	// A deadlineMs of zero or less means "use the default" to a plugin, so a call that queued away
+	// almost all of its budget is still sent with a positive one.
+	private static readonly TimeSpan _minimumDeadline = TimeSpan.FromMilliseconds(1);
+
 	private readonly IPluginSessionRegistry _sessionRegistry;
 	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
@@ -26,6 +30,8 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	private readonly ConcurrentDictionary<string, DateTimeOffset> _abandoned = new(StringComparer.Ordinal);
 
 	private readonly ConcurrentDictionary<string, SemaphoreSlim> _concurrencyByPlugin = new(StringComparer.Ordinal);
+
+	private readonly CancellationTokenSource _disposed = new();
 
 	public PluginCapabilityInvoker(
 		IPluginSessionRegistry sessionRegistry,
@@ -80,10 +86,19 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 		var semaphore = _concurrencyByPlugin.GetOrAdd(pluginId,
 			static _ => new SemaphoreSlim(ProtocolLimits.MaxConcurrentInvocations));
 
-		if (!await semaphore.WaitAsync(TimeSpan.Zero, cancellationToken).ConfigureAwait(false))
+		var queuedAt = _timeProvider.GetUtcNow();
+		await WaitForSlotAsync(semaphore, budget, cancellationToken).ConfigureAwait(false);
+
+		var queued = _timeProvider.GetUtcNow() - queuedAt;
+		if (queued > TimeSpan.Zero)
 		{
-			throw RemoteCapabilityException.CreateRetryable(ProtocolErrorCodes.RateLimited,
-				$"This plugin is already running {ProtocolLimits.MaxConcurrentInvocations} invocations.");
+			budget -= queued;
+			if (budget < _minimumDeadline)
+			{
+				budget = _minimumDeadline;
+			}
+
+			envelope = envelope with { DeadlineMs = (int)Math.Ceiling(budget.TotalMilliseconds) };
 		}
 
 		var completion = new TaskCompletionSource<ProtocolEnvelope>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -192,9 +207,39 @@ public sealed class PluginCapabilityInvoker : IPluginCapabilityInvoker, IDisposa
 	{
 		_sessionRegistry.SessionEnded -= OnSessionEnded;
 
-		foreach (var semaphore in _concurrencyByPlugin.Values)
+		// The semaphores are left undisposed: SemaphoreSlim.Dispose drops waiters whose cancellation is still
+		// being processed, so their calls would never complete. They hold no wait handle.
+		_disposed.Cancel();
+	}
+
+	private async Task WaitForSlotAsync(SemaphoreSlim semaphore, TimeSpan budget, CancellationToken cancellationToken)
+	{
+		if (await semaphore.WaitAsync(TimeSpan.Zero, cancellationToken).ConfigureAwait(false))
 		{
-			semaphore.Dispose();
+			return;
+		}
+
+		using var expiry = new CancellationTokenSource(budget, _timeProvider);
+		using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
+			expiry.Token,
+			_disposed.Token);
+
+		try
+		{
+			await semaphore.WaitAsync(linked.Token).ConfigureAwait(false);
+		}
+		catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+		{
+			throw new OperationCanceledException(cancellationToken);
+		}
+		catch (OperationCanceledException) when (_disposed.IsCancellationRequested)
+		{
+			throw new ObjectDisposedException(nameof(PluginCapabilityInvoker));
+		}
+		catch (OperationCanceledException)
+		{
+			throw RemoteCapabilityException.CreateRetryable(ProtocolErrorCodes.RateLimited,
+				$"This plugin is already running {ProtocolLimits.MaxConcurrentInvocations} invocations.");
 		}
 	}
 

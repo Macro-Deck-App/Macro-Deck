@@ -2779,6 +2779,10 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Načtení událostí se nezdařilo</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Hodnota „{parameter}“ musí být konečné číslo</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Událost „{eventId}“ nebyla nalezena</value>
     <comment>[eventId:string]</comment>
@@ -3059,6 +3063,9 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   </data>
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Tento plugin je podepsán jiným vydavatelem než již nainstalovaná verze, a proto nebyl nainstalován.</value>
+  </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Podepsaná a ověřená verze tohoto pluginu je již nainstalována, takže ji neověřený balíček nemůže nahradit. Sestavení lze před zveřejněním vyzkoušet po pozvání mezi testery od autora pluginu.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Některá uložená data pluginu nebylo možné smazat, protože se soubor stále používá, proto plugin nebyl odinstalován. Zavřete programy, které ho používají, a zkuste to znovu.</value>

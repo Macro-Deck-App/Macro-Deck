@@ -68,6 +68,10 @@ Things to know:
   `integrationId::eventId`.
 - **`Publish` is fire-and-forget.** It never throws into the caller and has no reply, so it is safe to
   call from a socket callback or polling loop. An occurrence nobody subscribed to is simply dropped.
+- **Numbers must be finite.** An occurrence whose parameters hold `NaN` or an infinity, nested values
+  included, is not published: it is dropped and a warning is logged, the first time for each event id.
+  Since Macro Deck 3.0.3 the SDK drops it instead of throwing; a plugin built with an earlier SDK
+  throws an `ArgumentException` from `Publish` until it is rebuilt.
 - **Payload keys must match the declaration.** Publish the names you listed in `PayloadParameters` -
   those are what the user can pick and filter on.
 
@@ -361,7 +365,8 @@ Assert.That(published.Parameters!.Value.GetProperty("sceneName").GetString(), Is
 ```
 
 `FakeEventPublisher` serializes parameters exactly as the wire protocol does, and like the real one it
-never throws. `SetBindings(...)` replaces what `GetBindings()` returns and raises
+never throws. A call whose parameters cannot be serialized, such as a non-finite number, is recorded
+with `Parameters` set to `null`; the real publisher sends nothing to the host in that case. `SetBindings(...)` replaces what `GetBindings()` returns and raises
 `BindingsChanged`, standing in for a user who binds or edits a trigger. `PluginTestHarness.Events` calls `describe` and `options` over the protocol. See
 [testing](/features/testing/).
 

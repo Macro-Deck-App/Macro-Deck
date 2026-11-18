@@ -47,7 +47,7 @@ public sealed class LogFileSet
 			}
 		}
 
-		stamps.Sort(static (left, right) => string.CompareOrdinal(right, left));
+		stamps.Sort(static (left, right) => LogFileStamp.Compare(right, left));
 
 		return stamps;
 	}

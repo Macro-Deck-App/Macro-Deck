@@ -132,9 +132,8 @@ test('six Web Clients on a folder of 24 plugin tiles each paint every tile', asy
   }
 });
 
-// Host bug: PluginCapabilityInvoker rejects a call past 32 concurrent invocations as retryable, but nothing
-// retries a UI session open, so a burst of 45 tiles leaves some blank for good. Unskip when opens retry.
-test.fixme('three Web Clients on a folder of 45 plugin tiles each paint every tile', async ({ browser, api, host }) => {
+// E2E-MULTI-01.
+test('three Web Clients on a folder of 45 plugin tiles each paint every tile', async ({ browser, api, host }) => {
   test.setTimeout(300_000);
   await ensurePluginRunning(api);
   const { profile, tiles } = await seedTileFolder(api, 'E2E Plugin Tile Burst', 9, 5);

@@ -1,6 +1,9 @@
 namespace MacroDeckHost.Application.MusicPlayer;
 
-public sealed record ProcessedArtworkResult(byte[] MasterWebp, IReadOnlyDictionary<int, byte[]> Variants);
+public sealed record ProcessedArtworkResult(
+	byte[] Master,
+	IReadOnlyDictionary<int, byte[]> Variants,
+	string ContentType);
 
 public interface IArtworkProcessor
 {

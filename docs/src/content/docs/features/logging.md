@@ -68,7 +68,8 @@ plugin" and "filter by integration" are the same filter.
 
 | | Location |
 | --- | --- |
-| Host log files | `<data directory>/logs/host-<date>.log`, one file per day, 14 kept |
+| Host log files | `<data directory>/logs/host-<date>.log`, one file per day, kept for 14 days |
+| Host log files, size | A file that reaches 32 MB continues in `host-<date>_001.log`, `_002` and so on. At most 32 files are kept, so the folder stays at about 1 GB and a flood pushes out the oldest files first |
 | Data directory, Windows | `%APPDATA%\MacroDeck` |
 | Data directory, macOS | `~/Library/Application Support/MacroDeck` |
 | Data directory, Linux | `$XDG_DATA_HOME/MacroDeck`, or `~/.local/share/MacroDeck` |
@@ -76,6 +77,12 @@ plugin" and "filter by integration" are the same filter.
 | Log viewer | Developer page, **Logs** tab: every retained day, filterable by level, source and integration |
 
 Newlines inside a message are escaped, so one entry is always one header line.
+
+Log files written by a version without the size limit can be 1 GB each. The host deletes every host log
+file larger than the limit when it starts, so their entries are gone after the update.
+
+Retention counts files and their age, not sessions: a host that is started once a week keeps the files of
+the last 14 days, not its last 14 runs.
 
 ## Levels and what goes where
 

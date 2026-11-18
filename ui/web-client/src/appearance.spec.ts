@@ -50,15 +50,53 @@ describe('appearance', () => {
     expect(theme()).toBe('light');
   });
 
-  it('lets the host overrule what this device remembered', () => {
+  it('keeps the theme chosen on this device across a reload and whatever the host reports', () => {
+    new Appearance().setThemeMode('light');
+
+    const reloaded = new Appearance();
+    reloaded.applyFromHost('dark', '#ff0000');
+
+    expect(reloaded.themeMode()).toBe('light');
+    expect(theme()).toBe('light');
+    expect(new Appearance().themeMode()).toBe('light');
+  });
+
+  it('follows the host appearance on a device that has not chosen its own', () => {
     const appearance = new Appearance();
-    appearance.setThemeMode('light');
 
-    appearance.applyFromHost('dark', '#ff0000');
+    appearance.applyFromHost('light', '#ff0000');
 
-    expect(appearance.themeMode()).toBe('dark');
+    expect(appearance.themeMode()).toBe('light');
     expect(appearance.accentColor()).toBe('#ff0000');
+    expect(theme()).toBe('light');
+
+    document.documentElement.className = '';
+    const reloaded = new Appearance();
+    expect(theme()).toBe('light');
+    reloaded.applyFromHost('dark', '#00ff00');
     expect(theme()).toBe('dark');
+  });
+
+  it('keeps the accent chosen on this device over the host accent', () => {
+    new Appearance().setAccentColor('#804020');
+
+    const reloaded = new Appearance();
+    reloaded.applyFromHost('system', '#ff0000');
+
+    expect(reloaded.accentColor()).toBe('#804020');
+    expect(document.documentElement.style.getPropertyValue('--color-accent')).toBe('#804020');
+  });
+
+  it('follows the device preference again once this device picks system', () => {
+    prefersDark = false;
+    const appearance = new Appearance();
+    appearance.setThemeMode('dark');
+    appearance.setThemeMode('system');
+
+    appearance.applyFromHost('dark', undefined);
+
+    expect(new Appearance().themeMode()).toBe('system');
+    expect(theme()).toBe('light');
   });
 
   it('derives the accent hover and muted variants from the accent itself', () => {

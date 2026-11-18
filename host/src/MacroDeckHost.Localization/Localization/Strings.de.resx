@@ -2778,6 +2778,10 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Ereignisse konnten nicht geladen werden</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>Der Wert von „{parameter}“ muss eine endliche Zahl sein</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Ereignis „{eventId}“ wurde nicht gefunden</value>
     <comment>[eventId:string]</comment>
@@ -3058,6 +3062,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   </data>
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Dieses Plugin ist von einem anderen Herausgeber signiert als die Version, die du bereits hast, daher wurde es nicht installiert.</value>
+  </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Eine signierte und verifizierte Version dieses Plugins ist bereits installiert, daher kann ein nicht verifiziertes Paket sie nicht ersetzen. Um einen Build vor der Veröffentlichung auszuprobieren, bitte den Ersteller, dich als Tester einzuladen.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Einige gespeicherte Daten des Plugins konnten nicht gelöscht werden, weil eine Datei noch verwendet wird, daher wurde das Plugin nicht deinstalliert. Schließe alle Programme, die sie verwenden, und versuche es erneut.</value>

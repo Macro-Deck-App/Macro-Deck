@@ -68,6 +68,29 @@ public class SoundPadConnectionTests
 	}
 
 	[Test]
+	public async Task AFailedAttemptEndingAfterSoundPadStarts_KeepsTheConnectionACommandOpened()
+	{
+		var failingAttempt = new TaskCompletionSource();
+		var client = new FakeSoundPadClient { Reachable = false, HoldNextConnect = failingAttempt };
+		using var connection = new SoundPadConnection(() => client, TimeSpan.FromMinutes(1));
+		connection.Start();
+		await SoundPadTestSupport.WaitUntilAsync(() => client.ConnectAttempts >= 1);
+
+		client.Reachable = true;
+		var command = connection.RunAsync(c => c.StopSoundAsync(), CancellationToken.None, true);
+		failingAttempt.SetResult();
+		await command;
+
+		await SoundPadTestSupport.WaitUntilAsync(() => client.Disconnects >= 1);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(client.Commands, Is.EqualTo(new[] { "stop" }));
+			Assert.That(connection.IsConnected, Is.True);
+		});
+	}
+
+	[Test]
 	public async Task Dispose_StopsReconnecting_AndReleasesThePipe()
 	{
 		var client = new FakeSoundPadClient { Reachable = false };

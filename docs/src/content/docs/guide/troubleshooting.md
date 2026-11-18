@@ -354,6 +354,13 @@ updates from the plugin's own publisher. If the plugin really changed hands, or 
 other publisher's package, uninstall the plugin first and tick **Also delete the plugin's stored data**,
 then install it again.
 
+## Keyboard actions do nothing in an app started as administrator
+
+Windows does not let an app pass keys or text to an app that runs with higher privileges. If Macro Deck runs
+normally and the app you type into was started as administrator, keyboard actions do nothing there, in every
+target mode. Macro Deck writes a warning naming the app to its log. Start both the same way: run Macro Deck as
+administrator too, or start the other app without administrator rights.
+
 ## Keyboard actions or Automatic activation do not reach an app on Wayland
 
 Most Linux desktops use Wayland by default. Macro Deck works through X11 there, using XWayland, so it only sees
@@ -367,6 +374,20 @@ apps that run through XWayland:
 
 The **Keyboard** and **System** integrations show a warning for this, and so does the Automatic activation dialog.
 To avoid these limits, log in to an X11 session if your desktop offers one, or run the app through XWayland.
+
+## Keyboard and mouse stop working after the X server restarts
+
+On Linux, Macro Deck keeps running when the X server it uses goes away, for example when the display server
+restarts or you log out without quitting Macro Deck. While no X server is reachable, keyboard and mouse actions
+fail, and the **Keyboard** and **Mouse** integrations show that simulation is unavailable. Once an X server is
+back on the same display, they work again within a few seconds, without restarting Macro Deck.
+
+Two cases still close Macro Deck:
+
+- distributions with libX11 older than 1.7, such as Red Hat Enterprise Linux 8 and its rebuilds;
+- rarely, an X server that goes away at the very moment Macro Deck is typing text.
+
+Start Macro Deck again in that case.
 
 ## A reverse proxy or firewall blocks a connection to a service
 

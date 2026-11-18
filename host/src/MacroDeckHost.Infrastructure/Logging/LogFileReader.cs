@@ -191,7 +191,7 @@ public sealed class LogFileReader : ILogFileReader
 		var ceiling = DayStampAbove(to);
 		foreach (var stamp in set.Stamps())
 		{
-			if (string.CompareOrdinal(stamp, ceiling) > 0)
+			if (LogFileStamp.Compare(stamp, ceiling) > 0)
 			{
 				continue;
 			}
@@ -313,7 +313,7 @@ public sealed class LogFileReader : ILogFileReader
 		{
 			return _floorStamp is not null
 				&& LogEntryId.TryParse(entry.Id, out _, out var position)
-				&& string.CompareOrdinal(position.FileStamp, _floorStamp) < 0;
+				&& LogFileStamp.Compare(position.FileStamp, _floorStamp) < 0;
 		}
 	}
 }

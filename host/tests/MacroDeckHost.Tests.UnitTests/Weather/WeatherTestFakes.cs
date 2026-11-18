@@ -87,6 +87,11 @@ internal sealed class FakeOpenMeteoClient : IOpenMeteoClient
 	public List<GeocodingResult> GeocodingResults { get; set; } = [];
 	public Exception? GeocodingException { get; set; }
 	public OpenMeteoForecastResponse? Forecast { get; set; }
+	public Exception? ForecastException { get; set; }
+
+	public int ForecastRequests => _forecastRequests;
+
+	private int _forecastRequests;
 
 	public Task<OpenMeteoForecastResponse?> GetForecastAsync(
 		double latitude,
@@ -94,6 +99,12 @@ internal sealed class FakeOpenMeteoClient : IOpenMeteoClient
 		TemperatureUnit unit,
 		CancellationToken cancellationToken)
 	{
+		Interlocked.Increment(ref _forecastRequests);
+		if (ForecastException is not null)
+		{
+			throw ForecastException;
+		}
+
 		return Task.FromResult(Forecast);
 	}
 

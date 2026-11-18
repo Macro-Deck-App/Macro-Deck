@@ -149,6 +149,8 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 	/// <summary>Answers a snapshot request, typically by pushing raw bytes back through the link.</summary>
 	public Func<string, Task>? OnSnapshotRequested { get; set; }
 
+	public Func<Task>? OnOpening { get; set; }
+
 	public string SurfaceKind { get; set; } = "config";
 
 	public string SessionMode { get; set; } = "exclusive";
@@ -191,7 +193,15 @@ internal sealed class TestUiCapabilityHandler : ICapabilityHandler
 				var arguments = Read<UiSessionOpenArguments>(invocation);
 				if (arguments is not null)
 				{
-					Opened.Add(arguments);
+					lock (Opened)
+					{
+						Opened.Add(arguments);
+					}
+				}
+
+				if (OnOpening is { } opening)
+				{
+					await opening().ConfigureAwait(false);
 				}
 
 				return CapabilityInvocationResult.Ok(new UiSessionOpenResult

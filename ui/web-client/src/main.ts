@@ -180,7 +180,6 @@ export function start(root: HTMLElement, target: WebClientTarget = ACTIVE_TARGET
   iconResolution.onChange(() => shell.repaint());
   appearance.onChange(() => shell.repaint());
   motion.onChange(() => shell.repaint());
-  appearance.setPersistence((mode, accent) => void client.saveAppearance(mode, accent));
 
   // A tab that was in the background may have missed a whole session; the clock may also have
   // drifted while nothing was drawing.

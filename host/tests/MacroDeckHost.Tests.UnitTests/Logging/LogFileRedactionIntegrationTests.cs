@@ -43,7 +43,7 @@ public class LogFileRedactionIntegrationTests
 		// query string only exists once the user asks for Debug - which is exactly when it must still
 		// be redacted.
 		var host = await new HostBuilder()
-			.ConfigureSerilog(_paths, new LogLevelState(LogEntryLevel.Debug))
+			.ConfigureSerilog(new HostLogPipeline(_paths, new LogLevelState(LogEntryLevel.Debug)))
 			.ConfigureWebHost(web => web
 				.UseTestServer()
 				.Configure(app => app.Run(context => context.Response.WriteAsync("ok"))))
@@ -93,7 +93,7 @@ public class LogFileRedactionIntegrationTests
 		}
 
 		var host = await new HostBuilder()
-			.ConfigureSerilog(_paths, new LogLevelState(LogEntryLevel.Information))
+			.ConfigureSerilog(new HostLogPipeline(_paths, new LogLevelState(LogEntryLevel.Information)))
 			.StartAsync();
 
 		using (host)
@@ -124,7 +124,7 @@ public class LogFileRedactionIntegrationTests
 	{
 		var state = new LogLevelState(LogEntryLevel.Information);
 		using (var host = await Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-			.ConfigureSerilog(_paths, state)
+			.ConfigureSerilog(new HostLogPipeline(_paths, state))
 			.ConfigureWebHost(web => web
 				.UseTestServer()
 				.Configure(app =>

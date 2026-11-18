@@ -2778,6 +2778,10 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Gebeurtenissen laden is mislukt</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>De waarde van ‘{parameter}’ moet een eindig getal zijn</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Gebeurtenis ‘{eventId}’ niet gevonden</value>
     <comment>[eventId:string]</comment>
@@ -3058,6 +3062,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   </data>
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Deze plug-in is ondertekend door een andere uitgever dan de versie die je al hebt, dus is hij niet geïnstalleerd.</value>
+  </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Er is al een ondertekende en geverifieerde versie van deze plug-in geïnstalleerd, dus een niet-geverifieerd pakket kan die niet vervangen. Vraag de maker om je als tester uit te nodigen als je een build wilt proberen voordat hij wordt gepubliceerd.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Een deel van de opgeslagen gegevens van de plug-in kon niet worden verwijderd omdat een bestand nog in gebruik is, dus de plug-in is niet verwijderd. Sluit de programma's die het gebruiken en probeer het opnieuw.</value>

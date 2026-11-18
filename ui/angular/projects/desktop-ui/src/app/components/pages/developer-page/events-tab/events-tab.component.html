@@ -151,7 +151,7 @@
                   @if (result.error) {
                     <p class="trigger-result-error">
                       <span class="trigger-result-code">{{ result.error.code }}</span>
-                      {{ result.error.message }}
+                      {{ result.error.message | localizedText }}
                     </p>
                   }
                 </div>
