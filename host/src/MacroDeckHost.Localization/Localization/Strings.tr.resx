@@ -13603,6 +13603,15 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Dosyanın tam yolu. Yoksa oluşturulur; klasörün zaten var olması gerekir.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Şablon değişkenini yenile</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Bir şablon değişkenini yeniden işler, örneğin yeni bir rastgele sayı almak için.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Yeniden işlenecek şablon değişkeni. Onu okuyan değişkenler yeni değerini izler.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Hiçbir değişken seçilmedi.</value>
   </data>
@@ -13626,6 +13635,9 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Değişkenin şu anda bir değeri yok.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Değişken bir şablon değişkeni değil.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Dosya yazılamadı.</value>

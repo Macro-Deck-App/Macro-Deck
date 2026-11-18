@@ -721,6 +721,14 @@ temperature updates both. A template variable announces a change, for example to
 only when its value really changes. **Template settings** in the variable's menu changes the template or
 the decimal places later; to change the type, create the variable again.
 
+To get a new value on demand, for example a new random number from `{{ math.random 1 7 }}` on every
+press, add the **Refresh Template Variable** action of the **Variables** integration to a button or an
+automation. Its picker lists only template variables. Like **Set Variable**, it picks the button's,
+automation's or script's own variable before a global one of the same name. The variable has its new value
+as soon as the action finishes, and variables that read it follow shortly after. **Variable Changed** fires
+only when the value really changed. The action fails when the variable does not exist, is not a template
+variable, or its template gives no value it can hold.
+
 The type is checked: a **Numeric** variable needs a number with a dot as the decimal separator, a
 **Boolean** variable needs `true`, `false`, `1` or `0`, a **Color** variable a color such as `#FF8800`. While the template produces something else or
 cannot be rendered, the variable reads as unavailable and its row says why. A template that reads its
@@ -730,7 +738,7 @@ such a loop, the variables in it read as unavailable until the loop is gone.
 Some things to know:
 
 - A template variable is read-only: **Set Variable**, sliders and plugins cannot write to it.
-- Templates are rendered again when a variable they read changes. A template that shows the current
+- Templates are rendered again when a variable they read changes or **Refresh Template Variable** runs. A template that shows the current
   time, with `date.now`, `date.utc_now` or `'now' | date: '%H:%M'`, is also rendered again at the start
   of every minute, in your computer's time zone. That holds wherever you write a template: template
   variables, button labels and **State mapping**, gauge names, graph subtitles and slider labels. A change is

@@ -13602,6 +13602,15 @@ Esta copia portátil no se actualiza sola. Descarga el ZIP portátil desde el si
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>La ruta completa del archivo. Si no existe, se crea; la carpeta ya debe existir.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Actualizar variable de plantilla</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Vuelve a generar una variable de plantilla, por ejemplo para obtener un nuevo número aleatorio.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>La variable de plantilla que se vuelve a generar. Las variables que la leen siguen su nuevo valor.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>No se seleccionó ninguna variable.</value>
   </data>
@@ -13625,6 +13634,9 @@ Esta copia portátil no se actualiza sola. Descarga el ZIP portátil desde el si
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>La variable no tiene valor en este momento.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>La variable no es una variable de plantilla.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>No se pudo escribir el archivo.</value>

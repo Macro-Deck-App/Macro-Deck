@@ -13605,6 +13605,15 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>The full path of the file. It is created if it does not exist; the folder must already exist.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Refresh Template Variable</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Renders a template variable again, for example to get a new random number.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>The template variable to render again. Variables that read it follow its new value.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>No variable was selected.</value>
   </data>
@@ -13628,6 +13637,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>The variable has no value right now.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>The variable is not a template variable.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>The file could not be written.</value>

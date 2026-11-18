@@ -13603,6 +13603,15 @@
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>المسار الكامل للملف. يُنشأ إن لم يكن موجوداً، ويجب أن يكون المجلد موجوداً مسبقاً.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>تحديث متغير القالب</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>يعيد عرض متغير قالب، مثلًا للحصول على رقم عشوائي جديد.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>متغير القالب المراد إعادة عرضه. تتبع المتغيرات التي تقرؤه قيمته الجديدة.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>لم يُحدد أي متغير.</value>
   </data>
@@ -13626,6 +13635,9 @@
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>ليس للمتغير قيمة حالياً.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>المتغير ليس متغير قالب.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>تعذّرت كتابة الملف.</value>

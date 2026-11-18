@@ -1122,6 +1122,7 @@ public class Startup
 		services.AddSingleton<IHostOptionsSource, VariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, EventVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, UserVariablesOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, TemplateVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, MusicPlayerInstancesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, CalendarAccountsOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, CalendarCalendarsOptionsSource>();

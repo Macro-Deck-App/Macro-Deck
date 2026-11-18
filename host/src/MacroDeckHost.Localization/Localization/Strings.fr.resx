@@ -13602,6 +13602,15 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Le chemin complet du fichier. S'il n'existe pas, il est créé ; le dossier doit déjà exister.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Actualiser la variable de modèle</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Génère à nouveau une variable de modèle, par exemple pour obtenir un nouveau nombre aléatoire.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>La variable de modèle à générer à nouveau. Les variables qui la lisent suivent sa nouvelle valeur.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Aucune variable n'a été sélectionnée.</value>
   </data>
@@ -13625,6 +13634,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>La variable n'a pas de valeur pour le moment.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>La variable n'est pas une variable de modèle.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Impossible d'écrire le fichier.</value>

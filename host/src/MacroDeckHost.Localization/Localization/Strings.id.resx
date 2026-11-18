@@ -13603,6 +13603,15 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Jalur lengkap file. File dibuat jika belum ada; folder harus sudah ada.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Segarkan Variabel Templat</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Merender ulang variabel templat, misalnya untuk mendapatkan angka acak baru.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Variabel templat yang dirender ulang. Variabel yang membacanya mengikuti nilai barunya.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Belum ada variabel yang dipilih.</value>
   </data>
@@ -13626,6 +13635,9 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Variabel belum memiliki nilai saat ini.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Variabel ini bukan variabel templat.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>File tidak dapat ditulis.</value>
