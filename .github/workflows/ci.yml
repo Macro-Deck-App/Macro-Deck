@@ -60,6 +60,34 @@ jobs:
             node ci/scripts/ci-scope.mjs --all --github-output "$GITHUB_OUTPUT"
           fi
 
+  # A pull request into production that carries unreleased main commits ships them as a hotfix, as the
+  # astro bump retargeted from main did with 3.0.3. Only main itself may bring main into production.
+  production-guard:
+    name: Production carries no unreleased main commits
+    if: github.event_name == 'pull_request' && github.base_ref == 'production' && github.head_ref != 'main'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Refuse main commits production does not have
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null \
+            || git fetch --no-tags origin "+refs/pull/${{ github.event.pull_request.number }}/head"
+          # Every commit both the pull request and main contain is a common ancestor of the two.
+          mapfile -t bases < <(git merge-base --all "$HEAD_SHA" origin/main)
+          mapfile -t leaked < <(git rev-list --no-merges "${bases[@]}" ^origin/production)
+          if [ "${#leaked[@]}" -gt 0 ]; then
+            echo "::error::This pull request brings ${#leaked[@]} commits from main into production. Branch hotfixes from production and cherry-pick fixes instead."
+            git log --no-walk --format='%h %s' "${leaked[@]}" | head -50
+            exit 1
+          fi
+          echo "No unreleased main commits."
+
   host:
     name: Host build & tests
     needs: changes

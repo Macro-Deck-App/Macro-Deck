@@ -53,6 +53,7 @@ jobs:
       deb_version: ${{ steps.version.outputs.deb_version }}
       rpm_version: ${{ steps.version.outputs.rpm_version }}
       rpm_release: ${{ steps.version.outputs.rpm_release }}
+      previous_tag: ${{ steps.previous.outputs.previous_tag }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
@@ -75,6 +76,19 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Version: ${informational} (build ${{ github.run_number }}, built ${build_time})"
 
+      # Left to itself GitHub picks the previous tag by date, so a beta tagged after the last stable
+      # release made the 3.0.3 notes compare against 3.0.1.
+      - name: Find previous release tag
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          previous=$(gh api "repos/${{ github.repository }}/tags" --paginate --jq '.[].name' \
+            | node ci/scripts/previous-release-tag.mjs "$VERSION")
+          echo "previous_tag=${previous}" >> "$GITHUB_OUTPUT"
+          echo "Release notes compare against: ${previous:-none}"
+
   release-notes:
     name: Generate release notes
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -87,10 +101,13 @@ jobs:
       - name: Generate release notes
         env:
           GH_TOKEN: ${{ github.token }}
+          PREVIOUS_TAG: ${{ needs.prepare.outputs.previous_tag }}
         run: |
-          gh api "repos/${{ github.repository }}/releases/generate-notes" \
-            -f tag_name="v${{ needs.prepare.outputs.version }}" \
-            -f target_commitish="$GITHUB_SHA" \
+          args=(-f tag_name="v${{ needs.prepare.outputs.version }}" -f target_commitish="$GITHUB_SHA")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            args+=(-f previous_tag_name="$PREVIOUS_TAG")
+          fi
+          gh api "repos/${{ github.repository }}/releases/generate-notes" "${args[@]}" \
             --jq .body > release-notes.md
 
       - name: Upload release notes
