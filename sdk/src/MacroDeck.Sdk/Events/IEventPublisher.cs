@@ -3,6 +3,8 @@ namespace MacroDeck.Sdk.Events;
 /// <summary>Publishes events for the calling integration, and reads back what the user bound to them.</summary>
 /// <remarks>
 /// Publishing is fire-and-forget and does not throw into the caller. Parameter keys must match the event declaration.
+/// An occurrence whose parameters hold a number that is not finite (NaN or infinity, nested values included) is not
+/// published; it is dropped and logged.
 /// </remarks>
 public interface IEventPublisher
 {

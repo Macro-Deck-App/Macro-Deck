@@ -356,19 +356,37 @@ public sealed class KeyboardInputService : IKeyboardInputService
 		KeyboardTarget target)
 	{
 		var processKey = KeyboardProcessName.Normalize(target.ProcessName);
-		var isNew = !_backgroundHolds.TryGetValue(processKey, out var hold);
-		if (hold is null)
+		if (_backgroundHolds.TryGetValue(processKey, out var cached))
 		{
-			var window = _provider.ResolveTarget(target.ProcessName);
-			if (window is null)
+			try
 			{
-				DebugUnresolved(target);
-				return KeyboardSessionUnavailableReason.TargetNotFound;
+				return HoldInBackground(cached, false, processKey, modifiers, key, target);
 			}
-
-			hold = new BackgroundHold(window);
+			catch (PlatformNotSupportedException)
+			{
+				cached.Window.Dispose();
+				_backgroundHolds.Remove(processKey);
+			}
 		}
 
+		var window = _provider.ResolveTarget(target.ProcessName);
+		if (window is null)
+		{
+			DebugUnresolved(target);
+			return KeyboardSessionUnavailableReason.TargetNotFound;
+		}
+
+		return HoldInBackground(new BackgroundHold(window), true, processKey, modifiers, key, target);
+	}
+
+	private KeyboardSessionUnavailableReason? HoldInBackground(
+		BackgroundHold hold,
+		bool isNew,
+		string processKey,
+		KeyModifier modifiers,
+		KeyCode key,
+		KeyboardTarget target)
+	{
 		if (KeyboardBackgroundDelivery.ModifiersCannotBeDelivered(this, target, modifiers, key))
 		{
 			if (isNew)
@@ -380,12 +398,22 @@ public sealed class KeyboardInputService : IKeyboardInputService
 		}
 
 		_backgroundHolds[processKey] = hold;
-		foreach (var modifierKey in _layout.ExpandModifiers(modifiers))
+		try
 		{
-			hold.Hold(modifierKey);
+			foreach (var modifierKey in _layout.ExpandModifiers(modifiers))
+			{
+				hold.Hold(modifierKey);
+			}
+
+			hold.Hold(key);
+		}
+		catch (PlatformNotSupportedException) when (isNew)
+		{
+			_backgroundHolds.Remove(processKey);
+			hold.Window.Dispose();
+			throw;
 		}
 
-		hold.Hold(key);
 		return null;
 	}
 
@@ -451,9 +479,14 @@ public sealed class KeyboardInputService : IKeyboardInputService
 	{
 		if (!_provider.IsSupported)
 		{
-			throw new PlatformNotSupportedException(
-				$"Keyboard input simulation is not available on this platform/session ({_provider.PlatformName}).");
+			throw Unavailable(_provider.PlatformName);
 		}
+	}
+
+	internal static PlatformNotSupportedException Unavailable(string platformName)
+	{
+		return new PlatformNotSupportedException(
+			$"Keyboard input simulation is not available on this platform/session ({platformName}).");
 	}
 
 	private readonly record struct Emitter(Action<KeyCode> Down, Action<KeyCode> Up, Action<string> Type);

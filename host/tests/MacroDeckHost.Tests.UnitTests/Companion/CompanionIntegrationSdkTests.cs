@@ -14,6 +14,20 @@ namespace MacroDeckHost.Tests.UnitTests.Companion;
 internal sealed class CompanionIntegrationSdkTests
 {
 	[Test]
+	public void The_brand_icon_is_a_png()
+	{
+		var integration = new CompanionIntegration();
+
+		var icon = integration.GetIcon();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(integration.IconMimeType, Is.EqualTo("image/png"));
+			Assert.That(icon[..8], Is.EqualTo(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }));
+		});
+	}
+
+	[Test]
 	public async Task An_entry_reports_disconnected_before_the_first_initialization_and_follows_the_device_after_it()
 	{
 		var (harness, device) = await WithEntryAsync();

@@ -138,7 +138,7 @@ com.example.my-plugin 1.0: 1 error(s), 1 warning(s).
 | `unknown-link-type` | An `additionalLinks` type outside the standard list. Advisory: it installs, but the Store does not show the link. | Use a standard type or `custom` with a `label`. |
 | `file-missing`, `file-size-mismatch`, `file-digest-mismatch` | `files[]` disagrees with the disk. | Do not hand-write `files[]`; let `pack` recompute it. |
 | `undeclared-file` | A file in the artifact that `files[]` omits; once present, `files[]` is a complete inventory. | Repack. |
-| `not-an-artifact` (exit `3`) | `--artifact` is not a ZIP, often a `manifest.json`. | Use `--manifest`; the CLI suggests it. |
+| `not-an-artifact` (exit `3`) | `--artifact` is not a ZIP, often a `manifest.json`, or one of its entries is corrupt (`an entry is corrupt`). | Use `--manifest`; the CLI suggests it. For a corrupt entry, pack or download the artifact again. |
 | `source-directory` | Pointed at a source tree: `manifest.json` next to a `.csproj` with no built entrypoint. | Build, then validate the output directory. |
 | `no-selector`, `too-many-selectors` (from `inspect`) | `inspect` needs exactly one of `--artifact`/`--directory`, with no default. | Pass exactly one. |
 

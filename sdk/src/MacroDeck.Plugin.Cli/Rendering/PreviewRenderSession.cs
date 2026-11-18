@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Cli.Runtime;
 using MacroDeck.Plugin.Protocol.Capabilities.Ui;
 using MacroDeck.Plugin.Testing;
@@ -41,6 +42,16 @@ internal static class PreviewRenderSession
 		catch (PluginSubjectException exception)
 		{
 			console.WriteError(exception.Code, exception.Message, exception.Detail);
+			return ExitCode.InputUnreadable;
+		}
+		catch (InvalidOperationException exception) when (options.Artifact is not null)
+		{
+			console.WriteError("artifact-unreadable", exception.Message);
+			return ExitCode.InputUnreadable;
+		}
+		catch (InvalidDataException exception) when (options.Artifact is { } artifact)
+		{
+			console.WriteError("artifact-unreadable", ArtifactErrorText.CorruptArtifact(artifact, exception.Message));
 			return ExitCode.InputUnreadable;
 		}
 

@@ -78,19 +78,16 @@ public static class Program
 
 		var logLevelState = new LogLevelState(LogLevelDefaults.ForChannel(BuildConfig.Channel));
 
-		Log.Logger = new LoggerConfiguration()
-			.MinimumLevel.ControlledBy(logLevelState.Global)
-			.Enrich.With(new LogOriginEnricher())
-			.WriteTo.Redacted(sinks =>
-			{
-				sinks.Console(formatProvider: CultureInfo.InvariantCulture);
-				sinks.File(RedactingTextFormatter.ForFileSink(),
-					Path.Combine(paths.LogsDirectory, "host-.log"),
-					rollingInterval: RollingInterval.Day,
-					retainedFileCountLimit: 14,
-					shared: true);
-			})
-			.CreateLogger();
+		var logPipeline = new HostLogPipeline(paths, logLevelState);
+
+		var removedLogBytes = logPipeline.RemoveOversizedFiles();
+
+		Log.Logger = logPipeline.Apply(new LoggerConfiguration(), null).CreateLogger();
+
+		if (removedLogBytes > 0)
+		{
+			Log.Information("Removed {Bytes} bytes of host log files written before the size limit", removedLogBytes);
+		}
 
 		AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
@@ -287,7 +284,7 @@ public static class Program
 			}
 
 			var host = Host.CreateDefaultBuilder(args)
-				.ConfigureSerilog(paths, logLevelState)
+				.ConfigureSerilog(logPipeline)
 				.ConfigureServices(services =>
 				{
 					services.AddSingleton<ILogLevelState>(logLevelState);

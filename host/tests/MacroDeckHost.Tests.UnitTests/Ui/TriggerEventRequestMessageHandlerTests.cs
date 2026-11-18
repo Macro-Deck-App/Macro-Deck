@@ -122,6 +122,29 @@ public class TriggerEventRequestMessageHandlerTests
 		});
 	}
 
+	[TestCase("\"NaN\"")]
+	[TestCase("\"Infinity\"")]
+	[TestCase("\"-Infinity\"")]
+	[TestCase("\"1e400\"")]
+	[TestCase("1e400")]
+	public async Task A_number_payload_that_is_not_finite_is_refused_and_nothing_is_published(string volume)
+	{
+		_index.Add(Subscription("app.macro-deck.obs::volume-changed"));
+
+		var response = await Handle(new TriggerEventRequest
+		{
+			EventId = "app.macro-deck.obs::volume-changed",
+			Parameters = Values(("volume", volume))
+		});
+
+		Assert.Multiple(() =>
+		{
+			AssertRefused(response, "VALIDATION_ERROR");
+			Assert.That(response.Error?.Message.Localized?.Key.Name, Is.EqualTo("Errors.Events.NonFiniteParameter"));
+			Assert.That(_bus.Published, Is.Empty);
+		});
+	}
+
 	[Test]
 	public async Task Queued_subscriptions_exclude_the_ones_the_payload_provably_cannot_match()
 	{

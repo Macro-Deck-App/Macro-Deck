@@ -2767,6 +2767,10 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Não foi possível carregar os eventos</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>O valor de '{parameter}' deve ser um número finito</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Evento '{eventId}' não encontrado</value>
     <comment>[eventId:string]</comment>
@@ -3044,6 +3048,9 @@ Baixe-o no site do Macro Deck e atualize o AppImage, DEB ou RPM que você instal
   </data>
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>Este plugin foi assinado por um publicador diferente do da versão já instalada, então não foi instalado.</value>
+  </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>Uma versão assinada e verificada deste plugin já está instalada, então um pacote não verificado não pode substituí-la. Para experimentar um build antes da publicação, peça ao criador um convite como testador.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Não foi possível excluir parte dos dados salvos do plugin porque um arquivo ainda está em uso, então o plugin não foi desinstalado. Feche os programas que o usam e tente novamente.</value>

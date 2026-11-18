@@ -23,6 +23,7 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Plugins;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
+using MacroDeckHost.Tests.UnitTests.Triggers;
 using MacroDeck.Sdk.Decks;
 using MacroDeck.Sdk.Scripts;
 using MacroDeck.Sdk.Widgets;
@@ -805,6 +806,46 @@ public partial class PluginWebSocketEndpointDispatchTests
 			Assert.That(occurrence.Parameters["label"], Is.EqualTo("text"));
 			Assert.That(occurrence.Parameters["missing"], Is.Null);
 		});
+	}
+
+	[Test]
+	public async Task Event_publish_with_a_number_beyond_double_range_is_not_published()
+	{
+		var samples = new EventSampleStore();
+		var bus = new EventBus(new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache()),
+			samples,
+			Serilog.Core.Logger.None);
+		var (endpoint, connection, _) = CreateEndpoint(bus);
+
+		await endpoint.HandleEventPublishAsync(connection,
+			"com.example.plugin",
+			RawEventPublish("too-large", """{"value":1e400}"""),
+			CancellationToken.None);
+		await endpoint.HandleEventPublishAsync(connection,
+			"com.example.plugin",
+			RawEventPublish("in-range", """{"value":1.7e308}"""),
+			CancellationToken.None);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(samples.TryGetLast("com.example.plugin::too-large"), Is.Null);
+			Assert.That(samples.TryGetLast("com.example.plugin::in-range")?["value"], Is.EqualTo(1.7e308));
+		});
+	}
+
+	private static ProtocolEnvelope RawEventPublish(string eventId, string parametersJson)
+	{
+		return new ProtocolEnvelope
+		{
+			Type = MessageTypes.EventPublish,
+			Id = eventId,
+			Payload = JsonSerializer.SerializeToElement(new EventPublishPayload
+				{
+					EventId = eventId,
+					Parameters = JsonDocument.Parse(parametersJson).RootElement
+				},
+				PluginProtocolJson.Options)
+		};
 	}
 
 	[Test]

@@ -2767,6 +2767,10 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   <data name="Errors.Event.LoadFailed" xml:space="preserve">
     <value>Failed to load events</value>
   </data>
+  <data name="Errors.Events.NonFiniteParameter" xml:space="preserve">
+    <value>The value of '{parameter}' must be a finite number</value>
+    <comment>[parameter:string]</comment>
+  </data>
   <data name="Errors.Events.NotFoundWithId" xml:space="preserve">
     <value>Event '{eventId}' not found</value>
     <comment>[eventId:string]</comment>
@@ -3044,6 +3048,9 @@ Download it from the Macro Deck website and update the AppImage, DEB or RPM you 
   </data>
   <data name="Errors.Plugins.SignerMismatch" xml:space="preserve">
     <value>This plugin is signed by a different publisher than the version you already have, so it was not installed.</value>
+  </data>
+  <data name="Errors.Plugins.TrustDowngrade" xml:space="preserve">
+    <value>A signed and verified version of this plugin is already installed, so a package that is not verified cannot replace it. To try a build before it is published, ask its creator to invite you as a tester.</value>
   </data>
   <data name="Errors.Plugins.UninstallDataNotDeleted" xml:space="preserve">
     <value>Some of the plugin's stored data could not be deleted because a file is still in use, so the plugin was not uninstalled. Close any program that uses it and try again.</value>

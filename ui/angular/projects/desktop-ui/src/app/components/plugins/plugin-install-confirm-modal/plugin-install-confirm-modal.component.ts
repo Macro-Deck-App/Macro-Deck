@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, computed, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AppStrings, AppStringsKey, GetBackupStatusResponse, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_USES_ADB, PLUGIN_WARNING_USES_COMPANION_DEVICES, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
+import { AppStrings, AppStringsKey, GetBackupStatusResponse, PLUGIN_WARNING_ARTIFACT_UNSIGNED, PLUGIN_WARNING_SIGNATURE_UNVERIFIED, PLUGIN_WARNING_TRUST_DOWNGRADE, PLUGIN_WARNING_USES_ADB, PLUGIN_WARNING_USES_COMPANION_DEVICES, PluginInstallActionResponse, PluginInstallWarning, PluginSignatureVerification } from '@macro-deck/runtime';
 import { ButtonComponent, LocalizationService, ModalComponent, TranslatePipe, dismissModal } from '@shared';
 import { BackupService } from '../../../services/backup.service';
 import { isActiveBackupFor } from '../../../util/backup-progress-display';
@@ -132,7 +132,7 @@ interface WarningEntry {
             </div>
           }
 
-          @if (isUnsigned() && unsignedChoiceOffered()) {
+          @if (isUnsigned() && unsignedChoiceOffered() && downgradeReason() === null) {
             <label class="plugin-install-consent">
               <input
                 type="checkbox"
@@ -233,8 +233,12 @@ export class PluginInstallConfirmModalComponent {
     if (this.isSupported() === false) {
       return this.localization.translateKey(AppStrings.Plugins.UnsupportedPlatformReason);
     }
-    return null;
+    return this.downgradeReason();
   });
+
+  protected readonly downgradeReason = computed<string | null>(
+    () => this.inspection()?.warnings?.find(warning => warning.code === PLUGIN_WARNING_TRUST_DOWNGRADE)?.message ?? null
+  );
 
   protected readonly publisherName = computed(
     () => this.inspection()?.publisher?.name ?? this.localization.translateKey(AppStrings.Plugins.UnknownPublisher)
@@ -302,7 +306,7 @@ export class PluginInstallConfirmModalComponent {
 
   protected readonly warnings = computed<WarningEntry[]>(() =>
     (this.inspection()?.warnings ?? [])
-      .filter(warning => !isSignatureWarning(warning))
+      .filter(warning => !isSignatureWarning(warning) && warning.code !== PLUGIN_WARNING_TRUST_DOWNGRADE)
       .map(warning => ({
         message: warning.code === PLUGIN_WARNING_USES_ADB
           ? this.localization.translateKey(AppStrings.Plugins.UsesAdbNote)

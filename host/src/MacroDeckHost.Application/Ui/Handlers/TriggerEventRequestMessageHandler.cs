@@ -4,9 +4,11 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages;
 using MacroDeckHost.Application.Ui.Transport.Messages.Events;
+using MacroDeck.Localization;
 using MacroDeck.Sdk.Events;
 using MacroDeck.Sdk.Identity;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Localization;
 using Serilog;
 
 namespace MacroDeckHost.Application.Ui.Handlers;
@@ -76,6 +78,10 @@ public sealed class TriggerEventRequestMessageHandler
 		var coerced = ActionParameterLiteralCoercion.Build(descriptor.Definition.PayloadParameters,
 			request.Parameters);
 		var parameters = coerced.ToDictionary(p => p.Key, p => (object?)p.Value, StringComparer.Ordinal);
+		if (EventParameterValues.FindNonFinite(parameters) is { } nonFinite)
+		{
+			return Fail("VALIDATION_ERROR", AppStrings.Errors.Events.NonFiniteParameter(nonFinite));
+		}
 
 		var occurrence = new EventOccurrence(request.EventId, parameters, McpTokenId: request.McpTokenId);
 		var queued = _index.Find(request.EventId)
@@ -93,7 +99,7 @@ public sealed class TriggerEventRequestMessageHandler
 		});
 	}
 
-	private static ValueTask<TriggerEventResponse> Fail(string code, string message)
+	private static ValueTask<TriggerEventResponse> Fail(string code, LocalizedText message)
 	{
 		return ValueTask.FromResult(new TriggerEventResponse
 		{

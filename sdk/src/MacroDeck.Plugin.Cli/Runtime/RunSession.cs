@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text.Json;
 using MacroDeck.Plugin.Cli.Commands;
+using MacroDeck.Plugin.Cli.Manifests;
 using MacroDeck.Plugin.Hosting;
 using MacroDeck.Plugin.Protocol.Envelope;
 using MacroDeck.Plugin.Protocol.Errors;
@@ -61,6 +62,11 @@ internal static class RunSession
 		{
 			// PluginLaunchSpec.ForArtifactAsync's own failure shape for an unreadable artifact.
 			console.WriteError("artifact-unreadable", ex.Message);
+			return ExitCode.InputUnreadable;
+		}
+		catch (InvalidDataException ex) when (options.Artifact is { } artifact)
+		{
+			console.WriteError("artifact-unreadable", ArtifactErrorText.CorruptArtifact(artifact, ex.Message));
 			return ExitCode.InputUnreadable;
 		}
 

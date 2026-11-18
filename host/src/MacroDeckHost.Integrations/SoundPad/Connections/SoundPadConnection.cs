@@ -22,6 +22,7 @@ internal sealed class SoundPadConnection : IDisposable
 	private readonly TimeSpan _retryInterval;
 	private readonly TimeSpan _commandTimeout;
 	private readonly Lock _gate = new();
+	private readonly SemaphoreSlim _connectGate = new(1, 1);
 
 	private ISoundPadClient? _client;
 	private CancellationTokenSource? _loop;
@@ -147,6 +148,22 @@ internal sealed class SoundPadConnection : IDisposable
 	{
 		try
 		{
+			await _connectGate.WaitAsync(cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
+			return false;
+		}
+
+		// One attempt at a time: a failed attempt drops the pipe, which would also drop a pipe
+		// that a concurrent attempt had just opened.
+		try
+		{
+			if (client.IsConnected)
+			{
+				return true;
+			}
+
 			await Bound(Connect(client), _commandTimeout, cancellationToken);
 			_logger.Information("Connected to SoundPad");
 			return true;
@@ -160,6 +177,10 @@ internal sealed class SoundPadConnection : IDisposable
 			_logger.Verbose(ex, "SoundPad is not reachable yet");
 			client.Disconnect();
 			return false;
+		}
+		finally
+		{
+			_connectGate.Release();
 		}
 	}
 

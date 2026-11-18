@@ -71,7 +71,7 @@ public sealed partial class CompanionIntegration
 
 	public IReadOnlyList<IActionDefinition> Actions { get; }
 
-	public string IconMimeType => "image/svg+xml";
+	public string IconMimeType => "image/png";
 
 	public bool AllowsMultipleConfigurations => true;
 
@@ -282,7 +282,7 @@ public sealed partial class CompanionIntegration
 	{
 		var assembly = typeof(CompanionIntegration).Assembly;
 		var name = assembly.GetManifestResourceNames()
-			.First(n => n.EndsWith("companion-icon.svg", StringComparison.Ordinal));
+			.First(n => n.EndsWith("companion-icon.png", StringComparison.Ordinal));
 		using var stream = assembly.GetManifestResourceStream(name)!;
 		using var memory = new MemoryStream();
 		stream.CopyTo(memory);

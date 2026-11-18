@@ -155,6 +155,22 @@ internal static class HostingLog
 		logger.Debug(exception, "Failed to publish event '{EventId}' to the host.", eventId);
 	}
 
+	public static void EventParametersRejected(this ILogger logger, string eventId, bool firstTime, Exception exception)
+	{
+		if (firstTime)
+		{
+			logger.Warning(exception,
+				"Event '{EventId}' was not published: its parameters could not be serialized, for example a number "
+				+ "that is not finite.",
+				eventId);
+			return;
+		}
+
+		logger.Debug(exception,
+			"Event '{EventId}' was not published: its parameters could not be serialized.",
+			eventId);
+	}
+
 	public static void HostCallbackFailed(this ILogger logger, string api, string operation, Exception exception)
 	{
 		logger.Debug(exception, "Fire-and-forget host callback '{Api}/{Operation}' failed.", api, operation);

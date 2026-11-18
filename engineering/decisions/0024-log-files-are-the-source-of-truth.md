@@ -76,8 +76,8 @@ rather than maintaining a second plugin-specific subsystem.
 - An idle install does no log-viewer work at all: with no subscriber, nothing is read, parsed or sent.
 - Entries written by a previous version parse without an origin segment and are attributed to the host.
   The alternative is a viewer that looks empty for the fortnight those files are retained.
-- Serilog's file sink stops writing at its 1 GB default rather than rolling. That failure mode is now
-  the viewer's failure mode too.
+- The file sink rolls a day's file on size and keeps a bounded number of files, so a flood costs the
+  oldest retained entries, in the viewer too, instead of the newest ones.
 - Live entries reach an open viewer within about a second: the tail polls and holds the newest entry
   back one read, so a stack trace is never pushed as a bare header with its detail still being written.
 - A plugin cannot attribute its logs to another integration, and reconnecting does not reset its budget.
