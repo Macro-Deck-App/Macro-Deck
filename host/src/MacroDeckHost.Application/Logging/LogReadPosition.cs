@@ -10,7 +10,7 @@ public readonly record struct LogReadPosition(string FileStamp, long Offset)
 
 	public int CompareTo(LogReadPosition other)
 	{
-		var byStamp = string.CompareOrdinal(FileStamp, other.FileStamp);
+		var byStamp = LogFileStamp.Compare(FileStamp, other.FileStamp);
 
 		return byStamp != 0 ? byStamp : Offset.CompareTo(other.Offset);
 	}
