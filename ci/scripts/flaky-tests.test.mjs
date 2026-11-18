@@ -118,6 +118,20 @@ test('the issue ranks repeated tests first, counts a failure that passed on reru
   assert.match(body, /- \[UI tests & build \(Linux\)\]\(https:\/\/example\.test\/ui\) on 2026-11-16$/m);
 });
 
+test('a test name with a pipe or a backslash stays in its own table cell', () => {
+  const body = renderIssue({
+    branch: 'main',
+    from: 'a',
+    to: 'b',
+    runs: 1,
+    attempts: 1,
+    occurrences: [{ test: 'Parses_a\\|b("x|y")', job: 'Host', date: '2026-11-18T00:00:00Z', url: 'u', flaky: false }],
+    unattributed: []
+  });
+
+  assert.match(body, /^\| Parses_a\\\\\\\|b\("x\\\|y"\) \| Host \|/m);
+});
+
 test('the issue says so when nothing failed', () => {
   const body = renderIssue({ branch: 'main', from: 'a', to: 'b', runs: 3, attempts: 3, occurrences: [], unattributed: [] });
 

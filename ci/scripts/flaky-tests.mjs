@@ -104,7 +104,7 @@ export function summarize(occurrences) {
 }
 
 function cell(text) {
-  return text.replace(/\|/g, '\\|');
+  return text.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 }
 
 export function renderIssue({ branch, from, to, runs, attempts, occurrences, unattributed }) {
