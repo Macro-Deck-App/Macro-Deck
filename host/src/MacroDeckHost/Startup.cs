@@ -682,6 +682,7 @@ public class Startup
 		services.AddScoped<IPluginAccessTokenRepository, PluginAccessTokenRepository>();
 		services.AddScoped<IPluginTokenService, PluginTokenService>();
 		services.AddScoped<IMcpAccessTokenRepository, McpAccessTokenRepository>();
+		services.AddSingleton<IMcpExtensionTokenStore, ShellMcpExtensionTokenStore>();
 		services.AddScoped<IMcpTokenService, McpTokenService>();
 		services.AddMacroDeckMcp();
 		services.AddScoped<IPluginRegistrationService, PluginRegistrationService>();

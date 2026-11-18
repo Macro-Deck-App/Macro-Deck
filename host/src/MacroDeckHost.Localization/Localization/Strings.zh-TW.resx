@@ -1069,6 +1069,9 @@
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>未設定 {variable}。請在「設定 &gt; AI 用戶端」中重新安裝 Claude Desktop 擴充功能。</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>此電腦上未儲存此擴充功能的存取權杖。請在「設定 &gt; AI 用戶端」中建立新權杖，然後重新安裝擴充功能。</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck 未在執行。請啟動 Macro Deck 後再試一次。</value>
   </data>
@@ -2992,6 +2995,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>此存取權杖已無法使用。請建立新權杖以下載擴充功能。</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck 無法將存取權杖儲存到此電腦的認證存放區，因此未建立擴充功能。請再試一次，或改用用戶端設定連線用戶端。</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop 擴充功能僅適用於在 macOS 和 Windows 上安裝的 Macro Deck 應用程式。</value>
@@ -17602,7 +17608,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>下載 Claude Desktop 擴充功能</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>在 Claude Desktop 中開啟下載的檔案，即可在其中安裝 Macro Deck。此檔案包含這個權杖，安裝後請將其刪除。</value>
+    <value>在 Claude Desktop 中開啟下載的檔案，即可在其中安裝 Macro Deck。此檔案不含權杖：Macro Deck 會將權杖保存在此電腦的認證存放區中。</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>無法儲存 Claude Desktop 擴充功能</value>

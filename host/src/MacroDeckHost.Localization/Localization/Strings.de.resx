@@ -1069,6 +1069,9 @@ Beende die Anwendung, die den Port belegt (oder ein noch laufendes Macro Deck), 
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} ist nicht gesetzt. Installiere die Claude-Desktop-Erweiterung erneut über Einstellungen &gt; KI-Clients.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Das Zugriffstoken für diese Erweiterung ist auf diesem Computer nicht gespeichert. Erstelle unter Einstellungen &gt; KI-Clients ein neues Token und installiere die Erweiterung erneut.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck läuft nicht. Starte Macro Deck und versuche es erneut.</value>
   </data>
@@ -2992,6 +2995,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Dieses Zugriffstoken kann nicht mehr verwendet werden. Erstelle ein neues Token, um die Erweiterung herunterzuladen.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck konnte das Zugriffstoken nicht im Anmeldeinformationsspeicher dieses Computers speichern, deshalb wurde die Erweiterung nicht erstellt. Versuche es erneut oder verbinde deinen Client stattdessen über die Client-Konfiguration.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Die Claude-Desktop-Erweiterung gibt es nur in der installierten Macro-Deck-App unter macOS und Windows.</value>
@@ -17599,7 +17605,7 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
     <value>Für Claude Desktop herunterladen</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Öffne die heruntergeladene Datei in Claude Desktop, um Macro Deck dort zu installieren. Die Datei enthält dieses Token, lösche sie also nach der Installation.</value>
+    <value>Öffne die heruntergeladene Datei in Claude Desktop, um Macro Deck dort zu installieren. Die Datei enthält kein Token: Macro Deck bewahrt es im Anmeldeinformationsspeicher dieses Computers auf.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Die Claude-Desktop-Erweiterung konnte nicht gespeichert werden</value>

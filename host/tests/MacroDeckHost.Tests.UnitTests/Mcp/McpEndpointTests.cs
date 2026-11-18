@@ -67,6 +67,8 @@ public partial class McpEndpointTests
 					services.AddSingleton(readiness);
 					services.RemoveAll<TimeProvider>();
 					services.AddSingleton<TimeProvider>(_clock);
+					services.RemoveAll<IMcpExtensionTokenStore>();
+					services.AddSingleton<IMcpExtensionTokenStore>(_extensionTokens);
 				});
 			})
 			.StartAsync();

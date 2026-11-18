@@ -1070,6 +1070,9 @@ Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck)
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>Proměnná {variable} není nastavena. Rozšíření pro Claude Desktop znovu nainstalujte v Nastavení &gt; Klienti AI.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Přístupový token pro toto rozšíření není v tomto počítači uložen. V Nastavení &gt; Klienti AI vytvořte nový token a rozšíření znovu nainstalujte.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck není spuštěný. Spusťte Macro Deck a zkuste to znovu.</value>
   </data>
@@ -2993,6 +2996,9 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Tento přístupový token již nelze použít. Pro stažení rozšíření vytvořte nový token.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck nemohl uložit přístupový token do úložiště přihlašovacích údajů tohoto počítače, a rozšíření proto nebylo vytvořeno. Zkuste to znovu nebo klienta připojte pomocí konfigurace klienta.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Rozšíření pro Claude Desktop je dostupné jen v nainstalované aplikaci Macro Deck v systémech macOS a Windows.</value>
@@ -17601,7 +17607,7 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
     <value>Stáhnout pro Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Otevřete stažený soubor v Claude Desktop a nainstalujte do něj Macro Deck. Soubor obsahuje tento token, proto jej po instalaci smažte.</value>
+    <value>Otevřete stažený soubor v Claude Desktop a nainstalujte do něj Macro Deck. Soubor neobsahuje žádný token: Macro Deck jej uchovává v úložišti přihlašovacích údajů tohoto počítače.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Rozšíření pro Claude Desktop se nepodařilo uložit</value>

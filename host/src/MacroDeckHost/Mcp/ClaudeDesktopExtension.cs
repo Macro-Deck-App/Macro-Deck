@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Infrastructure.Autostart;
 
 namespace MacroDeckHost.Mcp;
@@ -8,7 +9,7 @@ namespace MacroDeckHost.Mcp;
 public sealed record ClaudeDesktopExtensionContent(
 	string ShellExecutable,
 	string Platform,
-	string Token,
+	Guid TokenId,
 	string Version,
 	string Description);
 
@@ -16,12 +17,14 @@ public static class ClaudeDesktopExtension
 {
 	public const string FileName = "macro-deck.mcpb";
 	public const string ManifestEntry = "manifest.json";
+	public const string IconEntry = "icon.png";
 	public const string ManifestVersion = "0.3";
 	public const string Name = "macro-deck";
 	public const string DisplayName = "Macro Deck";
 	public const string BridgeArgument = "mcp";
-	public const string TokenEnvironmentVariable = "MACRODECK_MCP_TOKEN";
+	public const string TokenIdEnvironmentVariable = "MACRODECK_MCP_TOKEN_ID";
 	private const string Homepage = "https://macro-deck.app";
+	private const string IconResource = "MacroDeckHost.Mcp.ClaudeDesktopExtensionIcon.png";
 
 	private static readonly JsonSerializerOptions _manifestOptions = new() { WriteIndented = true };
 
@@ -42,7 +45,14 @@ public static class ClaudeDesktopExtension
 
 	public static bool IsAvailable()
 	{
-		return CurrentPlatform() is not null && ShellExecutable() is not null;
+		return IsAvailable(DataRootEnvironment.Current());
+	}
+
+	public static bool IsAvailable(DataRootEnvironment environment)
+	{
+		return CurrentPlatform() is not null
+			&& ShellExecutable() is not null
+			&& !MacroDeckDataRootResolver.IsPortable(environment);
 	}
 
 	public static string VersionOf(Version? version)
@@ -63,6 +73,7 @@ public static class ClaudeDesktopExtension
 			["description"] = content.Description,
 			["author"] = new JsonObject { ["name"] = DisplayName, ["url"] = Homepage },
 			["homepage"] = Homepage,
+			["icon"] = IconEntry,
 			["server"] = new JsonObject
 			{
 				["type"] = "binary",
@@ -71,7 +82,7 @@ public static class ClaudeDesktopExtension
 				{
 					["command"] = content.ShellExecutable,
 					["args"] = new JsonArray(BridgeArgument),
-					["env"] = new JsonObject { [TokenEnvironmentVariable] = content.Token }
+					["env"] = new JsonObject { [TokenIdEnvironmentVariable] = content.TokenId.ToString("D") }
 				}
 			},
 			["compatibility"] = new JsonObject { ["platforms"] = new JsonArray(content.Platform) }
@@ -84,8 +95,15 @@ public static class ClaudeDesktopExtension
 		using (var archive = new ZipArchive(stream, ZipArchiveMode.Create, true))
 		{
 			var entry = archive.CreateEntry(ManifestEntry, CompressionLevel.Optimal);
-			using var writer = entry.Open();
-			JsonSerializer.Serialize(writer, Manifest(content), _manifestOptions);
+			using (var writer = entry.Open())
+			{
+				JsonSerializer.Serialize(writer, Manifest(content), _manifestOptions);
+			}
+
+			using var icon = typeof(ClaudeDesktopExtension).Assembly.GetManifestResourceStream(IconResource)
+				?? throw new InvalidOperationException($"Missing embedded resource {IconResource}");
+			using var iconWriter = archive.CreateEntry(IconEntry, CompressionLevel.NoCompression).Open();
+			icon.CopyTo(iconWriter);
 		}
 
 		return stream.ToArray();

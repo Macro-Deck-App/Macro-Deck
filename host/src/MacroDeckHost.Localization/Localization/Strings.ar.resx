@@ -1069,6 +1069,9 @@
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>لم يتم تعيين {variable}. أعد تثبيت إضافة Claude Desktop من الإعدادات &gt; عملاء الذكاء الاصطناعي.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>رمز الوصول لهذه الإضافة غير محفوظ على هذا الكمبيوتر. أنشئ رمزًا جديدًا في الإعدادات &gt; عملاء الذكاء الاصطناعي وأعد تثبيت الإضافة.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck لا يعمل. شغّل Macro Deck وحاول مرة أخرى.</value>
   </data>
@@ -2992,6 +2995,9 @@
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>لم يعد من الممكن استخدام رمز الوصول هذا. أنشئ رمزًا جديدًا لتنزيل الإضافة.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>تعذّر على Macro Deck حفظ رمز الوصول في مخزن بيانات الاعتماد على هذا الكمبيوتر، لذا لم تُنشأ الإضافة. حاول مرة أخرى، أو صِل العميل باستخدام إعدادات العميل بدلًا من ذلك.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>إضافة Claude Desktop متاحة فقط في تطبيق Macro Deck المثبّت على macOS وWindows.</value>
@@ -17602,7 +17608,7 @@
     <value>تنزيل لـ Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>افتح الملف الذي تم تنزيله في Claude Desktop لتثبيت Macro Deck فيه. يحتوي الملف على هذا الرمز، لذا احذفه بعد التثبيت.</value>
+    <value>افتح الملف الذي تم تنزيله في Claude Desktop لتثبيت Macro Deck فيه. لا يحتوي الملف على أي رمز: يحفظه Macro Deck في مخزن بيانات الاعتماد على هذا الكمبيوتر.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>تعذر حفظ إضافة Claude Desktop</value>

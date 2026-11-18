@@ -1070,6 +1070,9 @@ Ferme l'application utilisant ce port (ou un Macro Deck encore en cours d'exécu
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} n'est pas définie. Réinstalle l'extension pour Claude Desktop depuis Paramètres &gt; Clients IA.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Le jeton d'accès de cette extension n'est pas enregistré sur cet ordinateur. Crée un nouveau jeton dans Paramètres &gt; Clients IA et réinstalle l'extension.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck n'est pas en cours d'exécution. Lance Macro Deck et réessaie.</value>
   </data>
@@ -2993,6 +2996,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   </data>
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Ce jeton d'accès ne peut plus être utilisé. Crée un nouveau jeton pour télécharger l'extension.</value>
+  </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck n'a pas pu enregistrer le jeton d'accès dans le magasin d'identifiants de cet ordinateur, l'extension n'a donc pas été créée. Réessaie ou connecte ton client avec la configuration du client.</value>
   </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>L'extension pour Claude Desktop n'est disponible que dans l'app Macro Deck installée sur macOS et Windows.</value>
@@ -17601,7 +17607,7 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
     <value>Télécharger pour Claude Desktop</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Ouvre le fichier téléchargé dans Claude Desktop pour y installer Macro Deck. Le fichier contient ce jeton, supprime-le donc après l'installation.</value>
+    <value>Ouvre le fichier téléchargé dans Claude Desktop pour y installer Macro Deck. Le fichier ne contient aucun jeton : Macro Deck le conserve dans le magasin d'identifiants de cet ordinateur.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Impossible d'enregistrer l'extension pour Claude Desktop</value>

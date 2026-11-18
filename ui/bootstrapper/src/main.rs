@@ -30,6 +30,7 @@ mod localization;
 mod logging;
 mod loopback_secret;
 mod mcp_bridge;
+mod mcp_token_store;
 mod menu;
 mod notifications;
 mod opened_files;
@@ -231,6 +232,11 @@ fn main() {
     // single-instance lock, open a window or touch the running app.
     if mcp_bridge::is_invocation(std::env::args_os()) {
         std::process::exit(mcp_bridge::run());
+    }
+    if mcp_token_store::is_invocation(std::env::args_os()) {
+        std::process::exit(mcp_token_store::run(
+            &std::env::args_os().collect::<Vec<_>>(),
+        ));
     }
 
     #[cfg(target_os = "linux")]

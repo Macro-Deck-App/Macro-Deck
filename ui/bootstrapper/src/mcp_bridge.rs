@@ -15,9 +15,11 @@ use tokio::task::JoinHandle;
 use crate::host;
 use crate::localization::{self, keys};
 use crate::loopback_secret;
+use crate::mcp_token_store::{self, ReadError};
 
 pub const SUBCOMMAND: &str = "mcp";
 pub const TOKEN_ENVIRONMENT_VARIABLE: &str = "MACRODECK_MCP_TOKEN";
+pub const TOKEN_ID_ENVIRONMENT_VARIABLE: &str = "MACRODECK_MCP_TOKEN_ID";
 const PORT_OVERRIDE_ENVIRONMENT_VARIABLE: &str = "MACRODECK_HOST_PORT";
 const SECRET_FILE_OVERRIDE_ENVIRONMENT_VARIABLE: &str = "MACRODECK_LOOPBACK_SECRET_FILE";
 const ENDPOINT_PATH: &str = "/mcp";
@@ -37,17 +39,52 @@ pub fn is_invocation(args: impl IntoIterator<Item = OsString>) -> bool {
     args.into_iter().nth(1).is_some_and(|arg| arg == SUBCOMMAND)
 }
 
-pub fn run() -> i32 {
-    let Some(token) = std::env::var(TOKEN_ENVIRONMENT_VARIABLE)
-        .ok()
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TokenProblem {
+    Missing,
+    NotStored,
+}
+
+// A token in the environment wins, so manual configurations and extensions installed before the
+// token moved to the secure store keep working.
+pub fn resolve_token(
+    environment: Environment,
+    read_stored: impl Fn(&str) -> Result<String, ReadError>,
+) -> Result<String, TokenProblem> {
+    let value = |name: &str| {
+        environment(name)
+            .and_then(|value| value.into_string().ok())
+            .map(|value| value.trim().to_string())
+            .filter(|value| !value.is_empty())
+    };
+    if let Some(token) = value(TOKEN_ENVIRONMENT_VARIABLE) {
+        return Ok(token);
+    }
+    let Some(id) = value(TOKEN_ID_ENVIRONMENT_VARIABLE) else {
+        return Err(TokenProblem::Missing);
+    };
+    read_stored(&id)
         .map(|token| token.trim().to_string())
+        .ok()
         .filter(|token| !token.is_empty())
-    else {
-        report(&localization::t_args(
-            keys::MCP_TOKEN_MISSING,
-            &[("variable", TOKEN_ENVIRONMENT_VARIABLE)],
-        ));
-        return 2;
+        .ok_or(TokenProblem::NotStored)
+}
+
+pub fn run() -> i32 {
+    let environment = |name: &str| std::env::var_os(name);
+    let token = match resolve_token(&environment, mcp_token_store::read_stored) {
+        Ok(token) => token,
+        Err(TokenProblem::Missing) => {
+            report(&localization::t_args(
+                keys::MCP_TOKEN_MISSING,
+                &[("variable", TOKEN_ENVIRONMENT_VARIABLE)],
+            ));
+            return 2;
+        }
+        Err(TokenProblem::NotStored) => {
+            report(&localization::t(keys::MCP_TOKEN_NOT_STORED));
+            return 2;
+        }
     };
     let client = match http_client() {
         Ok(client) => client,
@@ -761,6 +798,74 @@ mod tests {
     const TOKEN: &str = "mdmcp_test-token-value";
     const SECRET: &str = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
     const OTHER_SECRET: &str = "ffeeddccbbaa99887766554433221100ffeeddccbbaa99887766554433221100";
+
+    const TOKEN_ID: &str = "0f8fad5b-d9cb-469f-a165-70867728950e";
+
+    fn environment_of(pairs: &[(&str, &str)]) -> impl Fn(&str) -> Option<OsString> {
+        let pairs: Vec<(String, String)> = pairs
+            .iter()
+            .map(|(name, value)| (name.to_string(), value.to_string()))
+            .collect();
+        move |name| {
+            pairs
+                .iter()
+                .find(|(candidate, _)| candidate == name)
+                .map(|(_, value)| OsString::from(value))
+        }
+    }
+
+    fn stored(id: &str) -> Result<String, ReadError> {
+        if id == TOKEN_ID {
+            Ok(format!("{TOKEN}\n"))
+        } else {
+            Err(ReadError::NotFound)
+        }
+    }
+
+    #[test]
+    fn a_token_in_the_environment_wins_over_a_stored_one() {
+        let environment = environment_of(&[
+            (TOKEN_ENVIRONMENT_VARIABLE, " mdmcp_manual "),
+            (TOKEN_ID_ENVIRONMENT_VARIABLE, TOKEN_ID),
+        ]);
+        assert_eq!(
+            resolve_token(&environment, stored),
+            Ok("mdmcp_manual".to_string())
+        );
+    }
+
+    #[test]
+    fn a_token_id_reads_the_token_from_the_secure_store() {
+        let environment = environment_of(&[(TOKEN_ID_ENVIRONMENT_VARIABLE, TOKEN_ID)]);
+        assert_eq!(resolve_token(&environment, stored), Ok(TOKEN.to_string()));
+    }
+
+    #[test]
+    fn a_token_id_without_a_stored_token_is_reported_as_not_stored() {
+        let environment = environment_of(&[(
+            TOKEN_ID_ENVIRONMENT_VARIABLE,
+            "00000000-0000-4000-8000-000000000001",
+        )]);
+        assert_eq!(
+            resolve_token(&environment, stored),
+            Err(TokenProblem::NotStored)
+        );
+        let unavailable = |_: &str| Err(ReadError::Unavailable);
+        let environment = environment_of(&[(TOKEN_ID_ENVIRONMENT_VARIABLE, TOKEN_ID)]);
+        assert_eq!(
+            resolve_token(&environment, unavailable),
+            Err(TokenProblem::NotStored)
+        );
+    }
+
+    #[test]
+    fn without_token_or_token_id_the_token_is_missing() {
+        let environment = environment_of(&[(TOKEN_ENVIRONMENT_VARIABLE, "  ")]);
+        assert_eq!(
+            resolve_token(&environment, stored),
+            Err(TokenProblem::Missing)
+        );
+    }
 
     struct Request {
         method: String,
