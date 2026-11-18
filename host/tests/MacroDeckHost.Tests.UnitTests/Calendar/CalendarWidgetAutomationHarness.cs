@@ -101,7 +101,7 @@ internal sealed class CalendarWidgetAutomationHarness : IAsyncDisposable
 	public CalendarWidgetBackgroundService BackgroundService()
 	{
 		var readiness = new StartupReadiness();
-		readiness.MarkEventDispatchReady();
+		readiness.MarkEventDispatchReady(_ => { });
 
 		return new CalendarWidgetBackgroundService(new StartedHostLifetime(),
 			Triggers,

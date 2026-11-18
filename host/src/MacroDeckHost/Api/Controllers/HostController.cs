@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Host;
 using MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
@@ -13,6 +14,8 @@ public record ShellNotificationsResponse(IReadOnlyList<ShellNotification> Notifi
 
 public record ShellNotificationResultRequest(bool Shown);
 
+public record HostStartupResponse(bool StartupEventsDispatched);
+
 [ApiController]
 [Route("api/host")]
 public class HostController : ControllerBase
@@ -25,6 +28,7 @@ public class HostController : ControllerBase
 	private readonly IHostApplicationLifetime _lifetime;
 	private readonly IShellNotificationBridge _shellNotifications;
 	private readonly UserSessionEnd _sessionEnd;
+	private readonly StartupReadiness _readiness;
 
 	private readonly IUiTransportMessageHandler<ReportUpdateStateRequest, ReportUpdateStateResponse>
 		_reportUpdateState;
@@ -55,7 +59,8 @@ public class HostController : ControllerBase
 		IUiTransportMessageHandler<OpenDataDirectoryRequest, OpenDataDirectoryResponse> openDataDirectory,
 		IUiTransportMessageHandler<GetHostSessionRequest, GetHostSessionResponse> getHostSession,
 		IShellNotificationBridge shellNotifications,
-		UserSessionEnd sessionEnd)
+		UserSessionEnd sessionEnd,
+		StartupReadiness readiness)
 	{
 		_logger = logger;
 		_shellNotifications = shellNotifications;
@@ -67,12 +72,24 @@ public class HostController : ControllerBase
 		_openDataDirectory = openDataDirectory;
 		_getHostSession = getHostSession;
 		_sessionEnd = sessionEnd;
+		_readiness = readiness;
 	}
 
 	[HttpGet("session")]
 	public Task<GetHostSessionResponse> Session(CancellationToken ct)
 	{
 		return _getHostSession.Handle(new GetHostSessionRequest(), ct).AsTask();
+	}
+
+	[HttpGet("startup")]
+	public IActionResult Startup()
+	{
+		if (!LoopbackConnection.IsTrusted(HttpContext))
+		{
+			return NotFound();
+		}
+
+		return Ok(new HostStartupResponse(_readiness.AreStartupEventsDispatched));
 	}
 
 	[HttpPost("shutdown")]

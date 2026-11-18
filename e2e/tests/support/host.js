@@ -187,13 +187,29 @@ export class MacroDeckHost {
     this.child = child;
   }
 
+  // Answering is not started: integrations still connect, and their held events still reach whatever
+  // automation exists by then, so a test that seeds one too early sees the start it did not ask about.
   async waitUntilReady(timeoutMs = 60_000, { requirePublic = true } = {}) {
     const ready = await until(async () => {
       const loopback = await answers(`${this.loopbackUrl}/api/auth/status`);
-      return loopback && (!requirePublic || await answers(`${this.publicUrl}/api/auth/status`));
+      return loopback
+        && (!requirePublic || await answers(`${this.publicUrl}/api/auth/status`))
+        && await this.startupEventsDispatched();
     }, timeoutMs);
     if (!ready) {
       throw new Error(`Macro Deck host ${this.name} did not become ready; see ${this.hostLog}`);
+    }
+  }
+
+  async startupEventsDispatched() {
+    try {
+      const response = await fetch(`${this.loopbackUrl}/api/host/startup`, {
+        headers: { 'X-MacroDeck-Loopback-Secret': this.secret },
+        signal: AbortSignal.timeout(2_000),
+      });
+      return response.ok && (await response.json()).startupEventsDispatched === true;
+    } catch {
+      return false;
     }
   }
 

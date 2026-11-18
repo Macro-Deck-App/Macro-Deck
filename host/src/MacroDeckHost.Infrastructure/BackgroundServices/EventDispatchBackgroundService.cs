@@ -47,10 +47,10 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 
 		// Rebuilt first so events raised during this wait queue in the bus instead of being dropped.
 		await _builtInRegistration.Completed.WaitAsync(stoppingToken);
-		_readiness.MarkEventDispatchReady();
+		_readiness.MarkEventDispatchReady(_bus.Publish);
 
 		var reader = _bus.Reader;
-		while (await reader.WaitToReadAsync(stoppingToken))
+		do
 		{
 			while (reader.TryRead(out var occurrence))
 			{
@@ -59,7 +59,11 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 					Dispatch(subscription, occurrence, stoppingToken);
 				}
 			}
+
+			// Everything held during startup was queued before the first drain, so it has been matched by now.
+			_readiness.MarkStartupEventsDispatched();
 		}
+		while (await reader.WaitToReadAsync(stoppingToken));
 	}
 
 	private IReadOnlyList<EventSubscription> Resolve(EventOccurrence occurrence)
