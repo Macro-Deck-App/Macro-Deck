@@ -13,7 +13,6 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 	private readonly IEventBus _bus;
 	private readonly IEventSubscriptionIndex _subscriptions;
 	private readonly StartupReadiness _readiness;
-	private readonly IHostApplicationLifetime _lifetime;
 	private readonly DeviceConnectionTracker _connections;
 	private readonly TimeProvider _timeProvider;
 
@@ -21,14 +20,12 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 		IEventBus bus,
 		IEventSubscriptionIndex subscriptions,
 		StartupReadiness readiness,
-		IHostApplicationLifetime lifetime,
 		DeviceConnectionTracker connections,
 		TimeProvider timeProvider)
 	{
 		_bus = bus;
 		_subscriptions = subscriptions;
 		_readiness = readiness;
-		_lifetime = lifetime;
 		_connections = connections;
 		_timeProvider = timeProvider;
 	}
@@ -40,7 +37,14 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 
 	public Task StartAsync(CancellationToken cancellationToken)
 	{
-		_ = PublishWhenReady();
+		// The bus drops events nobody subscribes to, so publishing before the dispatcher has indexed the
+		// automations would lose this one-shot event.
+		var occurrence = Occurrence(EventIds.ServerStarted);
+		if (!_readiness.HoldUntilEventDispatchReady(occurrence))
+		{
+			_bus.Publish(occurrence);
+		}
+
 		return Task.CompletedTask;
 	}
 
@@ -76,20 +80,6 @@ public sealed class ServerLifecycleEventBackgroundService : IHostedLifecycleServ
 	public Task StoppedAsync(CancellationToken cancellationToken)
 	{
 		return Task.CompletedTask;
-	}
-
-	private async Task PublishWhenReady()
-	{
-		try
-		{
-			// The bus drops events nobody subscribes to, so publishing before the dispatcher has indexed the
-			// automations would lose this one-shot event.
-			await _readiness.WhenEventDispatchReady.WaitAsync(_lifetime.ApplicationStopping);
-			_bus.Publish(Occurrence(EventIds.ServerStarted));
-		}
-		catch (OperationCanceledException)
-		{
-		}
 	}
 
 	private static EventOccurrence Occurrence(string eventId)

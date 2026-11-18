@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Net;
 using MacroDeckHost.Api.Controllers;
 using MacroDeckHost.Application.Notifications;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Host;
 using MacroDeckHost.Application.Ui.Transport.Messages.Notifications;
@@ -58,7 +59,8 @@ public class HostControllerTests
 		FakeApplicationService? applicationService = null,
 		TestPaths? paths = null,
 		IShellNotificationBridge? shellNotifications = null,
-		UserSessionEnd? sessionEnd = null)
+		UserSessionEnd? sessionEnd = null,
+		StartupReadiness? readiness = null)
 	{
 		var httpContext = new DefaultHttpContext
 		{
@@ -92,10 +94,36 @@ public class HostControllerTests
 			new OpenDataDirectoryRequestMessageHandler(macroDeckPaths, reveal),
 			new GetHostSessionRequestMessageHandler(new HostSession()),
 			shellNotifications ?? new ShellNotificationBridge(TimeProvider.System),
-			sessionEnd ?? new UserSessionEnd())
+			sessionEnd ?? new UserSessionEnd(),
+			readiness ?? new StartupReadiness())
 		{
 			ControllerContext = new ControllerContext { HttpContext = httpContext }
 		};
+	}
+
+	[Test]
+	public void Startup_reports_on_loopback_whether_startup_events_are_dispatched_and_is_hidden_on_the_public_port()
+	{
+		var readiness = new StartupReadiness();
+		var loopback = CreateController(new FakeLifetime(),
+			TestListenerPorts.Loopback,
+			IPAddress.Loopback,
+			readiness: readiness);
+		var publicPort = CreateController(new FakeLifetime(),
+			HostEndpoints.PublicPort,
+			IPAddress.Loopback,
+			readiness: readiness);
+
+		var before = loopback.Startup();
+		readiness.MarkStartupEventsDispatched();
+		var after = loopback.Startup();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(((OkObjectResult)before).Value, Is.EqualTo(new HostStartupResponse(false)));
+			Assert.That(((OkObjectResult)after).Value, Is.EqualTo(new HostStartupResponse(true)));
+			Assert.That(publicPort.Startup(), Is.InstanceOf<NotFoundResult>());
+		});
 	}
 
 	[Test]

@@ -77,6 +77,34 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 			Is.EqualTo(new[] { (EventTriggerOwner.ForAutomation(automation.Id), Disconnected, IntegrationId) }));
 	}
 
+	[Test]
+	public async Task An_automation_saved_once_startup_events_are_dispatched_does_not_run_for_a_startup_connect()
+	{
+		await using var world = await World.Start();
+		world.Automations.Add(Flows("integration-connected", "app.test.other"));
+
+		await world.Handler.Handle(new IntegrationStateChangedNotification(IntegrationId), CancellationToken.None);
+		world.MarkStartupReady();
+		await world.Readiness.WhenStartupEventsDispatched.WaitAsync(TimeSpan.FromSeconds(10));
+
+		var late = world.Automations.Add(Flows("integration-connected", IntegrationId));
+		world.Index.ReindexAutomation(late.Id, late.Flows, true);
+		await Task.Delay(_settle);
+
+		Assert.That(world.Runner.Runs, Is.Empty);
+	}
+
+	[Test]
+	public async Task Startup_events_count_as_dispatched_when_nothing_was_raised_during_startup()
+	{
+		await using var world = await World.Start();
+
+		world.MarkStartupReady();
+
+		Assert.That(async () => await world.Readiness.WhenStartupEventsDispatched.WaitAsync(TimeSpan.FromSeconds(10)),
+			Throws.Nothing);
+	}
+
 	private static string Flows(string eventId, string integrationId)
 	{
 		return JsonSerializer.Serialize(new[]
@@ -103,6 +131,7 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 		private World(
 			IHost host,
 			StubAutomationCache automations,
+			EventSubscriptionIndex index,
 			ThreadRecordingIntegrationRegistry registry,
 			StartupReadiness readiness,
 			RecordingTriggerRunner runner,
@@ -110,6 +139,7 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 		{
 			_host = host;
 			Automations = automations;
+			Index = index;
 			Registry = registry;
 			Readiness = readiness;
 			Runner = runner;
@@ -117,6 +147,8 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 		}
 
 		public StubAutomationCache Automations { get; }
+
+		public EventSubscriptionIndex Index { get; }
 
 		public ThreadRecordingIntegrationRegistry Registry { get; }
 
@@ -154,10 +186,9 @@ public sealed class IntegrationStateChangedEventTriggerHandlerTests
 
 			var handler = new IntegrationStateChangedEventTriggerHandler(bus,
 				registry,
-				readiness,
-				host.Services.GetRequiredService<IHostApplicationLifetime>());
+				readiness);
 
-			return new World(host, automations, registry, readiness, runner, handler);
+			return new World(host, automations, index, registry, readiness, runner, handler);
 		}
 
 		public void MarkStartupReady()
