@@ -84,6 +84,47 @@ public class LogFileReaderTests
 	}
 
 	[Test]
+	public void Paging_Continues_Through_The_Files_A_Day_Was_Split_Into()
+	{
+		TestLogFiles.WriteHost(_paths.LogsDirectory,
+			Yesterday,
+			TestLogFiles.HostLine("yesterday", 1, stamp: Yesterday));
+		TestLogFiles.WriteHost(_paths.LogsDirectory, Today, TestLogFiles.HostLine("morning", 1));
+		TestLogFiles.WriteHost(_paths.LogsDirectory, $"{Today}_001", TestLogFiles.HostLine("noon", 2));
+		TestLogFiles.WriteHost(_paths.LogsDirectory, $"{Today}_002", TestLogFiles.HostLine("evening", 3));
+
+		var messages = new List<string>();
+		var page = Read(limit: 1);
+		messages.Add(page.Entries.Single().Message);
+		while (page.Older is not null)
+		{
+			page = Read(limit: 1, before: page.Older);
+			messages.AddRange(page.Entries.Select(entry => entry.Message));
+		}
+
+		string[] expected = ["evening", "noon", "morning", "yesterday"];
+		Assert.That(messages, Is.EqualTo(expected));
+	}
+
+	[Test]
+	public void The_Thousandth_File_Of_A_Day_Is_Newer_Than_The_One_Before_It()
+	{
+		TestLogFiles.WriteHost(_paths.LogsDirectory, $"{Today}_999", TestLogFiles.HostLine("before", 1));
+		TestLogFiles.WriteHost(_paths.LogsDirectory, $"{Today}_1000", TestLogFiles.HostLine("after", 2));
+
+		var newest = Read(limit: 1);
+		var older = Read(limit: 1, before: newest.Older);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(newest.Entries.Single().Message, Is.EqualTo("after"));
+			Assert.That(older.Entries.Single().Message, Is.EqualTo("before"));
+			Assert.That(new LogReadPosition($"{Today}_1000", 0).CompareTo(new LogReadPosition($"{Today}_999", 50)),
+				Is.GreaterThan(0));
+		});
+	}
+
+	[Test]
 	public void A_Cursor_Into_A_Pruned_File_Does_Not_Replay_Newer_Entries()
 	{
 		TestLogFiles.WriteHost(_paths.LogsDirectory,

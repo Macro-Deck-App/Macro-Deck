@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -329,9 +330,13 @@ public sealed class FlowExecutor : IFlowExecutor
 				await ExecuteBlocksAsync(block.Children, run, cancellationToken);
 				break;
 			default:
-				_logger.Warning("Skipping unsupported action-button block {BlockType} ({Type})",
-					block.BlockType,
-					block.Type);
+				if (run.FirstLogFor(block.Id))
+				{
+					_logger.Warning("Skipping unsupported action-button block {BlockType} ({Type})",
+						block.BlockType,
+						block.Type);
+				}
+
 				run.Record(block.Id,
 					block.Label,
 					block.IntegrationId,
@@ -351,7 +356,11 @@ public sealed class FlowExecutor : IFlowExecutor
 			case "break":
 				throw new BreakLoopException();
 			default:
-				_logger.Warning("Skipping unsupported flow-control block {BlockType}", block.BlockType);
+				if (run.FirstLogFor(block.Id))
+				{
+					_logger.Warning("Skipping unsupported flow-control block {BlockType}", block.BlockType);
+				}
+
 				run.Record(block.Id,
 					block.Label,
 					block.IntegrationId,
@@ -373,7 +382,12 @@ public sealed class FlowExecutor : IFlowExecutor
 			= ActionFlowJson.ResolveActionIdentity(block.IntegrationId, block.ActionId, block.BlockType);
 		if (string.IsNullOrWhiteSpace(integrationId) || string.IsNullOrWhiteSpace(actionId))
 		{
-			_logger.Warning("Skipping action block {BlockType}: missing integration/action id", block.BlockType);
+			if (run.FirstLogFor(block.Id))
+			{
+				_logger.Warning("Skipping action block {BlockType}: missing integration/action id",
+					block.BlockType);
+			}
+
 			run.Record(block.Id,
 				block.Label,
 				integrationId,
@@ -391,9 +405,13 @@ public sealed class FlowExecutor : IFlowExecutor
 			.Any(integration => string.Equals(integration.Id, integrationId, StringComparison.Ordinal));
 		if (!integrationExists)
 		{
-			_logger.Warning("Skipping action {IntegrationId}.{ActionId}: integration not found",
-				integrationId,
-				actionId);
+			if (run.FirstLogFor(block.Id))
+			{
+				_logger.Warning("Skipping action {IntegrationId}.{ActionId}: integration not found",
+					integrationId,
+					actionId);
+			}
+
 			run.Record(block.Id,
 				block.Label,
 				integrationId,
@@ -422,7 +440,11 @@ public sealed class FlowExecutor : IFlowExecutor
 		var action = _integrationRegistry.FindAction(integrationId, actionId);
 		if (action is null)
 		{
-			_logger.Warning("Skipping unknown action {IntegrationId}.{ActionId}", integrationId, actionId);
+			if (run.FirstLogFor(block.Id))
+			{
+				_logger.Warning("Skipping unknown action {IntegrationId}.{ActionId}", integrationId, actionId);
+			}
+
 			run.Record(block.Id,
 				block.Label,
 				integrationId,
@@ -553,12 +575,16 @@ public sealed class FlowExecutor : IFlowExecutor
 		{
 			stopwatch.Stop();
 			var (code, message) = ActionErrorSanitizer.Sanitize(ex);
-			_logger.Error(ex,
-				"Action {IntegrationId}.{ActionId} failed (execution {ExecutionId}, block {BlockId})",
-				integrationId,
-				actionId,
-				run.ExecutionId,
-				block.Id);
+			if (run.FirstLogFor(block.Id))
+			{
+				_logger.Error(ex,
+					"Action {IntegrationId}.{ActionId} failed (execution {ExecutionId}, block {BlockId})",
+					integrationId,
+					actionId,
+					run.ExecutionId,
+					block.Id);
+			}
+
 			run.Record(block.Id,
 				block.Label,
 				integrationId,
@@ -694,7 +720,11 @@ public sealed class FlowExecutor : IFlowExecutor
 
 				break;
 			default:
-				_logger.Warning("Skipping unsupported loop block {BlockType}", block.BlockType);
+				if (run.FirstLogFor(block.Id))
+				{
+					_logger.Warning("Skipping unsupported loop block {BlockType}", block.BlockType);
+				}
+
 				run.Record(block.Id,
 					block.Label,
 					block.IntegrationId,
@@ -1125,6 +1155,7 @@ public sealed class FlowExecutor : IFlowExecutor
 	private sealed class FlowRun
 	{
 		private readonly Lazy<string?> _providerBlockId;
+		private readonly ConcurrentDictionary<string, byte> _loggedBlocks = new(StringComparer.Ordinal);
 
 		public FlowRun(
 			Guid executionId,
@@ -1167,6 +1198,12 @@ public sealed class FlowExecutor : IFlowExecutor
 		public FlowOwner? Owner { get; }
 		public bool TrustedDraft { get; }
 		public List<ActionExecutionOutcome> Outcomes { get; } = [];
+
+		// A loop repeats its body up to thousands of times, so a skip or failure is logged once per block.
+		public bool FirstLogFor(string? blockId)
+		{
+			return _loggedBlocks.TryAdd(blockId ?? string.Empty, 0);
+		}
 
 		public void Record(
 			string blockId,

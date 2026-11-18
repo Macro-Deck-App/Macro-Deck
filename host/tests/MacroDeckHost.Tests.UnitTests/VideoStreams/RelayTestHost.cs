@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.VideoStreams;
 using MacroDeckHost.Extensions;
 using MacroDeckHost.Infrastructure.Persistence;
+using MacroDeckHost.Logging;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -120,7 +121,7 @@ internal sealed class RelayTestHost : IAsyncDisposable
 		var hostBuilder = new HostBuilder();
 		if (realLogging)
 		{
-			hostBuilder.ConfigureSerilog(paths, new LogLevelState(LogEntryLevel.Debug));
+			hostBuilder.ConfigureSerilog(new HostLogPipeline(paths, new LogLevelState(LogEntryLevel.Debug)));
 		}
 
 		host._host = await hostBuilder

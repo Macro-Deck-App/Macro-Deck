@@ -39,7 +39,7 @@ public class PluginLogFileIntegrationTests
 		const string pluginId = "com.example.obs";
 
 		var host = await new HostBuilder()
-			.ConfigureSerilog(_paths, new LogLevelState(LogEntryLevel.Information))
+			.ConfigureSerilog(new HostLogPipeline(_paths, new LogLevelState(LogEntryLevel.Information)))
 			.StartAsync();
 
 		using (host)

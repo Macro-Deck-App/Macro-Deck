@@ -148,4 +148,19 @@ public class HostLogParserTests
 			Assert.That(HostLogParser.TryParseFileStamp("host-notadate.log", out _), Is.False);
 		});
 	}
+
+	[Test]
+	public void A_File_Rolled_On_Size_Is_Recognised_By_Its_Day_And_Sequence()
+	{
+		Assert.Multiple(() =>
+		{
+			Assert.That(HostLogParser.TryParseFileStamp("host-20260806_001.log", out var stamp), Is.True);
+			Assert.That(stamp, Is.EqualTo("20260806_001"));
+			Assert.That(HostLogParser.FileName(stamp), Is.EqualTo("host-20260806_001.log"));
+			Assert.That(HostLogParser.TryParseFileStamp("host-20260806_1234.log", out _), Is.True);
+			Assert.That(HostLogParser.TryParseFileStamp("host-20260806_.log", out _), Is.False);
+			Assert.That(HostLogParser.TryParseFileStamp("host-20260806_old.log", out _), Is.False);
+			Assert.That(HostLogParser.TryParseFileStamp("host-20260806_001_002.log", out _), Is.False);
+		});
+	}
 }
