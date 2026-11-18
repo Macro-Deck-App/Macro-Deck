@@ -316,6 +316,9 @@ internal sealed class UiSessionStore : IAsyncDisposable
 				WorkKind.Rebuild => RebuildAsync(),
 				WorkKind.Reload => ReloadAsync(),
 				WorkKind.Report => SendQueuedReportsAsync(),
+				// A flush can be queued before the event it follows has run, and so before the drain that
+				// event queues. Draining here keeps the flushed reply behind every patch its events produced.
+				WorkKind.Flush => DrainAsync(),
 				_ => Task.CompletedTask
 			};
 		}

@@ -276,7 +276,9 @@ What did **not** need a major:
   never reports. The `ui` host API gained `report-parameter-values`, which an older host answers with
   `CAPABILITY_UNSUPPORTED` and the SDK then drops, so a reported value is not saved there. The `ui`
   capability gained `session.flush`, which a plugin built before it answers with `CAPABILITY_UNSUPPORTED`
-  and the host treats as flushed.
+  and the host treats as flushed. `MacroDeck.Plugin.Hosting` now also sends the patches every earlier
+  event produced before it answers a flush; an earlier version could answer before sending them, and the
+  host then saved without them.
 - `IVariableApi` gained `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync`, both defaulting to a
   no-op, and the `variables` host API gained `refresh`; an older host makes the request a no-op.
   `NotifyDeclarationsChangedAsync` uses the existing `state.update`.
