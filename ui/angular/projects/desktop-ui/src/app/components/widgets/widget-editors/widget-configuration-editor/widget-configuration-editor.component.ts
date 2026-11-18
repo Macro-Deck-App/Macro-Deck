@@ -52,6 +52,7 @@ import { UiRenderContext } from '../../../ui-render/ui-render-context';
 import { deepEqual } from '../../../../util/deep-equal';
 import { findLabelFields, labelArea, labelAt, pickedLabelIndex, positionPercent, previewLabels } from './preview-label-drag.util';
 import { WidgetEditorShellComponent } from '../common/widget-editor-shell/widget-editor-shell.component';
+import { ActionConfigSessionFlusher } from '../../../action-builder/services/action-config-session-flusher.service';
 
 const DRAFT_EVENT_NAMES: ReadonlySet<string> = new Set([
   UiConfigEvents.Change,
@@ -196,34 +197,49 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     // enabled Save button and saving would add keys nobody asked for.
     effect(() => {
       const root = this.root();
-      if (!root) return;
-
-      // A tree from a newly opened session carries provider defaults the draft never had.
       const generation = this.handle()?.generation() ?? 0;
-      if (generation !== this.treeGeneration) {
-        this.treeGeneration = generation;
-        this.seenTree = false;
-        this.retainedRoot = this.previousRoot;
-      }
-
-      if (root === this.retainedRoot) return;
-      this.retainedRoot = null;
-
-      const previous = this.previousRoot;
-      this.previousRoot = root;
-
-      if (!this.seenTree) {
-        this.seenTree = true;
-        if (!deepEqual(this.widget.data, this.openedWith)) untracked(() => this.reopen());
-        else this.lastOpenedDraft = this.rememberShownDraft();
-        return;
-      }
-
-      untracked(() => this.onRevision(previous, root));
+      untracked(() => this.reconcileTree(root, generation));
     });
 
+    const destroyRef = inject(DestroyRef);
     const subscription = this.eventBus.events$.subscribe(event => this.onNodeEvent(event));
-    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+    destroyRef.onDestroy(() => subscription.unsubscribe());
+    destroyRef.onDestroy(inject(ActionConfigSessionFlusher).register({ flush: () => this.flush() }));
+  }
+
+  // A save reads the draft right after this resolves, before the effect above would have run, so the
+  // revisions the host answered the user's last edits with are folded in here.
+  private async flush(): Promise<void> {
+    const handle = this.handle();
+    if (!handle) return;
+    await handle.flush?.();
+    if (handle === this.handle()) this.reconcileTree(this.root(), handle.generation());
+  }
+
+  private reconcileTree(root: UiNode | null, generation: number): void {
+    if (!root) return;
+
+    // A tree from a newly opened session carries provider defaults the draft never had.
+    if (generation !== this.treeGeneration) {
+      this.treeGeneration = generation;
+      this.seenTree = false;
+      this.retainedRoot = this.previousRoot;
+    }
+
+    if (root === this.retainedRoot || root === this.previousRoot) return;
+    this.retainedRoot = null;
+
+    const previous = this.previousRoot;
+    this.previousRoot = root;
+
+    if (!this.seenTree) {
+      this.seenTree = true;
+      if (!deepEqual(this.widget.data, this.openedWith)) this.reopen();
+      else this.lastOpenedDraft = this.rememberShownDraft();
+      return;
+    }
+
+    this.onRevision(previous, root);
   }
 
   ngOnInit(): void {

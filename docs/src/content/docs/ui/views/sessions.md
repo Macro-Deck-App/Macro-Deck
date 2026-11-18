@@ -269,7 +269,7 @@ Like the other provider-shaped capabilities, `ui` declares the single local id `
 | `session.open` (developer preview) | A `developer-preview` surface names one registered scenario in its surface attributes. `MacroDeck.Plugin.Hosting` builds that scenario and never consults `IUiProvider`, so a production provider is unreachable from a preview. |
 | `session.snapshot` | Produce the current full tree. The tree does not return on the result - it arrives as a separate `host.invoke ui/snapshot`, so a first attach and a resync share one delivery path. A provider may also send `ui/snapshot` unasked to replace its whole tree, at any revision; later patches continue from that tree's revision. |
 | `session.event` | A client acted on a node. `clientId` says which one, and is meaningful only for a shared session. `MacroDeck.Plugin.Hosting` hands it to your session as the event's origin. A `pointer-move` still waiting to be sent is replaced by a newer one for the same node from the same client, and one the plugin could not take because it was busy or slow is dropped; see [Pointer streams and taps](/ui/components/modifier/#pointer-streams-and-taps). |
-| `session.flush` | Answer once every `session.event` sent for the session before it has been handled, and every `ui/report-parameter-values` those events raised has been answered. The host sends it when a client is about to save an action. A plugin built before it answers `CAPABILITY_UNSUPPORTED`, which the host treats as flushed: such a plugin never reports values. |
+| `session.flush` | Answer once every `session.event` sent for the session before it has been handled, every `ui/patch` those events produced has been sent, and every `ui/report-parameter-values` they raised has been answered. The host sends it when a client is about to save an action or a widget configuration. A plugin built before it answers `CAPABILITY_UNSUPPORTED`, which the host treats as flushed: such a plugin never reports values. An earlier `MacroDeck.Plugin.Hosting` could answer before sending the patches an earlier event produced. |
 | `session.close` | The host is ending this session. |
 | `modal.result` | How a modal this plugin opened ended. Host-to-plugin because a person, not a timeout, bounds the wait - see [Modal views](/ui/views/modal/). |
 
@@ -298,8 +298,8 @@ On the client side, a session's reported values reach the attached client as
 `UiSessionParameterValuesReportedEvent` (`sessionId`, `values`). A client asks with
 `FlushUiSession` (`sessionId`, `flushId`), which is answered at once, and receives
 `UiSessionFlushedEvent` (`sessionId`, `flushId`) on that connection alone once the session's provider has
-handled every event the client sent before, after every value those events reported. A host that predates
-flushing refuses the request as an unknown type, so a client treats that as flushed.
+handled every event the client sent before, after every patch and value those events produced. A host that
+predates flushing refuses the request as an unknown type, so a client treats that as flushed.
 
 ## See also
 

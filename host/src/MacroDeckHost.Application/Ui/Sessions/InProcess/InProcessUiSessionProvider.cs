@@ -299,7 +299,10 @@ public sealed class InProcessUiSessionProvider : IUiSessionProvider, IAsyncDispo
 		{
 			switch (kind)
 			{
+				// A flush can be queued before the event it follows has run, and so before the drain that
+				// event queues. Draining here keeps the flushed reply behind every patch its events produced.
 				case WorkKind.Drain:
+				case WorkKind.Flush:
 					Interlocked.Exchange(ref _drainQueued, 0);
 					DrainPatches();
 					break;

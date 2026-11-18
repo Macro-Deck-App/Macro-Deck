@@ -6,9 +6,9 @@ export const ACTION_CONFIG_FLUSH_TIMEOUT_MS = 3000;
 
 @Injectable({ providedIn: 'root' })
 export class ActionConfigSessionFlusher {
-  private readonly sessions = new Set<UiSessionHandle>();
+  private readonly sessions = new Set<Pick<UiSessionHandle, 'flush'>>();
 
-  register(session: UiSessionHandle): () => void {
+  register(session: Pick<UiSessionHandle, 'flush'>): () => void {
     this.sessions.add(session);
     return () => this.sessions.delete(session);
   }
