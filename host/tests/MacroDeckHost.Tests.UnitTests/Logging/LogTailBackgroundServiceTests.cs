@@ -174,6 +174,32 @@ public class LogTailBackgroundServiceTests
 	}
 
 	[Test]
+	public async Task A_Roll_On_Size_Does_Not_Break_The_Stream()
+	{
+		TestLogFiles.WriteHost(_paths.LogsDirectory, TestLogFiles.Stamp, TestLogFiles.HostLine("before", 1));
+		Subscribe(_reader.CurrentEnd());
+
+		TestLogFiles.AppendHost(_paths.LogsDirectory, TestLogFiles.Stamp, TestLogFiles.HostLine("last of the file", 2));
+		TestLogFiles.WriteHost(_paths.LogsDirectory,
+			$"{TestLogFiles.Stamp}_001",
+			TestLogFiles.HostLine("next file", 3),
+			TestLogFiles.HostLine("next file too", 4));
+
+		await Tick();
+		await Tick();
+		await Tick();
+
+		var delivered = Delivered().ToList();
+		Assert.Multiple(() =>
+		{
+			Assert.That(delivered, Does.Contain("last of the file"));
+			Assert.That(delivered, Does.Contain("next file"));
+			Assert.That(delivered, Does.Contain("next file too"));
+			Assert.That(delivered, Is.Unique);
+		});
+	}
+
+	[Test]
 	public async Task A_Stack_Trace_Arrives_Attached_To_Its_Entry()
 	{
 		TestLogFiles.WriteHost(_paths.LogsDirectory, TestLogFiles.Stamp, TestLogFiles.HostLine("first", 1));

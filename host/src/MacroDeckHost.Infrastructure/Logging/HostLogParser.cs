@@ -29,7 +29,21 @@ public static partial class HostLogParser
 		}
 
 		var candidate = fileName[FilePrefix.Length..^FileSuffix.Length];
-		if (!DateOnly.TryParseExact(candidate,
+		var day = candidate;
+		// The file sink names a file it rolled on size after its day plus a sequence: 20261117_001.
+		var separator = candidate.IndexOf('_', StringComparison.Ordinal);
+		if (separator >= 0)
+		{
+			var sequence = candidate[(separator + 1)..];
+			if (sequence.Length < 3 || !sequence.All(char.IsAsciiDigit))
+			{
+				return false;
+			}
+
+			day = candidate[..separator];
+		}
+
+		if (!DateOnly.TryParseExact(day,
 			"yyyyMMdd",
 			CultureInfo.InvariantCulture,
 			DateTimeStyles.None,

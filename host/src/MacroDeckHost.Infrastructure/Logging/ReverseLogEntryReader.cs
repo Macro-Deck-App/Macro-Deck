@@ -38,7 +38,7 @@ public sealed class ReverseLogEntryReader
 				startIndex = stamps.Count;
 				for (var i = 0; i < stamps.Count; i++)
 				{
-					if (string.CompareOrdinal(stamps[i], from.FileStamp) < 0)
+					if (LogFileStamp.Compare(stamps[i], from.FileStamp) < 0)
 					{
 						startIndex = i;
 						break;
