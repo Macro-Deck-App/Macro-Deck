@@ -13609,6 +13609,15 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Het volledige pad van het bestand. Het wordt aangemaakt als het niet bestaat; de map moet al bestaan.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Sjabloonvariabele vernieuwen</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Rendert een sjabloonvariabele opnieuw, bijvoorbeeld voor een nieuw willekeurig getal.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>De sjabloonvariabele die opnieuw wordt gerenderd. Variabelen die hem lezen, volgen zijn nieuwe waarde.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Er is geen variabele geselecteerd.</value>
   </data>
@@ -13632,6 +13641,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>De variabele heeft op dit moment geen waarde.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>De variabele is geen sjabloonvariabele.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Het bestand kon niet worden geschreven.</value>

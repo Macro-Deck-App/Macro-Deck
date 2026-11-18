@@ -13609,6 +13609,15 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>파일의 전체 경로입니다. 파일이 없으면 만들어지며, 폴더는 이미 있어야 합니다.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>템플릿 변수 새로 고침</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>템플릿 변수를 다시 렌더링합니다. 예를 들어 새 난수를 얻을 때 사용합니다.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>다시 렌더링할 템플릿 변수입니다. 이 변수를 읽는 변수도 새 값을 따릅니다.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>선택된 변수가 없습니다.</value>
   </data>
@@ -13632,6 +13641,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>변수에 현재 값이 없습니다.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>이 변수는 템플릿 변수가 아닙니다.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>파일을 쓸 수 없습니다.</value>

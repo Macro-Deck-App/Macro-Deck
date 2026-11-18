@@ -13609,6 +13609,15 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>文件的完整路径。文件不存在时会被创建；文件夹必须已经存在。</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>刷新模板变量</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>重新渲染模板变量，例如获取新的随机数。</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>要重新渲染的模板变量。读取它的变量会随其新值更新。</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>未选择变量。</value>
   </data>
@@ -13632,6 +13641,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>该变量目前没有值。</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>该变量不是模板变量。</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>无法写入文件。</value>

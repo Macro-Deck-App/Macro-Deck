@@ -13608,6 +13608,15 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Pełna ścieżka do pliku. Jeśli nie istnieje, zostanie utworzony; folder musi już istnieć.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Odśwież zmienną szablonową</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Ponownie renderuje zmienną szablonową, na przykład w celu uzyskania nowej liczby losowej.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Zmienna szablonowa do ponownego wyrenderowania. Zmienne, które ją odczytują, przyjmują jej nową wartość.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Nie wybrano żadnej zmiennej.</value>
   </data>
@@ -13631,6 +13640,9 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Zmienna nie ma teraz wartości.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Zmienna nie jest zmienną szablonową.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Nie udało się zapisać pliku.</value>

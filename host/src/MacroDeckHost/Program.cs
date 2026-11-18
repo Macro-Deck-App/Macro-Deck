@@ -318,6 +318,11 @@ public static class Program
 			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostVariableReader
 				= (name, variableContext, _)
 					=> Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, variableContext);
+			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostTemplateVariableRefresh
+				= (name, variableContext, _)
+					=> Application.Variables.Templates.HostTemplateVariableRefresher.RefreshAsync(scopeFactory,
+						name,
+						variableContext);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.

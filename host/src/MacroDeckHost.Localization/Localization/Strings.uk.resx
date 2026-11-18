@@ -13609,6 +13609,15 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Повний шлях до файлу. Файл буде створено, якщо його немає; папка має вже існувати.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Оновити змінну шаблону</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Повторно відтворює змінну шаблону, наприклад щоб отримати нове випадкове число.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Змінна шаблону для повторного відтворення. Змінні, які її читають, отримують її нове значення.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Змінну не вибрано.</value>
   </data>
@@ -13632,6 +13641,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Змінна наразі не має значення.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Змінна не є змінною шаблону.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Не вдалося записати файл.</value>

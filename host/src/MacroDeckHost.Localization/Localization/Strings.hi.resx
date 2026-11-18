@@ -13609,6 +13609,15 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>फ़ाइल का पूरा पथ। यदि फ़ाइल मौजूद नहीं है तो वह बनाई जाएगी; फ़ोल्डर पहले से मौजूद होना चाहिए।</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>टेम्पलेट वेरिएबल रीफ़्रेश करें</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>किसी टेम्पलेट वेरिएबल को फिर से रेंडर करता है, उदाहरण के लिए नई रैंडम संख्या पाने के लिए।</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>वह टेम्पलेट वेरिएबल जिसे फिर से रेंडर करना है। इसे पढ़ने वाले वेरिएबल इसकी नई वैल्यू अपनाते हैं।</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>कोई वेरिएबल चुना नहीं गया।</value>
   </data>
@@ -13632,6 +13641,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>वेरिएबल का अभी कोई मान नहीं है।</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>यह वेरिएबल टेम्पलेट वेरिएबल नहीं है।</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>फ़ाइल नहीं लिखी जा सकी।</value>

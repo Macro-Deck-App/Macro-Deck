@@ -13608,6 +13608,15 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Úplná cesta k souboru. Pokud neexistuje, vytvoří se; složka už musí existovat.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Obnovit šablonovou proměnnou</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Znovu vykreslí šablonovou proměnnou, například pro získání nového náhodného čísla.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Šablonová proměnná, která se znovu vykreslí. Proměnné, které ji čtou, převezmou její novou hodnotu.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Nebyla vybrána žádná proměnná.</value>
   </data>
@@ -13631,6 +13640,9 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Proměnná teď nemá žádnou hodnotu.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Proměnná není šablonová proměnná.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Soubor se nepodařilo zapsat.</value>

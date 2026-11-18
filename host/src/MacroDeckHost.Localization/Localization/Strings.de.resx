@@ -13606,6 +13606,15 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Der vollständige Pfad der Datei. Fehlt sie, wird sie angelegt; der Ordner muss bereits existieren.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Vorlagenvariable aktualisieren</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Rendert eine Vorlagenvariable erneut, zum Beispiel für eine neue Zufallszahl.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Die Vorlagenvariable, die erneut gerendert wird. Variablen, die sie lesen, folgen ihrem neuen Wert.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Es wurde keine Variable ausgewählt.</value>
   </data>
@@ -13629,6 +13638,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Die Variable hat gerade keinen Wert.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Die Variable ist keine Vorlagenvariable.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Die Datei konnte nicht geschrieben werden.</value>

@@ -9,6 +9,8 @@ public static class VariableOptionsSourceIds
 	public const string UserVariables = HostOptionsSources.UserVariables;
 
 	public const string EventVariables = "macrodeck.event-variables";
+
+	public const string TemplateVariables = "macrodeck.template-variables";
 }
 
 public static class MusicPlayerOptionsSourceIds

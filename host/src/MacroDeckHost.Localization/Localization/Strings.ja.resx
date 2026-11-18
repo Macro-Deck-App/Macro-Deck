@@ -13609,6 +13609,15 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>ファイルのフルパスです。ファイルが存在しない場合は作成されます。フォルダーは既に存在している必要があります。</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>テンプレート変数の更新</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>テンプレート変数を再レンダリングします。たとえば新しい乱数を取得する場合に使います。</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>再レンダリングするテンプレート変数です。この変数を読み取る変数も新しい値に従います。</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>変数が選択されていません。</value>
   </data>
@@ -13632,6 +13641,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>変数には現在値がありません。</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>この変数はテンプレート変数ではありません。</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>ファイルを書き込めませんでした。</value>

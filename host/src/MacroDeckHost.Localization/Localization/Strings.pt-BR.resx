@@ -13609,6 +13609,15 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>O caminho completo do arquivo. Ele é criado se não existir; a pasta precisa já existir.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Atualizar variável de modelo</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Renderiza novamente uma variável de modelo, por exemplo para obter um novo número aleatório.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>A variável de modelo a ser renderizada novamente. Variáveis que a leem acompanham o novo valor.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Nenhuma variável foi selecionada.</value>
   </data>
@@ -13632,6 +13641,9 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>A variável não tem valor no momento.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>A variável não é uma variável de modelo.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Não foi possível gravar o arquivo.</value>

@@ -13608,6 +13608,15 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Il percorso completo del file. Se non esiste viene creato; la cartella deve già esistere.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Aggiorna variabile modello</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Esegue di nuovo il rendering di una variabile modello, per esempio per ottenere un nuovo numero casuale.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>La variabile modello da elaborare di nuovo. Le variabili che la leggono seguono il suo nuovo valore.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Non è stata selezionata alcuna variabile.</value>
   </data>
@@ -13631,6 +13640,9 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>La variabile al momento non ha un valore.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>La variabile non è una variabile modello.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Impossibile scrivere il file.</value>
