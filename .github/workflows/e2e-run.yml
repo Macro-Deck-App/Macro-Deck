@@ -107,6 +107,11 @@ jobs:
           fi
           npx playwright test "${args[@]}"
 
+      # A test that passed only on its retry does not fail the job, so it is named here instead.
+      - name: Report flaky tests
+        if: always()
+        run: node ci/scripts/flaky-tests.mjs report e2e/test-results/results.json
+
       # Only the host and supervisor logs leave the run directory: the data directories hold key material.
       - name: Collect host logs
         if: always()

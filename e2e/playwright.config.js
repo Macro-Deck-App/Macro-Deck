@@ -10,11 +10,14 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers,
-  retries: 0,
+  // One retry in CI, so a flake no longer blocks a release; ci/scripts/flaky-tests.mjs reports every
+  // test that needed it, from results.json, and tracks them across main runs.
+  retries: process.env.CI ? 1 : 0,
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
+    ['json', { outputFile: 'test-results/results.json' }],
   ],
   use: {
     trace: 'retain-on-failure',

@@ -1,0 +1,45 @@
+# Keeps one open issue, "Flaky tests on main", listing every test that failed or needed a retry in CI runs
+# on main over the last two weeks, so flakes are fixed in order of how often they hit instead of rerun.
+name: Flaky tests
+
+on:
+  schedule:
+    - cron: "15 5 * * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Days of main CI runs to read
+        type: number
+        required: false
+        default: 14
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flaky-tests
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 30
+
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      issues: write
+
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '^22.22.3'
+
+      - name: Update the flaky tests issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DAYS: ${{ inputs.days || 14 }}
+        run: node ci/scripts/flaky-tests.mjs track --repo "$GITHUB_REPOSITORY" --branch main --days "$DAYS"
