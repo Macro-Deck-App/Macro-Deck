@@ -308,6 +308,8 @@ jobs:
   # it is out, nor skip publish-nuget, which gates on publish succeeding.
   publish-aur:
     name: Publish AUR packages
+    # Macro Deck is not in the AUR yet, so there is no package to push. Remove this to publish again.
+    if: false
     needs: publish
     permissions:
       contents: read
