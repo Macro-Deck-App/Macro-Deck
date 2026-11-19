@@ -1129,6 +1129,10 @@ Finder में Macro Deck को स्वयं Applications फ़ोल्�
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>दिखाएं</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: अपडेट {version} उपलब्ध है</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>{version} पर अपडेट करें</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@ Macro Deck उसके APT रिपॉज़िटरी से इंस्�
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck उसके APT रिपॉज़िटरी से इंस्टॉल किया गया था और apt द्वारा अपडेट होता है। sudo apt update &amp;&amp; sudo apt upgrade चलाएँ।</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} उपलब्ध है। नया क्या है देखने और अपडेट करने के लिए Macro Deck आइकन का मेनू खोलें।</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>अपडेट उपलब्ध है</value>
@@ -1171,11 +1179,6 @@ Macro Deck उसके APT रिपॉज़िटरी से इंस्�
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>अपडेट की जाँच नहीं हो सकी: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} उपलब्ध है।
-
-क्या आप इसे अभी डाउनलोड और इंस्टॉल करना चाहते हैं?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>डाउनलोड और इंस्टॉल करें</value>

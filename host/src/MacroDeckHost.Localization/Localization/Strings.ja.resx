@@ -1129,6 +1129,10 @@ Finder で Macro Deck を「アプリケーション」フォルダー（また�
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>表示</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: アップデート {version} があります</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>{version} に更新</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@ Macro Deck は APT リポジトリからインストールされています。�
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck は APT リポジトリからインストールされており、apt で更新されます。sudo apt update &amp;&amp; sudo apt upgrade を実行してください。</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} が利用可能です。Macro Deck アイコンのメニューを開いて、新機能を確認し、アップデートしてください。</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>更新があります</value>
@@ -1171,11 +1179,6 @@ Macro Deck は APT リポジトリからインストールされています。�
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>更新を確認できませんでした: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} が利用可能です。
-
-今すぐダウンロードしてインストールしますか？</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>ダウンロードしてインストール</value>

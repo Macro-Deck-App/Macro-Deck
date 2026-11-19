@@ -1129,6 +1129,10 @@
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Показать</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: доступно обновление {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>Обновить до {version}</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck установлен из репозитория APT и обновляется через apt. Выполните sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Доступна версия Macro Deck {version}. Откройте меню значка Macro Deck, чтобы узнать о новшествах и обновиться.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>Доступно обновление</value>
@@ -1171,11 +1179,6 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>Не удалось проверить обновления: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Доступна версия Macro Deck {version}.
-
-Скачать и установить её сейчас?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>Скачать и установить</value>

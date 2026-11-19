@@ -1130,6 +1130,10 @@ Zamknij aplikację korzystającą z tego portu (lub wciąż działający Macro D
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Pokaż</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: dostępna aktualizacja {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>Aktualizuj do {version}</value>
     <comment>[version:string]</comment>
@@ -1148,6 +1152,10 @@ Macro Deck został zainstalowany z repozytorium APT. Po opublikowaniu nowej wers
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck został zainstalowany z repozytorium APT i jest aktualizowany przez apt. Uruchom sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} jest dostępny. Nowości i aktualizacja są dostępne w menu ikony Macro Deck.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>Dostępna aktualizacja</value>
@@ -1172,11 +1180,6 @@ Macro Deck został zainstalowany z repozytorium APT. Po opublikowaniu nowej wers
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>Nie udało się sprawdzić dostępności aktualizacji: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} jest dostępny.
-
-Pobrać i zainstalować teraz?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>Pobierz i zainstaluj</value>
