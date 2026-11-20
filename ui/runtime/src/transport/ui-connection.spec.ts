@@ -159,6 +159,41 @@ describe('UiConnection', () => {
     connection.disconnect();
   });
 
+  it('dials again when the host never answers the registration', async () => {
+    const connection = build();
+    connection.connect();
+    await settle();
+    FakeWebSocket.instances[0].handshake();
+    await settle();
+
+    jasmine.clock().tick(10_000);
+    await settle();
+    expect(connection.state.get()).toBe('reconnecting');
+
+    jasmine.clock().tick(2000);
+    await settle();
+    expect(FakeWebSocket.instances.length).toBe(2);
+    connection.disconnect();
+  });
+
+  it('dials again when the host accepts the socket but never welcomes it', async () => {
+    const connection = build();
+    connection.connect();
+    await settle();
+    const silent = FakeWebSocket.instances[0];
+    silent.close = () => { silent.readyState = 2; };
+    silent.readyState = FakeWebSocket.OPEN;
+    if (silent.onopen) silent.onopen();
+
+    jasmine.clock().tick(15_000);
+    await settle();
+    jasmine.clock().tick(2000);
+    await settle();
+
+    expect(FakeWebSocket.instances.length).toBe(2);
+    connection.disconnect();
+  });
+
   it('goes reconnecting and dials again on a fixed interval after a drop', async () => {
     const connection = build();
     connection.connect();

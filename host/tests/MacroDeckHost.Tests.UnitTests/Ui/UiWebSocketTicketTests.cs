@@ -46,9 +46,9 @@ public sealed class UiWebSocketTicketTests
 			Assert.That(ticket.Value, Has.Length.EqualTo(43));
 			Assert.That(ticket.Value, Does.Match("^[A-Za-z0-9_-]+$"));
 		});
-		Assert.That(_tickets.TryRedeem(PublicContext("null"), ticket.Value, out var redeemed), Is.True);
+		Assert.That(_tickets.TryRedeem(PublicContext("null"), ticket.Value, out var redeemed, out _), Is.True);
 		Assert.That(redeemed.FindFirst(AuthDefaults.DeviceClaim)?.Value, Is.EqualTo("device-1"));
-		Assert.That(_tickets.TryRedeem(PublicContext("https://admin.example"), ticket.Value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(PublicContext("https://admin.example"), ticket.Value, out _, out _), Is.False);
 	}
 
 	[Test]
@@ -65,6 +65,7 @@ public sealed class UiWebSocketTicketTests
 					"proxy-two.example",
 					IPAddress.Parse("10.0.0.8")),
 				ticket.Value,
+				out _,
 				out _),
 			Is.True);
 	}
@@ -74,8 +75,8 @@ public sealed class UiWebSocketTicketTests
 	{
 		Assert.That(_tickets.TryCreate(PublicContext(null), Principal("device-1"), out var ticket), Is.True);
 
-		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out _), Is.False);
-		Assert.That(_tickets.TryRedeem(PublicContext(null), ticket.Value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out _, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(PublicContext(null), ticket.Value, out _, out _), Is.False);
 	}
 
 	[Test]
@@ -83,7 +84,7 @@ public sealed class UiWebSocketTicketTests
 	{
 		Assert.That(_tickets.TryCreate(DesktopSessionContext(), Principal("desktop"), out var ticket), Is.True);
 
-		Assert.That(_tickets.TryRedeem(DesktopSessionContext(), ticket.Value, out var redeemed), Is.True);
+		Assert.That(_tickets.TryRedeem(DesktopSessionContext(), ticket.Value, out var redeemed, out _), Is.True);
 		Assert.That(redeemed.FindFirst(AuthDefaults.DeviceClaim)?.Value, Is.EqualTo("desktop"));
 	}
 
@@ -92,20 +93,20 @@ public sealed class UiWebSocketTicketTests
 	{
 		Assert.That(_tickets.TryCreate(DesktopSessionContext(), Principal("desktop"), out var ticket), Is.True);
 
-		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out _, out _), Is.False);
 	}
 
 	[Test]
 	public void A_signed_in_caller_on_the_loopback_listener_gets_a_ticket_bound_to_that_listener()
 	{
 		Assert.That(_tickets.TryCreate(LoopbackContext(), Principal("device-1"), out var ticket), Is.True);
-		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out var redeemed), Is.True);
+		Assert.That(_tickets.TryRedeem(LoopbackContext(), ticket.Value, out var redeemed, out _), Is.True);
 		Assert.That(redeemed.FindFirst(AuthDefaults.ScopeClaim)?.Value, Is.EqualTo(AuthDefaults.ClientScope));
 
 		Assert.That(_tickets.TryCreate(LoopbackContext(), Principal("device-1"), out var second), Is.True);
-		Assert.That(_tickets.TryRedeem(PublicContext(null), second.Value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(PublicContext(null), second.Value, out _, out _), Is.False);
 		Assert.That(_tickets.TryCreate(LoopbackContext(), Principal("device-1"), out var third), Is.True);
-		Assert.That(_tickets.TryRedeem(DesktopSessionContext(), third.Value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(DesktopSessionContext(), third.Value, out _, out _), Is.False);
 	}
 
 	[Test]
@@ -114,7 +115,31 @@ public sealed class UiWebSocketTicketTests
 		Assert.That(_tickets.TryCreate(PublicContext(null), Principal("device-1"), out var ticket), Is.True);
 		_time.Advance(TimeSpan.FromSeconds(15));
 
-		Assert.That(_tickets.TryRedeem(PublicContext(null), ticket.Value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(PublicContext(null), ticket.Value, out _, out _), Is.False);
+	}
+
+	[Test]
+	public void A_refused_ticket_reports_why_it_was_refused()
+	{
+		Assert.That(_tickets.TryCreate(PublicContext(null), Principal("device-1"), out var wrongListener), Is.True);
+		Assert.That(_tickets.TryCreate(PublicContext(null), Principal("device-1"), out var expired), Is.True);
+		Assert.That(_tickets.TryCreate(PublicContext(null), Principal("device-1"), out var used), Is.True);
+		Assert.That(_tickets.TryRedeem(PublicContext(null), used.Value, out _, out var accepted), Is.True);
+
+		_tickets.TryRedeem(LoopbackContext(), wrongListener.Value, out _, out var mismatch);
+		_tickets.TryRedeem(PublicContext(null), used.Value, out _, out var reused);
+		_tickets.TryRedeem(PublicContext(null), "not-a-ticket", out _, out var malformed);
+		_time.Advance(TimeSpan.FromSeconds(15));
+		_tickets.TryRedeem(PublicContext(null), expired.Value, out _, out var late);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(accepted, Is.EqualTo(UiWebSocketTicketRefusal.None));
+			Assert.That(mismatch, Is.EqualTo(UiWebSocketTicketRefusal.ListenerMismatch));
+			Assert.That(reused, Is.EqualTo(UiWebSocketTicketRefusal.UnknownOrUsed));
+			Assert.That(malformed, Is.EqualTo(UiWebSocketTicketRefusal.Malformed));
+			Assert.That(late, Is.EqualTo(UiWebSocketTicketRefusal.Expired));
+		});
 	}
 
 	[Test]
@@ -135,7 +160,7 @@ public sealed class UiWebSocketTicketTests
 	[TestCase("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")]
 	public void Malformed_ticket_is_rejected_without_throwing(string value)
 	{
-		Assert.That(_tickets.TryRedeem(PublicContext(null), value, out _), Is.False);
+		Assert.That(_tickets.TryRedeem(PublicContext(null), value, out _, out _), Is.False);
 	}
 
 	private static ClaimsPrincipal Principal(string deviceId)

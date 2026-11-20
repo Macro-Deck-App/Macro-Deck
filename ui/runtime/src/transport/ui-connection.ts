@@ -12,6 +12,8 @@ const UI_PROTOCOL_VERSION = 1;
 
 const RECONNECT_DELAY_MS = 2000;
 
+const REGISTER_TIMEOUT_MS = 10_000;
+
 export interface UiConnectionOptions {
   http: HttpClient;
   baseUrl(): string;
@@ -125,7 +127,7 @@ export class UiConnection {
       const registration = this.options.features
         ? [this.options.clientId, [...this.options.features]]
         : [this.options.clientId];
-      await transport.request<void>('RegisterClient', registration);
+      await transport.request<void>('RegisterClient', registration, { timeoutMs: REGISTER_TIMEOUT_MS });
       if (!this.isCurrent(attempt)) {
         this.abandon(transport);
         return;

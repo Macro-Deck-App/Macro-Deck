@@ -18387,6 +18387,9 @@ Télécharge-le depuis le site web de Macro Deck et mets à jour l'AppImage, le 
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Fermeture de Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck met plus de temps que d'habitude à démarrer. Si rien ne change, redémarre Macro Deck et consulte les fichiers journaux.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build de développement</value>
   </data>

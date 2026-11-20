@@ -8163,6 +8163,7 @@ export const AppStrings = {
 			PreparingUpdate: 'macrodeck.app:Shell.Splash.PreparingUpdate',
 			StepBackup: 'macrodeck.app:Shell.Splash.StepBackup',
 			StepInstall: 'macrodeck.app:Shell.Splash.StepInstall',
+			StillConnecting: 'macrodeck.app:Shell.Splash.StillConnecting',
 			Stopping: 'macrodeck.app:Shell.Splash.Stopping',
 		},
 		Statusbar: {
@@ -16888,6 +16889,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Shell.Splash.PreparingUpdate': 'Preparing update…',
 	'macrodeck.app:Shell.Splash.StepBackup': 'Back up your data',
 	'macrodeck.app:Shell.Splash.StepInstall': 'Install the update',
+	'macrodeck.app:Shell.Splash.StillConnecting': 'Macro Deck is taking longer than usual to start. If this does not change, restart Macro Deck and check its log files.',
 	'macrodeck.app:Shell.Splash.Stopping': 'Stopping Macro Deck…',
 	'macrodeck.app:Shell.Statusbar.DevelopmentBuild': 'Development Build',
 	'macrodeck.app:Store.BackingUp': 'Backing up',

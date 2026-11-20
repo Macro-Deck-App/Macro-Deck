@@ -1720,19 +1720,6 @@ public sealed class PluginInstaller : IPluginInstaller
 
 	private static void MakeEntrypointsExecutable(PluginManifest manifest, string extractDirectory)
 	{
-		if (OperatingSystem.IsWindows())
-		{
-			return;
-		}
-
-		const UnixFileMode executableMode = UnixFileMode.UserRead
-			| UnixFileMode.UserWrite
-			| UnixFileMode.UserExecute
-			| UnixFileMode.GroupRead
-			| UnixFileMode.GroupExecute
-			| UnixFileMode.OtherRead
-			| UnixFileMode.OtherExecute;
-
 		foreach (var rid in PluginRuntimeIdentifiers.CandidatesFor(PluginRuntimeIdentifiers.Current))
 		{
 			if (!manifest.Entrypoints.TryGetValue(rid, out var entrypoint))
@@ -1740,21 +1727,8 @@ public sealed class PluginInstaller : IPluginInstaller
 				continue;
 			}
 
-			var path = Path.Combine(extractDirectory,
-				entrypoint.Executable.Replace('/', Path.DirectorySeparatorChar));
-
-			if (!File.Exists(path))
-			{
-				continue;
-			}
-
-			try
-			{
-				File.SetUnixFileMode(path, executableMode);
-			}
-			catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-			{
-			}
+			PluginEntrypointPermissions.MakeExecutable(Path.Combine(extractDirectory,
+				entrypoint.Executable.Replace('/', Path.DirectorySeparatorChar)));
 		}
 	}
 

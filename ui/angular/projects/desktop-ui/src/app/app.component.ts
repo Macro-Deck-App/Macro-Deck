@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, OnInit, OnDestroy, ChangeDetection
 
 import { RouterOutlet } from '@angular/router';
 import { AppStrings, GetBackupStatusResponse } from '@macro-deck/runtime';
-import { ApiService, AuthService, KeyRingService, LoginFormComponent, LocalizationService, NotificationDialogHostComponent, ThemeService, ToastHostComponent, VariableService, UiModalHostComponent } from '@shared';
+import { ApiService, AuthService, ConnectionDiagnosticsService, KeyRingService, LoginFormComponent, LocalizationService, NotificationDialogHostComponent, ThemeService, ToastHostComponent, VariableService, UiModalHostComponent } from '@shared';
 import { PluginPairingDialogComponent } from './components/overlay/plugin-pairing-dialog/plugin-pairing-dialog.component';
 import { PluginAdbConsentDialogComponent } from './components/overlay/plugin-adb-consent-dialog/plugin-adb-consent-dialog.component';
 import { PluginCompanionConsentDialogComponent } from './components/overlay/plugin-companion-consent-dialog/plugin-companion-consent-dialog.component';
@@ -61,7 +61,7 @@ const BOOTSTRAP_RETRY_MS = 1500;
           }
         }
         @default {
-          <app-splash [status]="splashStatus()"></app-splash>
+          <app-splash [status]="splashStatus()" [details]="splashDetails()"></app-splash>
         }
       }
     }
@@ -115,6 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
   protected readonly migrationWizard = inject(MigrationWizardService);
   private readonly updateService = inject(UpdateService);
   private readonly backupService = inject(BackupService);
+  private readonly connectionDiagnostics = inject(ConnectionDiagnosticsService);
   private readonly updateBackupId = signal<string | null>(null);
   private staleBackupId: string | null | undefined;
   private bootstrapRetryTimer: ReturnType<typeof setTimeout> | null = null;
@@ -149,6 +150,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.installingUpdate() && this.updateBackupRunning() ? backupPercent(this.updateBackup()) : null);
 
   protected readonly splashDetails = computed<string[]>(() => {
+    if (!this.hostSession.stopping() && !this.installingUpdate() && this.connectionDiagnostics.stalled()) {
+      return [this.localizationService.translateKey(AppStrings.Shell.Splash.StillConnecting)];
+    }
     if (this.hostSession.stopping() || !this.installingUpdate() || !this.updateBackupRunning()) {
       return [];
     }
@@ -207,6 +211,21 @@ export class AppComponent implements OnInit, OnDestroy {
     effect(() => {
       if (this.auth.state() === 'authenticated') {
         this.api.connect();
+      }
+    });
+
+    effect(() => {
+      const state = this.auth.state();
+      this.connectionDiagnostics.setActive(!this.keyRing.locked()
+        && state !== 'setupRequired'
+        && state !== 'loggedOut'
+        && !this.installingUpdate()
+        && !this.hostSession.stopping());
+    });
+
+    effect(() => {
+      if (this.isConnected()) {
+        this.connectionDiagnostics.connectedNow();
       }
     });
 
