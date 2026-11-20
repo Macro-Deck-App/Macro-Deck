@@ -481,6 +481,66 @@ public class VariableTemplateRendererFilterTests
 	}
 
 	[Test]
+	public void Text_variable_holding_a_number_works_with_every_math_filter()
+	{
+		var (_, renderer, context) = Build(Var("reading", VariableType.Text, "12.6"),
+			Var("negative", VariableType.Text, "-3.5"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(renderer.Render("{{ vars.reading | round: 0 }}", context), Is.EqualTo("13"));
+			Assert.That(renderer.Render("{{ vars.reading | round }}", context), Is.EqualTo("13"));
+			Assert.That(renderer.Render("{{ vars.reading | floor }}", context), Is.EqualTo("12"));
+			Assert.That(renderer.Render("{{ vars.reading | ceil }}", context), Is.EqualTo("13"));
+			Assert.That(renderer.Render("{{ vars.negative | abs }}", context), Is.EqualTo("3.5"));
+			Assert.That(renderer.Render("{{ vars.reading | plus: 1 }}", context), Is.EqualTo("13.6"));
+			Assert.That(renderer.Render("{{ vars.reading | minus: 1 }}", context), Is.EqualTo("11.6"));
+			Assert.That(renderer.Render("{{ vars.reading | times: 2 }}", context), Is.EqualTo("25.2"));
+			Assert.That(renderer.Render("{{ vars.reading | divided_by: 2 }}", context), Is.EqualTo("6"));
+			Assert.That(renderer.Render("{{ vars.reading | divided_by: 2.0 }}", context), Is.EqualTo("6.3"));
+			Assert.That(renderer.Render("{{ vars.reading | modulo: 5 }}", context), Is.EqualTo("2.6"));
+			Assert.That(renderer.Render("{{ vars.reading | floor | plus: 1 }}", context), Is.EqualTo("13"));
+			Assert.That(renderer.Render("{% assign whole = vars.reading | floor %}{{ whole }}", context),
+				Is.EqualTo("12"));
+			Assert.That(renderer.Render("{{ \"12.6\" | round: 0 }}", context), Is.EqualTo("13"));
+		});
+	}
+
+	[Test]
+	public void Text_variable_holding_no_number_passes_through_math_filters_unchanged()
+	{
+		var (_, renderer, context) = Build(Var("timecode", VariableType.Text, "00:01:23.456"),
+			Var("word", VariableType.Text, "abc"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(renderer.Render("{{ vars.timecode | round: 0 }}", context), Is.EqualTo("00:01:23.456"));
+			Assert.That(renderer.Render("{{ vars.timecode | floor }}", context), Is.EqualTo("00:01:23.456"));
+			Assert.That(renderer.Render("{{ vars.word | plus: 1 }}", context), Is.EqualTo("abc"));
+			Assert.That(renderer.Render("{{ vars.word | times: 2 }}", context), Is.EqualTo("abc"));
+			Assert.That(renderer.Render("{{ vars.word | abs }}", context), Is.EqualTo("abc"));
+		});
+	}
+
+	[Test]
+	public void Text_variable_holding_a_number_works_as_a_math_filter_argument()
+	{
+		var (_, renderer, context) = Build(Var("count", VariableType.Numeric, "10"),
+			Var("step", VariableType.Text, "2"));
+
+		Assert.That(renderer.Render("{{ vars.count | plus: vars.step }}", context), Is.EqualTo("12"));
+	}
+
+	[Test]
+	public void A_template_that_reassigns_a_math_filter_does_not_affect_other_templates()
+	{
+		var (_, renderer, context) = Build(Var("reading", VariableType.Text, "12.6"));
+
+		Assert.Catch(() => renderer.Render("{% assign math.round = 7 %}", context));
+		Assert.That(renderer.Render("{{ vars.reading | round: 0 }}", context), Is.EqualTo("13"));
+	}
+
+	[Test]
 	public void Numeric_variable_still_renders_with_its_declared_decimal_places()
 	{
 		var (_, renderer, context) = Build(Var("price", VariableType.Numeric, "12", 2),
