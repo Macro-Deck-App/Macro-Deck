@@ -1129,6 +1129,10 @@ Tutup aplikasi yang memakai port tersebut (atau Macro Deck yang masih berjalan) 
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Tampilkan</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: pembaruan {version} tersedia</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>Perbarui ke {version}</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@ Macro Deck dipasang dari repositori APT-nya, jadi jalankan sudo apt update &amp;
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck dipasang dari repositori APT-nya dan diperbarui oleh apt. Jalankan sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} tersedia. Buka menu ikon Macro Deck untuk melihat yang baru dan memperbarui.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>Pembaruan tersedia</value>
@@ -1171,11 +1179,6 @@ Macro Deck dipasang dari repositori APT-nya, jadi jalankan sudo apt update &amp;
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>Tidak dapat memeriksa pembaruan: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} tersedia.
-
-Apakah Anda ingin mengunduh dan memasangnya sekarang?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>Unduh &amp; pasang</value>

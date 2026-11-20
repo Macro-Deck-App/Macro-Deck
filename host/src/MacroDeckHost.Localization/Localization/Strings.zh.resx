@@ -1129,6 +1129,10 @@
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>显示</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck：可更新到 {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>更新到 {version}</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck 是通过 APT 软件源安装的，由 apt 负责更新。请运行 sudo apt update &amp;&amp; sudo apt upgrade。</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} 现已推出。打开 Macro Deck 图标的菜单，查看新功能并更新。</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>有可用更新</value>
@@ -1171,11 +1179,6 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>无法检查更新：{error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} 现已推出。
-
-要现在下载并安装吗？</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>下载并安装</value>

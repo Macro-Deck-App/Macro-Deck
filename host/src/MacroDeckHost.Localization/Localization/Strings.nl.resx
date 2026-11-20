@@ -1129,6 +1129,10 @@ Sluit de app die de poort gebruikt (of een Macro Deck dat nog draait) en probeer
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Tonen</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: update {version} beschikbaar</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>Bijwerken naar {version}</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@ Macro Deck is geïnstalleerd vanuit de APT-repository, dus voer sudo apt update 
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck is geïnstalleerd vanuit de APT-repository en wordt bijgewerkt door apt. Voer sudo apt update &amp;&amp; sudo apt upgrade uit.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} is beschikbaar. Open het menu van het Macro Deck-pictogram om te zien wat er nieuw is en bij te werken.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>Update beschikbaar</value>
@@ -1171,11 +1179,6 @@ Macro Deck is geïnstalleerd vanuit de APT-repository, dus voer sudo apt update 
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>Updates konden niet worden gecontroleerd: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} is beschikbaar.
-
-Wil je het nu downloaden en installeren?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>Downloaden en installeren</value>

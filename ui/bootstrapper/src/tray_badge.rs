@@ -4,7 +4,7 @@ pub enum BadgeStyle {
     Colour,
 }
 
-const DISC_DIAMETER: f64 = 0.42;
+const DISC_DIAMETER: f64 = 0.5;
 const GAP: f64 = 1.0 / 16.0;
 const SUBSAMPLES: u32 = 4;
 const BADGE_GREEN: [u8; 3] = [0x16, 0xa3, 0x4a];
@@ -39,6 +39,16 @@ impl Badge {
             centre_y: radius,
             radius,
             outer_radius: radius + size * GAP,
+        }
+    }
+
+    fn filling(size: u32) -> Self {
+        let radius = f64::from(size) / 2.0;
+        Self {
+            centre_x: radius,
+            centre_y: radius,
+            radius,
+            outer_radius: radius,
         }
     }
 
@@ -82,8 +92,22 @@ fn region_colour(region: Region, style: BadgeStyle, original: [u8; 4]) -> [u8; 4
 }
 
 pub fn with_update_badge(rgba: &[u8], width: u32, height: u32, style: BadgeStyle) -> Vec<u8> {
+    paint(rgba, width, height, &Badge::for_icon(width, height), style)
+}
+
+pub fn badge_image(size: u32) -> Vec<u8> {
+    let transparent = vec![0; (size * size * 4) as usize];
+    paint(
+        &transparent,
+        size,
+        size,
+        &Badge::filling(size),
+        BadgeStyle::Colour,
+    )
+}
+
+fn paint(rgba: &[u8], width: u32, height: u32, badge: &Badge, style: BadgeStyle) -> Vec<u8> {
     let mut output = rgba.to_vec();
-    let badge = Badge::for_icon(width, height);
     let step = 1.0 / f64::from(SUBSAMPLES);
     let samples = f64::from(SUBSAMPLES * SUBSAMPLES);
 
@@ -150,14 +174,14 @@ mod tests {
     }
 
     #[test]
-    fn the_badge_stays_inside_the_top_right_quadrant() {
+    fn the_badge_stays_in_the_top_right_corner() {
         for size in SIZES {
             for style in [BadgeStyle::Template, BadgeStyle::Colour] {
                 let base = opaque_square(size, [10, 20, 30, 255]);
                 let badged = with_update_badge(&base, size, size, style);
                 for y in 0..size {
                     for x in 0..size {
-                        if x < size / 2 || y >= size / 2 {
+                        if x * 5 < size * 2 || y * 5 >= size * 3 {
                             assert_eq!(pixel(&badged, size, x, y), pixel(&base, size, x, y));
                         }
                     }
@@ -165,6 +189,38 @@ mod tests {
                 assert_ne!(badged, base);
             }
         }
+    }
+
+    #[test]
+    fn the_badge_is_at_least_half_as_wide_as_the_icon() {
+        for size in SIZES {
+            let base = opaque_square(size, [10, 20, 30, 255]);
+            let badged = with_update_badge(&base, size, size, BadgeStyle::Colour);
+            let (_, cy) = disc_centre(size);
+            let left_edge = size - size / 2 + 1;
+            assert_eq!(
+                pixel(&badged, size, left_edge, cy),
+                [BADGE_GREEN[0], BADGE_GREEN[1], BADGE_GREEN[2], 255]
+            );
+        }
+    }
+
+    #[test]
+    fn the_menu_badge_is_the_green_disc_with_a_white_arrow_on_transparency() {
+        let size = 32;
+        let image = badge_image(size);
+        assert_eq!(image.len(), (size * size * 4) as usize);
+        for (x, y) in [(0, 0), (size - 1, 0), (0, size - 1), (size - 1, size - 1)] {
+            assert_eq!(pixel(&image, size, x, y)[3], 0);
+        }
+        assert_eq!(
+            pixel(&image, size, size / 2, size / 2),
+            [255, 255, 255, 255]
+        );
+        assert_eq!(
+            pixel(&image, size, size * 4 / 5, size * 2 / 3),
+            [BADGE_GREEN[0], BADGE_GREEN[1], BADGE_GREEN[2], 255]
+        );
     }
 
     #[test]

@@ -1129,6 +1129,10 @@
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>إظهار</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: التحديث {version} متاح</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>التحديث إلى {version}</value>
     <comment>[version:string]</comment>
@@ -1147,6 +1151,10 @@
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>تم تثبيت Macro Deck من مستودع APT الخاص به، ويحدّثه apt. شغّل sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>الإصدار {version} من Macro Deck متاح. افتح قائمة أيقونة Macro Deck لمعرفة الجديد والتحديث.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>تحديث متاح</value>
@@ -1171,11 +1179,6 @@
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>تعذّر التحقق من التحديثات: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>الإصدار {version} من Macro Deck متاح.
-
-هل تريد تنزيله وتثبيته الآن؟</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>تنزيل وتثبيت</value>

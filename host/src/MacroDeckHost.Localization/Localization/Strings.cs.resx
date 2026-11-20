@@ -1130,6 +1130,10 @@ Zavřete aplikaci používající tento port (nebo stále běžící Macro Deck)
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Zobrazit</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: k dispozici aktualizace {version}</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>Aktualizovat na {version}</value>
     <comment>[version:string]</comment>
@@ -1148,6 +1152,10 @@ Macro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v 
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck byl nainstalován z repozitáře APT a aktualizuje se přes apt. Spusťte sudo apt update &amp;&amp; sudo apt upgrade.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} je k dispozici. Novinky a aktualizace jsou v nabídce ikony Macro Deck.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>K dispozici je aktualizace</value>
@@ -1172,11 +1180,6 @@ Macro Deck byl nainstalován z repozitáře APT. Po zveřejnění nové verze v 
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>Nepodařilo se zkontrolovat aktualizace: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} je k dispozici.
-
-Stáhnout a nainstalovat nyní?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>Stáhnout a nainstalovat</value>
