@@ -18758,6 +18758,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>正在停止 Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck 启动时间比平时长。如果情况没有变化，请重启 Macro Deck 并查看日志文件。</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>开发构建</value>
   </data>

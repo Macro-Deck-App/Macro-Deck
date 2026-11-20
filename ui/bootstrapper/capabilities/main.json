@@ -11,6 +11,7 @@
     "core:window:allow-start-dragging",
     "allow-get-host-port",
     "allow-reauthenticate",
+    "allow-report-ui-connection",
     "allow-get-shell-info",
     "allow-get-cursor-position",
     "allow-open-external",

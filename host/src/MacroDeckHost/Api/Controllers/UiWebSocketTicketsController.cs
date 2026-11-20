@@ -3,6 +3,8 @@ using MacroDeckHost.Auth;
 using MacroDeckHost.Ui;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost.Api.Controllers;
 
@@ -11,6 +13,8 @@ namespace MacroDeckHost.Api.Controllers;
 [Authorize(Policy = AuthPolicies.ClientAccess)]
 public sealed class UiWebSocketTicketsController(IUiWebSocketTickets tickets) : ControllerBase
 {
+	private static readonly ILogger _logger = Log.ForContext<UiWebSocketTicketsController>();
+
 	[HttpPost]
 	public IActionResult Create([FromBody] JsonElement request)
 	{
@@ -18,11 +22,16 @@ public sealed class UiWebSocketTicketsController(IUiWebSocketTickets tickets) : 
 			|| request.ValueKind != JsonValueKind.Object
 			|| request.EnumerateObject().Any())
 		{
+			_logger.Warning("Refused a UI WebSocket ticket on port {Port}: the protocol header or the body is invalid",
+				HttpContext.Connection.LocalPort);
 			return BadRequest();
 		}
 
 		if (!tickets.TryCreate(HttpContext, User, out var ticket))
 		{
+			_logger.Warning(
+				"Refused a UI WebSocket ticket on port {Port}: the connection is not classified or has too many open tickets",
+				HttpContext.Connection.LocalPort);
 			return Forbid();
 		}
 

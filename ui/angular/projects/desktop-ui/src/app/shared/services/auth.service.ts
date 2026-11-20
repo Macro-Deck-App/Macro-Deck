@@ -11,6 +11,7 @@ import {
   TransportError,
 } from '@macro-deck/runtime';
 import { LocalizationService } from '../localization';
+import { ConnectionDiagnosticsService } from './connection-diagnostics.service';
 import { CROSS_TAB_LOCK_ENVIRONMENT, runExclusively } from './cross-tab-lock';
 import { DeviceIdentityService } from './device-identity.service';
 import { shellBridge } from '../../util/shell-bridge';
@@ -94,6 +95,7 @@ export class AuthService implements OnDestroy {
   private readonly lockEnvironment = inject(CROSS_TAB_LOCK_ENVIRONMENT);
   private readonly enrollmentEnvironment = inject(ENROLLMENT_URL_ENVIRONMENT);
   private readonly reauthEnvironment = inject(LOOPBACK_REAUTH_ENVIRONMENT);
+  private readonly diagnostics = inject(ConnectionDiagnosticsService);
 
   private readonly _state = signal<AuthState>('unknown');
   private readonly _scope = signal<AuthScope | null>(null);
@@ -147,9 +149,11 @@ export class AuthService implements OnDestroy {
 
   async bootstrap(): Promise<void> {
     this.subscribeToDeviceSessionRevoked();
+    this.diagnostics.attempting('auth');
     try {
       const baseUrl = await this.api.resolveBaseUrl();
       if (!baseUrl) {
+        this.diagnostics.fail('host-url', 'the host address is not known yet');
         return;
       }
 
@@ -189,10 +193,12 @@ export class AuthService implements OnDestroy {
         // host mid-restart - is not a host that has refused the session. Leaving the state at
         // `'unknown'` keeps `AppComponent.bootstrapWithRetry()` retrying behind the splash instead of
         // falling through to a login form the still-good refresh cookie should never have to see.
+        this.diagnostics.fail('auth', 'the session refresh did not get an answer');
         return;
       }
       this._state.set(outcome === 'ok' ? 'authenticated' : 'loggedOut');
-    } catch {
+    } catch (error) {
+      this.diagnostics.fail('auth', error);
     }
   }
 

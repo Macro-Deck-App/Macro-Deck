@@ -18758,6 +18758,9 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck durduruluyor…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck'in başlaması her zamankinden uzun sürüyor. Bir şey değişmezse Macro Deck'i yeniden başlatın ve günlük dosyalarını kontrol edin.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Geliştirme derlemesi</value>
   </data>

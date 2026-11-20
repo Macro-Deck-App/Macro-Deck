@@ -12,12 +12,27 @@ public enum UiWebSocketListener
 	SignedInLoopback
 }
 
+public enum UiWebSocketTicketRefusal
+{
+	None,
+	Malformed,
+	UnclassifiedConnection,
+	UnknownOrUsed,
+	Expired,
+	ListenerMismatch
+}
+
 public sealed record UiWebSocketTicket(string Value);
 
 public interface IUiWebSocketTickets
 {
 	bool TryCreate(HttpContext context, ClaimsPrincipal principal, out UiWebSocketTicket ticket);
-	bool TryRedeem(HttpContext context, string? value, out ClaimsPrincipal principal);
+
+	bool TryRedeem(
+		HttpContext context,
+		string? value,
+		out ClaimsPrincipal principal,
+		out UiWebSocketTicketRefusal refusal);
 }
 
 public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocketTickets
@@ -56,11 +71,22 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 		return true;
 	}
 
-	public bool TryRedeem(HttpContext context, string? value, out ClaimsPrincipal principal)
+	public bool TryRedeem(
+		HttpContext context,
+		string? value,
+		out ClaimsPrincipal principal,
+		out UiWebSocketTicketRefusal refusal)
 	{
 		principal = new ClaimsPrincipal();
-		if (value is not { Length: 43 } || !TryClassify(context, out var listener))
+		if (value is not { Length: 43 })
 		{
+			refusal = UiWebSocketTicketRefusal.Malformed;
+			return false;
+		}
+
+		if (!TryClassify(context, out var listener))
+		{
+			refusal = UiWebSocketTicketRefusal.UnclassifiedConnection;
 			return false;
 		}
 
@@ -71,11 +97,13 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 		}
 		catch (FormatException)
 		{
+			refusal = UiWebSocketTicketRefusal.Malformed;
 			return false;
 		}
 
 		if (bytes.Length != 32)
 		{
+			refusal = UiWebSocketTicketRefusal.Malformed;
 			return false;
 		}
 
@@ -85,16 +113,25 @@ public sealed class UiWebSocketTickets(TimeProvider timeProvider) : IUiWebSocket
 		{
 			if (!_tickets.Remove(hash, out entry))
 			{
+				refusal = UiWebSocketTicketRefusal.UnknownOrUsed;
 				return false;
 			}
 		}
 
-		if (entry.ExpiresAt <= timeProvider.GetUtcNow() || entry.Listener != listener)
+		if (entry.ExpiresAt <= timeProvider.GetUtcNow())
 		{
+			refusal = UiWebSocketTicketRefusal.Expired;
+			return false;
+		}
+
+		if (entry.Listener != listener)
+		{
+			refusal = UiWebSocketTicketRefusal.ListenerMismatch;
 			return false;
 		}
 
 		principal = entry.Principal;
+		refusal = UiWebSocketTicketRefusal.None;
 		return true;
 	}
 

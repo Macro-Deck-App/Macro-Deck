@@ -1,15 +1,18 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '../transport/api.service';
+import { ConnectionDiagnosticsService } from './connection-diagnostics.service';
 import { GetKeyRingStatusResponse, TransportError, UnlockKeyRingResponse } from '@macro-deck/runtime';
 
 @Injectable({ providedIn: 'root' })
 export class KeyRingService {
   private readonly api = inject(ApiService);
+  private readonly diagnostics = inject(ConnectionDiagnosticsService);
 
   readonly status = signal<GetKeyRingStatusResponse | null>(null);
   readonly locked = signal(false);
 
   async probe(): Promise<void> {
+    this.diagnostics.attempting('key-ring');
     try {
       // Mirrors AuthService.bootstrap(): this runs before anything else has resolved the host's base
       // URL, so without this call every request would go out relative to the UI's own origin instead
@@ -17,6 +20,7 @@ export class KeyRingService {
       // environment that stubs HOST_URL_RESOLVER to simulate "not reachable yet".
       const baseUrl = await this.api.resolveBaseUrl();
       if (!baseUrl) {
+        this.diagnostics.fail('host-url', 'the host address is not known yet');
         return;
       }
 
@@ -34,6 +38,7 @@ export class KeyRingService {
       }
 
       console.warn('Failed to probe the key ring status (the host may not be reachable yet):', error);
+      this.diagnostics.fail('key-ring', error);
     }
   }
 

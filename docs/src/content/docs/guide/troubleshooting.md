@@ -82,6 +82,20 @@ If another program already uses the port, Macro Deck starts without it and devic
 **Settings > Network** then says the port could not be used. Choose a different port there and
 restart Macro Deck.
 
+## Macro Deck stays on Connecting to Macro Deck
+
+The Macro Deck window shows **Connecting to Macro Deck…** while it reaches the part of Macro Deck that
+runs in the background. When that takes longer than about 15 seconds, the window adds
+**Macro Deck is taking longer than usual to start.**
+
+1. Quit Macro Deck completely and start it again.
+2. If the window stays on that message, open the [logs](#where-to-find-the-logs):
+   - `bootstrapper-<date>.log` contains lines starting with
+     `[window] the UI cannot reach the host`. Each one names the step that failed and why.
+   - `host-<date>.log` contains `Refused a UI WebSocket` when Macro Deck turned the window's
+     connection down.
+3. Ask for help as described at the top of this page and attach both files.
+
 ## A device says the deck needs an update
 
 After Macro Deck is updated, connected devices load the new version of the deck by themselves. If a device

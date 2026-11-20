@@ -18762,6 +18762,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Stopping Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck is taking longer than usual to start. If this does not change, restart Macro Deck and check its log files.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Development Build</value>
   </data>

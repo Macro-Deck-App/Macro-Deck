@@ -6,6 +6,11 @@ export { HOST_URL_RESOLVER } from './transport/host-url';
 export { ActionExecutionService, formatRunDuration } from './services/action-execution.service';
 export { AUTH_REQUIRED_SCOPE, AuthService, type AuthState } from './services/auth.service';
 export {
+  type ConnectionReport,
+  ConnectionDiagnosticsService,
+  type ConnectionStep,
+} from './services/connection-diagnostics.service';
+export {
   DECK_DRAG_THRESHOLD_PX,
   type DeckDragMode,
   DeckDragService,

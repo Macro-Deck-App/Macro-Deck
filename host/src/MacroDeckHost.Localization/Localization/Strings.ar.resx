@@ -18758,6 +18758,9 @@
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>جارٍ إيقاف Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>يستغرق بدء تشغيل Macro Deck وقتًا أطول من المعتاد. إذا لم يتغير شيء، فأعد تشغيل Macro Deck وتحقق من ملفات السجل.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>نسخة تطوير</value>
   </data>

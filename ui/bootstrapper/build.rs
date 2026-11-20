@@ -36,6 +36,7 @@ fn main() {
         tauri_build::AppManifest::new().commands(&[
             "get_host_port",
             "reauthenticate",
+            "report_ui_connection",
             "get_shell_info",
             "get_cursor_position",
             "open_external",

@@ -350,6 +350,78 @@ describe('ApiService', () => {
       }
     });
 
+    describe('when the host stops answering mid-connect', () => {
+      let reports: { step: string }[];
+
+      beforeEach(() => {
+        jasmine.clock().install();
+        reports = [];
+        (window as { macroDeckShell?: unknown }).macroDeckShell = {
+          reportUiConnection: (report: { step: string }) => {
+            reports.push(report);
+            return Promise.resolve();
+          },
+        };
+      });
+
+      afterEach(() => {
+        jasmine.clock().uninstall();
+        delete (window as { macroDeckShell?: unknown }).macroDeckShell;
+      });
+
+      it('gives up on a ticket request that never answers, reports it and tries again', async () => {
+        const fetchSpy = spyOn(window, 'fetch').and.callFake((_: RequestInfo | URL, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => init?.signal?.addEventListener('abort', () =>
+            reject(new DOMException('signal is aborted without reason', 'AbortError')))));
+        const api = configure(async () => 'http://localhost:5191');
+        api.connect();
+        await flushMicrotasks();
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+        jasmine.clock().tick(10_000);
+        await flushMicrotasks();
+        expect(api.connectionState).toBe('reconnecting');
+        expect(reports.map(report => report.step)).toEqual(['ticket']);
+        expect((reports[0] as { reason?: string }).reason).toContain('timed out');
+
+        jasmine.clock().tick(2000);
+        await flushMicrotasks();
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+        api.disconnect();
+      });
+
+      it('gives up on a registration that never answers, reports it and dials again', async () => {
+        acceptTickets();
+        const api = configure(async () => 'http://localhost:5191');
+        api.connect();
+        await flushMicrotasks();
+        FakeWebSocket.instances[0].open();
+        FakeWebSocket.instances[0].receive({ protocolVersion: 1, kind: 'welcome' });
+        await flushMicrotasks();
+
+        jasmine.clock().tick(10_000);
+        await flushMicrotasks();
+        expect(reports.map(report => report.step)).toEqual(['register']);
+
+        jasmine.clock().tick(2000);
+        await flushMicrotasks();
+        expect(FakeWebSocket.instances.length).toBe(2);
+        api.disconnect();
+      });
+
+      it('fails a key ring probe that never answers without passing it off as a host answer', async () => {
+        spyOn(window, 'fetch').and.callFake(() => new Promise<Response>(() => undefined));
+        const api = configure(async () => 'http://localhost:5191');
+        await api.resolveBaseUrl();
+
+        const probe = api.getKeyRingStatus();
+        jasmine.clock().tick(10_000);
+
+        await expectAsync(probe).toBeRejectedWithError(/key-ring\/status timed out/);
+        await probe.catch(error => expect(error instanceof TransportError).toBeFalse());
+      });
+    });
+
     it('declares that it can open links when it registers', async () => {
       acceptTickets();
       const api = configure(async () => 'http://localhost:5191');

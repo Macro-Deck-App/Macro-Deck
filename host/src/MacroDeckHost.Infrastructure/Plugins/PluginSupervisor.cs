@@ -19,6 +19,7 @@ using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Plugins.Trust;
 using MacroDeckHost.Application.Services;
+using MacroDeckHost.Infrastructure.Plugins.Installation;
 using MacroDeckHost.Localization;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -1562,7 +1563,11 @@ public sealed class PluginSupervisor : IPluginSupervisor
 		var launchExecutablePath = executablePath;
 		var launchArguments = candidateEntrypoint.Arguments ?? [];
 
-		if (candidateEntrypoint.Runtime?.Kind == PluginEntrypointRuntimeKind.FrameworkDependent)
+		if (candidateEntrypoint.Runtime?.Kind != PluginEntrypointRuntimeKind.FrameworkDependent)
+		{
+			PluginEntrypointPermissions.MakeExecutable(executablePath);
+		}
+		else
 		{
 			var manifestRequirement
 				= DotnetFrameworkRequirement.ForNetCoreApp(candidateEntrypoint.Runtime.DotnetVersion!);

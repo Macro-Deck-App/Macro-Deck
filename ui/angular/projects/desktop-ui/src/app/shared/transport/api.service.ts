@@ -1,5 +1,6 @@
 import { Injectable, Signal, inject, signal } from '@angular/core';
 import { BehaviorSubject, Subject, Observable, filter, map } from 'rxjs';
+import { ConnectionDiagnosticsService, ConnectionStep } from '../services/connection-diagnostics.service';
 import { HOST_URL_RESOLVER } from './host-url';
 import {
   ActiveNotificationsEvent,
@@ -476,6 +477,7 @@ interface IncomingNotification<T = unknown> {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly resolveHostUrl = inject(HOST_URL_RESOLVER);
+  private readonly diagnostics = inject(ConnectionDiagnosticsService);
 
   private readonly _connectionState = new BehaviorSubject<ConnectionState>('disconnected');
   private readonly _connectionStateSignal = signal<ConnectionState>('disconnected');
@@ -487,6 +489,8 @@ export class ApiService {
   private baseUrl = '';
 
   private static readonly RECONNECT_DELAY_MS = 2000;
+  private static readonly STARTUP_REQUEST_TIMEOUT_MS = 10_000;
+  private static readonly REGISTER_TIMEOUT_MS = 10_000;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   // Whether the app wants a connection at all: connect() sets it, disconnect() clears it. Gates the
   // retry loop so an intentional teardown (logout) is never resurrected by a late failure.
@@ -584,12 +588,15 @@ export class ApiService {
 
   private async establishConnection(attempt: number): Promise<void> {
     let attemptedConnection: WebSocketTransport | null = null;
+    let step: ConnectionStep = 'host-url';
     try {
+      this.diagnostics.attempting(step);
       const baseUrl = await this.resolveHostUrl();
       if (!this.isCurrentAttempt(attempt)) {
         return;
       }
       if (!baseUrl) {
+        this.diagnostics.fail(step, 'the host address is not known yet');
         this.setConnectionState(this.wantsConnection ? 'reconnecting' : 'disconnected');
         this.scheduleReconnect();
         return;
@@ -597,6 +604,8 @@ export class ApiService {
 
       this.baseUrl = baseUrl;
 
+      step = 'ticket';
+      this.diagnostics.attempting(step);
       const ticket = await this.mintUiSocketTicket();
       if (!this.isCurrentAttempt(attempt)) {
         return;
@@ -612,13 +621,21 @@ export class ApiService {
       attemptedConnection = connection;
       connection.onAny((method, params) => this._notifications.next({ method, params }));
       this.connection = connection;
+      step = 'socket';
+      this.diagnostics.attempting(step);
       await connection.connect(`${ApiService.websocketUrl(baseUrl)}${UI_SOCKET_PATH}?ticket=${encodeURIComponent(ticket)}`);
       if (!this.isCurrentAttempt(attempt)) {
         if (this.connection === connection) this.connection = null;
         connection.disconnect();
         return;
       }
-      await connection.request<void>('RegisterClient', [this._clientId, [UI_CLIENT_FEATURE_OPEN_URL]]);
+      step = 'register';
+      this.diagnostics.attempting(step);
+      await connection.request<void>(
+        'RegisterClient',
+        [this._clientId, [UI_CLIENT_FEATURE_OPEN_URL]],
+        { timeoutMs: ApiService.REGISTER_TIMEOUT_MS }
+      );
       if (!this.isCurrentAttempt(attempt)) {
         if (this.connection === connection) this.connection = null;
         connection.disconnect();
@@ -634,6 +651,7 @@ export class ApiService {
       if (!this.isCurrentAttempt(attempt)) {
         return;
       }
+      this.diagnostics.fail(step, err);
       this.setConnectionState(this.wantsConnection ? 'reconnecting' : 'disconnected');
       if (ApiService.isUnauthorizedError(err) && this.connectionUnauthorizedHandler) {
         this.connectionUnauthorizedHandler();
@@ -663,7 +681,7 @@ export class ApiService {
         'X-MacroDeck-Ui-Protocol': '1',
       },
       body: '{}',
-    });
+    }, false, ApiService.STARTUP_REQUEST_TIMEOUT_MS);
     if (!response.ok) {
       throw new Error(`UI WebSocket ticket request failed: ${response.status}`);
     }
@@ -748,17 +766,28 @@ export class ApiService {
     return this._connectionState.value;
   }
 
-  private async http<T>(method: string, path: string, body?: unknown, skipAuthRetry = false): Promise<T> {
+  private async http<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    skipAuthRetry = false,
+    timeoutMs?: number,
+  ): Promise<T> {
     const response = await this.fetchWithAuth(path, {
       method,
       headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
       body: body !== undefined ? JSON.stringify(body) : undefined,
-    }, skipAuthRetry);
+    }, skipAuthRetry, timeoutMs);
     return ApiService.parseResponse<T>(response);
   }
 
-  private async fetchWithAuth(path: string, init: RequestInit, skipAuthRetry = false): Promise<Response> {
-    const response = await fetch(`${this.baseUrl}${path}`, this.buildRequestInit(init));
+  private async fetchWithAuth(
+    path: string,
+    init: RequestInit,
+    skipAuthRetry = false,
+    timeoutMs?: number,
+  ): Promise<Response> {
+    const response = await this.fetchBounded(path, init, timeoutMs);
     if (skipAuthRetry) {
       return response;
     }
@@ -777,7 +806,35 @@ export class ApiService {
       return response;
     }
 
-    return fetch(`${this.baseUrl}${path}`, this.buildRequestInit(init));
+    return this.fetchBounded(path, init, timeoutMs);
+  }
+
+  private async fetchBounded(path: string, init: RequestInit, timeoutMs: number | undefined): Promise<Response> {
+    const url = `${this.baseUrl}${path}`;
+    if (timeoutMs === undefined || typeof AbortController === 'undefined') {
+      return fetch(url, this.buildRequestInit(init));
+    }
+
+    // Not a TransportError: a host that never answered has told us nothing, unlike one that refused.
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`${init.method ?? 'GET'} ${path} timed out after ${timeoutMs} ms.`));
+        controller.abort();
+      }, timeoutMs);
+    });
+    let response: Response;
+    try {
+      response = await Promise.race([
+        fetch(url, this.buildRequestInit({ ...init, signal: controller.signal })),
+        deadline,
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+    setTimeout(() => controller.abort(), timeoutMs);
+    return response;
   }
 
   private buildRequestInit(init: RequestInit): RequestInit {
@@ -824,7 +881,7 @@ export class ApiService {
   }
 
   getAuthStatus(): Promise<AuthStatusResponse> {
-    return this.http('GET', '/api/auth/status', undefined, true);
+    return this.http('GET', '/api/auth/status', undefined, true, ApiService.STARTUP_REQUEST_TIMEOUT_MS);
   }
 
   setupUser(request: SetupRequest): Promise<void> {
@@ -2588,7 +2645,7 @@ export class ApiService {
   // restriction the backup endpoints below use, because a locked host answers 503 to the endpoints
   // that would otherwise authenticate a remote caller.
   getKeyRingStatus(): Promise<GetKeyRingStatusResponse> {
-    return this.http('GET', '/api/key-ring/status');
+    return this.http('GET', '/api/key-ring/status', undefined, false, ApiService.STARTUP_REQUEST_TIMEOUT_MS);
   }
 
   unlockKeyRing(request: UnlockKeyRingRequest): Promise<UnlockKeyRingResponse> {
