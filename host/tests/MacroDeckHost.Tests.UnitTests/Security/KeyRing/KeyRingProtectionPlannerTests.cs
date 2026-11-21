@@ -24,17 +24,21 @@ public class KeyRingProtectionPlannerTests
 	private static readonly KekStoreIdentity _identity = new("Macro Deck Tests", "key-ring-kek");
 
 	private string _keysDirectory = null!;
+	private ManualResetEventSlim _readGate = null!;
 
 	[SetUp]
 	public void SetUp()
 	{
 		_keysDirectory = Path.Combine(Path.GetTempPath(), "macro-deck-tests", Guid.NewGuid().ToString("N"), "keys");
 		Directory.CreateDirectory(_keysDirectory);
+		_readGate = new ManualResetEventSlim(false);
 	}
 
 	[TearDown]
 	public void TearDown()
 	{
+		_readGate.Set();
+		_readGate.Dispose();
 		var root = Directory.GetParent(_keysDirectory)!.FullName;
 		if (Directory.Exists(root))
 		{
@@ -172,9 +176,70 @@ public class KeyRingProtectionPlannerTests
 		});
 	}
 
+	[Test]
+	public async Task A_keystore_that_does_not_answer_in_time_locks_the_ring_and_keeps_the_read_going()
+	{
+		var kek = KeyRingKeyDerivation.CreateKek();
+		WrapRing(kek);
+		WriteEscrow(kek);
+		var store = new FakeKekStore { ReadGate = _readGate };
+		store.Seed(kek);
+
+		var plan = KeyRingProtectionPlanner.Resolve(_keysDirectory,
+			store,
+			_identity,
+			true,
+			false,
+			TimeSpan.FromMilliseconds(100),
+			out var lateRead);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plan.Mode, Is.EqualTo(KeyRingProtectionMode.Locked));
+			Assert.That(plan.LockReason, Is.EqualTo(KeyRingLockReason.KeystoreUnavailable));
+			Assert.That(plan.RingKekId, Is.EqualTo(KeyRingKeyDerivation.DeriveKekId(kek)));
+			Assert.That(lateRead, Is.Not.Null);
+		});
+
+		_readGate.Set();
+		var late = await lateRead!.WaitAsync(TimeSpan.FromSeconds(10));
+
+		Assert.That(late.Kek, Is.EqualTo(kek));
+	}
+
+	[Test]
+	public void A_keystore_that_answers_within_the_deadline_resolves_as_before()
+	{
+		var kek = KeyRingKeyDerivation.CreateKek();
+		WrapRing(kek);
+		var store = new FakeKekStore();
+		store.Seed(kek);
+
+		var plan = KeyRingProtectionPlanner.Resolve(_keysDirectory,
+			store,
+			_identity,
+			true,
+			false,
+			TimeSpan.FromSeconds(10),
+			out var lateRead);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(plan.Mode, Is.EqualTo(KeyRingProtectionMode.Protected));
+			Assert.That(plan.Kek, Is.EqualTo(kek));
+			Assert.That(lateRead, Is.Null);
+		});
+	}
+
 	private KeyRingProtectionPlan Resolve(FakeKekStore store, bool recoveryKeyExported, bool portable = false)
 	{
-		return KeyRingProtectionPlanner.Resolve(_keysDirectory, store, _identity, recoveryKeyExported, portable);
+		return KeyRingProtectionPlanner.Resolve(_keysDirectory,
+			store,
+			_identity,
+			recoveryKeyExported,
+			portable,
+			TimeSpan.FromSeconds(10),
+			out _);
 	}
 
 	private void WrapRing(byte[] kek)

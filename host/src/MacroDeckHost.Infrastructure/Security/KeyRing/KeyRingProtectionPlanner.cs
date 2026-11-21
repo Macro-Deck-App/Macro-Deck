@@ -28,8 +28,11 @@ public static class KeyRingProtectionPlanner
 		IKekStore store,
 		KekStoreIdentity identity,
 		bool recoveryKeyExported,
-		bool portable)
+		bool portable,
+		TimeSpan readDeadline,
+		out Task<KekStoreReadResult>? lateRead)
 	{
+		lateRead = null;
 		var availability = store.Availability;
 		var states = KeyRingFileInspector.InspectDirectory(keysDirectory);
 		var wrapped = states.Where(state => state.Protection == KeyRingFileProtection.KeyEncryptionKey).ToList();
@@ -54,7 +57,17 @@ public static class KeyRingProtectionPlanner
 			return Locked(store, availability, KeyRingLockReason.KeystoreEntryStale, ringKekId);
 		}
 
-		var read = store.Read(identity);
+		// A locked Secret Service collection answers a lookup with a password prompt and waits for it, so
+		// an unanswered prompt would keep the host from ever listening. Past the deadline it starts locked.
+		var pending = Task.Run(() => store.Read(identity));
+		if (!pending.Wait(readDeadline))
+		{
+			lateRead = pending;
+
+			return Locked(store, availability, KeyRingLockReason.KeystoreUnavailable, ringKekId);
+		}
+
+		var read = pending.GetAwaiter().GetResult();
 
 		switch (read.Status)
 		{

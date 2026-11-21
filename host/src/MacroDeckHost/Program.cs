@@ -30,6 +30,13 @@ namespace MacroDeckHost;
 
 public static class Program
 {
+	// Well inside the bootstrapper's first readiness window, which would otherwise end the host and
+	// raise a fresh keystore prompt on every restart attempt.
+	private static readonly TimeSpan _keystoreReadDeadline = TimeSpan.FromSeconds(15);
+
+	// Used once after a restart that a late keystore answer caused, still inside that readiness window.
+	private static readonly TimeSpan _keystoreReadDeadlineAfterLateAnswer = TimeSpan.FromSeconds(45);
+
 	public static void Main(string[] args)
 	{
 		var commandLine = HostCommandLine.Parse(args);
@@ -372,7 +379,23 @@ public static class Program
 			DateTimeStyles.RoundtripKind,
 			out _);
 
-		var plan = KeyRingProtectionPlanner.Resolve(paths.KeysDirectory, store, identity, exported, portable);
+		var lateAnswerMarker = KeyRingLateKeystoreAnswerService.MarkerPath(installationId);
+		var restartedAfterLateAnswer = KeyRingLateKeystoreAnswerService.ConsumeMarker(lateAnswerMarker);
+		var deadline = restartedAfterLateAnswer ? _keystoreReadDeadlineAfterLateAnswer : _keystoreReadDeadline;
+		var plan = KeyRingProtectionPlanner.Resolve(paths.KeysDirectory,
+			store,
+			identity,
+			exported,
+			portable,
+			deadline,
+			out var lateKeystoreRead);
+		if (lateKeystoreRead is not null)
+		{
+			Log.Warning("The {Backend} keystore did not answer within {Seconds} s, most likely because it is "
+				+ "locked and waiting for its password; starting locked",
+				store.Backend,
+				deadline.TotalSeconds);
+		}
 
 		string? scratchKeys = null;
 		if (plan.Mode == KeyRingProtectionMode.Locked)
@@ -396,7 +419,15 @@ public static class Program
 			KeyRingStartupState.KekHolder.Set(plan.Kek);
 		}
 
-		KeyRingStartupState.Set(plan, KeyRingStartupState.KekHolder, store, identity, portable, scratchKeys);
+		KeyRingStartupState.Set(plan,
+			KeyRingStartupState.KekHolder,
+			store,
+			identity,
+			portable,
+			scratchKeys,
+			lateKeystoreRead,
+			lateAnswerMarker,
+			restartedAfterLateAnswer);
 
 		return plan;
 	}
