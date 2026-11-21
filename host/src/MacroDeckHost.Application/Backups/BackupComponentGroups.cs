@@ -19,6 +19,8 @@ public sealed record BackupComponentGroupDefinition(
 
 public static class BackupComponentGroups
 {
+	private const string StoreInstallationRecordsPath = "store/installations.json";
+
 	/// <summary>
 	/// Paths under the data root that are never archived. Derived state that the host rebuilds, plus the
 	/// backup directories themselves - archiving those would nest a second full installation, key ring
@@ -88,7 +90,7 @@ public static class BackupComponentGroups
 				BackupComponentGroup.Plugins,
 				BackupComponentGroup.Variables
 			],
-			[Dir("data/profiles")],
+			[Dir("data/profiles"), File(StoreInstallationRecordsPath)],
 			[]),
 		new(BackupComponentGroup.Automations,
 			[BackupComponentGroup.Scripts, BackupComponentGroup.Integrations, BackupComponentGroup.Variables],
@@ -125,7 +127,20 @@ public static class BackupComponentGroups
 		"connect."
 	];
 
-	public static readonly IReadOnlyList<string> KeptWhenMissingFromArchive = ["keys/host-identity.key"];
+	public static readonly IReadOnlyList<string> KeptWhenMissingFromArchive =
+	[
+		"keys/host-identity.key",
+		StoreInstallationRecordsPath
+	];
+
+	// The Store's records describe icon packs, plugins and profile templates. A restore that leaves any of
+	// them out keeps the current records, so they never describe one installation's packs with another's.
+	private static readonly IReadOnlyList<BackupComponentGroup> _storeInstallationRecordTargets =
+	[
+		BackupComponentGroup.Icons,
+		BackupComponentGroup.Plugins,
+		BackupComponentGroup.Profiles
+	];
 
 	public static IReadOnlyList<BackupComponentGroup> AllIds => [.. All.Select(definition => definition.Id)];
 
@@ -148,6 +163,17 @@ public static class BackupComponentGroups
 	public static bool IsRestorablePreferenceKey(string key)
 	{
 		return !PreferenceKeyDenyPrefixes.Any(prefix => key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+	}
+
+	public static bool IsRestoredWith(string relativePath, IReadOnlyCollection<BackupComponentGroup> selected)
+	{
+		if (Owner(relativePath) is not { } owner || !selected.Contains(owner))
+		{
+			return false;
+		}
+
+		return !Matches(File(StoreInstallationRecordsPath), relativePath)
+			|| _storeInstallationRecordTargets.All(selected.Contains);
 	}
 
 	public static BackupComponentGroup? Owner(string relativePath)

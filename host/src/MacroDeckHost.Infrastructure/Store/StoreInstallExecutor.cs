@@ -13,6 +13,7 @@ using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Reviews;
 using MacroDeckHost.Application.Store.Testing;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
@@ -437,9 +438,10 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 			_tracker.Transition(operationId, StoreOperationState.Installing);
 
 			var existingRecord = _installations.Find(StoreExtensionKind.IconPack, entry.Id);
-			var existingPack = existingRecord is { TargetIds.Count: > 0 }
-				? _iconPackCache.GetPackById(existingRecord.TargetIds[0])
-				: null;
+			var existingPack = (existingRecord is { TargetIds.Count: > 0 }
+					? _iconPackCache.GetPackById(existingRecord.TargetIds[0])
+					: null)
+				?? StampedPack(entry.Id);
 
 			using var scope = _scopeFactory.CreateScope();
 			var restoreService = scope.ServiceProvider.GetRequiredService<IIconPackRestoreService>();
@@ -498,6 +500,16 @@ public sealed class StoreInstallExecutor : IStoreInstallExecutor
 		{
 			DeleteStagingDirectory(operationId);
 		}
+	}
+
+	// After a reinstall already duplicated a restored pack, the oldest stamped one is the original buttons use.
+	private IconPackEntity? StampedPack(string packageId)
+	{
+		return _iconPackCache.GetAllPacks()
+			.Where(pack => pack.SourceType == IconPackSourceType.ExtensionStore
+				&& string.Equals(pack.SourceId, packageId, StringComparison.OrdinalIgnoreCase))
+			.OrderBy(pack => pack.CreatedAt)
+			.FirstOrDefault();
 	}
 
 	private async Task ExecuteProfileTemplate(

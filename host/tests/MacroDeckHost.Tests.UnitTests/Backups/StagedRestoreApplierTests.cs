@@ -15,6 +15,13 @@ namespace MacroDeckHost.Tests.UnitTests.Backups;
 [TestFixture]
 public class StagedRestoreApplierTests
 {
+	private static readonly BackupComponentGroup[] _storeRecordTargets =
+	[
+		BackupComponentGroup.Icons,
+		BackupComponentGroup.Plugins,
+		BackupComponentGroup.Profiles
+	];
+
 	private TestPaths _paths = null!;
 
 	[SetUp]
@@ -190,6 +197,48 @@ public class StagedRestoreApplierTests
 			Assert.That(Read("keys/host-identity.key"),
 				Is.EqualTo("current-identity"),
 				"an archive from before the identity key existed must not unpair every device");
+		});
+	}
+
+	[Test]
+	public void A_restore_of_icons_plugins_and_profiles_brings_back_the_Store_installation_records()
+	{
+		Write("store/installations.json", "current-records");
+		Stage(_storeRecordTargets, ("store/installations.json", "restored-records"));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.That(Read("store/installations.json"), Is.EqualTo("restored-records"));
+	}
+
+	[Test]
+	public void An_archive_without_Store_installation_records_keeps_the_current_ones()
+	{
+		Write("store/installations.json", "current-records");
+		Stage(_storeRecordTargets, ("data/profiles/office.json", "from-backup"));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.That(Read("store/installations.json"), Is.EqualTo("current-records"));
+	}
+
+	[TestCase(BackupComponentGroup.Icons)]
+	[TestCase(BackupComponentGroup.Plugins)]
+	public void A_restore_that_leaves_out_what_the_Store_records_describe_keeps_the_current_records(
+		BackupComponentGroup clearedGroup)
+	{
+		Write("store/installations.json", "current-records");
+		Write("data/profiles/office.json", "local-edit");
+		Stage([.. _storeRecordTargets.Where(group => group != clearedGroup)],
+			("store/installations.json", "restored-records"),
+			("data/profiles/office.json", "from-backup"));
+
+		StagedRestoreApplier.ApplyPending(_paths);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Read("store/installations.json"), Is.EqualTo("current-records"));
+			Assert.That(Read("data/profiles/office.json"), Is.EqualTo("from-backup"));
 		});
 	}
 
