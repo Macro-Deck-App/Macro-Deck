@@ -269,7 +269,7 @@ public static class StagedRestoreApplier
 	{
 		var selected = document.Components.ToHashSet();
 
-		return document.Files.Where(file => selected.Contains(file.Component));
+		return document.Files.Where(file => BackupComponentGroups.IsRestoredWith(file.RelativePath, selected));
 	}
 
 	private static void ApplyTables(IMacroDeckPaths paths, PendingRestoreDocument document)
@@ -448,8 +448,7 @@ public static class StagedRestoreApplier
 				continue;
 			}
 
-			var owner = BackupComponentGroups.Owner(relative);
-			if (owner is not null && selected.Contains(owner.Value))
+			if (BackupComponentGroups.IsRestoredWith(relative, selected))
 			{
 				yield return relative;
 			}

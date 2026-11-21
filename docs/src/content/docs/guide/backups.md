@@ -64,6 +64,13 @@ key, so devices have to be paired again after restoring it.
 Imported fonts belong to **Icons, icon packs and fonts**. Restoring that group from a backup made before
 Macro Deck could import fonts removes the fonts you imported since.
 
+What you installed from the Store is restored when you restore **Icons, icon packs and fonts**, **Plugins**
+and **Profiles and decks** together, so icon packs from the Store come back as Store packs. If you clear one
+of them, Macro Deck keeps what this installation knows about its Store installs. An icon pack that comes back
+as an ordinary icon pack, for example on a new installation from a backup made before Macro Deck 3.0.5,
+becomes the Store pack again when you install it from the Store again: it keeps its icons on your buttons,
+and no second pack is added.
+
 The restore is applied the next time Macro Deck starts. The installed app restarts on its own. Before that,
 Macro Deck checks the backup you chose (step 1 of 2) and then makes a backup marked **Safety backup** (step 2
 of 2), so you can go back.

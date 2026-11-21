@@ -18388,6 +18388,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck बंद हो रहा है…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck को शुरू होने में सामान्य से अधिक समय लग रहा है। अगर कुछ नहीं बदलता है, तो Macro Deck को फिर से शुरू करें और लॉग फ़ाइलें देखें।</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>डेवलपमेंट बिल्ड</value>
   </data>

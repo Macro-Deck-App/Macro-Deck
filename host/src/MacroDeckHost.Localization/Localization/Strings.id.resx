@@ -18388,6 +18388,9 @@ Unduh dari situs web Macro Deck dan perbarui AppImage, DEB, atau RPM yang Anda p
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Menghentikan Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck memerlukan waktu lebih lama dari biasanya untuk dimulai. Jika tidak ada perubahan, mulai ulang Macro Deck dan periksa file log.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build pengembangan</value>
   </data>

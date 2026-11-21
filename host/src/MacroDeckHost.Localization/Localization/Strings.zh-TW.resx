@@ -18388,6 +18388,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>正在停止 Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck 啟動時間比平常久。如果情況沒有改變，請重新啟動 Macro Deck 並查看記錄檔。</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>開發版本</value>
   </data>

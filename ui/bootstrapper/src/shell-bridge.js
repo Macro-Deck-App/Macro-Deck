@@ -78,6 +78,9 @@
     reauthenticate: function () {
       return invoke('reauthenticate');
     },
+    reportUiConnection: function (report) {
+      return invoke('report_ui_connection', { report: report });
+    },
     getCursorPosition: function () {
       return invoke('get_cursor_position');
     },

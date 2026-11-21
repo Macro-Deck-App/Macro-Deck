@@ -18388,6 +18388,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck を停止しています…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck の起動にいつもより時間がかかっています。状況が変わらない場合は、Macro Deck を再起動してログ ファイルを確認してください。</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>開発ビルド</value>
   </data>

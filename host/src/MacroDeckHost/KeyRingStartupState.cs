@@ -23,6 +23,13 @@ public static class KeyRingStartupState
 
 	public static bool Portable { get; private set; }
 
+	public static Task<KekStoreReadResult>? LateKeystoreRead { get; private set; }
+
+	public static string LateAnswerMarkerPath { get; private set; } =
+		KeyRingLateKeystoreAnswerService.MarkerPath(Guid.Empty);
+
+	public static bool RestartedAfterLateAnswer { get; private set; }
+
 	/// <summary>
 	/// Where a locked host points Data Protection instead of the real key ring, so that nothing it does
 	/// can create, rotate or overwrite a key file it cannot read.
@@ -37,7 +44,10 @@ public static class KeyRingStartupState
 		IKekStore store,
 		KekStoreIdentity identity,
 		bool portable,
-		string? scratchKeysDirectory)
+		string? scratchKeysDirectory,
+		Task<KekStoreReadResult>? lateKeystoreRead = null,
+		string? lateAnswerMarkerPath = null,
+		bool restartedAfterLateAnswer = false)
 	{
 		Plan = plan;
 		KekHolder = holder;
@@ -45,8 +55,10 @@ public static class KeyRingStartupState
 		_identity = identity;
 		Portable = portable;
 		ScratchKeysDirectory = scratchKeysDirectory;
+		LateKeystoreRead = lateKeystoreRead;
+		LateAnswerMarkerPath = lateAnswerMarkerPath ?? KeyRingLateKeystoreAnswerService.MarkerPath(Guid.Empty);
+		RestartedAfterLateAnswer = restartedAfterLateAnswer;
 	}
-
 
 	private static KeyRingProtectionPlan Unresolved()
 	{

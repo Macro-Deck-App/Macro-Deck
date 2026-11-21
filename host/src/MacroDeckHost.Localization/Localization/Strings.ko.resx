@@ -18388,6 +18388,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck 중지 중…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck 시작이 평소보다 오래 걸리고 있습니다. 상황이 바뀌지 않으면 Macro Deck을 다시 시작하고 로그 파일을 확인하세요.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>개발 빌드</value>
   </data>
