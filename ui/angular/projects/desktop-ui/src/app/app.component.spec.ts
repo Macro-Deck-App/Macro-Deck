@@ -10,6 +10,7 @@ import {
   ApiService,
   AuthService,
   AuthState,
+  ConnectionDiagnosticsService,
   ConnectionState,
   FolderService,
   KeyRingService,
@@ -152,6 +153,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
   const INSTALL_FAILED_DEFAULT = 'Couldn\'t install the update. Please try again.';
   const CONNECTING = 'Connecting to Macro Deck…';
   const STOPPING = 'Stopping Macro Deck…';
+  const STILL_CONNECTING = 'Macro Deck is taking longer than usual to start.';
 
   let backupFake: { operation: WritableSignal<GetBackupStatusResponse | null>; cancelOperation: jasmine.Spy };
   let connection: WritableSignal<ConnectionState>;
@@ -198,6 +200,7 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
       [AppStrings.Settings.Update.InstallFailed]: INSTALL_FAILED_DEFAULT,
       [AppStrings.WebClient.Connecting]: CONNECTING,
       [AppStrings.Shell.Splash.Stopping]: STOPPING,
+      [AppStrings.Shell.Splash.StillConnecting]: STILL_CONNECTING,
       [AppStrings.Shell.Splash.CreatingBackup]: 'Creating a backup…',
       [AppStrings.Shell.Splash.CreatingBackupProgress]: 'Creating a backup… {percent}%',
       [AppStrings.Shell.Splash.InstallingUpdate]: 'Installing the update…',
@@ -313,6 +316,56 @@ describe('AppComponent (desktop-ui) - splash status during an update install (is
   function statusText(fixture: ReturnType<typeof TestBed.createComponent<AppComponent>>): string | null {
     return fixture.nativeElement.querySelector('app-splash .status .status-message')?.textContent ?? null;
   }
+
+  it('tells the user it is taking longer while the host never answered the first probes', async () => {
+    const fixture = await createFixture('unknown', 'disconnected');
+
+    TestBed.inject(ConnectionDiagnosticsService).stalled.set(true);
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(CONNECTING);
+    expect(details(fixture)).toEqual([STILL_CONNECTING]);
+  });
+
+  it('tells the user it is taking longer while the first WebSocket connect keeps failing', async () => {
+    const fixture = await createFixture('authenticated', 'reconnecting');
+    expect(details(fixture)).toEqual([]);
+
+    TestBed.inject(ConnectionDiagnosticsService).stalled.set(true);
+    await settle(fixture);
+
+    expect(details(fixture)).toEqual([STILL_CONNECTING]);
+  });
+
+  it('never counts the first-run setup as a slow start', async () => {
+    const reports: unknown[] = [];
+    setShell({ reportUiConnection: (report: unknown) => { reports.push(report); return Promise.resolve(); } });
+    jasmine.clock().install();
+    try {
+      const fixture = await createFixture('setupRequired', 'disconnected');
+      const diagnostics = TestBed.inject(ConnectionDiagnosticsService);
+
+      diagnostics.attempting('auth');
+      jasmine.clock().tick(60_000);
+      await settle(fixture);
+
+      expect(diagnostics.stalled()).toBeFalse();
+      expect(reports).toEqual([]);
+    } finally {
+      jasmine.clock().uninstall();
+    }
+  });
+
+  it('keeps the update install splash free of the taking-longer line', async () => {
+    installingShell();
+    const fixture = await createFixture('authenticated', 'reconnecting');
+
+    TestBed.inject(ConnectionDiagnosticsService).stalled.set(true);
+    await settle(fixture);
+
+    expect(statusText(fixture)).toBe(PREPARING_UPDATE);
+    expect(details(fixture)).not.toContain(STILL_CONNECTING);
+  });
 
   it('A3: authenticated + reconnecting + installing shows the preparing-update message', async () => {
     setShell({

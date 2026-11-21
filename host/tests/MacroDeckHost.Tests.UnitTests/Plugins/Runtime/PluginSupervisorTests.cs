@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.Versioning;
 using MacroDeck.Plugin.Packaging.Manifest;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Events;
@@ -200,6 +201,37 @@ internal sealed class PluginSupervisorTests
 	private void HostPortNotPublishedYet()
 	{
 		_listenerState = new HostListenerState(PublicEndpointSet.HttpOnly(50000), false);
+	}
+
+	[Test]
+	[Platform(Exclude = "Win", Reason = "Unix file modes")]
+	[UnsupportedOSPlatform("windows")]
+	public async Task A_self_contained_entrypoint_that_lost_its_executable_bit_is_executable_when_launched()
+	{
+		var entrypoint = Path.Combine(InstalledFor(PluginId, Version).ActiveVersion!.VersionDirectory, "app");
+		Directory.CreateDirectory(Path.GetDirectoryName(entrypoint)!);
+		await File.WriteAllTextAsync(entrypoint, "native");
+		File.SetUnixFileMode(entrypoint, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead);
+		var executableAtLaunch = false;
+		_launcher.OnStart = _ =>
+		{
+			executableAtLaunch = (File.GetUnixFileMode(entrypoint) & UnixFileMode.UserExecute) != 0;
+			var process = new FakePluginProcess();
+			_launcher.StartedProcesses.Add(process);
+			return process;
+		};
+
+		try
+		{
+			await CreateSupervisor().Start(PluginId).WaitAsync(TimeSpan.FromSeconds(5));
+
+			Assert.That(_launcher.Requests, Has.Count.EqualTo(1));
+			Assert.That(executableAtLaunch, Is.True);
+		}
+		finally
+		{
+			File.Delete(entrypoint);
+		}
 	}
 
 	[Test]

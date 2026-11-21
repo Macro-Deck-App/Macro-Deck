@@ -24,6 +24,7 @@ using MacroDeckHost.Application.Store.Installation;
 using MacroDeckHost.Application.Store.Model;
 using MacroDeckHost.Application.Store.Operations;
 using MacroDeckHost.Application.Store.Updates;
+using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Infrastructure.Plugins;
 using MacroDeckHost.Infrastructure.Plugins.Installation;
@@ -390,6 +391,66 @@ internal sealed class StoreInstallExecutorTests
 			Assert.That(packs.Single().Id, Is.EqualTo(installed.Id));
 			Assert.That(packs.Single().Version, Is.EqualTo("1.1.0"));
 			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId)!.Version, Is.EqualTo("1.1.0"));
+		});
+	}
+
+	[Test]
+	public async Task Installing_a_restored_Store_icon_pack_again_takes_it_over_instead_of_adding_a_second_one()
+	{
+		var restored = await InstallIconPack("1.0.0");
+		_installations.Delete(StoreExtensionKind.IconPack, IconPackId);
+		Assert.That(OwnerRegistry().Describe(restored).Kind, Is.Not.EqualTo(IconPackOwnerKind.Store));
+
+		var install = await InstallIconPackOperation("1.1.0");
+
+		var packs = _iconHarness.Cache.GetAllPacks();
+		Assert.Multiple(() =>
+		{
+			Assert.That(_tracker.Find(install.Id)!.State, Is.EqualTo(StoreOperationState.Completed));
+			Assert.That(packs, Has.Count.EqualTo(1));
+			Assert.That(packs.Single().Id, Is.EqualTo(restored.Id));
+			Assert.That(packs.Single().Version, Is.EqualTo("1.1.0"));
+			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId)!.TargetIds,
+				Is.EqualTo(new[] { restored.Id }));
+			Assert.That(OwnerRegistry().Describe(packs.Single()).Kind, Is.EqualTo(IconPackOwnerKind.Store));
+		});
+	}
+
+	[Test]
+	public async Task Installing_again_after_a_duplicate_takes_over_the_original_restored_pack()
+	{
+		var restored = await InstallIconPack("1.0.0");
+		_installations.Delete(StoreExtensionKind.IconPack, IconPackId);
+		var duplicate = await _iconHarness.CreatePack("Store Icons");
+		duplicate.SourceType = IconPackSourceType.ExtensionStore;
+		duplicate.SourceId = IconPackId;
+		duplicate.CreatedAt = restored.CreatedAt.AddMinutes(1);
+		await _iconHarness.Cache.AddOrUpdatePack(duplicate);
+
+		await InstallIconPackOperation("1.1.0");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(_iconHarness.Cache.GetAllPacks(), Has.Count.EqualTo(2));
+			Assert.That(_installations.Find(StoreExtensionKind.IconPack, IconPackId)!.TargetIds,
+				Is.EqualTo(new[] { restored.Id }));
+			Assert.That(_iconHarness.Cache.GetPackById(restored.Id)!.Version, Is.EqualTo("1.1.0"));
+		});
+	}
+
+	[Test]
+	public async Task A_user_icon_pack_with_the_same_name_is_not_taken_over_by_a_Store_install()
+	{
+		var userPack = await _iconHarness.CreatePack("Store Icons");
+
+		await InstallIconPackOperation("1.0.0");
+
+		var storePack = _iconHarness.Cache.GetAllPacks().Single(pack => pack.Id != userPack.Id);
+		Assert.Multiple(() =>
+		{
+			Assert.That(_iconHarness.Cache.GetPackById(userPack.Id)!.SourceType, Is.EqualTo(IconPackSourceType.User));
+			Assert.That(storePack.SourceId, Is.EqualTo(IconPackId));
+			Assert.That(OwnerRegistry().Describe(storePack).Kind, Is.EqualTo(IconPackOwnerKind.Store));
 		});
 	}
 
@@ -1070,6 +1131,25 @@ internal sealed class StoreInstallExecutorTests
 			new PluginManifestReader());
 		Assert.That(result.Success, Is.True, result.Message);
 		return output;
+	}
+
+	private async Task<StoreOperation> InstallIconPackOperation(string version)
+	{
+		ServeIconPack(await BuildIconPackArtifact(version), version);
+		var operation = _tracker.Create(StoreOperationKind.Install,
+			StoreExtensionKind.IconPack,
+			IconPackId,
+			version,
+			"Store Icons",
+			null);
+		await _executor.Execute(operation.Id);
+		return operation;
+	}
+
+	private async Task<IconPackEntity> InstallIconPack(string version)
+	{
+		await InstallIconPackOperation(version);
+		return _iconHarness.Cache.GetAllPacks().Single(pack => pack.SourceId == IconPackId);
 	}
 
 	private async Task<byte[]> BuildIconPackArtifact(string version)

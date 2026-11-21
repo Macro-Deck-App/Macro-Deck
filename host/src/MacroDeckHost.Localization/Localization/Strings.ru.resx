@@ -18758,6 +18758,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Остановка Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Запуск Macro Deck занимает больше времени, чем обычно. Если ничего не изменится, перезапустите Macro Deck и проверьте файлы журнала.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Сборка для разработки</value>
   </data>

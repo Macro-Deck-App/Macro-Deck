@@ -41,6 +41,7 @@ mod quit_request;
 mod redact;
 mod release_notes;
 mod tray_badge;
+mod ui_connection_log;
 mod update_channel;
 mod update_mode;
 mod update_state;
@@ -306,6 +307,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             bridge::get_host_port,
             bridge::reauthenticate,
+            bridge::report_ui_connection,
             bridge::get_shell_info,
             bridge::get_cursor_position,
             bridge::open_external,

@@ -19,6 +19,8 @@ internal sealed class FakeKekStore : IKekStore
 
 	public bool WriteFails { get; set; }
 
+	public ManualResetEventSlim? ReadGate { get; set; }
+
 	public int Writes { get; private set; }
 
 	public byte[]? Stored => _kek?.ToArray();
@@ -35,6 +37,8 @@ internal sealed class FakeKekStore : IKekStore
 
 	public KekStoreReadResult Read(KekStoreIdentity identity)
 	{
+		ReadGate?.Wait();
+
 		if (ReadOverride == KekStoreStatus.Unavailable)
 		{
 			return KekStoreReadResult.Unavailable(Availability.Reason ?? "unavailable");

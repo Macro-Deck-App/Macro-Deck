@@ -18757,6 +18757,9 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Zamykanie aplikacji Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Uruchamianie Macro Deck trwa dłużej niż zwykle. Jeśli nic się nie zmieni, uruchom ponownie Macro Deck i sprawdź pliki dziennika.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build deweloperski</value>
   </data>

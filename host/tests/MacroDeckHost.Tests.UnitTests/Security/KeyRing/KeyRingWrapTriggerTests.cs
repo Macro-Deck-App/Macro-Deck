@@ -54,7 +54,9 @@ public class KeyRingWrapTriggerTests
 			_store,
 			_identity,
 			false,
-			false);
+			false,
+			TimeSpan.FromSeconds(10),
+			out _);
 		_keyRing = new KeyRingProtectionService(_paths,
 			_store,
 			_identity,
@@ -282,7 +284,9 @@ public class KeyRingWrapTriggerTests
 				_store,
 				_identity,
 				true,
-				false),
+				false,
+				TimeSpan.FromSeconds(10),
+				out _),
 			false,
 			TimeProvider.System,
 			Log.Logger);

@@ -38,12 +38,21 @@ public sealed class UiWebSocketEndpoint(
 	private static readonly TimeSpan _sendDeadline = TimeSpan.FromSeconds(30);
 	private static readonly TimeSpan _gracefulClose = TimeSpan.FromSeconds(5);
 	private static readonly ILogger _logger = Log.ForContext<UiWebSocketEndpoint>();
+	private readonly UiWebSocketRefusalLog _refusals = new(_logger, timeProvider);
 
 	public async Task HandleAsync(HttpContext context)
 	{
-		if (!context.WebSockets.IsWebSocketRequest
-			|| !tickets.TryRedeem(context, context.Request.Query["ticket"], out var principal))
+		if (!context.WebSockets.IsWebSocketRequest)
 		{
+			_logger.Debug("Refused a UI WebSocket request on port {Port}: it is not a WebSocket upgrade",
+				context.Connection.LocalPort);
+			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			return;
+		}
+
+		if (!tickets.TryRedeem(context, context.Request.Query["ticket"], out var principal, out var refusal))
+		{
+			_refusals.TicketRefused(context.Connection.LocalPort, refusal);
 			context.Response.StatusCode = StatusCodes.Status400BadRequest;
 			return;
 		}
@@ -51,6 +60,9 @@ public sealed class UiWebSocketEndpoint(
 		if (!context.WebSockets.WebSocketRequestedProtocols.Contains(UiWebSocketProtocol.SubProtocol,
 			StringComparer.Ordinal))
 		{
+			_logger.Debug("Refused a UI WebSocket upgrade on port {Port}: the {SubProtocol} subprotocol is missing",
+				context.Connection.LocalPort,
+				UiWebSocketProtocol.SubProtocol);
 			context.Response.StatusCode = StatusCodes.Status400BadRequest;
 			return;
 		}

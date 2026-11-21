@@ -18,6 +18,7 @@ export class WebSocketTransport {
   private static readonly HOST_PING_INTERVAL_MS = 20_000;
   private static readonly LIVE_WITHIN_MS = WebSocketTransport.HOST_PING_INTERVAL_MS * 1.5;
   private static readonly MAX_PENDING_REQUESTS = 256;
+  private static readonly HANDSHAKE_TIMEOUT_MS = 15_000;
   private socket: WebSocket | null = null;
   private readonly handlers = new Map<string, Set<(payload: unknown) => void>>();
   private readonly anyHandlers = new Set<(type: string, payload: unknown) => void>();
@@ -26,6 +27,7 @@ export class WebSocketTransport {
   private staleTimer: ReturnType<typeof setTimeout> | null = null;
   private lastInboundAt = 0;
   private closed = false;
+  private rejectWelcome: ((reason: Error) => void) | null = null;
 
   constructor(private readonly onClose: () => void) {}
 
@@ -33,6 +35,7 @@ export class WebSocketTransport {
     const socket = new WebSocket(url, 'macrodeck.ui.v1');
     this.socket = socket;
     const welcome = new Promise<void>((resolve, reject) => {
+      this.rejectWelcome = reject;
       socket.onopen = () => this.write({ protocolVersion: 1, kind: 'hello' });
       socket.onerror = () => {
         reject(new Error('WebSocket connection failed.'));
@@ -66,7 +69,16 @@ export class WebSocketTransport {
       };
     });
     this.refreshStaleTimer();
-    await welcome;
+    const deadline = setTimeout(() => {
+      this.rejectWelcome?.(new Error('The UI WebSocket handshake timed out.'));
+      this.fail();
+    }, WebSocketTransport.HANDSHAKE_TIMEOUT_MS);
+    try {
+      await welcome;
+    } finally {
+      clearTimeout(deadline);
+      this.rejectWelcome = null;
+    }
   }
 
   get live(): boolean {
@@ -91,7 +103,7 @@ export class WebSocketTransport {
     this.write({ protocolVersion: 1, kind: 'message', type, payload });
   }
 
-  request<T>(type: string, payload?: unknown, options?: { signal?: AbortSignal }): Promise<T> {
+  request<T>(type: string, payload?: unknown, options?: { signal?: AbortSignal; timeoutMs?: number }): Promise<T> {
     const id = `${++this.sequence}-${randomToken()}`;
     return new Promise<T>((resolve, reject) => {
       if (this.closed || !this.socket || this.socket.readyState !== WebSocket.OPEN) {
@@ -108,6 +120,7 @@ export class WebSocketTransport {
       }
       const abort = () => {
         this.pending.delete(id);
+        if (deadline !== null) clearTimeout(deadline);
         try {
           this.write({ protocolVersion: 1, kind: 'cancel', correlationId: id });
         } catch {
@@ -117,15 +130,26 @@ export class WebSocketTransport {
         }
       };
       options?.signal?.addEventListener('abort', abort, { once: true });
+      const deadline = options?.timeoutMs === undefined
+        ? null
+        : setTimeout(() => {
+          this.pending.delete(id);
+          options?.signal?.removeEventListener('abort', abort);
+          reject(new Error(`The ${type} request timed out.`));
+        }, options.timeoutMs);
+      const settle = (): void => {
+        if (deadline !== null) clearTimeout(deadline);
+        options?.signal?.removeEventListener('abort', abort);
+      };
       this.pending.set(id, {
-        resolve: value => { options?.signal?.removeEventListener('abort', abort); resolve(value as T); },
-        reject: reason => { options?.signal?.removeEventListener('abort', abort); reject(reason); },
+        resolve: value => { settle(); resolve(value as T); },
+        reject: reason => { settle(); reject(reason); },
       });
       try {
         this.write({ protocolVersion: 1, kind: 'request', type, id, payload });
       } catch (error) {
         this.pending.delete(id);
-        options?.signal?.removeEventListener('abort', abort);
+        settle();
         reject(error);
       }
     });
@@ -188,6 +212,7 @@ export class WebSocketTransport {
     this.closed = true;
     this.socket = null;
     if (this.staleTimer) clearTimeout(this.staleTimer);
+    this.rejectWelcome?.(new Error('WebSocket closed before the handshake completed.'));
     this.pending.forEach(({ reject }) => reject(new Error('WebSocket disconnected.')));
     this.pending.clear();
     this.onClose();
