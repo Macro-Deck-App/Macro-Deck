@@ -44,7 +44,8 @@ That spent bandwidth and extended trust to the feed on every tick without asking
 
 A Beta package polls `beta-<target>.json`; a stable package polls `latest-<target>.json`. A beta
 release publishes only the beta manifest; a stable release publishes **both**, so Beta installations
-graduate to it automatically while stable installations never receive a beta.
+graduate to it automatically while stable installations never receive a beta. A feed never moves
+to a lower version: a stable hotfix on an older line leaves a newer beta in the beta manifest.
 
 ### The channel and the mode are bootstrapper-owned preferences
 

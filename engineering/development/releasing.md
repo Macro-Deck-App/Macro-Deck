@@ -24,7 +24,7 @@ Publishing then happens in one order, because each step depends on the one befor
 
 1. The GitHub release is created and carries the installers, the checksums and the signed updater payloads.
 2. The channel manifests are repointed at the assets that release actually got, since GitHub sanitizes asset names on upload.
-3. Those manifests - and only those - are uploaded to the R2 feed installed clients poll.
+3. Those manifests - and only those - are uploaded to the R2 feed installed clients poll. A manifest whose version is lower than the one the feed already serves is dropped, so a hotfix on an older line updates `latest` without pulling beta clients back from a newer beta.
 4. The NuGet packages are pushed, last, because a published package cannot be taken back and must never exist for a release that failed to be created. This is the one publishing step allowed to fail: the release is already out, and a failed push is reported as a warning so the packages can be pushed afterwards from the manual NuGet workflow at the same version.
 
 The Tauri bootstrapper is the installed entry point. The published host and Angular output are staged into its application bundle before packaging.
@@ -34,6 +34,7 @@ Relevant implementation files:
 - [`.github/workflows/build.yml`](../../.github/workflows/build.yml) - build and packaging.
 - [`.github/workflows/publish-release.yml`](../../.github/workflows/publish-release.yml) - publishing order.
 - [`ci/scripts/point-manifests-at-release.mjs`](../../ci/scripts/point-manifests-at-release.mjs) - repointing channel manifests at release assets.
+- [`ci/scripts/drop-superseded-manifests.mjs`](../../ci/scripts/drop-superseded-manifests.mjs) - keeping a feed from moving to a lower version.
 - [`ci/scripts/stage-host.sh`](../../ci/scripts/stage-host.sh) - local host staging for the bootstrapper.
 - [`ci/scripts/release-version.mjs`](../../ci/scripts/release-version.mjs) - release version validation/mapping.
 - [`ci/scripts/make-update-manifest.mjs`](../../ci/scripts/make-update-manifest.mjs) - updater metadata.
