@@ -23,3 +23,4 @@ export * from './device-identity.service';
 export * from './cross-tab-lock';
 export * from './key-ring.service';
 export * from './rendering-mode.service';
+export * from './connection-diagnostics.service';

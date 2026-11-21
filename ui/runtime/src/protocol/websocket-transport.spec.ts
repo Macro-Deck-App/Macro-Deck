@@ -79,6 +79,38 @@ describe('WebSocketTransport', () => {
     await expectAsync(connected).toBeRejectedWithError(/handshake/);
   });
 
+  describe('when the host never completes the handshake', () => {
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    it('gives up on connect and closes, even when the socket never reports closing', async () => {
+      const closed = jasmine.createSpy('closed');
+      const transport = new WebSocketTransport(closed);
+      const connected = transport.connect('ws://host/ws/ui?ticket=secret');
+      const socket = FakeWebSocket.instances[0];
+      socket.close = () => { socket.readyState = 2; };
+      socket.open();
+
+      jasmine.clock().tick(15_000);
+
+      await expectAsync(connected).toBeRejectedWithError(/handshake/);
+      expect(closed).toHaveBeenCalledTimes(1);
+    });
+
+    it('still connects when the welcome arrives in time', async () => {
+      const transport = new WebSocketTransport(() => undefined);
+      const connected = transport.connect('ws://host/ws/ui?ticket=secret');
+      const socket = FakeWebSocket.instances[0];
+      socket.open();
+      jasmine.clock().tick(14_000);
+      socket.receive({ protocolVersion: 1, kind: 'welcome' });
+
+      await expectAsync(connected).toBeResolved();
+      jasmine.clock().tick(5_000);
+      expect(transport.live).toBeTrue();
+    });
+  });
+
   it('answers ping immediately and sends cancel when a request is aborted', async () => {
     const transport = new WebSocketTransport(() => undefined);
     const connected = transport.connect('ws://host/ws/ui?ticket=secret');

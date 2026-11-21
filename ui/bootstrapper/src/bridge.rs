@@ -155,6 +155,11 @@ pub fn reauthenticate(app: AppHandle) {
 }
 
 #[tauri::command]
+pub fn report_ui_connection(report: crate::ui_connection_log::UiConnectionReport) {
+    crate::ui_connection_log::record(&report);
+}
+
+#[tauri::command]
 pub fn get_shell_info(app: AppHandle) -> ShellInfo {
     ShellInfo {
         // Not package_info().version: on a beta RPM that is the mapped version,
@@ -618,9 +623,10 @@ mod tests {
         assert!(script.contains("encodeURIComponent"));
     }
 
-    const SHARED_COMMANDS: [&str; 23] = [
+    const SHARED_COMMANDS: [&str; 24] = [
         "get_host_port",
         "reauthenticate",
+        "report_ui_connection",
         "get_shell_info",
         "get_cursor_position",
         "open_external",

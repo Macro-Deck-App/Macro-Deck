@@ -18388,6 +18388,9 @@ Download het van de Macro Deck-website en werk de AppImage, DEB of RPM bij die j
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck stoppen…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck heeft meer tijd nodig dan normaal om te starten. Als er niets verandert, start Macro Deck dan opnieuw en bekijk de logbestanden.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Ontwikkelbuild</value>
   </data>

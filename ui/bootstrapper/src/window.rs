@@ -275,6 +275,7 @@ fn ensure_main_window_capability(app: &AppHandle, url: &tauri::Url) {
         .permission("allow-set-hide-dock-icon")
         .permission("allow-set-appearance")
         .permission("allow-reauthenticate")
+        .permission("allow-report-ui-connection")
         .permission("core:event:allow-listen")
         .permission("core:event:allow-unlisten");
     if let Err(error) = app.add_capability(capability) {

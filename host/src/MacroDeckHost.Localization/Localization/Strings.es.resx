@@ -18387,6 +18387,9 @@ Descárgalo desde el sitio web de Macro Deck y actualiza el AppImage, DEB o RPM 
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Cerrando Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck está tardando más de lo normal en iniciarse. Si esto no cambia, reinicia Macro Deck y revisa los archivos de registro.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Compilación de desarrollo</value>
   </data>

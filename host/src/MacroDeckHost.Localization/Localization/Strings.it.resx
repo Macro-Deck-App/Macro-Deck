@@ -18387,6 +18387,9 @@ Scaricalo dal sito di Macro Deck e aggiorna l'AppImage, il DEB o l'RPM che hai i
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Chiusura di Macro Deck…</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck sta impiegando più del solito ad avviarsi. Se la situazione non cambia, riavvia Macro Deck e controlla i file di log.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Build di sviluppo</value>
   </data>

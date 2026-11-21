@@ -18385,6 +18385,9 @@ Lade es von der Macro-Deck-Website herunter und aktualisiere deine installierte 
   <data name="Shell.Splash.Stopping" xml:space="preserve">
     <value>Macro Deck wird beendet …</value>
   </data>
+  <data name="Shell.Splash.StillConnecting" xml:space="preserve">
+    <value>Macro Deck braucht länger als üblich zum Starten. Wenn sich nichts ändert, starte Macro Deck neu und sieh dir die Logdateien an.</value>
+  </data>
   <data name="Shell.Statusbar.DevelopmentBuild" xml:space="preserve">
     <value>Entwicklungsversion</value>
   </data>
