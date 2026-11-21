@@ -115,9 +115,11 @@ public class PluginNotificationResultDeliveryTests
 		_invoker.Accepting = false;
 		var shown = await ShowDialog(_plugin);
 		_manager.Respond(new NotificationPrincipal(true, null), shown.Id, "yes", null);
-		await Task.Delay(100);
+		Assert.That(() => _invoker.Attempts, Is.GreaterThan(1).After(2000, 10));
 
 		await _sessions.Create(Session("session-2"));
+		// An attempt that took the result before the prune may still be running; accept only once retries stop.
+		await WaitUntilNoMoreAttempts();
 		_invoker.Accepting = true;
 		await Task.Delay(200);
 
@@ -172,6 +174,20 @@ public class PluginNotificationResultDeliveryTests
 				Popup = NotificationPopup.Dialog,
 				Actions = [new NotificationAction { Id = "yes", Label = "Yes" }]
 			});
+	}
+
+	private async Task WaitUntilNoMoreAttempts()
+	{
+		var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+		int before;
+		do
+		{
+			before = _invoker.Attempts;
+			await Task.Delay(100);
+		}
+		while (_invoker.Attempts != before && DateTime.UtcNow < deadline);
+
+		Assert.That(_invoker.Attempts, Is.EqualTo(before), "Delivery kept retrying after the session was pruned.");
 	}
 
 	private static PluginSessionRecord Session(string sessionId)
