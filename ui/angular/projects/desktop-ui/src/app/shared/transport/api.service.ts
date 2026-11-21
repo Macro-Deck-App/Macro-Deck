@@ -806,7 +806,7 @@ export class ApiService {
 
   private async fetchBounded(path: string, init: RequestInit, timeoutMs: number | undefined): Promise<Response> {
     const url = `${this.baseUrl}${path}`;
-    if (timeoutMs === undefined || typeof AbortController === 'undefined') {
+    if (timeoutMs === undefined) {
       return fetch(url, this.buildRequestInit(init));
     }
 

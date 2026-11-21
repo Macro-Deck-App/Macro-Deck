@@ -95,6 +95,21 @@ runs in the background. When that takes longer than about 15 seconds, the window
      connection down.
 3. Ask for help as described at the top of this page and attach both files.
 
+### On Linux: a locked wallet or keyring
+
+Macro Deck keeps the key that protects your stored secrets in your desktop's password storage, KDE Wallet
+or GNOME Keyring. If that storage is locked when Macro Deck starts, your desktop asks for its password.
+This is common when you sign in automatically, without typing a password.
+
+- Enter the wallet or keyring password when asked. Macro Deck then restarts by itself and opens normally.
+- If you closed that prompt, unlock the wallet in KDE Wallet Manager or Passwords and Keys, then quit
+  Macro Deck completely and start it again.
+- If you do not answer within about 15 seconds, Macro Deck opens anyway and asks for your backup recovery
+  key. Entering the recovery key does not help while the wallet stays locked: Macro Deck has to store the
+  key there again. Unlock the wallet first.
+- The recovery key helps when the password storage no longer holds Macro Deck's key, for example after
+  the wallet was reset.
+
 ## A device says the deck needs an update
 
 After Macro Deck is updated, connected devices load the new version of the deck by themselves. If a device
