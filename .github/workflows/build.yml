@@ -814,7 +814,7 @@ jobs:
           test -n "$manifest" || { echo "error: no install manifest in $installer" >&2; exit 1; }
           node ci/scripts/make-install-manifest.mjs verify "$(dirname "$manifest")" --pubkey ui/bootstrapper/tauri.conf.json
 
-      # Reuses the executable and host the installer carries, already signed, so the portable copy
+      # Reuses the signed executable from the installer and the signed host, so the portable copy
       # spends no further eSigner signature.
       - name: Package portable ZIP
         shell: pwsh
@@ -828,7 +828,18 @@ jobs:
           $root = Join-Path $env:RUNNER_TEMP 'macro-deck-portable'
           $stage = Join-Path $root 'Macro Deck'
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          Copy-Item ui/bootstrapper/target/release/MacroDeck.exe $stage
+          # tauri bundle restores the unsigned MacroDeck.exe in target/release after building the
+          # installer, so the signed executable only exists inside the installer.
+          $extracted = Join-Path $env:RUNNER_TEMP 'macro-deck-installer'
+          7z x -y "-o$extracted" $installer.FullName | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not extract $($installer.Name)"
+          }
+          $executable = @(Get-ChildItem $extracted -Recurse -File -Filter 'MacroDeck.exe')
+          if ($executable.Count -ne 1) {
+            throw "Expected exactly one MacroDeck.exe in $($installer.Name); found $($executable.Count)"
+          }
+          Copy-Item $executable[0].FullName $stage
           Copy-Item ui/bootstrapper/host-publish (Join-Path $stage 'host') -Recurse
           New-Item -ItemType File -Path (Join-Path $stage 'portable') | Out-Null
           if ($env:SIGN_WINDOWS -eq 'true') {
