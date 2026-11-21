@@ -321,7 +321,7 @@ public class LabelTextServiceTests
 	[Test]
 	public async Task ResolveText_ShowsThePlaceholder_WhenAFilterCannotHandleAnUnavailableVariable()
 	{
-		var widget = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.cpu | round: 1 }}\"}");
+		var widget = Button(Guid.NewGuid(), "{\"label\":\"{{ 100 | minus: vars.cpu | round: 1 }}\"}");
 		var registry = new VariableRegistry();
 		registry.Upsert(Numeric("cpu", "12.345"), false);
 		var service = Service(ReadySignal(), registry, widget);
@@ -347,7 +347,7 @@ public class LabelTextServiceTests
 	[Test]
 	public async Task ResolveText_RendersTheLabelAgain_OnceTheVariableIsAvailable()
 	{
-		var widget = Button(Guid.NewGuid(), "{\"label\":\"{{ vars.cpu | round: 1 }}\"}");
+		var widget = Button(Guid.NewGuid(), "{\"label\":\"{{ 100 | minus: vars.cpu | round: 1 }}\"}");
 		var registry = new VariableRegistry();
 		var cpu = Numeric("cpu", "12.345");
 		registry.Upsert(cpu, false);
@@ -357,7 +357,7 @@ public class LabelTextServiceTests
 		registry.SetAvailable(cpu.Id, true);
 		var text = await service.ResolveText(widget.Id, "off");
 
-		Assert.That(text, Is.EqualTo("12.3"));
+		Assert.That(text, Is.EqualTo("87.7"));
 	}
 
 	[Test]

@@ -91,7 +91,8 @@ public class ActionButtonWidgetUiProviderTests
 	[Test]
 	public async Task A_widget_surface_session_opens_with_a_placeholder_when_its_label_fails_to_render()
 	{
-		const string roundedData = "{\"label\":\"{{ vars.cpu | round: 1 }}\",\"flows\":\"[]\",\"stateMode\":false}";
+		const string roundedData
+			= "{\"label\":\"{{ 100 | minus: vars.cpu | round: 1 }}\",\"flows\":\"[]\",\"stateMode\":false}";
 		var widgetId = Guid.NewGuid();
 		var folderCache = new StubFolderCache();
 		folderCache.AddFolder(new WidgetEntity

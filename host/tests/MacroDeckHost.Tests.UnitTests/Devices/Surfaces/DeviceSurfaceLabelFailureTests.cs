@@ -15,7 +15,7 @@ namespace MacroDeckHost.Tests.UnitTests.Devices.Surfaces;
 [TestFixture]
 public class DeviceSurfaceLabelFailureTests
 {
-	private const string RoundedCpuLabel = "{{ vars.cpu | round: 1 }}";
+	private const string RoundedCpuLabel = "{{ 100 | minus: vars.cpu | round: 1 }}";
 
 	private static readonly Guid _roundedId = Guid.NewGuid();
 	private static readonly Guid _temperatureId = Guid.NewGuid();
@@ -111,7 +111,7 @@ public class DeviceSurfaceLabelFailureTests
 		await _fixture.Service.OnWidgetLabelChanged(_roundedId, "off");
 		await _fixture.SettleAsync();
 
-		Assert.That(LabelOf(deviceId, _roundedId), Is.EqualTo("12.3"));
+		Assert.That(LabelOf(deviceId, _roundedId), Is.EqualTo("87.7"));
 	}
 
 	[Test]
