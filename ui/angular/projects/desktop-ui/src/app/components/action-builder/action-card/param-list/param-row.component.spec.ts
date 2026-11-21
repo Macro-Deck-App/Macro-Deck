@@ -5,10 +5,12 @@ import { Subject } from 'rxjs';
 
 import { ActionBlock, ActionBlockParameter, EventDefinition, GetActionParameterOptionsResponse, WIDGET_TARGET_SELF, isVariableReference } from '@macro-deck/runtime';
 import { ApiService, IconImageService, VariableService } from '@shared';
+import type { Variable } from '@macro-deck/runtime';
 import { ActionOptionsService, ResolvedActionParameterOption } from '../../../../services/action-options.service';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { WidgetTargetPickerComponent } from '../../../forms/widget-target-picker/widget-target-picker.component';
 import { KeyboardComboEditorComponent } from '../../../forms/keyboard-combo-editor/keyboard-combo-editor.component';
+import { VariablePickerComponent } from '../../../variable-picker/variable-picker.component';
 import { ParamRowComponent } from './param-row.component';
 
 function fakeApiService(): ApiService {
@@ -175,6 +177,64 @@ describe('ParamRowComponent host-backed option labels', () => {
         disabled: true,
       }),
     ]);
+  });
+
+  describe('marking a required selection unavailable', () => {
+    async function loadFor(param: ActionBlockParameter, siblings: ActionBlockParameter[] = []): Promise<void> {
+      component.param = param;
+      component.block = {
+        integrationId: 'app.macro-deck.obs',
+        actionId: 'set-input-setting',
+        parameters: [...siblings, param],
+      } as ActionBlock;
+      component.loadDynamicOptions();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+
+    const unavailable = jasmine.objectContaining({ label: jasmine.stringMatching(/no longer available/i) });
+
+    it('accepts a template in an autocomplete as a valid value', async () => {
+      await loadFor({
+        name: 'variable', type: 'autocomplete', label: 'Variable', value: '{{ vars.name }}',
+        required: true, dynamicOptions: true,
+      });
+
+      expect(component.effectiveOptions).not.toContain(unavailable);
+    });
+
+    it('still marks a template in a dynamic choice, which the host does not render', async () => {
+      await loadFor({
+        name: 'scene', type: 'dynamic-choice', label: 'Scene', value: '{{ vars.name }}',
+        required: true, dynamicOptions: true,
+      });
+
+      expect(component.dynamicChoiceOptions).toContain(unavailable);
+    });
+
+    it('does not blame a value whose list depends on a sibling bound to a variable', async () => {
+      await loadFor(
+        { name: 'setting', type: 'autocomplete', label: 'Setting', value: 'text', required: true, dynamicOptions: true },
+        [{ name: 'input', type: 'dynamic-choice', label: 'Input', value: { $var: 'scene_text_name' } }]);
+
+      expect(component.effectiveOptions).not.toContain(unavailable);
+    });
+
+    it('still marks a missing value when only a scalar sibling is bound to a variable', async () => {
+      await loadFor(
+        { name: 'input', type: 'dynamic-choice', label: 'Input', value: 'Mic', required: true, dynamicOptions: true },
+        [{ name: 'volume', type: 'number', label: 'Volume', value: { $var: 'volume' } }]);
+
+      expect(component.dynamicChoiceOptions).toContain(unavailable);
+    });
+
+    it('still marks a missing value whose siblings are literal', async () => {
+      await loadFor(
+        { name: 'setting', type: 'autocomplete', label: 'Setting', value: 'text', required: true, dynamicOptions: true },
+        [{ name: 'input', type: 'dynamic-choice', label: 'Input', value: 'Scoreboard' }]);
+
+      expect(component.effectiveOptions).toContain(unavailable);
+    });
   });
 
   it('stores what a number box was given as a number', async () => {
@@ -368,23 +428,105 @@ describe('ParamRowComponent host-backed option labels', () => {
     expect(fixture.nativeElement.querySelector('shared-variable-picker')).not.toBeNull();
   });
 
-  it('offers the external variable picker only for scalar primitive types', () => {
+  it('offers the external variable picker for scalar and list-picking types only', () => {
     const withType = (type: ActionBlockParameter['type']): boolean => {
       component.param = { name: 'p', type, label: 'P', value: '' };
       return component.showsExternalVariablePicker;
     };
 
-    for (const type of ['number', 'duration', 'boolean'] as const) {
+    for (const type of ['number', 'duration', 'boolean', 'autocomplete', 'dynamic-choice'] as const) {
       expect(withType(type))
         .withContext(`external picker should show for ${type}`)
         .toBeTrue();
     }
 
-    for (const type of ['choice', 'dynamic-choice', 'color', 'datetime', 'file', 'folder'] as const) {
+    for (const type of ['choice', 'color', 'datetime', 'file', 'folder'] as const) {
       expect(withType(type))
         .withContext(`external picker should be hidden for ${type}`)
         .toBeFalse();
     }
+  });
+
+  describe('binding a list-picking parameter to a variable', () => {
+    const textVariable = { name: 'scene_name', type: 'text', value: 'Intro' } as unknown as Variable;
+    const eventVariable = { name: 'scene', type: 'text', value: '', origin: 'event' } as unknown as Variable;
+
+    function render(param: ActionBlockParameter, eventId?: string): ComponentFixture<ParamRowComponent> {
+      const fixture = TestBed.createComponent(ParamRowComponent);
+      fixture.componentRef.setInput('blockId', 'block-1');
+      fixture.componentRef.setInput('param', param);
+      if (eventId) {
+        fixture.componentRef.setInput('eventId', eventId);
+      }
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    function picker(fixture: ComponentFixture<ParamRowComponent>): VariablePickerComponent | undefined {
+      return fixture.debugElement.query(By.directive(VariablePickerComponent))?.componentInstance;
+    }
+
+    beforeEach(() => {
+      store.pickerVariables.and.returnValue([eventVariable, textVariable]);
+      (store as unknown as Record<string, unknown>)['variables'] = () => [textVariable];
+    });
+
+    it('lets an autocomplete be bound to a text variable', () => {
+      const fixture = render({ name: 'variable', type: 'autocomplete', label: 'Variable', value: '' });
+
+      const found = picker(fixture);
+      expect(found).toBeDefined();
+      expect(found!.acceptedTypes).toEqual(['text']);
+
+      found!.pick.emit('scene_name');
+
+      const stored: unknown = store.updateParam.calls.mostRecent().args[2];
+      expect(stored).toEqual({ $var: 'scene_name' });
+    });
+
+    it('lets a dynamic choice be bound to a variable', () => {
+      const fixture = render({ name: 'input', type: 'dynamic-choice', label: 'Input', value: '' });
+
+      picker(fixture)!.pick.emit('scene_name');
+
+      const stored: unknown = store.updateParam.calls.mostRecent().args[2];
+      expect(stored).toEqual({ $var: 'scene_name' });
+    });
+
+    it('offers the picker again once a bound reference is cleared', () => {
+      const fixture = render({ name: 'input', type: 'dynamic-choice', label: 'Input', value: { $var: 'scene_name' } });
+      expect(picker(fixture)).toBeUndefined();
+      expect(fixture.nativeElement.querySelector('.param-variable-chip')).not.toBeNull();
+
+      component = fixture.componentInstance;
+      component.onClearVariable();
+      fixture.componentRef.setInput('param', { name: 'input', type: 'dynamic-choice', label: 'Input', value: '' });
+      fixture.detectChanges();
+
+      const stored: unknown = store.updateParam.calls.mostRecent().args[2];
+      expect(stored).toBe('');
+      expect(picker(fixture)).toBeDefined();
+    });
+
+    it('offers no picker on a literal-only list parameter', () => {
+      const fixture = render({
+        name: 'scriptId', type: 'dynamic-choice', label: 'Script', value: '', literalOnly: true,
+      });
+
+      expect(picker(fixture)).toBeUndefined();
+    });
+
+    it('offers an event trigger row the variables but not the event\'s own parameters', () => {
+      const fixture = render({ name: 'scene', type: 'dynamic-choice', label: 'Scene', value: '' }, 'obs::scene-changed');
+
+      expect(picker(fixture)!.variables).toEqual([textVariable]);
+    });
+
+    it('still offers an action row the event parameters it runs with', () => {
+      const fixture = render({ name: 'scene', type: 'dynamic-choice', label: 'Scene', value: '' });
+
+      expect(picker(fixture)!.variables).toEqual([eventVariable, textVariable]);
+    });
   });
 
   it('hides the external variable picker when references are disabled', () => {
@@ -1465,6 +1607,7 @@ describe('ParamRowComponent event filter operator rendering', () => {
     );
     store.errorsFor.and.returnValue([]);
     store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['variables'] = () => [];
     (store as unknown as Record<string, unknown>)['previewScope'] = () => 'global';
 
     TestBed.configureTestingModule({
@@ -1705,5 +1848,189 @@ describe('ParamRowComponent right-hand modifier keys', () => {
 
   it('keeps an event filter to the generic names plugins publish', () => {
     expect(modifierToggles('app.macro-deck.keyboard', 'plugin.example.hotkey-pressed').length).toBe(4);
+  });
+});
+
+describe('ParamRowComponent creating a user variable', () => {
+  let store: jasmine.SpyObj<ActionFlowStore>;
+  let api: jasmine.SpyObj<ApiService>;
+  let loadLabeledOptions: jasmine.Spy;
+  let hostOptions: string[];
+
+  const answerVariable: ActionBlockParameter = {
+    name: 'answerVariable',
+    type: 'autocomplete',
+    label: 'Answer variable',
+    value: 'score',
+    optionsSourceId: 'macrodeck.user-variables',
+  };
+
+  beforeEach(() => {
+    store = jasmine.createSpyObj<ActionFlowStore>(
+      'ActionFlowStore', ['updateParam', 'errorsFor', 'pickerVariables', 'cacheParamLabel', 'actionRole']);
+    store.errorsFor.and.returnValue([]);
+    store.pickerVariables.and.returnValue([]);
+    (store as unknown as Record<string, unknown>)['variables'] = () => [];
+    (store as unknown as Record<string, unknown>)['previewScope'] = () => 'widget';
+    (store as unknown as Record<string, unknown>)['previewScopeRefId'] = () => 'w1';
+    (store as unknown as Record<string, unknown>)['previewOwnerWidgetId'] = () => 'w1';
+    (store as unknown as Record<string, unknown>)['previewScopeStates'] = () => undefined;
+
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['onNotification', 'getVariables', 'createVariable']);
+    api.onNotification.and.callFake(() => new Subject());
+    api.getVariables.and.resolveTo({ variables: [] });
+    api.createVariable.and.callFake(async request => ({
+      success: true,
+      variable: {
+        id: 'v-new', name: request.name, scope: request.scope, scopeRefId: request.scopeRefId,
+        type: request.type, classification: 'user', value: request.initialValue ?? '',
+      },
+    }));
+    Object.defineProperty(api, 'connectionStateSignal', { value: signal('disconnected') });
+
+    hostOptions = [];
+    loadLabeledOptions = jasmine.createSpy('loadLabeledOptions').and.callFake(async () => ({
+      options: hostOptions.map(value => ({ value, label: value })),
+    }));
+
+    TestBed.configureTestingModule({
+      imports: [ParamRowComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: ApiService, useValue: api },
+        { provide: ActionFlowStore, useValue: store },
+        {
+          provide: ActionOptionsService,
+          useValue: { loadLabeledOptions, invalidateOptionsSource: jasmine.createSpy('invalidateOptionsSource') },
+        },
+      ],
+    });
+  });
+
+  async function render(param: ActionBlockParameter, extra: Record<string, unknown> = {}) {
+    const fixture = TestBed.createComponent(ParamRowComponent);
+    fixture.componentRef.setInput('blockId', 'block-1');
+    fixture.componentRef.setInput('param', param);
+    fixture.componentRef.setInput('block', {
+      id: 'block-1', integrationId: 'app.macro-deck.system', actionId: 'ask-question', parameters: [param],
+    } as ActionBlock);
+    for (const [name, value] of Object.entries(extra)) {
+      fixture.componentRef.setInput(name, value);
+    }
+    fixture.detectChanges();
+    await fixture.whenStable();
+    return fixture;
+  }
+
+  function createButton(fixture: ComponentFixture<ParamRowComponent>): HTMLButtonElement | null {
+    return fixture.nativeElement.querySelector('.param-value .icon-plus')?.closest('button') ?? null;
+  }
+
+  async function settle(fixture: ComponentFixture<ParamRowComponent>): Promise<void> {
+    for (let i = 0; i < 2; i++) {
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+  }
+
+  async function openDialog(fixture: ComponentFixture<ParamRowComponent>): Promise<HTMLElement> {
+    createButton(fixture)!.click();
+    await settle(fixture);
+    return fixture.nativeElement.querySelector('shared-variable-create-dialog');
+  }
+
+  function dialogButton(dialog: HTMLElement, label: string): HTMLButtonElement {
+    return (Array.from(dialog.querySelectorAll('.form-actions button')) as HTMLButtonElement[])
+      .find(button => button.textContent?.trim() === label)!;
+  }
+
+  async function closeAnimation(fixture: ComponentFixture<ParamRowComponent>): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await settle(fixture);
+  }
+
+  it('offers to create a variable on a field fed by the user variables', async () => {
+    const fixture = await render(answerVariable);
+
+    expect(createButton(fixture)).not.toBeNull();
+  });
+
+  it('offers nothing on fields that do not pick user variables', async () => {
+    const everyVariable = await render({ ...answerVariable, optionsSourceId: 'macrodeck.variables' });
+    const freeList = await render({ ...answerVariable, optionsSourceId: undefined });
+    const eventFilter = await render(answerVariable, { eventId: 'macro-deck::variable-changed' });
+
+    expect(createButton(everyVariable)).toBeNull();
+    expect(createButton(freeList)).toBeNull();
+    expect(createButton(eventFilter)).toBeNull();
+  });
+
+  it('opens the create dialog with what is typed in the field and the flow\'s own scope', async () => {
+    const fixture = await render(answerVariable);
+
+    const dialog = await openDialog(fixture);
+
+    expect((dialog.querySelector('shared-input[name="name"] input') as HTMLInputElement).value).toBe('score');
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+    expect(api.createVariable).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'score', scope: 'widget', scopeRefId: 'w1',
+    }));
+  });
+
+  it('puts the created variable in the field and in its suggestions', async () => {
+    const fixture = await render({ ...answerVariable, value: 'scor' });
+    const dialog = await openDialog(fixture);
+    const nameInput = dialog.querySelector('shared-input[name="name"] input') as HTMLInputElement;
+    nameInput.value = 'score';
+    nameInput.dispatchEvent(new Event('input'));
+    hostOptions = ['score'];
+
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+
+    expect(store.updateParam.calls.mostRecent().args.slice(0, 3) as unknown[])
+      .toEqual(['block-1', 'answerVariable', 'score']);
+    expect(fixture.componentInstance.effectiveOptions.map(o => o.value)).toContain('score');
+    expect(fixture.nativeElement.querySelector('shared-variable-create-dialog')).toBeNull();
+  });
+
+  it('shows the created name, not a missing-selection note, when the typed name had no match yet', async () => {
+    const fixture = await render({ ...answerVariable, required: true });
+    fixture.componentInstance.loadDynamicOptions('score');
+    await settle(fixture);
+    const dialog = await openDialog(fixture);
+    hostOptions = ['score'];
+
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+
+    const [, name, value, label] = store.updateParam.calls.mostRecent().args;
+    expect([name, value, label] as unknown[]).toEqual(['answerVariable', 'score', undefined]);
+    expect(fixture.componentInstance.autocompleteDisplayLabel).toBe('');
+  });
+
+  it('hands the created variable to the parent of a nested field', async () => {
+    const fixture = await render(answerVariable, { nested: true });
+    const emitted: unknown[] = [];
+    fixture.componentInstance.nestedChange.subscribe(value => emitted.push(value));
+    const dialog = await openDialog(fixture);
+
+    dialogButton(dialog, 'Create').click();
+    await closeAnimation(fixture);
+
+    expect(emitted).toEqual(['score']);
+  });
+
+  it('leaves the field as it was when the dialog is cancelled', async () => {
+    const fixture = await render(answerVariable);
+    const dialog = await openDialog(fixture);
+
+    dialogButton(dialog, 'Cancel').click();
+    await closeAnimation(fixture);
+
+    expect(api.createVariable).not.toHaveBeenCalled();
+    expect(store.updateParam.calls.count()).toBe(0);
+    expect(fixture.nativeElement.querySelector('shared-variable-create-dialog')).toBeNull();
   });
 });

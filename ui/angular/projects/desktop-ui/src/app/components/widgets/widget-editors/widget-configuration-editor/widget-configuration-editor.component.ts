@@ -34,6 +34,7 @@ import {
   widgetTileBorder,
   WIDGET_REFERENCE_CELL_SIZE,
   WIDGET_REFERENCE_GAP,
+  WidgetType,
 } from '@macro-deck/runtime';
 import {
   ButtonComponent,
@@ -49,7 +50,9 @@ import {
 import { UiNodeComponent } from '../../../ui-render/ui-node.component';
 import { UiRenderContext } from '../../../ui-render/ui-render-context';
 import { deepEqual } from '../../../../util/deep-equal';
+import { findLabelFields, labelArea, labelAt, pickedLabelIndex, positionPercent, previewLabels } from './preview-label-drag.util';
 import { WidgetEditorShellComponent } from '../common/widget-editor-shell/widget-editor-shell.component';
+import { ActionConfigSessionFlusher } from '../../../action-builder/services/action-config-session-flusher.service';
 
 const DRAFT_EVENT_NAMES: ReadonlySet<string> = new Set([
   UiConfigEvents.Change,
@@ -62,6 +65,20 @@ const FOLLOW_CONFIRM_MS = 2000;
 const PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE';
 
 type Draft = Record<string, unknown>;
+
+const LABEL_DRAG_THRESHOLD_PX = 3;
+
+interface LabelDrag {
+  index: number;
+  grabX: number;
+  grabY: number;
+  width: number;
+  height: number;
+  startX: number;
+  startY: number;
+  moved: boolean;
+  requestedPick?: number;
+}
 
 const PREVIEW_SHORT_SIDE_PX = 100;
 const PREVIEW_LONG_SIDE_MAX_PX = 220;
@@ -180,34 +197,49 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     // enabled Save button and saving would add keys nobody asked for.
     effect(() => {
       const root = this.root();
-      if (!root) return;
-
-      // A tree from a newly opened session carries provider defaults the draft never had.
       const generation = this.handle()?.generation() ?? 0;
-      if (generation !== this.treeGeneration) {
-        this.treeGeneration = generation;
-        this.seenTree = false;
-        this.retainedRoot = this.previousRoot;
-      }
-
-      if (root === this.retainedRoot) return;
-      this.retainedRoot = null;
-
-      const previous = this.previousRoot;
-      this.previousRoot = root;
-
-      if (!this.seenTree) {
-        this.seenTree = true;
-        if (!deepEqual(this.widget.data, this.openedWith)) untracked(() => this.reopen());
-        else this.lastOpenedDraft = this.rememberShownDraft();
-        return;
-      }
-
-      untracked(() => this.onRevision(previous, root));
+      untracked(() => this.reconcileTree(root, generation));
     });
 
+    const destroyRef = inject(DestroyRef);
     const subscription = this.eventBus.events$.subscribe(event => this.onNodeEvent(event));
-    inject(DestroyRef).onDestroy(() => subscription.unsubscribe());
+    destroyRef.onDestroy(() => subscription.unsubscribe());
+    destroyRef.onDestroy(inject(ActionConfigSessionFlusher).register({ flush: () => this.flush() }));
+  }
+
+  // A save reads the draft right after this resolves, before the effect above would have run, so the
+  // revisions the host answered the user's last edits with are folded in here.
+  private async flush(): Promise<void> {
+    const handle = this.handle();
+    if (!handle) return;
+    await handle.flush?.();
+    if (handle === this.handle()) this.reconcileTree(this.root(), handle.generation());
+  }
+
+  private reconcileTree(root: UiNode | null, generation: number): void {
+    if (!root) return;
+
+    // A tree from a newly opened session carries provider defaults the draft never had.
+    if (generation !== this.treeGeneration) {
+      this.treeGeneration = generation;
+      this.seenTree = false;
+      this.retainedRoot = this.previousRoot;
+    }
+
+    if (root === this.retainedRoot || root === this.previousRoot) return;
+    this.retainedRoot = null;
+
+    const previous = this.previousRoot;
+    this.previousRoot = root;
+
+    if (!this.seenTree) {
+      this.seenTree = true;
+      if (!deepEqual(this.widget.data, this.openedWith)) this.reopen();
+      else this.lastOpenedDraft = this.rememberShownDraft();
+      return;
+    }
+
+    this.onRevision(previous, root);
   }
 
   ngOnInit(): void {
@@ -348,6 +380,75 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     }, { notifyFault: false }));
   }
 
+  protected readonly labelDrag = signal<LabelDrag | null>(null);
+  protected readonly labelHover = signal(false);
+
+  private dragsLabels(): boolean {
+    return this.widget.type === WidgetType.ActionButton && findLabelFields(this.root()).picker !== null;
+  }
+
+  protected onPreviewPointerDown(event: PointerEvent, frame: HTMLElement): void {
+    if (event.button !== 0 || !this.dragsLabels()) return;
+
+    const label = labelAt(previewLabels(frame), event.clientX, event.clientY);
+    if (!label) return;
+
+    capturePointer(frame, event.pointerId);
+    this.labelDrag.set({
+      index: label.index,
+      grabX: event.clientX - label.box.left,
+      grabY: event.clientY - label.box.top,
+      width: label.box.width,
+      height: label.box.height,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false,
+    });
+  }
+
+  protected onPreviewPointerMove(event: PointerEvent, frame: HTMLElement): void {
+    const drag = this.labelDrag();
+    if (!drag) {
+      this.labelHover.set(
+        this.dragsLabels() && labelAt(previewLabels(frame), event.clientX, event.clientY) !== null);
+      return;
+    }
+
+    if (!drag.moved) {
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < LABEL_DRAG_THRESHOLD_PX) return;
+      drag.moved = true;
+    }
+
+    const fields = findLabelFields(this.root());
+    if (!fields.picker) return;
+
+    // The position fields belong to the picked label, so nothing is written until the pick has arrived.
+    if (pickedLabelIndex(fields) !== drag.index) {
+      if (drag.requestedPick !== drag.index) {
+        drag.requestedPick = drag.index;
+        this.onNodeEvent({ nodeId: fields.picker.id, name: UiConfigEvents.Change, data: `${drag.index}` });
+      }
+      return;
+    }
+
+    const area = labelArea(frame);
+    if (!area || !fields.x || !fields.y) return;
+
+    this.moveLabel(fields.x, positionPercent(event.clientX - drag.grabX, area.left, area.width, drag.width));
+    this.moveLabel(fields.y, positionPercent(event.clientY - drag.grabY, area.top, area.height, drag.height));
+  }
+
+  protected onPreviewPointerUp(event: PointerEvent, frame: HTMLElement): void {
+    if (!this.labelDrag()) return;
+    if (frame.hasPointerCapture(event.pointerId)) frame.releasePointerCapture(event.pointerId);
+    this.labelDrag.set(null);
+  }
+
+  private moveLabel(field: UiNode, percent: number | null): void {
+    if (percent === null || field.properties?.[UiConfigProperties.Value] === percent) return;
+    this.onNodeEvent({ nodeId: field.id, name: UiConfigEvents.Change, data: percent });
+  }
+
   protected onNodeEvent(event: UiNodeEvent): void {
     this.handle()?.send(event);
     if (!DRAFT_EVENT_NAMES.has(event.name)) return;
@@ -369,6 +470,15 @@ export class WidgetConfigurationEditorComponent implements IWidgetEditorComponen
     Object.assign(data, next);
     this.treeDraft = structuredClone(this.widget.data);
     this.previewData.set({ ...data });
+  }
+}
+
+// Capture is refused for a pointer the browser no longer tracks; the drag then simply ends at the frame's edge.
+function capturePointer(frame: HTMLElement, pointerId: number): void {
+  try {
+    frame.setPointerCapture(pointerId);
+  } catch {
+    return;
   }
 }
 

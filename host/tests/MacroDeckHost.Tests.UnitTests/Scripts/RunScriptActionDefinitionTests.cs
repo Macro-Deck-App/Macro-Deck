@@ -39,6 +39,14 @@ public class RunScriptActionDefinitionTests
 	}
 
 	[Test]
+	public void The_script_to_run_cannot_be_bound_to_a_variable()
+	{
+		var scriptId = _action.Parameters.Single(parameter => parameter.Name == "scriptId");
+
+		Assert.That(scriptId.LiteralOnly, Is.True);
+	}
+
+	[Test]
 	public async Task Input_parameters_are_collected_and_forwarded_to_the_script()
 	{
 		_scripts.Seed(new SdkScript { Id = "s1", Name = "Alpha" });

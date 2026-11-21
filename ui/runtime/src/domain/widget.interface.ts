@@ -99,7 +99,22 @@ export interface ButtonState {
   fontFaceId?: string;
   fontSize?: number;
   textAlign?: 'left' | 'center' | 'right';
+  labelX?: number;
+  labelY?: number;
+  extraLabels?: ButtonExtraLabel[];
   border?: WidgetBorder;
+}
+
+export interface ButtonExtraLabel {
+  id: string;
+  label?: string;
+  labelPosition?: 'top' | 'center' | 'bottom';
+  labelColor?: string;
+  fontFaceId?: string;
+  fontSize?: number;
+  textAlign?: 'left' | 'center' | 'right';
+  labelX?: number;
+  labelY?: number;
 }
 
 export interface ButtonStateDefinition {
@@ -150,6 +165,10 @@ export interface ActionButtonData {
   fontSize?: number;
   textAlign?: 'left' | 'center' | 'right';
   labelPosition?: 'top' | 'center' | 'bottom';
+
+  labelX?: number;
+  labelY?: number;
+  extraLabels?: ButtonExtraLabel[];
 
   border?: WidgetBorder;
 

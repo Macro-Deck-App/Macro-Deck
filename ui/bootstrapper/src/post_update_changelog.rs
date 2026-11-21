@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
 use crate::logging;
 use crate::release_notes::{self, ReleaseNotes};
@@ -124,9 +124,7 @@ pub(crate) fn pending_for(dir: &Path, current_version: &str) -> Option<PostUpdat
 }
 
 fn config_dir(app: &AppHandle) -> PathBuf {
-    app.path()
-        .app_config_dir()
-        .unwrap_or_else(|_| Path::new(".").to_path_buf())
+    crate::portable::app_config_dir(app).unwrap_or_else(|_| Path::new(".").to_path_buf())
 }
 
 pub fn remember(

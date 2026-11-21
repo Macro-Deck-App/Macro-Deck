@@ -36,6 +36,9 @@ internal static class ActionButtonWidgetViewPreviews
 		return ActionButtonWidgetView.Build(new UiState<ActionButtonWidgetData>(config),
 			new UiState<string?>(config.InitialStateId),
 			new UiState<string?>(config.Resolve(config.InitialStateId).Label),
+			new UiState<IReadOnlyList<string?>>(config.Resolve(config.InitialStateId)
+				.ExtraLabels.Select(label => label.Text)
+				.ToList()),
 			new UiState<IReadOnlyDictionary<WidgetIconReference, UiResource>>(
 				new Dictionary<WidgetIconReference, UiResource>()),
 			new UiState<WidgetIconResolution>(new WidgetIconResolution(false, null)),

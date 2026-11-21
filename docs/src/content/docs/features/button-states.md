@@ -174,5 +174,6 @@ A `state.update` for the actions kind only brings the next read forward. Test it
 
 - [Actions](/features/actions/)
 - [Button icons](/features/button-icons/) - a separate capability; enabling one never enables the other
+- [Button labels](/features/button-labels/) - each state has its own extra labels
 - [Capability parity](/reference/capability-parity/#the-state-poll-window)
 - [Localization](/features/localization/)

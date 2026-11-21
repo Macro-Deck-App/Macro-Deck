@@ -221,16 +221,55 @@ public class BridgedConnectionTests
 		});
 	}
 
+	// CLOSE ends both directions, so the listener sees the bytes and then end of stream; whether a server
+	// still answers a client that already closed is its own choice (Kestrel aborts such a request).
 	[Test]
-	public async Task A_request_sent_right_before_close_is_still_bridged()
+	public async Task A_request_sent_right_before_close_reaches_the_listener_in_full_and_stamped_as_bridged()
 	{
-		await using var harness = await KestrelHarness.StartAsync();
-		await harness.HandshakeAsync();
+		var listener = new TcpListener(IPAddress.Loopback, 0);
+		listener.Start();
+		try
+		{
+			var registry = new BridgedConnections(TimeProvider.System);
+			var dialer = new LoopbackBridgeDialer(
+				new FakeHostListenerState
+					{ PublicEndpoints = PublicEndpointSet.HttpOnly(((IPEndPoint)listener.LocalEndpoint).Port) },
+				registry);
+			await using var carrier = new FakeLinkCarrier();
+			var link = new NativeLink(carrier, DeviceKey, dialer, TimeProvider.System, Logger.None);
+			using var stop = new CancellationTokenSource();
+			var run = link.RunAsync(stop.Token);
+			try
+			{
+				var hello = LinkHello.Parse(await carrier.NextAsync(frame => frame.Type == LinkFrameType.Hello));
+				carrier.Send(LinkFrame.Hello(true, 0xABCD, hello.Epoch), LinkFrame.Hello(false, 0xABCD, 0));
+				await Eventually.True(() => link.IsLinked, "the link came up");
 
-		harness.Carrier.Send(LinkFrame.Open(1), LinkFrame.Data(1, Request("/probe?n=closing")), LinkFrame.Close(1));
+				var request = Request("/probe?n=closing");
+				carrier.Send(LinkFrame.Open(1), LinkFrame.Data(1, request), LinkFrame.Close(1));
 
-		await Eventually.True(() => harness.Seen.Count == 1, "the request arrived");
-		Assert.That(harness.Seen.Single(), Is.EqualTo(("closing", false, DeviceKey)));
+				using var accepted = await listener.AcceptSocketAsync().WaitAsync(TimeSpan.FromSeconds(10));
+				await using var network = new NetworkStream(accepted);
+				await using var received = new MemoryStream();
+				await network.CopyToAsync(received).WaitAsync(TimeSpan.FromSeconds(10));
+				var stamped = Stamped(registry, (IPEndPoint)accepted.RemoteEndPoint!);
+
+				Assert.Multiple(() =>
+				{
+					Assert.That(received.ToArray(), Is.EqualTo(request));
+					Assert.That(stamped, Is.EqualTo(DeviceKey));
+				});
+			}
+			finally
+			{
+				await stop.CancelAsync();
+				await run.WaitAsync(TimeSpan.FromSeconds(10));
+			}
+		}
+		finally
+		{
+			listener.Stop();
+		}
 	}
 
 	private static bool Exhausts(

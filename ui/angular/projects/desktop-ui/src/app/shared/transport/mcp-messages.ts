@@ -31,6 +31,15 @@ export interface McpEndpoint {
   url?: string | null;
   contractVersion: string;
   extensionAvailable?: boolean;
+  networkClientsAllowed?: boolean;
+}
+
+export interface SetMcpNetworkAccessRequest {
+  allowed: boolean;
+}
+
+export interface McpNetworkAccessResponse {
+  allowed: boolean;
 }
 
 export interface GetMcpTokensResponse {

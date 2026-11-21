@@ -73,6 +73,7 @@ plugin" and "filter by integration" are the same filter.
 | Data directory, Windows | `%APPDATA%\MacroDeck` |
 | Data directory, macOS | `~/Library/Application Support/MacroDeck` |
 | Data directory, Linux | `$XDG_DATA_HOME/MacroDeck`, or `~/.local/share/MacroDeck` |
+| Data directory, portable mode | `Data` next to `MacroDeck.exe` ([portable mode](/guide/installation/#portable-mode-windows)) |
 | Log viewer | Developer page, **Logs** tab: every retained day, filterable by level, source and integration |
 
 Newlines inside a message are escaped, so one entry is always one header line.

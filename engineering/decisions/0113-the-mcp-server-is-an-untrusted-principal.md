@@ -18,7 +18,9 @@ revisions still need a session.
 
 - The host serves MCP itself, at `/mcp` on the public listener and on the private loopback listener, as
   a host feature and not as a built-in integration. The public port is stable, so a client configuration
-  does not go stale, and a client on another computer in the network can connect. Tools call the existing transport handlers and services; they never call
+  does not go stale, and a client on another computer in the network can connect while the user allows
+  AI clients on other devices; with that switch off, the public listener serves `/mcp` only to requests
+  from this computer (see the MCP reference). Tools call the existing transport handlers and services; they never call
   the host's own REST API.
 - A new scope `mcp` with its own token type, created and revoked by the user. The token opens only
   `/mcp`, and no other credential opens `/mcp`. `Origin` and `Sec-Fetch-Site` are checked on every
@@ -51,8 +53,10 @@ revisions still need a session.
   keep the no-secret rule; a reflection test refuses tools that depend on secret-returning handlers.
 - Attribution by provider fails closed: a write the same provider makes for another reason during an MCP
   run is refused, and a write an accepted action makes after the grace period is not attributed.
-- Anyone in the local network who holds a token can use it, and over plain HTTP a token or a secret
-  typed into the secret page can be read in transit on an untrusted network.
+- While AI clients on other devices are allowed, anyone in the local network who holds a token can use
+  it, and over plain HTTP a token or a secret typed into the secret page can be read in transit on an
+  untrusted network. New installs start with that switch off; installs that had a live token before it
+  existed keep it on.
 - Sessions for pre-`2026-07-28` clients depend on a deprecated SDK mode that can be dropped once those
   clients are gone.
 

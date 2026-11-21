@@ -30,7 +30,7 @@ sequenceDiagram
     P->>H: host.invoke (optional, while handling)
     H->>P: host.result
     P->>H: capability.result
-    P-->>H: event.publish / log.publish / state.update (fire-and-forget)
+    P-->>H: event.publish / log.publish / state.update (no reply unless refused)
     P->>H: session.ping (every 20s, either side)
     H->>P: session.pong
     P->>H: session.goodbye, then close
@@ -329,7 +329,7 @@ APIs: `variables`, `user-variables`, `config`, `deck`, `scripts`, `widgets`, `no
 | `ui` | Not charged to the per-plugin callback throttle, except `origin.report-failure`, `origin.show-modal`, `origin.open-url` and `origin.read-upload`, which are charged like any other callback. `snapshot`, `patch` and `fault` are bounded per session by `maxUiUpdatesPerSecond` / `maxUiUpdateBurst`; `report-parameter-values` is bounded by `maxUiTreeBytes` per call and relayed only for an action configuration session; `reload` ends its session, and one for a session that already ended is ignored; `register-resource`, `remove-resource` and `register-music-player-artwork` have their own per-plugin rate limit, and `register-music-player-artwork` a tighter one on top. |
 | `variables` | `refresh` without arguments makes the host read every declared variable of the plugin on its next poll; with `definitionIds` (at most `maxVariableRefreshDefinitionIds`) only those, declared variables and polled catalog resources a user bound alike. Requests that arrive while one is pending are merged. A host that predates it answers `CAPABILITY_UNSUPPORTED`, which the SDK treats as a no-op, and a host that predates `definitionIds` ignores them and reads every declared variable; an older host ignores catalog resource ids, which keep their refresh interval. `bind` (`bindings`: `localResourceId`, `name`, `type`, optional `decimalPlaces` and `migratedFrom`, at most `maxVariableBindingsPerCall`) records bindings from the plugin's own catalog resources to variables, owned by the calling plugin, all or nothing, and answers `outcomes`, one `bound` or `already-bound` per binding in request order; an invalid name, resource id or type answers `INVALID_PAYLOAD`, and a store that cannot be read or written `INTERNAL_ERROR`. `history.open` (`name`, `capacity`) opens a window on one of the plugin's own global variables and answers its `windowId`; a name that is not the plugin's own answers `INVALID_PAYLOAD`, and too many open windows `CAPABILITY_UNAVAILABLE`. `history.read` (`windowId`) answers the `values`, oldest first, and is not charged to the per-plugin callback throttle; `history.close` (`windowId`) closes it. A plugin's windows end with its connection. |
 | `variable-values` | Data-carrying push for the catalog half only; eager variables are always polled via `variables`/`get`. |
-| `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. |
+| `event-bindings` | Push-only `host.state`, no `host.invoke` operations. `data` lists the triggers bound to this plugin's own events, each an `eventId` and `parameters` keyed by name (`value`, absent for a state operator, and `operator`). Sent on registration and whenever that list changes. A session that declares the host API feature `event-bindings.resolved-value` also gets `resolvedValue`, what a `{"$var":...}` in `value` currently resolves to (absent otherwise), and a push whenever only such a resolved value changed; every other session gets neither. The .NET SDK declares the feature. |
 | `adb` | Gated per plugin, runs off the session's dispatch loop, at most 4 calls in flight per plugin - see [`adb`](#adb). |
 | `icon-packs` | `get-icon-resource` and `sync-bundled` reach the calling plugin's own bundled icon packs only, `get-icon` any installed icon by id; `sync-bundled` only from a self-registered development session - see [`icon-packs`](#icon-packs). |
 | `messaging` | Needs the `messaging` capability kind; own rate limit instead of the per-plugin callback throttle; `send` and `request` run off the session's dispatch loop - see [`messaging`](#messaging). |
@@ -906,17 +906,30 @@ same rule as the `deck` push. A host without this api never pushes it and answer
  "payload":{"eventId":"light-toggled","parameters":{"on":true}}}
 ```
 
-All three are plugin → host and **fire-and-forget** - no reply message.
+All three are plugin → host and **fire-and-forget**: no reply message, unless the host refuses one with a
+`protocol.error` correlated to it (see the refusals below the table).
 
 | Type | Field | Type | Required | Meaning |
 | --- | --- | --- | --- | --- |
 | `event.publish` | `eventId` | string | yes | Unqualified id; the host qualifies it with the authenticated plugin id. |
-| | `parameters` | object | no | Parameter values; a nested object or array reaches triggers and templates as its JSON text. Since Macro Deck 3.0.3 the host drops an occurrence with a top-level number beyond the range of a 64-bit float, such as `1e400`, and logs a warning. |
+| | `parameters` | object | no | Parameter values; a nested object or array reaches triggers and templates as its JSON text. A number beyond the range of a 64-bit float, such as `1e400`, is refused (see below). |
 | `log.publish` | `events` | array of `LogEventDto` | yes | A batch of structured log events (≤ 64). |
 | | `dropped` | integer | no | Events the plugin's sink dropped since the previous batch. |
 | `state.update` | `kind` | string | yes | The kind whose snapshot is stale - re-describe it. Not data-carrying. |
 | | `localId` | string | no | The capability that changed. For `email-inbox`, the inbox whose content or status changed - see [`email-inbox`](#email-inbox). |
 | | `reason` | string | no | Diagnostic reason. |
+
+Refusals, each a `protocol.error` correlated to the refused message:
+
+- `event.publish` with a number anywhere in `parameters` (nested objects and arrays included) that
+  falls outside the range of a 64-bit float, such as `1e400`: `INVALID_PAYLOAD`, and the event is not
+  published. JSON has no `NaN` or `Infinity` literal, so this is how an infinite value would arrive. Every
+  protocol major gets this answer. A Macro Deck 3.0.3 host drops an occurrence with such a top-level number
+  without an answer and logs a warning; an earlier host published the value as infinity.
+- `log.publish` with more than 64 events: `PAYLOAD_TOO_LARGE`. The first batch over the log rate limit:
+  `RATE_LIMITED`.
+- `event.publish` or `state.update` the host failed to handle: `INTERNAL_ERROR`, see
+  [Errors](/reference/protocol/#errors).
 
 Built from the schema:
 

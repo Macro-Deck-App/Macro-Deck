@@ -22,8 +22,8 @@ env:
   NODE_VERSION: '^22.22.3'
   # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
   # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
-  DOTNET_VERSION: 10.0.401
-  RUST_TOOLCHAIN: '1.99.0'
+  DOTNET_VERSION: 10.0.402
+  RUST_TOOLCHAIN: '1.99.1'
   # CI validates the installed product configuration. Local IDE builds keep
   # the Development default in Directory.Build.props and ui/bootstrapper/build.rs.
   BUILD_CHANNEL: Production
@@ -47,7 +47,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -59,6 +59,34 @@ jobs:
           else
             node ci/scripts/ci-scope.mjs --all --github-output "$GITHUB_OUTPUT"
           fi
+
+  # A pull request into production that carries unreleased main commits ships them as a hotfix, as the
+  # astro bump retargeted from main did with 3.0.3. Only main itself may bring main into production.
+  production-guard:
+    name: Production carries no unreleased main commits
+    if: github.event_name == 'pull_request' && github.base_ref == 'production' && github.head_ref != 'main'
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Refuse main commits production does not have
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null \
+            || git fetch --no-tags origin "+refs/pull/${{ github.event.pull_request.number }}/head"
+          # Every commit both the pull request and main contain is a common ancestor of the two.
+          mapfile -t bases < <(git merge-base --all "$HEAD_SHA" origin/main)
+          mapfile -t leaked < <(git rev-list --no-merges "${bases[@]}" ^origin/production)
+          if [ "${#leaked[@]}" -gt 0 ]; then
+            echo "::error::This pull request brings ${#leaked[@]} commits from main into production. Branch hotfixes from production and cherry-pick fixes instead."
+            git log --no-walk --format='%h %s' "${leaked[@]}" | head -50
+            exit 1
+          fi
+          echo "No unreleased main commits."
 
   host:
     name: Host build & tests
@@ -74,7 +102,7 @@ jobs:
 
       # For ci/scripts/verify-nuget-packages.mjs below, and for the preview renderer the plugin CLI
       # bundles from ui/runtime on build.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -235,7 +263,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -350,7 +378,7 @@ jobs:
 
       - name: Upload regenerated measured fixtures
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: measured-conformance
           path: ${{ runner.temp }}/measured-conformance
@@ -373,7 +401,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -457,7 +485,7 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: clippy, rustfmt
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: ui/bootstrapper
 
@@ -502,7 +530,7 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: clippy, rustfmt
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: ui/bootstrapper
 
@@ -568,7 +596,7 @@ jobs:
 
       - name: Upload harness logs
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: installer-test-logs
           path: ${{ runner.temp }}/installer-tests/logs

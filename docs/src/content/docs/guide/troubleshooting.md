@@ -17,6 +17,7 @@ Macro Deck writes its logs to the `logs` folder inside its data folder:
 | Windows | `%APPDATA%\MacroDeck` |
 | macOS | `~/Library/Application Support/MacroDeck` |
 | Linux | `~/.local/share/MacroDeck`, or `$XDG_DATA_HOME/MacroDeck` if that is set |
+| [Portable mode](/guide/installation/#portable-mode-windows) | The `Data` folder next to `MacroDeck.exe` |
 
 ## An exported profile, folder or button will not import
 
@@ -248,8 +249,18 @@ does not open a second copy. Look for the running Macro Deck in the system tray 
 If you quit from the menu bar or system tray while Macro Deck is still restoring a backup or preparing its
 data at startup, it finishes that first, for up to 15 minutes. Until then, starting it again shows nothing.
 
+If you start Macro Deck again right after quitting it, it can take up to about a minute to open: it waits
+for the previous Macro Deck to finish shutting down. One that does not finish in that time is ended.
+
 If Macro Deck says another host is already running under this account, a host is still running without
-its window. Close it or restart the computer, then start Macro Deck again.
+its window. Close it or restart the computer, then start Macro Deck again. On Linux and macOS, a host
+stops on its own within a few seconds once the Macro Deck that started it has ended, even when Macro Deck
+crashed or was killed; a host left over by an older version does not.
+
+To quit Macro Deck from a terminal or a script, start the Macro Deck program with `--quit` as its only
+argument. That quits the running Macro Deck the same way **Quit** in the tray menu does, and starts
+nothing when Macro Deck is not running. On macOS, run the program inside the app bundle directly: `open`
+only brings the running Macro Deck to the front.
 
 On Linux, two users on one computer can each run their own Macro Deck at the same time. The first one
 keeps the default public port, so the second one starts without it: its devices connect once you
@@ -305,6 +316,49 @@ again.
 If the host does not start although nothing seems to use the port, a host left over from an earlier
 Macro Deck may still be running and can no longer be taken over. End the **Macro Deck Host** process in
 Task Manager or Activity Monitor, then choose **Restart Macro Deck**.
+
+## A plugin keeps Macro Deck from starting or working
+
+Start the Macro Deck program with `--disable-plugins`. Macro Deck then starts without starting any
+installed plugin, and the status bar shows **Plugins disabled**. Your plugins stay installed and listed,
+and you can uninstall one without starting it.
+
+To find the plugin that causes the problem, turn on developer mode and open **Developer Tools**. Under
+**Managed plugins**, every plugin shows whether it is stopped or running. Start them one at a time: a
+started plugin runs as usual, with its logs and errors, and one that fails to start does not affect
+Macro Deck.
+
+This only applies until you quit Macro Deck. Starting or stopping a plugin in this mode does not change
+which plugins start the next time, and plugins are not updated automatically. A plugin you install in
+this mode runs right away but only starts automatically again once you start it in a normal session.
+When Macro Deck restarts itself, for example after an update, it stays in this mode.
+
+Quit Macro Deck before you start it with `--disable-plugins`. If it is already running, the program says
+so and exits without changing anything. If the running Macro Deck is still starting or shows that it
+stopped, the new start only brings its window to the front.
+
+## Command-line options
+
+Start the Macro Deck program with one of these options to get information without starting Macro Deck.
+They only read the installed files, start no plugin and also work while Macro Deck is running.
+
+| Option | What it does |
+| --- | --- |
+| `--help`, `-h` | Lists the command-line options. |
+| `--version` | Shows the installed version and build. |
+| `--list-plugins` | Lists every installed plugin with its name, identifier and versions. A plugin whose files are damaged is listed with what is wrong, and the others are still listed. |
+| `--disable-plugins` | Starts Macro Deck without starting installed plugins, see [above](#a-plugin-keeps-macro-deck-from-starting-or-working). |
+| `--quit` | Quits the running Macro Deck, see [Macro Deck does not open a second time](#macro-deck-does-not-open-a-second-time). |
+
+The output is in the language of your operating system. The exit code is `0` when the command worked,
+`1` when the plugins folder or the Macro Deck installation could not be read, and `89` when
+`--disable-plugins` found Macro Deck already running.
+
+On Windows, a Command Prompt or PowerShell window does not wait for Macro Deck, so the output appears
+after the next prompt and the exit code is lost. Run it from a batch file, which waits, or in PowerShell use
+`(Start-Process "Macro Deck.exe" --version -Wait -PassThru -NoNewWindow).ExitCode` for the exit code or
+`& "Macro Deck.exe" --version | Out-String` for the output. On macOS, run the program inside the app
+bundle directly, not with `open`.
 
 ## Plugins show up as dotnet in Task Manager
 
@@ -618,9 +672,13 @@ for the case that fits.
   address** from **Settings > AI clients** into your client's configuration again. The Claude Desktop
   extension finds Macro Deck on its own. A request that was running while Macro Deck restarted can fail
   once; ask again.
-- **It runs on another computer and cannot reach Macro Deck.** Check that the configuration uses the
-  network address of the computer running Macro Deck instead of `127.0.0.1`, and go through the network
-  checks under [A device cannot connect](#a-device-cannot-connect).
+- **It runs on another computer and is refused (403 Forbidden), or cannot reach Macro Deck.** Turn on
+  **Allow AI clients on other devices** in **Settings > AI clients**. Check that the configuration uses
+  the network address of the computer running Macro Deck instead of `127.0.0.1`, and go through the
+  network checks under [A device cannot connect](#a-device-cannot-connect).
+- **It runs on this computer and is refused (403 Forbidden).** Its configuration uses this computer's
+  network address. Copy **Server address** from **Settings > AI clients**, which uses `127.0.0.1`, or turn
+  on **Allow AI clients on other devices**.
 - **It is rejected (401 Unauthorized), or the extension says the access token was rejected.** The token
   was revoked or removed. Create a new token in **Settings > AI clients** and update your client's
   configuration, or install the Claude Desktop extension again from a new download.

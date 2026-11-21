@@ -58,13 +58,15 @@ public class WidgetStateProviderResolutionTests
 			{ Id = id, FolderId = Guid.NewGuid(), Type = WidgetTypeIds.ActionButton, Data = data.ToJsonString() };
 	}
 
-	private static (WidgetStateService Service, FakeIntegrationRegistry Registry) Build(WidgetEntity widget)
+	private static (WidgetStateService Service, FakeIntegrationRegistry Registry) Build(
+		WidgetEntity widget,
+		VariableRegistry? variables = null)
 	{
 		var readiness = new StartupReadiness();
 		readiness.MarkCachesReady();
 		readiness.MarkVariablesReady();
 		var registry = new FakeIntegrationRegistry();
-		var renderer = new VariableTemplateRenderer(new VariableRegistry());
+		var renderer = new VariableTemplateRenderer(variables ?? new VariableRegistry());
 		var service = new WidgetStateService(new SingleWidgetFolderCache(widget),
 			renderer,
 			new ActionConditionEvaluator(renderer),
@@ -110,6 +112,44 @@ public class WidgetStateProviderResolutionTests
 		var resolution = await service.Resolve(widget.Id);
 
 		Assert.That(resolution!.StateId, Is.EqualTo("a"));
+	}
+
+	[Test]
+	public async Task A_provider_parameter_bound_to_a_variable_is_read_with_the_value_it_holds_for_the_widget()
+	{
+		var action = new FakeStateProviderAction
+		{
+			Id = "provide", SnapshotToReturn = new ActionStateSnapshot([new ActionStateDefinition("a", "A")], "a")
+		};
+		const string flows =
+			"[{\"triggerId\":\"t\",\"triggerType\":\"onEvent\",\"children\":[{\"id\":\"blk-1\","
+			+ "\"type\":\"action\",\"blockType\":\"integration.provide\",\"integrationId\":\"integration\","
+			+ "\"actionId\":\"provide\",\"parameters\":[{\"name\":\"input\",\"type\":\"dynamic-choice\","
+			+ "\"value\":{\"$var\":\"mic_name\"}},{\"name\":\"missing\",\"type\":\"dynamic-choice\","
+			+ "\"value\":{\"$var\":\"nope\"}},{\"name\":\"literal\",\"type\":\"string\",\"value\":\"Desk\"}]}]}]";
+		var widget = Button(Guid.NewGuid(), flows, ProviderData("blk-1", ["a"]));
+		var variables = new VariableRegistry();
+		variables.Upsert(new VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = "mic_name",
+			Scope = Domain.Enums.VariableScope.Widget,
+			ScopeRefId = widget.Id.ToString(),
+			Type = Domain.Enums.VariableType.Text,
+			Classification = Domain.Enums.VariableClassification.User,
+			Value = "Mic/Aux"
+		});
+		var (service, registry) = Build(widget, variables);
+		registry.Add(new FakeIntegration { Id = "integration", Actions = [action] });
+
+		await service.Resolve(widget.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(action.LastParameters!["input"], Is.EqualTo("Mic/Aux"));
+			Assert.That(action.LastParameters!["missing"], Is.Null);
+			Assert.That(action.LastParameters!["literal"], Is.EqualTo("Desk"));
+		});
 	}
 
 	[Test]

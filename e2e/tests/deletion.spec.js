@@ -1,6 +1,12 @@
 import { expect, test, useIsolatedHost } from './support/fixtures.js';
 import { flow } from './support/seed.js';
-import { desktopTile, openDesktopProfile, recordSocketFrames } from './support/pages.js';
+import {
+  desktopProfileTrigger,
+  desktopTile,
+  openDesktopProfile,
+  pressDesktopTile,
+  recordSocketFrames,
+} from './support/pages.js';
 
 useIsolatedHost('deletion', { prepare: api => api.completeOnboarding() });
 
@@ -67,15 +73,25 @@ test('deleting one widget ends the editor session another desktop window holds o
     .toBeGreaterThan(0);
 });
 
-test('deleting several widgets at once ends the editor session another desktop window holds on one of them', async ({ page, api, host }) => {
+test('deleting several widgets through the desktop multi-select ends the editor session another desktop window holds on one of them', async ({ page, browser, api, host }) => {
   const { profile, buttons } = await seedButtons(api, 'E2E Delete Many');
   const editor = await openEditorOn(page, host, profile, buttons[1].id);
 
-  await api.post('/api/widgets/batch/delete', {
-    folderId: profile.rootFolder.id,
-    ids: buttons.map(button => button.id),
-  });
+  const deckContext = await browser.newContext();
+  const deck = await deckContext.newPage();
+  await openDesktopProfile(deck, host, profile.name);
+  for (const button of buttons) {
+    await desktopTile(deck, button.id).click({ modifiers: ['ControlOrMeta'] });
+  }
+  await expect(deck.locator('.widget-chrome.is-selected')).toHaveCount(buttons.length);
+  await desktopTile(deck, buttons[2].id).click({ button: 'right' });
+  await deck.locator('.menu-item').filter({ hasText: /^\s*Delete 3 widgets\s*$/ }).click();
+  await deck.getByRole('dialog', { name: 'Delete Widgets' }).getByRole('button', { name: 'Delete', exact: true }).click();
+  for (const button of buttons) {
+    await expect(desktopTile(deck, button.id)).toHaveCount(0);
+  }
   await expect.poll(async () => (await api.rootFolder(profile.id)).widgets.length).toBe(0);
+  await deckContext.close();
 
   await expect.poll(() => closedByHost(editor.frames).filter(id => editor.sessions.includes(id)).length)
     .toBeGreaterThan(0);
@@ -105,4 +121,37 @@ test('a single delete the host refuses puts the widget back and shows an error',
 
   await expect(page.locator('shared-error-banner')).toBeVisible();
   await expect(desktopTile(page, buttons[0].id)).toBeVisible();
+});
+
+// E2E-DEL-01, MD-54. The target profile starts on its root folder, so Back has no parent to fall back to.
+test('Back after the profile it came from was deleted stays on the current profile', async ({ page, api, host }) => {
+  const from = await api.profile('E2E Back From', { columns: 3, rows: 2 });
+  const to = await api.profile('E2E Back To', { columns: 3, rows: 2 });
+  const toTarget = await api.actionButton(from.rootFolder.id, {
+    label: 'To target',
+    flows: [flow.shortPress(flow.changeProfile(to.id))],
+  });
+  const back = await api.actionButton(to.rootFolder.id, { label: 'Back', flows: [flow.shortPress(flow.goBack())] });
+  const frames = recordSocketFrames(page);
+  const backCommands = () => frames.received.filter(message => message.type === 'FolderNavigationEvent'
+    && message.payload?.command === 'back').length;
+
+  await openDesktopProfile(page, host, from.name);
+  await page.getByRole('button', { name: 'Lock', exact: true }).click();
+  await pressDesktopTile(page, frames, toTarget.id);
+  await expect(desktopProfileTrigger(page)).toContainText(to.name);
+  await expect(desktopTile(page, back.id)).toBeVisible();
+
+  await desktopProfileTrigger(page).click();
+  await page.locator('.profile-list-item').filter({ hasText: from.name })
+    .getByRole('button', { name: `More actions for ${from.name}` }).click();
+  await page.locator('.menu-item').filter({ hasText: /^\s*Delete\s*$/ }).click();
+  await page.getByRole('dialog', { name: 'Delete Profile' }).getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect.poll(async () => (await api.profiles()).some(profile => profile.id === from.id)).toBe(false);
+
+  await pressDesktopTile(page, frames, back.id);
+  await expect.poll(backCommands, { message: 'the host sent the Back command' }).toBe(1);
+  await expect(desktopProfileTrigger(page)).toContainText(to.name);
+  await expect(desktopTile(page, back.id)).toBeVisible();
+  await expect(page.locator('shared-error-banner')).toHaveCount(0);
 });

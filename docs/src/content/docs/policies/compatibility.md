@@ -220,6 +220,14 @@ What did **not** need a major:
   host ignores the field, so a patch carrying only it applies nothing there and `ApplyAsync` returns
   `false`. While a Slider's or History Graph's colour thresholds are on, a stored accent has no visible
   effect.
+- An Action Button can carry up to four labels. `WidgetAppearancePatch.LabelNumber` and an optional
+  `labelNumber` field on the wire patch name the label a patch changes, `1` being the primary one, and
+  `DeviceSurfaceAppearance` gained `LabelX`, `LabelY` and `ExtraLabels`, mirrored as optional
+  fields on the wire. An older host ignores `labelNumber` and **changes the primary label**, so a plugin
+  that must not touch it there has no way to tell and should not send a numbered patch to a host it has
+  not been tested against. An older device provider ignores the new surface fields and draws the primary
+  label only, at the third of the button `TextAlign` and `LabelPosition` name. A patch's `TextAlign` or
+  `LabelPosition` now also replaces a free position the user set on that axis.
 - [Video streams](/features/video-streams/) added a capability kind, `video-stream-provider`, a host API,
   `video-streams`, and `video_stream_` error reasons under the existing `CAPABILITY_UNAVAILABLE` code, all
   within major `3`. An older host rejects the kind non-fatally, and a plugin that does not implement
@@ -268,7 +276,9 @@ What did **not** need a major:
   never reports. The `ui` host API gained `report-parameter-values`, which an older host answers with
   `CAPABILITY_UNSUPPORTED` and the SDK then drops, so a reported value is not saved there. The `ui`
   capability gained `session.flush`, which a plugin built before it answers with `CAPABILITY_UNSUPPORTED`
-  and the host treats as flushed.
+  and the host treats as flushed. `MacroDeck.Plugin.Hosting` now also sends the patches every earlier
+  event produced before it answers a flush; an earlier version could answer before sending them, and the
+  host then saved without them.
 - `IVariableApi` gained `RequestRefreshAsync` and `NotifyDeclarationsChangedAsync`, both defaulting to a
   no-op, and the `variables` host API gained `refresh`; an older host makes the request a no-op.
   `NotifyDeclarationsChangedAsync` uses the existing `state.update`.
@@ -389,6 +399,13 @@ What did **not** need a major:
   `scripts.input-color`; only then does a Color script input reach it as `color`, every other plugin keeps
   receiving it as `text` with the hex value. The SDK declares it automatically. See
   [Color variables](/features/variables/#color-variables).
+- Variable references on trigger parameters added an optional `resolvedValue` to each `event-bindings`
+  parameter (`EventBindingValue.ResolvedValue`, an init property, so the two-value constructor and
+  deconstruction stay as they were) and the host API feature `event-bindings.resolved-value`, within major
+  `3`. The SDK declares the feature automatically. Only a session that declares it receives
+  `resolvedValue` and a push when only a bound variable's value changed; every other session keeps today's
+  payload and push timing, because an older SDK raises `BindingsChanged` on every push. `Value` still
+  carries the reference unresolved. See [Reading what is bound](/features/events/#reading-what-is-bound).
 - Colour variables are also a one-way step for the host's own data, which no plugin contract covers: once
   a user variable of type `Color` exists, the persisted user-variables file cannot be read by a Macro Deck
   release from before `Color`, which then starts without any user variables. Downgrading the host is
@@ -556,6 +573,11 @@ the value vocabularies `UiButtonVariants`, `UiStackAlignments`, `UiStackGaps` an
 `UiModelVersions` did not move. An older reader declines the new types and draws each node's explicit
 fallback, and ignores the new properties, drawing an ordinary button, a plain stack and a heading without a
 badge.
+
+[Collapsible sections](/ui/views/configuration/#collapsible-sections) added the configuration type `section`
+(`UiConfigSection`), the properties `modified` and `memoryKey`, and the `reset` config event
+(`UiConfigEvents.Reset`); `UiModelVersions` did not move. An older reader declines the type and draws the
+node's explicit fallback, and never sends `reset`.
 
 ### What "maintained per major" means in practice
 

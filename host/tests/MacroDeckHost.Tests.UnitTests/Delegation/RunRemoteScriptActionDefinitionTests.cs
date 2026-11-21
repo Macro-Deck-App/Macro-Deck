@@ -37,6 +37,15 @@ internal sealed class RunRemoteScriptActionDefinitionTests
 		_client.Dispose();
 	}
 
+	[TestCase("instance")]
+	[TestCase("scriptId")]
+	public void The_remote_script_target_cannot_be_bound_to_a_variable(string name)
+	{
+		var parameter = _action.Parameters.Single(candidate => candidate.Name == name);
+
+		Assert.That(parameter.LiteralOnly, Is.True);
+	}
+
 	[Test]
 	public void Declares_the_run_remote_script_role_so_the_editor_offers_script_inputs()
 	{

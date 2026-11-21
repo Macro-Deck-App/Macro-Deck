@@ -7,6 +7,7 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Triggers;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Infrastructure.BackgroundServices;
 using MacroDeckHost.Tests.UnitTests.Auth;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -46,6 +47,7 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 					TimeProvider.System,
 					new DeckClientTracker(Serilog.Core.Logger.None)));
 				services.AddScoped<IEventTriggerRunner>(_ => runner);
+				services.AddSingleton<IVariableEventAudience>(new VariableEventAudience(new VariableRegistry()));
 				services.AddHostedService<EventDispatchBackgroundService>();
 				services.AddHostedService<ServerLifecycleEventBackgroundService>();
 			})
@@ -87,6 +89,7 @@ public sealed class ServerLifecycleEventBackgroundServiceTests
 					TimeProvider.System,
 					new DeckClientTracker(Serilog.Core.Logger.None)));
 				services.AddScoped<IEventTriggerRunner>(_ => runner);
+				services.AddSingleton<IVariableEventAudience>(new VariableEventAudience(new VariableRegistry()));
 				services.AddHostedService<EventDispatchBackgroundService>();
 				services.AddHostedService<ServerLifecycleEventBackgroundService>();
 			})

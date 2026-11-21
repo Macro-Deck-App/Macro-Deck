@@ -104,6 +104,36 @@ internal sealed class PluginArtifactReaderTests
 		Assert.That(result.Error, Is.EqualTo(PluginInstallError.InvalidArchive));
 	}
 
+	// The ZIP directory stays intact; only the first entry's deflate stream is overwritten. A 0xFF first
+	// byte declares the reserved block type 3, which no inflater accepts.
+	private string WriteArchiveWithCorruptFirstEntry()
+	{
+		var artifact = WriteArchive(archive =>
+		{
+			AddEntry(archive, "app", new byte[64 * 1024], CompressionLevel.Optimal);
+			AddManifest(archive);
+		});
+
+		var bytes = File.ReadAllBytes(artifact);
+		var dataStart = 30 + BitConverter.ToUInt16(bytes, 26) + BitConverter.ToUInt16(bytes, 28);
+		bytes.AsSpan(dataStart, 16).Fill(0xFF);
+		File.WriteAllBytes(artifact, bytes);
+		return artifact;
+	}
+
+	[Test]
+	public void An_archive_that_opens_but_holds_a_corrupt_entry_throws_invalid_data_instead_of_returning_a_result()
+	{
+		var artifact = WriteArchiveWithCorruptFirstEntry();
+		var target = Path.Combine(_root, "extract");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(async () => await _reader.Inspect(artifact), Throws.TypeOf<InvalidDataException>());
+			Assert.That(async () => await _reader.ExtractTo(artifact, target), Throws.TypeOf<InvalidDataException>());
+		});
+	}
+
 	[Test]
 	public async Task An_archive_beyond_the_compression_ratio_limit_is_refused()
 	{

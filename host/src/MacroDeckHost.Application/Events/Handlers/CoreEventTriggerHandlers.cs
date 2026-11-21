@@ -4,19 +4,9 @@ using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Application.Triggers.Providers;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Domain.Enums;
 using Mediator;
-using Microsoft.Extensions.Hosting;
 
 namespace MacroDeckHost.Application.Events.Handlers;
-
-internal static class VariableEventScope
-{
-	public static bool IsLocalToRun(VariableEntity variable)
-	{
-		return variable.Scope is VariableScope.Script or VariableScope.Automation;
-	}
-}
 
 public sealed class VariableValueChangedEventTriggerHandler
 	: INotificationHandler<VariableValueChangedNotification>
@@ -41,7 +31,11 @@ public sealed class VariableValueChangedEventTriggerHandler
 				["variable"] = notification.Variable.Name,
 				["value"] = ActionConditionValue(notification.Variable),
 				["previousValue"] = notification.PreviousValue
-			}));
+			},
+			null,
+			null,
+			0,
+			EventVariableSource.Of(notification.Variable)));
 
 		return ValueTask.CompletedTask;
 	}
@@ -58,18 +52,15 @@ public sealed class IntegrationStateChangedEventTriggerHandler
 	private readonly IEventBus _bus;
 	private readonly IIntegrationRegistry _integrations;
 	private readonly StartupReadiness _readiness;
-	private readonly IHostApplicationLifetime _lifetime;
 
 	public IntegrationStateChangedEventTriggerHandler(
 		IEventBus bus,
 		IIntegrationRegistry integrations,
-		StartupReadiness readiness,
-		IHostApplicationLifetime lifetime)
+		StartupReadiness readiness)
 	{
 		_bus = bus;
 		_integrations = integrations;
 		_readiness = readiness;
-		_lifetime = lifetime;
 	}
 
 	public ValueTask Handle(IntegrationStateChangedNotification notification, CancellationToken cancellationToken)
@@ -85,30 +76,14 @@ public sealed class IntegrationStateChangedEventTriggerHandler
 				["integrationName"] = integration?.Name ?? notification.IntegrationId
 			});
 
-		if (_readiness.WhenEventDispatchReady.IsCompletedSuccessfully)
+		// Integrations initialize before the dispatcher has indexed the automations, and the bus drops
+		// events nobody subscribes to yet.
+		if (!_readiness.HoldUntilEventDispatchReady(occurrence))
 		{
 			_bus.Publish(occurrence);
-		}
-		else
-		{
-			_ = PublishWhenDispatchReady(occurrence);
 		}
 
 		return ValueTask.CompletedTask;
-	}
-
-	private async Task PublishWhenDispatchReady(EventOccurrence occurrence)
-	{
-		try
-		{
-			// Integrations initialize before the dispatcher has indexed the automations, and the bus drops
-			// events nobody subscribes to yet.
-			await _readiness.WhenEventDispatchReady.WaitAsync(_lifetime.ApplicationStopping);
-			_bus.Publish(occurrence);
-		}
-		catch (OperationCanceledException)
-		{
-		}
 	}
 }
 
@@ -129,7 +104,11 @@ public sealed class VariableCreatedEventTriggerHandler : INotificationHandler<Va
 		}
 
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableCreated),
-			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name }));
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name },
+			null,
+			null,
+			0,
+			EventVariableSource.Of(notification.Variable)));
 
 		return ValueTask.CompletedTask;
 	}
@@ -152,7 +131,11 @@ public sealed class VariableDeletedEventTriggerHandler : INotificationHandler<Va
 		}
 
 		_bus.Publish(new EventOccurrence(EventIds.Qualify(EventIds.VariableDeleted),
-			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name }));
+			new Dictionary<string, object?>(StringComparer.Ordinal) { ["variable"] = notification.Variable.Name },
+			null,
+			null,
+			0,
+			EventVariableSource.Of(notification.Variable)));
 
 		return ValueTask.CompletedTask;
 	}

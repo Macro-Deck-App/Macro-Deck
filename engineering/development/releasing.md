@@ -10,6 +10,12 @@ Every release covers Windows, Linux, and macOS. There is no platform selection: 
 
 Release artifacts always use the Production build identity. Beta is derived from the version; it is not a separate build channel.
 
+The generated release notes compare against the newest earlier tag of the same channel, a stable release against the last stable release and a beta against the last beta ([`ci/scripts/previous-release-tag.mjs`](../../ci/scripts/previous-release-tag.mjs)). Left to pick on its own, GitHub chooses by date, and a beta tagged after the last stable release made the 3.0.3 notes cover everything since 3.0.1.
+
+## Hotfixes and the production branch
+
+`production` holds what stable users run. A hotfix branches from `production` and takes fixes from `main` only by cherry-pick. A pull request into `production` that carries any commit of `main` that `production` does not already have fails the `Production carries no unreleased main commits` check in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml): that is how 3.0.3 shipped the 3.1 features, through a dependency update branched from `main` and retargeted to `production`. Only a pull request whose head is `main` itself is exempt.
+
 ## What the workflow does
 
 The build workflow tests every platform, builds the Angular UI, publishes the framework-dependent single-file host for all three runtime identifiers together in one Ubuntu job with a bundled .NET runtime in each `runtime/` folder (the official ASP.NET Core runtime archives, resolved from Microsoft's release metadata at the runtime patch of the exact SDK the workflows pin and checksum-verified, see [`ci/scripts/stage-dotnet-runtime.sh`](../../ci/scripts/stage-dotnet-runtime.sh)), packages the Tauri application on the target operating systems, runs the end-to-end suite against a production host staged from the same revision, and packs the NuGet package family. Linux and macOS package in parallel with the tests. Windows compiles and signs only after they all pass, protecting the eSigner quota. A final collection job exposes the complete platform artifact set atomically. The build publishes nothing externally; everything it produces is a workflow artifact.

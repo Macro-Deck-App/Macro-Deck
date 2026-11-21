@@ -1,12 +1,15 @@
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 using MacroDeckHost.Application.Security.KeyRing;
 using MacroDeckHost.Auth;
+using MacroDeckHost.Cli;
 using MacroDeckHost.Application.Backups;
 using MacroDeckHost.Application.Configuration;
 using MacroDeckHost.Application.Network.Http;
 using MacroDeckHost.Application.Usb;
 using MacroDeckHost.Application.Logging;
+using MacroDeckHost.Application.Mcp;
 using MacroDeckHost.Application.Paths;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Network.Tls;
@@ -36,6 +39,16 @@ public static class Program
 
 	public static void Main(string[] args)
 	{
+		var commandLine = HostCommandLine.Parse(args);
+		if (commandLine.Command != HostCommand.Run)
+		{
+			Environment.ExitCode = RunCommand(commandLine.Command);
+			return;
+		}
+
+		HostStartupFacts.PluginsDisabled = commandLine.DisablePlugins;
+		args = commandLine.RemainingArguments;
+
 		if (!OperatingSystem.IsMacOS())
 		{
 			RunHostAsync(args).GetAwaiter().GetResult();
@@ -56,6 +69,13 @@ public static class Program
 		}
 
 		host.GetAwaiter().GetResult();
+	}
+
+	private static int RunCommand(HostCommand command)
+	{
+		using var output = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false));
+		var cli = new HostCli(output, CultureInfo.CurrentUICulture.Name);
+		return cli.Run(command, DataRootEnvironment.Current());
 	}
 
 	private static async Task RunHostAsync(string[] args)
@@ -89,6 +109,7 @@ public static class Program
 		{
 			var loopbackPort = HostEndpoints.ResolveLoopbackPort();
 			var loopbackSecret = LoopbackSecretSource.Resolve();
+			var shellParent = ShellParent.Take();
 			LoopbackSecret.Set(loopbackSecret.Secret);
 
 			if (await SingleInstanceGuard.IsAnotherInstanceRunning())
@@ -283,6 +304,8 @@ public static class Program
 					services.AddSingleton(KeyRingStartupState.KekHolder);
 					services.AddSingleton(KeyRingStartupState.Store);
 					services.AddSingleton(KeyRingStartupState.Identity);
+					services.AddSingleton(shellParent);
+					services.AddHostedService<ShellProcessWatchdog>();
 				})
 				.ConfigureWebHostDefaults(hostBuilder =>
 				{
@@ -293,11 +316,17 @@ public static class Program
 
 			await SeedLogLevelAsync(host, logLevelState);
 			await SeedHttpUserAgentAsync(host);
+			await SeedMcpNetworkAccessAsync(host);
 
 			var scopeFactory = host.Services.GetRequiredService<IServiceScopeFactory>();
 			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostVariableReader
 				= (name, variableContext, _)
 					=> Application.Variables.HostVariableReader.ReadAsync(scopeFactory, name, variableContext);
+			Infrastructure.SystemIntegrations.Variables.VariablesIntegration.HostTemplateVariableRefresh
+				= (name, variableContext, _)
+					=> Application.Variables.Templates.HostTemplateVariableRefresher.RefreshAsync(scopeFactory,
+						name,
+						variableContext);
 
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.
@@ -420,6 +449,24 @@ public static class Program
 		catch (Exception e)
 		{
 			Log.Warning(e, "Could not seed the HTTP User-Agent; keeping the default");
+		}
+	}
+
+	private static async Task SeedMcpNetworkAccessAsync(IHost host)
+	{
+		if (KeyRingStartupState.IsLocked)
+		{
+			return;
+		}
+
+		try
+		{
+			await host.Services.GetRequiredService<IMcpNetworkAccess>().Seed();
+		}
+		catch (Exception e)
+		{
+			Log.Warning(e,
+				"Could not read whether AI clients on other devices are allowed; serving this computer only");
 		}
 	}
 

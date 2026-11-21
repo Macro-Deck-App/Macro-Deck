@@ -23,6 +23,7 @@ using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.Auth;
+using MacroDeckHost.Tests.UnitTests.Plugins;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 
 namespace MacroDeckHost.Tests.UnitTests.Ui.Sessions;
@@ -86,7 +87,11 @@ internal sealed class WidgetUiSessionTests
 			_profiles);
 
 		_connections = new NoPluginConnections();
-		var availability = new WidgetProviderAvailability(_widgetTypes, _integrations, _connections);
+		var availability = new WidgetProviderAvailability(_widgetTypes,
+			_integrations,
+			_connections,
+			new FakePluginInstallationCatalog(),
+			new FakePluginManifestReader());
 		_recovery = new UnavailableWidgetSessionRecovery(_registry, availability, _integrations);
 
 		_opener = new WidgetUiSessionOpener(_folders,
@@ -597,6 +602,26 @@ internal sealed class WidgetUiSessionTests
 	}
 
 	[Test]
+	public async Task A_widget_whose_plugin_stops_keeps_its_last_known_integration_name()
+	{
+		_integrations.Add(new FakeIntegration { Id = GaugeOwner });
+		var widget = AddWidget(GaugeType, "{}");
+		await TreeOf(OpenLive(widget, DeviceA));
+		await _integrations.UnregisterAsync(GaugeOwner);
+
+		var ticket = OpenLive(widget, DeviceB);
+		var tree = await TreeOf(ticket);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ticket.Accepted, Is.True, ticket.Message);
+			Assert.That(tree, Does.Contain("Deck.UnavailableWidget.Tile"));
+			Assert.That(tree, Does.Contain("\"unavailableProviderName\":\"Test Integration\""));
+			Assert.That(tree, Does.Contain("\"plugin\":\"Test Integration\""));
+		});
+	}
+
+	[Test]
 	public async Task The_placeholder_names_the_plugin_by_its_integration_name_while_it_is_installed()
 	{
 		_integrations.Add(new FakeIntegration { Id = GaugeOwner });
@@ -768,7 +793,11 @@ internal sealed class WidgetUiSessionTests
 			_widgetTypes,
 			_registry,
 			_broker,
-			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
+			new WidgetProviderAvailability(_widgetTypes,
+				_integrations,
+				_connections,
+				new FakePluginInstallationCatalog(),
+				new FakePluginManifestReader()),
 			_recovery,
 			new ColorReferenceResolver(variables));
 		const string data = """{"backgroundColor":"{{ vars.primary | color | color_opacity: 50 }}"}""";
@@ -807,7 +836,11 @@ internal sealed class WidgetUiSessionTests
 			_widgetTypes,
 			_registry,
 			_broker,
-			new WidgetProviderAvailability(_widgetTypes, _integrations, _connections),
+			new WidgetProviderAvailability(_widgetTypes,
+				_integrations,
+				_connections,
+				new FakePluginInstallationCatalog(),
+				new FakePluginManifestReader()),
 			_recovery,
 			TestColors.None,
 			culture);

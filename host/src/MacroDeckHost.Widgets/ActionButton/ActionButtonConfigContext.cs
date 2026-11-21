@@ -29,6 +29,8 @@ internal sealed class ActionButtonConfigContext(
 
 	public CancellationToken SessionToken { get; } = sessionToken;
 
+	public ActionButtonLabelClipboard LabelClipboard { get; init; } = new();
+
 	public string Resolve(LocalizedText text)
 	{
 		return Localization.Resolve(text, Culture) ?? string.Empty;

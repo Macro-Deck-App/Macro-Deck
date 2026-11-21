@@ -9,6 +9,10 @@ internal sealed class ManualTimeProvider : TimeProvider
 
 	public DateTimeOffset Now { get; set; } = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
+	public TimeZoneInfo Zone { get; set; } = TimeZoneInfo.Local;
+
+	public override TimeZoneInfo LocalTimeZone => Zone;
+
 	public override DateTimeOffset GetUtcNow()
 	{
 		return Now;

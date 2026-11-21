@@ -1,4 +1,10 @@
-import { HttpClient, LocalizationCatalog, type GetDeviceSetupResponse } from '@macro-deck/runtime';
+import {
+  ClientAppStrings,
+  HttpClient,
+  LocalizationCatalog,
+  Strings,
+  type GetDeviceSetupResponse,
+} from '@macro-deck/runtime';
 import { DeviceSetupService, type DeviceSetupLocation } from './device-setup';
 import { createDeviceSetupWizard, type PwaAvailability } from './device-setup-wizard';
 import { type PlatformNavigator } from '../pwa/platform';
@@ -262,5 +268,47 @@ describe('device setup wizard', () => {
     await setup.service.recheck();
 
     expect(text(wizard.element)).not.toContain('does not trust');
+  });
+  it('switches to a new language while open, keeping its state and focus', async () => {
+    const setup = service(makeInfo(), refused);
+    await setup.loaded;
+    const localization = new LocalizationCatalog();
+    const wizard = createDeviceSetupWizard({
+      deviceSetup: setup.service,
+      localization: localization,
+      navigator: IOS,
+      hostname: LOCATION.hostname,
+      pwaInstall: { availability: () => 'promptable', promptInstall: () => Promise.resolve('accepted') },
+    });
+    document.body.appendChild(wizard.element);
+    await setup.service.load();
+    const install = wizard.element.querySelector<HTMLButtonElement>('.wc-setup-install .wc-btn')!;
+    install.focus();
+
+    localization.apply({
+      culture: 'de',
+      translations: {
+        [ClientAppStrings.WebClient.DeviceSetup.Title]: 'Gerät einrichten',
+        [ClientAppStrings.WebClient.DeviceSetup.StepApp]: 'App',
+        [ClientAppStrings.WebClient.DeviceSetup.RecheckAction]: 'Erneut prüfen',
+        [ClientAppStrings.WebClient.DeviceSetup.IosStep1]: 'Erster Schritt',
+        [ClientAppStrings.WebClient.DeviceSetup.IosStep5]: 'Vertraue {authority}',
+        [ClientAppStrings.WebClient.Install.InstallAction]: 'Installieren',
+        [Strings.Common.Close]: 'Schließen',
+      },
+    });
+    wizard.repaint();
+
+    expect(document.body.contains(wizard.element)).toBeTrue();
+    expect(wizard.element.querySelector('.wc-setup-title')!.textContent).toBe('Gerät einrichten');
+    expect(wizard.element.querySelector('.wc-setup-close')!.getAttribute('aria-label')).toBe('Schließen');
+    expect(text(wizard.element)).toContain('Erneut prüfen');
+    expect(text(wizard.element)).toContain('Erster Schritt');
+    expect(text(wizard.element)).toContain('Vertraue Macro Deck Local CA');
+    expect(text(wizard.element)).toContain('does not trust');
+    expect(wizard.element.querySelector('.wc-setup-install .wc-btn')).toBe(install);
+    expect(install.textContent).toBe('Installieren');
+    expect(document.activeElement).toBe(install);
+    wizard.close();
   });
 });

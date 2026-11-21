@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 
 use tauri::image::Image;
-use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder};
+use tauri::menu::{IconMenuItemBuilder, Menu, MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::utils::platform::Target;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, Wry};
@@ -152,6 +152,7 @@ pub fn create_main_window(app: &AppHandle) {
         .zoom_hotkeys_enabled(false)
         .initialization_script(SHELL_BRIDGE_SCRIPT)
         .initialization_script(EXTERNAL_LINKS_SCRIPT);
+    builder = crate::portable::with_webview_data(builder);
 
     if should_disable_context_menu(host::is_packaged(), devtools_requested) {
         builder = builder.initialization_script(DISABLE_CONTEXT_MENU_SCRIPT);
@@ -360,6 +361,8 @@ pub fn show_main_window(app: &AppHandle) {
 }
 
 const TRAY_ID: &str = "main";
+const TRAY_TOOLTIP: &str = "Macro Deck";
+const MENU_BADGE_SIZE: u32 = 32;
 
 // macOS gets a flat black silhouette because it is used as a template image:
 // the system recolours it for the menu bar's appearance and for the selected
@@ -379,10 +382,15 @@ static TRAY_UPDATE_VERSION: Mutex<Option<String>> = Mutex::new(None);
 fn tray_menu(app: &AppHandle, update_version: Option<&str>) -> tauri::Result<Menu<Wry>> {
     let mut menu = MenuBuilder::new(app);
     if let Some(version) = update_version {
-        let update = MenuItemBuilder::with_id(
+        let update = IconMenuItemBuilder::with_id(
             "update",
             localization::t_args(keys::TRAY_UPDATE_TO, &[("version", version)]),
         )
+        .icon(Image::new_owned(
+            tray_badge::badge_image(MENU_BADGE_SIZE),
+            MENU_BADGE_SIZE,
+            MENU_BADGE_SIZE,
+        ))
         .build(app)?;
         menu = menu.item(&update).separator();
     }
@@ -424,6 +432,14 @@ pub fn sync_tray_update(app: &AppHandle, version: Option<&str>) {
             let Some(tray) = app.tray_by_id(TRAY_ID) else {
                 return;
             };
+            let tooltip = match version.as_deref() {
+                Some(version) => localization::t_args(
+                    keys::TRAY_UPDATE_AVAILABLE_TOOLTIP,
+                    &[("version", version)],
+                ),
+                None => TRAY_TOOLTIP.to_string(),
+            };
+            let _ = tray.set_tooltip(Some(tooltip));
             match tray_menu(&app, version.as_deref()) {
                 Ok(menu) => {
                     let _ = tray.set_menu(Some(menu));
@@ -454,7 +470,7 @@ pub fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .icon_as_template(cfg!(target_os = "macos"))
-        .tooltip("Macro Deck")
+        .tooltip(TRAY_TOOLTIP)
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "show" => show_main_window(app),
@@ -523,7 +539,7 @@ mod tests {
             .enumerate()
         {
             let (x, y) = (i as u32 % width, i as u32 / width);
-            if x < width / 2 || y >= height / 2 {
+            if x * 5 < width * 2 || y * 5 >= height * 3 {
                 assert_eq!(a, b, "pixel {x},{y} outside the badge corner changed");
             }
         }

@@ -53,7 +53,7 @@ public class LabelTextServiceTests
 			"{\"label\":\"E2E Action\",\"flows\":\"[]\",\"backgroundColor\":\"var(--color-accent)\",\"stateMode\":false}");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo("E2E Action"));
 	}
@@ -73,7 +73,7 @@ public class LabelTextServiceTests
 		});
 		var service = Service(ReadySignal(), registry, widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo("Hi Hello"));
 	}
@@ -97,7 +97,7 @@ public class LabelTextServiceTests
 		});
 		var service = Service(ReadySignal(), registry, widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo("Server: CJHACKERYT"));
 	}
@@ -107,7 +107,7 @@ public class LabelTextServiceTests
 	{
 		var service = Service(ReadySignal(), new VariableRegistry());
 
-		var text = await service.ResolveText(Guid.NewGuid(), "off");
+		var text = await ResolveText(service, Guid.NewGuid(), "off");
 
 		Assert.That(text, Is.Null);
 	}
@@ -119,7 +119,7 @@ public class LabelTextServiceTests
 		var readiness = new StartupReadiness();
 		var service = Service(readiness, new VariableRegistry(), widget);
 
-		var pending = service.ResolveText(widget.Id, "off");
+		var pending = ResolveText(service, widget.Id, "off");
 		await Task.Yield();
 		Assert.That(pending.IsCompleted, Is.False);
 
@@ -136,7 +136,7 @@ public class LabelTextServiceTests
 		using var cts = new CancellationTokenSource();
 		cts.Cancel();
 
-		Assert.ThrowsAsync<TaskCanceledException>(() => service.ResolveText(Guid.NewGuid(), "off", cts.Token));
+		Assert.ThrowsAsync<TaskCanceledException>(() => ResolveText(service, Guid.NewGuid(), "off", cts.Token));
 	}
 
 	[Test]
@@ -146,8 +146,8 @@ public class LabelTextServiceTests
 			"""{"mode":"toggle","states":{"off":{"label":"Off"},"on":{"label":"On"}},"label":"Root"}""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var on = await service.ResolveText(widget.Id, "on");
-		var off = await service.ResolveText(widget.Id, "off");
+		var on = await ResolveText(service, widget.Id, "on");
+		var off = await ResolveText(service, widget.Id, "off");
 		Assert.Multiple(() =>
 		{
 			Assert.That(on, Is.EqualTo("On"));
@@ -162,7 +162,7 @@ public class LabelTextServiceTests
 			"""{"mode":"toggle","states":{"off":{"label":"Off"},"on":{}},"label":"Root"}""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var text = await service.ResolveText(widget.Id, "on");
+		var text = await ResolveText(service, widget.Id, "on");
 
 		Assert.That(text, Is.EqualTo("Root"));
 	}
@@ -179,7 +179,7 @@ public class LabelTextServiceTests
 			"""{"mode":"toggle","states":{"off":{"label":"Off"}},"label":"Root"}""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var text = await service.ResolveText(widget.Id, "on");
+		var text = await ResolveText(service, widget.Id, "on");
 
 		Assert.That(text, Is.EqualTo("Root"));
 	}
@@ -191,7 +191,7 @@ public class LabelTextServiceTests
 			"""{"mode":"toggle","states":{"off":{"label":""},"on":{"label":""}},"label":"Root"}""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo("Root"));
 	}
@@ -203,8 +203,8 @@ public class LabelTextServiceTests
 			"""{"mode":"toggle","offState":{"label":"Off"},"onState":{"label":"On"}}""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var off = await service.ResolveText(widget.Id, "off");
-		var on = await service.ResolveText(widget.Id, "on");
+		var off = await ResolveText(service, widget.Id, "off");
+		var on = await ResolveText(service, widget.Id, "on");
 		Assert.Multiple(() =>
 		{
 			Assert.That(off, Is.EqualTo("Off"));
@@ -222,8 +222,8 @@ public class LabelTextServiceTests
 			""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var off = await service.ResolveText(widget.Id, "off");
-		var on = await service.ResolveText(widget.Id, "on");
+		var off = await ResolveText(service, widget.Id, "off");
+		var on = await ResolveText(service, widget.Id, "on");
 		Assert.Multiple(() =>
 		{
 			Assert.That(off, Is.EqualTo("NEW"));
@@ -238,7 +238,7 @@ public class LabelTextServiceTests
 			"""{"mode":"momentary","label":"Root","states":{"off":{"label":"Ignored"},"on":{}}}""");
 		var service = Service(ReadySignal(), new VariableRegistry(), widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo("Root"));
 	}
@@ -256,7 +256,7 @@ public class LabelTextServiceTests
 		{
 			var widget = Button(Guid.NewGuid(), JsonSerializer.Serialize(new { label }));
 			var service = Service(ReadySignal(), registry, widget);
-			return await service.ResolveText(widget.Id, "off");
+			return await ResolveText(service, widget.Id, "off");
 		}
 
 		var availableRegistry = new VariableRegistry();
@@ -326,7 +326,7 @@ public class LabelTextServiceTests
 		registry.Upsert(Numeric("cpu", "12.345"), false);
 		var service = Service(ReadySignal(), registry, widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
 	}
@@ -339,7 +339,7 @@ public class LabelTextServiceTests
 		registry.Upsert(Numeric("cpu", "12.345"));
 		var service = Service(ReadySignal(), registry, widget);
 
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
 	}
@@ -352,10 +352,10 @@ public class LabelTextServiceTests
 		var cpu = Numeric("cpu", "12.345");
 		registry.Upsert(cpu, false);
 		var service = Service(ReadySignal(), registry, widget);
-		await service.ResolveText(widget.Id, "off");
+		await ResolveText(service, widget.Id, "off");
 
 		registry.SetAvailable(cpu.Id, true);
-		var text = await service.ResolveText(widget.Id, "off");
+		var text = await ResolveText(service, widget.Id, "off");
 
 		Assert.That(text, Is.EqualTo("87.7"));
 	}
@@ -368,6 +368,59 @@ public class LabelTextServiceTests
 		var text = await service.ResolvePreview(new LabelImagePreviewRequest { Label = "CPU {{ vars.cpu }" });
 
 		Assert.That(text, Is.EqualTo(VariableTemplateRenderer.UnavailablePlaceholder));
+	}
+
+	[Test]
+	public async Task ResolveTexts_renders_every_label_and_contains_a_broken_template_to_its_own_label()
+	{
+		var widget = Button(Guid.NewGuid(),
+			"""
+			{"label":"Main","extraLabels":[{"id":"a","label":"CPU {{ vars.cpu }}"},{"id":"b","label":"Bad {{ vars.cpu }"},
+			 {"id":"c","label":""}]}
+			""");
+		var registry = new VariableRegistry();
+		registry.Upsert(Numeric("cpu", "12"));
+		var service = Service(ReadySignal(), registry, widget);
+
+		var texts = await service.ResolveTexts(widget.Id, "off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(texts.Primary, Is.EqualTo("Main"));
+			Assert.That(texts.Extras,
+				Is.EqualTo(new[] { "CPU 12", VariableTemplateRenderer.UnavailablePlaceholder, null }));
+		});
+	}
+
+	[Test]
+	public async Task ResolveTexts_renders_the_extra_labels_of_the_asked_state_only()
+	{
+		var widget = Button(Guid.NewGuid(),
+			"""
+			{"stateMode":true,"extraLabels":[{"id":"r","label":"Button level"}],
+			 "states":[{"id":"a","label":"A","appearance":{"label":"A","extraLabels":[{"id":"x","label":"Only A"}]}},
+			           {"id":"b","label":"B","appearance":{"label":"B"}}]}
+			""");
+		var service = Service(ReadySignal(), new VariableRegistry(), widget);
+
+		var a = await service.ResolveTexts(widget.Id, "a");
+		var b = await service.ResolveTexts(widget.Id, "b");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(a.Extras, Is.EqualTo(new[] { "Only A" }));
+			Assert.That(b.Primary, Is.EqualTo("B"));
+			Assert.That(b.Extras, Is.Empty);
+		});
+	}
+
+	private static async Task<string?> ResolveText(
+		LabelTextService service,
+		Guid widgetId,
+		string state,
+		CancellationToken cancellationToken = default)
+	{
+		return (await service.ResolveTexts(widgetId, state, cancellationToken)).Primary;
 	}
 
 	private static VariableEntity Numeric(string name, string value)

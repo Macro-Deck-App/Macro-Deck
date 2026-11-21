@@ -60,10 +60,12 @@ public class UiConfigVocabularyTests
 
 	private static readonly string[] _expectedPageLayout = ["split", "list", "list-item", "empty-state"];
 
+	private static readonly string[] _expectedSections = ["section"];
+
 	private static readonly string[] _expectedEvents =
 	[
 		"change", "submit", "cancel", "back", "activate", "expand", "collapse", "open", "filter", "reload",
-		"add", "remove", "provide", "content-uploaded", "content-upload-failed"
+		"add", "remove", "provide", "content-uploaded", "content-upload-failed", "reset"
 	];
 
 	/// <summary>Regularised spellings a reasonable person would reach for and this vocabulary must not
@@ -92,6 +94,7 @@ public class UiConfigVocabularyTests
 			.Concat(_expectedWidgetChrome)
 			.Concat(_expectedLaterChrome)
 			.Concat(_expectedPageLayout)
+			.Concat(_expectedSections)
 			.ToArray();
 
 		Assert.Multiple(() =>
@@ -100,10 +103,10 @@ public class UiConfigVocabularyTests
 				Is.EqualTo(expected).AsCollection,
 				"the primitive vocabulary is the 27 control names, then the 8 high-level controls, then the "
 				+ "17 chrome names, then the 3 widget configuration regions, then later chrome, then the 4 page "
-				+ "layout types, in order");
-			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(62));
+				+ "layout types, then the collapsible section, in order");
+			Assert.That(UiConfigPrimitives.WellKnown, Has.Count.EqualTo(63));
 			Assert.That(UiConfigPrimitives.WellKnown.Distinct(StringComparer.Ordinal).Count(),
-				Is.EqualTo(62));
+				Is.EqualTo(63));
 
 			foreach (var forbidden in _forbiddenPrimitives)
 			{
@@ -120,7 +123,7 @@ public class UiConfigVocabularyTests
 		Assert.Multiple(() =>
 		{
 			Assert.That(UiConfigEvents.WellKnown, Is.EqualTo(_expectedEvents).AsCollection);
-			Assert.That(UiConfigEvents.WellKnown, Has.Count.EqualTo(15));
+			Assert.That(UiConfigEvents.WellKnown, Has.Count.EqualTo(16));
 
 			foreach (var forbidden in _forbiddenEvents)
 			{
@@ -607,6 +610,15 @@ public class UiConfigVocabularyTests
 							Title = "Stop?",
 							Text = "Your states come back.",
 							Children = [new UiConfigButton { Key = "dialog-stop", Label = "Stop" }]
+						},
+						new UiConfigSection
+						{
+							Key = "section",
+							Label = "Appearance",
+							DefaultExpanded = false,
+							Modified = true,
+							MemoryKey = "sample.appearance",
+							Children = [new UiConfigButton { Key = "section-button", Label = "Inside" }]
 						},
 						new UiConfigMenu
 						{

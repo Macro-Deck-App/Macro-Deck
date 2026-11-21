@@ -24,10 +24,16 @@ internal sealed class RunScriptActionDefinition : IDynamicOptionsActionDefinitio
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
-		ActionParameter.DynamicChoice("scriptId",
-			AppStrings.Integrations.Scripts.Actions.ScriptLabel(),
-			AppStrings.Integrations.Scripts.Actions.ScriptDescription(),
-			required: true)
+		new()
+		{
+			Name = "scriptId",
+			Type = ActionParameterType.DynamicChoice,
+			DynamicOptions = true,
+			Label = AppStrings.Integrations.Scripts.Actions.ScriptLabel(),
+			Description = AppStrings.Integrations.Scripts.Actions.ScriptDescription(),
+			Required = true,
+			LiteralOnly = true
+		}
 	];
 
 	public IActionExecutor CreateExecutor()

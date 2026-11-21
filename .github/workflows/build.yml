@@ -33,8 +33,8 @@ env:
   NODE_VERSION: '^22.22.3'
   # Exact, equal to global.json: a floating 10.0.x outruns the release metadata the bundled
   # runtime is resolved from (ci/scripts/resolve-dotnet-runtime.mjs).
-  DOTNET_VERSION: 10.0.401
-  RUST_TOOLCHAIN: '1.99.0'
+  DOTNET_VERSION: 10.0.402
+  RUST_TOOLCHAIN: '1.99.1'
   # Release artifacts always use the production host and bootstrapper identity.
   # Beta is derived from the normalized version below, not a separate build mode.
   BUILD_CHANNEL: Production
@@ -53,10 +53,11 @@ jobs:
       deb_version: ${{ steps.version.outputs.deb_version }}
       rpm_version: ${{ steps.version.outputs.rpm_version }}
       rpm_release: ${{ steps.version.outputs.rpm_release }}
+      previous_tag: ${{ steps.previous.outputs.previous_tag }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -75,6 +76,19 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Version: ${informational} (build ${{ github.run_number }}, built ${build_time})"
 
+      # Left to itself GitHub picks the previous tag by date, so a beta tagged after the last stable
+      # release made the 3.0.3 notes compare against 3.0.1.
+      - name: Find previous release tag
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          previous=$(gh api "repos/${{ github.repository }}/tags" --paginate --jq '.[].name' \
+            | node ci/scripts/previous-release-tag.mjs "$VERSION")
+          echo "previous_tag=${previous}" >> "$GITHUB_OUTPUT"
+          echo "Release notes compare against: ${previous:-none}"
+
   release-notes:
     name: Generate release notes
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -87,14 +101,17 @@ jobs:
       - name: Generate release notes
         env:
           GH_TOKEN: ${{ github.token }}
+          PREVIOUS_TAG: ${{ needs.prepare.outputs.previous_tag }}
         run: |
-          gh api "repos/${{ github.repository }}/releases/generate-notes" \
-            -f tag_name="v${{ needs.prepare.outputs.version }}" \
-            -f target_commitish="$GITHUB_SHA" \
+          args=(-f tag_name="v${{ needs.prepare.outputs.version }}" -f target_commitish="$GITHUB_SHA")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            args+=(-f previous_tag_name="$PREVIOUS_TAG")
+          fi
+          gh api "repos/${{ github.repository }}/releases/generate-notes" "${args[@]}" \
             --jq .body > release-notes.md
 
       - name: Upload release notes
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-notes
           path: release-notes.md
@@ -212,7 +229,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -271,7 +288,7 @@ jobs:
         run: node ci/scripts/verify-worker-manifest.mjs ui/web-client/dist ui/web-client/dist-carthing
 
       - name: Upload Angular dist
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: angular-dist
           path: ui/angular/dist/
@@ -282,7 +299,7 @@ jobs:
       # the publish job - a separate runner that only checks out the repo - has nothing to copy
       # into wwwroot unless its builds travel with it.
       - name: Upload web client dist
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: web-client-dist
           path: |
@@ -300,7 +317,7 @@ jobs:
 
       # stage-dotnet-runtime.sh uses Node to resolve and validate the runtime
       # archives, even though dotnet publish itself does not need it.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -366,7 +383,7 @@ jobs:
           done
 
       - name: Upload Windows host
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: host-win-x64
           path: host-win-x64.tar.gz
@@ -374,7 +391,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Linux host
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: host-linux-x64
           path: host-linux-x64.tar.gz
@@ -382,7 +399,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload macOS host
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: host-osx-arm64
           path: host-osx-arm64.tar.gz
@@ -406,7 +423,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -416,7 +433,7 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: ui/bootstrapper
 
@@ -621,7 +638,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: staging-macro-deck-linux
           path: |
@@ -648,7 +665,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -658,7 +675,7 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: ui/bootstrapper
 
@@ -797,6 +814,49 @@ jobs:
           test -n "$manifest" || { echo "error: no install manifest in $installer" >&2; exit 1; }
           node ci/scripts/make-install-manifest.mjs verify "$(dirname "$manifest")" --pubkey ui/bootstrapper/tauri.conf.json
 
+      # Reuses the signed executable from the installer and the signed host, so the portable copy
+      # spends no further eSigner signature.
+      - name: Package portable ZIP
+        shell: pwsh
+        env:
+          SIGN_WINDOWS: ${{ inputs.sign_windows }}
+        run: |
+          $installer = Get-ChildItem ui/bootstrapper/target/release/bundle/nsis -Filter '*-setup.exe' | Select-Object -First 1
+          if (-not $installer) {
+            throw 'No NSIS installer found to name the portable ZIP after'
+          }
+          $root = Join-Path $env:RUNNER_TEMP 'macro-deck-portable'
+          $stage = Join-Path $root 'Macro Deck'
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          # tauri bundle restores the unsigned MacroDeck.exe in target/release after building the
+          # installer, so the signed executable only exists inside the installer.
+          $extracted = Join-Path $env:RUNNER_TEMP 'macro-deck-installer'
+          7z x -y "-o$extracted" $installer.FullName | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not extract $($installer.Name)"
+          }
+          $executable = @(Get-ChildItem $extracted -Recurse -File -Filter 'MacroDeck.exe')
+          if ($executable.Count -ne 1) {
+            throw "Expected exactly one MacroDeck.exe in $($installer.Name); found $($executable.Count)"
+          }
+          Copy-Item $executable[0].FullName $stage
+          Copy-Item ui/bootstrapper/host-publish (Join-Path $stage 'host') -Recurse
+          New-Item -ItemType File -Path (Join-Path $stage 'portable') | Out-Null
+          if ($env:SIGN_WINDOWS -eq 'true') {
+            $signature = Get-AuthenticodeSignature (Join-Path $stage 'MacroDeck.exe')
+            if ($signature.Status -ne 'Valid') {
+              throw "MacroDeck.exe in the portable ZIP is not validly signed: $($signature.Status)"
+            }
+          }
+          if ($env:HAS_UPDATER_KEY -eq 'true') {
+            node ci/scripts/make-install-manifest.mjs verify (Join-Path $stage 'host') --pubkey ui/bootstrapper/tauri.conf.json
+            if ($LASTEXITCODE -ne 0) {
+              throw 'The install manifest in the portable ZIP does not verify'
+            }
+          }
+          $zip = Join-Path $installer.DirectoryName ($installer.Name -replace '-setup\.exe$', '-portable.zip')
+          Compress-Archive -Path (Join-Path $root '*') -DestinationPath $zip
+
       - name: Record unsigned Windows build
         if: ${{ ! inputs.sign_windows }}
         shell: bash
@@ -816,11 +876,12 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: staging-macro-deck-windows
           path: |
             ui/bootstrapper/target/release/bundle/nsis/*.exe
+            ui/bootstrapper/target/release/bundle/nsis/*-portable.zip
             ui/bootstrapper/target/release/bundle/latest-windows.json
             ui/bootstrapper/target/release/bundle/beta-windows.json
           retention-days: 1
@@ -839,7 +900,7 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -849,7 +910,7 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: ui/bootstrapper
 
@@ -1035,7 +1096,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: staging-macro-deck-macos
           path: |
@@ -1053,6 +1114,14 @@ jobs:
     name: E2E
     uses: ./.github/workflows/e2e-run.yml
 
+  e2e-cross:
+    name: E2E cross-platform
+    uses: ./.github/workflows/e2e-cross.yml
+
+  bootstrapper-smoke:
+    name: Bootstrapper smoke
+    uses: ./.github/workflows/bootstrapper-smoke-run.yml
+
   # This gate is intentionally stricter than the ordinary package dependencies:
   # it protects the quota-limited Windows signing step. Linux/macOS packaging and
   # every test can run in parallel, but eSigner is not touched unless all pass.
@@ -1065,6 +1134,8 @@ jobs:
       - test-host-windows
       - test-host-macos
       - e2e
+      - e2e-cross
+      - bootstrapper-smoke
       - package-linux
       - package-macos
     steps:
@@ -1102,7 +1173,7 @@ jobs:
           find release-artifacts/windows -type f -name '*.exe' | grep -q .
 
       - name: Upload final Linux artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macro-deck-linux
           path: release-artifacts/linux/
@@ -1110,7 +1181,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload final macOS artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macro-deck-macos
           path: release-artifacts/macos/
@@ -1118,7 +1189,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload final Windows artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: macro-deck-windows
           path: release-artifacts/windows/
@@ -1136,7 +1207,7 @@ jobs:
             > release-metadata.json
 
       - name: Upload release metadata
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: release-metadata
           path: release-metadata.json

@@ -9,6 +9,7 @@ using MacroDeck.Plugin.Protocol.Versioning;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Plugins;
 using MacroDeckHost.Application.Plugins.Assets;
+using MacroDeckHost.Application.Plugins.Logging;
 using MacroDeckHost.Application.Plugins.Runtime;
 using MacroDeckHost.Application.Triggers;
 using MacroDeckHost.Plugins;
@@ -153,7 +154,8 @@ public partial class PluginWebSocketEndpointDispatchTests
 		TimeProvider clock,
 		IHostApplicationLifetime? lifetime = null,
 		PluginConnectionLifetime? connectionLifetime = null,
-		IEventBus? eventBus = null)
+		IEventBus? eventBus = null,
+		IPluginLogIngestor? logIngestor = null)
 	{
 		var registry = new PluginSessionRegistry(clock, Serilog.Core.Logger.None);
 		var statePusher
@@ -177,7 +179,7 @@ public partial class PluginWebSocketEndpointDispatchTests
 			clock,
 			new RecordingMediator(),
 			lifetime ?? new NeverStoppingLifetime(),
-			CreateLogIngestor(registry),
+			logIngestor ?? CreateLogIngestor(registry),
 			Serilog.Core.Logger.None,
 			connectionLifetime: connectionLifetime);
 

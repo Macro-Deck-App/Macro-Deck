@@ -43,8 +43,8 @@ public class ActionButtonWidgetConfigTests
 		host.ById("label").Change("Press me");
 		host.ById("fontFaceId").Change("inter-400");
 		host.ById("fontSize").Change(20d);
-		host.ById("textAlign").Change("left");
-		host.ById("labelPosition").Change("top");
+		host.ById("labelXPreset").Change("left");
+		host.ById("labelYPreset").Change("top");
 		host.ById("labelColor").Change("#111111");
 		host.ById("labelBoxColor").Change("#444444");
 		host.ById("labelShadow").Change(false);
@@ -69,8 +69,8 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(composed.GetProperty("label").GetString(), Is.EqualTo("Press me"));
 			Assert.That(composed.GetProperty("fontFaceId").GetString(), Is.EqualTo("inter-400"));
 			Assert.That(composed.GetProperty("fontSize").GetDouble(), Is.EqualTo(20));
-			Assert.That(composed.GetProperty("textAlign").GetString(), Is.EqualTo("left"));
-			Assert.That(composed.GetProperty("labelPosition").GetString(), Is.EqualTo("top"));
+			Assert.That(composed.GetProperty("labelX").GetDouble(), Is.Zero);
+			Assert.That(composed.GetProperty("labelY").GetDouble(), Is.Zero);
 			Assert.That(composed.GetProperty("labelColor").GetString(), Is.EqualTo("#111111"));
 			Assert.That(composed.GetProperty("labelBoxColor").GetString(), Is.EqualTo("#444444"));
 			Assert.That(composed.GetProperty("labelShadow").GetBoolean(), Is.False);
@@ -285,6 +285,397 @@ public class ActionButtonWidgetConfigTests
 			var off = ReadStates(onHost).First(s => Id(s) == "off");
 			Assert.That(off.GetProperty("appearance").GetProperty("backgroundColor").GetString(),
 				Is.EqualTo("#123456"));
+		});
+	}
+
+	[Test]
+	public void A_button_without_extra_labels_offers_only_its_primary_label_and_submits_no_label_list()
+	{
+		var host = Render(new { stateMode = false, label = "Main" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelPicker").Text(UiConfigProperties.Value), Is.EqualTo("0"));
+			Assert.That(host.ById("label").Text(UiConfigProperties.Value), Is.EqualTo("Main"));
+			Assert.That(host.ById("extraLabels").Property(UiConfigProperties.Value)?.ValueKind,
+				Is.Not.EqualTo(JsonValueKind.Array));
+			Assert.That(HasSuffix(host, ".removeLabel"), Is.False);
+		});
+	}
+
+	[Test]
+	public void A_label_is_placed_freely_and_the_former_alignments_are_presets_of_that_position()
+	{
+		var host = Render(new { stateMode = false, label = "Main", textAlign = "right", labelPosition = "top" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelX").Number(UiConfigProperties.Value), Is.EqualTo(100));
+			Assert.That(host.ById("labelY").Number(UiConfigProperties.Value), Is.Zero);
+			Assert.That(host.ById("labelXPreset").Text(UiConfigProperties.Value), Is.EqualTo("right"));
+			Assert.That(host.ById("labelYPreset").Text(UiConfigProperties.Value), Is.EqualTo("top"));
+		});
+
+		host.ById("labelX").Change(15);
+		host.ById("labelYPreset").Change("bottom");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelX").Number(UiConfigProperties.Value), Is.EqualTo(15));
+			Assert.That(host.ById("labelXPreset").Text(UiConfigProperties.Value),
+				Is.Empty,
+				"15 is none of the presets");
+			Assert.That(host.ById("labelY").Number(UiConfigProperties.Value), Is.EqualTo(100));
+			Assert.That(host.ById("labelYPreset").Text(UiConfigProperties.Value), Is.EqualTo("bottom"));
+		});
+	}
+
+	[Test]
+	public void An_added_label_is_edited_on_its_own_and_validates_against_the_shipped_schema()
+	{
+		var host = Render(new { stateMode = false, label = "Main", labelColor = "#00ff00" });
+
+		BySuffix(host, ".addLabel").Activate();
+		var id = ReadExtraLabels(host).Single().GetProperty("id").GetString();
+		host.ById($"extraLabels.{id}.label").Change("Second");
+		host.ById($"extraLabels.{id}.labelYPreset").Change("bottom");
+		host.ById($"extraLabels.{id}.labelX").Change(12);
+		host.ById($"extraLabels.{id}.fontSize").Change(20);
+
+		var label = ReadExtraLabels(host).Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelPicker").Text(UiConfigProperties.Value), Is.EqualTo("1"));
+			Assert.That(host.FindById("label"), Is.Null, "Only the picked label's form is shown.");
+			Assert.That(label.GetProperty("label").GetString(), Is.EqualTo("Second"));
+			Assert.That(label.GetProperty("labelY").GetDouble(), Is.EqualTo(100));
+			Assert.That(label.GetProperty("labelX").GetDouble(), Is.EqualTo(12));
+			Assert.That(label.GetProperty("fontSize").GetDouble(), Is.EqualTo(20));
+			Assert.That(label.TryGetProperty("labelColor", out _), Is.False);
+		});
+
+		host.ById("labelPicker").Change("0");
+
+		Assert.That(host.ById("label").Text(UiConfigProperties.Value), Is.EqualTo("Main"));
+
+		var composed = new JsonObject
+		{
+			["label"] = host.ById("label").Text(UiConfigProperties.Value),
+			["labelX"] = host.ById("labelX").Number(UiConfigProperties.Value),
+			["extraLabels"]
+				= JsonNode.Parse(host.ById("extraLabels").Property(UiConfigProperties.Value)!.Value.GetRawText())
+		};
+		AssertValidatesAgainstSchema(JsonSerializer.Deserialize<JsonElement>(composed.ToJsonString()));
+	}
+
+	[Test]
+	public void A_button_takes_three_extra_labels_and_a_removed_one_leaves_the_others()
+	{
+		var host = Render(new
+		{
+			stateMode = false,
+			label = "Main",
+			extraLabels = new object[]
+			{
+				new { id = "a", label = "Two" }, new { id = "b", label = "Three" }, new { id = "c", label = "Four" }
+			}
+		});
+
+		Assert.That(HasSuffix(host, ".addLabel"), Is.False, "Four labels is the limit.");
+
+		host.ById("labelPicker").Change("2");
+		BySuffix(host, ".removeLabel").Activate();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(ReadExtraLabels(host).Select(label => label.GetProperty("label").GetString()),
+				Is.EqualTo(new[] { "Two", "Four" }));
+			Assert.That(HasSuffix(host, ".addLabel"), Is.True);
+			Assert.That(host.ById("labelPicker").Text(UiConfigProperties.Value), Is.EqualTo("1"));
+			Assert.That(host.ById("extraLabels.a.label").Text(UiConfigProperties.Value), Is.EqualTo("Two"));
+		});
+	}
+
+	[Test]
+	public void Resetting_the_position_section_returns_the_selected_label_to_the_centre_and_keeps_its_text_and_style()
+	{
+		var host = Render(new
+		{
+			stateMode = false,
+			label = "Main",
+			labelColor = "#00ff00",
+			labelX = 20,
+			labelY = 85,
+			extraLabels = new object[] { new { id = "a", label = "Two", fontSize = 22, labelX = 0, labelY = 0 } }
+		});
+
+		Section(host, "place").Raise(UiConfigEvents.Reset);
+		host.ById("labelPicker").Change("1");
+		Section(host, "place").Raise(UiConfigEvents.Reset);
+		var extra = ReadExtraLabels(host).Single();
+		host.ById("labelPicker").Change("0");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("labelX").Number(UiConfigProperties.Value), Is.EqualTo(50));
+			Assert.That(host.ById("labelY").Number(UiConfigProperties.Value), Is.EqualTo(50));
+			Assert.That(host.ById("labelXPreset").Text(UiConfigProperties.Value), Is.EqualTo("center"));
+			Assert.That(host.ById("label").Text(UiConfigProperties.Value), Is.EqualTo("Main"));
+			Assert.That(host.ById("labelColor").Text(UiConfigProperties.Value), Is.EqualTo("#00ff00"));
+			Assert.That(ActionButtonLabelJson.ReadX(JsonNode.Parse(extra.GetRawText())!.AsObject()) ?? 50,
+				Is.EqualTo(50));
+			Assert.That(ActionButtonLabelJson.ReadY(JsonNode.Parse(extra.GetRawText())!.AsObject()) ?? 50,
+				Is.EqualTo(50));
+			Assert.That(extra.GetProperty("label").GetString(), Is.EqualTo("Two"));
+			Assert.That(extra.GetProperty("fontSize").GetDouble(), Is.EqualTo(22));
+		});
+	}
+
+	[Test]
+	public void A_label_whose_stored_id_is_very_long_can_still_be_edited()
+	{
+		var longId = new string('a', 64);
+		var host = Render(new
+		{
+			stateMode = true,
+			activeStateId = Guid.Empty.ToString("N"),
+			states = new object[]
+			{
+				new
+				{
+					id = Guid.Empty.ToString("N"),
+					label = "Generated",
+					appearance = new { extraLabels = new object[] { new { id = longId, label = "Two" } } }
+				}
+			}
+		});
+
+		host.ById($"states.{Guid.Empty:N}.appearance.labelPicker").Change("1");
+
+		Assert.That(DescendantIds(host.Root), Has.All.Matches<string>(id => id.Length <= 128));
+	}
+
+	[Test]
+	public void The_longest_state_and_label_ids_a_widget_may_store_can_still_be_edited()
+	{
+		var stateId = new string('s', 64);
+		var host = Render(new
+		{
+			stateMode = true,
+			activeStateId = stateId,
+			states = new object[]
+			{
+				new
+				{
+					id = stateId,
+					label = "Provided",
+					appearance = new
+					{
+						labelOutlineColor = "#ff0000",
+						labelBoxBorderColor = "#ff0000",
+						extraLabels = new object[]
+						{
+							new
+							{
+								id = new string('l', 12),
+								label = "Two",
+								labelOutlineColor = "#ff0000",
+								labelBoxBorderColor = "#00ff00"
+							}
+						}
+					}
+				},
+				new { id = "other", label = "Other", appearance = new { } }
+			}
+		});
+
+		host.ById($"states.{stateId}.appearance.labelPicker").Change("1");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(DescendantIds(host.Root), Has.All.Matches<string>(id => id.Length <= 128));
+			Assert.That(DescendantIds(host.Root), Is.Unique);
+		});
+	}
+
+	[Test]
+	public void A_state_with_a_generated_id_still_gets_the_whole_label_menu()
+	{
+		var stateId = Guid.NewGuid().ToString("N");
+		var host = Render(new
+		{
+			stateMode = true,
+			activeStateId = stateId,
+			states = new object[] { new { id = stateId, label = "Generated" }, new { id = "other", label = "Other" } }
+		});
+
+		BySuffix(host, ".copyLabel").Activate();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(HasSuffix(host, ".duplicateLabel"), Is.True);
+			Assert.That(HasSuffix(host, ".replaceLabel"), Is.True);
+			Assert.That(DescendantIds(host.Root), Has.All.Matches<string>(id => id.Length <= 128));
+		});
+	}
+
+	[Test]
+	public void Duplicating_a_label_adds_a_complete_copy_as_a_new_label_until_the_button_is_full()
+	{
+		var host = Render(new
+		{
+			stateMode = false,
+			label = "Main",
+			labelColor = "#00ff00",
+			fontSize = 22,
+			textAlign = "right",
+			labelY = 30,
+			extraLabels = new object[] { new { id = "a", label = "Two", labelX = 10 } }
+		});
+
+		BySuffix(host, ".duplicateLabel").Activate();
+		var copyOfPrimary = ReadExtraLabels(host)[1];
+
+		host.ById("labelPicker").Change("1");
+		BySuffix(host, ".duplicateLabel").Activate();
+		var labels = ReadExtraLabels(host);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(copyOfPrimary.GetProperty("label").GetString(), Is.EqualTo("Main"));
+			Assert.That(copyOfPrimary.GetProperty("labelColor").GetString(), Is.EqualTo("#00ff00"));
+			Assert.That(copyOfPrimary.GetProperty("fontSize").GetDouble(), Is.EqualTo(22));
+			Assert.That(copyOfPrimary.GetProperty("labelX").GetDouble(), Is.EqualTo(100));
+			Assert.That(copyOfPrimary.GetProperty("labelY").GetDouble(), Is.EqualTo(30));
+			Assert.That(labels, Has.Count.EqualTo(3));
+			Assert.That(labels[2].GetProperty("label").GetString(), Is.EqualTo("Two"));
+			Assert.That(labels[2].GetProperty("labelX").GetDouble(), Is.EqualTo(10));
+			Assert.That(labels.Select(label => label.GetProperty("id").GetString()), Is.Unique);
+			Assert.That(host.ById("labelPicker").Text(UiConfigProperties.Value), Is.EqualTo("3"));
+			Assert.That(HasSuffix(host, ".duplicateLabel"), Is.False, "Four labels is the limit.");
+		});
+	}
+
+	[Test]
+	public void A_copied_label_is_pasted_into_another_button_as_a_new_label_or_over_the_selected_one()
+	{
+		var clipboard = new ActionButtonLabelClipboard();
+		var source = Render(new
+			{
+				stateMode = false,
+				label = "Main",
+				extraLabels = new object[]
+					{ new { id = "a", label = "CPU {{ vars.cpu }}", labelColor = "#ff0000", labelY = 90 } }
+			},
+			clipboard: clipboard);
+		var empty = Render(new { stateMode = false, label = "Other" });
+
+		Assert.That(HasSuffix(empty, ".pasteLabel"), Is.False, "Nothing was copied yet.");
+
+		source.ById("labelPicker").Change("1");
+		BySuffix(source, ".copyLabel").Activate();
+
+		var asNew = Render(new { stateMode = false, label = "Target" }, clipboard: clipboard);
+		BySuffix(asNew, ".pasteLabel").Activate();
+
+		var replaced = Render(new { stateMode = false, label = "Target", labelColor = "#0000ff", fontSize = 40 },
+			clipboard: clipboard);
+		BySuffix(replaced, ".replaceLabel").Activate();
+
+		var pasted = ReadExtraLabels(asNew).Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(pasted.GetProperty("label").GetString(), Is.EqualTo("CPU {{ vars.cpu }}"));
+			Assert.That(pasted.GetProperty("labelColor").GetString(), Is.EqualTo("#ff0000"));
+			Assert.That(pasted.GetProperty("labelY").GetDouble(), Is.EqualTo(90));
+			Assert.That(pasted.GetProperty("id").GetString(), Is.Not.EqualTo("a"));
+			Assert.That(asNew.FindById("label"), Is.Null, "the pasted label is the one being edited");
+			Assert.That(replaced.ById("label").Text(UiConfigProperties.Value), Is.EqualTo("CPU {{ vars.cpu }}"));
+			Assert.That(replaced.ById("labelColor").Text(UiConfigProperties.Value), Is.EqualTo("#ff0000"));
+			Assert.That(replaced.ById("fontSize").Number(UiConfigProperties.Value), Is.EqualTo(14));
+			Assert.That(replaced.ById("labelY").Number(UiConfigProperties.Value), Is.EqualTo(90));
+		});
+	}
+
+	[Test]
+	public void Replacing_a_states_label_with_a_copied_one_takes_the_copied_look_and_not_the_buttons()
+	{
+		var clipboard = new ActionButtonLabelClipboard();
+		var host = Render(new
+			{
+				stateMode = true,
+				activeStateId = "off",
+				labelColor = "#00ff00",
+				fontSize = 30,
+				labelShadow = false,
+				states = new object[]
+				{
+					new
+					{
+						id = "off",
+						label = "Off",
+						appearance = new
+						{
+							label = "Off", extraLabels = new object[] { new { id = "a", label = "Plain", labelY = 80 } }
+						}
+					},
+					new { id = "on", label = "On" }
+				}
+			},
+			clipboard: clipboard);
+
+		host.ById("states.off.appearance.labelPicker").Change("1");
+		BySuffix(host, ".copyLabel").Activate();
+		host.ById("states.off.appearance.labelPicker").Change("0");
+		BySuffix(host, ".replaceLabel").Activate();
+
+		var appearance = ReadStates(host).First(state => Id(state) == "off").GetProperty("appearance");
+		var resolved = ActionButtonWidgetData
+			.Parse(JsonSerializer.SerializeToElement(new
+			{
+				stateMode = true,
+				labelColor = "#00ff00",
+				fontSize = 30,
+				labelShadow = false,
+				states = new object[] { new { id = "off", label = "Off", appearance } }
+			}))
+			.Resolve("off");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(resolved.Label, Is.EqualTo("Plain"));
+			Assert.That(resolved.LabelColor, Is.EqualTo("#ffffff"));
+			Assert.That(resolved.FontSizePercent, Is.EqualTo(14));
+			Assert.That(resolved.LabelShadow, Is.True);
+			Assert.That(resolved.LabelY, Is.EqualTo(80));
+		});
+	}
+
+	[Test]
+	public void Each_state_gets_its_own_extra_labels()
+	{
+		var host = Render(_twoStates);
+
+		BySuffix(host, ".addLabel").Activate();
+		var off = ReadStates(host).First(state => Id(state) == "off");
+		var id = off.GetProperty("appearance").GetProperty("extraLabels")[0].GetProperty("id").GetString();
+		host.ById($"states.off.appearance.extraLabels.{id}.label").Change("Only off");
+
+		var states = ReadStates(host);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(states.First(state => Id(state) == "off")
+					.GetProperty("appearance")
+					.GetProperty("extraLabels")[0]
+					.GetProperty("label")
+					.GetString(),
+				Is.EqualTo("Only off"));
+			Assert.That(states.First(state => Id(state) == "on").TryGetProperty("appearance", out var on)
+				&& on.TryGetProperty("extraLabels", out _),
+				Is.False);
 		});
 	}
 
@@ -682,9 +1073,8 @@ public class ActionButtonWidgetConfigTests
 			Assert.That(labelIds,
 				Is.SupersetOf(new[]
 				{
-					"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
-					"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor",
-					"labelBoxBorderWidth"
+					"label", "fontFaceId", "fontSize", "labelX", "labelY", "labelColor", "labelBoxColor",
+					"labelShadow", "labelOutlineColor", "labelBoxBorderColor"
 				}));
 			Assert.That(labelIds, Has.No.Member("backgroundColor"));
 			Assert.That(labelIds, Has.No.Member("icon"));
@@ -960,7 +1350,7 @@ public class ActionButtonWidgetConfigTests
 		Assert.That(composed.EnumerateObject().Select(p => p.Name),
 			Is.EquivalentTo(new[]
 			{
-				"label", "fontFaceId", "fontSize", "textAlign", "labelPosition", "labelColor", "labelBoxColor",
+				"label", "fontFaceId", "fontSize", "labelX", "labelY", "labelColor", "labelBoxColor",
 				"labelShadow", "labelOutlineColor", "labelOutlineWidth", "labelBoxBorderColor", "labelBoxBorderWidth",
 				"backgroundColor", "icon",
 				"iconDisplay", "iconColor", "border"
@@ -1293,7 +1683,7 @@ public class ActionButtonWidgetConfigTests
 	public void
 		A_new_button_starts_with_the_shadow_on_and_offers_outline_widths_up_to_three_and_box_borders_up_to_five()
 	{
-		var host = Render(new { });
+		var host = Render(new { labelOutlineColor = "#111111", labelBoxBorderColor = "#222222" });
 
 		Assert.Multiple(() =>
 		{
@@ -1308,7 +1698,7 @@ public class ActionButtonWidgetConfigTests
 	[Test]
 	public void The_shadow_comes_first_and_each_stroke_width_shares_one_line_with_its_colour()
 	{
-		var host = Render(new { });
+		var host = Render(new { labelOutlineColor = "#111111", labelBoxBorderColor = "#222222" });
 		var labelTab = host.SingleByType(UiConfigPrimitives.Tabs)
 			.Children
 			.First(t => DescendantIds(t).Contains("label"));
@@ -1336,14 +1726,14 @@ public class ActionButtonWidgetConfigTests
 	}
 
 	[Test]
-	public void A_stroke_width_is_editable_only_while_its_colour_is_set()
+	public void A_stroke_width_is_offered_only_while_its_colour_is_set()
 	{
 		var host = Render(new { labelBoxBorderColor = "#123456" });
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.ById("labelOutlineWidth").Flag(UiConfigProperties.Disabled), Is.True);
-			Assert.That(host.ById("labelBoxBorderWidth").Flag(UiConfigProperties.Disabled), Is.Not.True);
+			Assert.That(host.FindById("labelOutlineWidth"), Is.Null);
+			Assert.That(host.FindById("labelBoxBorderWidth"), Is.Not.Null);
 		});
 
 		host.ById("labelOutlineColor").Change("#ff0000");
@@ -1351,8 +1741,130 @@ public class ActionButtonWidgetConfigTests
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(host.ById("labelOutlineWidth").Flag(UiConfigProperties.Disabled), Is.Not.True);
-			Assert.That(host.ById("labelBoxBorderWidth").Flag(UiConfigProperties.Disabled), Is.True);
+			Assert.That(host.FindById("labelOutlineWidth"), Is.Not.Null);
+			Assert.That(host.FindById("labelBoxBorderWidth"), Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_section_is_marked_only_while_one_of_its_settings_differs_from_the_default()
+	{
+		var host = Render(new { stateMode = false, label = "Main" });
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Section(host, "type").Flag(UiConfigProperties.Modified), Is.Not.True);
+			Assert.That(Section(host, "place").Flag(UiConfigProperties.Modified), Is.Not.True);
+			Assert.That(Section(host, "look").Flag(UiConfigProperties.Modified), Is.Not.True);
+		});
+
+		host.ById("fontSize").Change(30d);
+		host.ById("labelX").Change(10d);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Section(host, "type").Flag(UiConfigProperties.Modified), Is.True);
+			Assert.That(Section(host, "place").Flag(UiConfigProperties.Modified), Is.True);
+			Assert.That(Section(host, "look").Flag(UiConfigProperties.Modified), Is.Not.True);
+		});
+	}
+
+	[Test]
+	public void Resetting_a_section_restores_only_its_own_settings()
+	{
+		var host = Render(new
+		{
+			stateMode = false,
+			label = "Main",
+			fontSize = 30,
+			labelX = 10,
+			labelColor = "#00ff00",
+			labelOutlineColor = "#ff0000",
+			labelOutlineWidth = 3d,
+			labelShadow = false
+		});
+
+		Section(host, "look").Raise(UiConfigEvents.Reset);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Section(host, "look").Flag(UiConfigProperties.Modified), Is.Not.True);
+			Assert.That(host.ById("labelColor").Text(UiConfigProperties.Value), Is.Null.Or.Empty);
+			Assert.That(host.ById("labelOutlineColor").Text(UiConfigProperties.Value), Is.Null.Or.Empty);
+			Assert.That(host.ById("labelShadow").Flag(UiConfigProperties.Value), Is.True);
+			Assert.That(host.ById("label").Text(UiConfigProperties.Value), Is.EqualTo("Main"));
+			Assert.That(host.ById("fontSize").Number(UiConfigProperties.Value), Is.EqualTo(30));
+			Assert.That(host.ById("labelX").Number(UiConfigProperties.Value), Is.EqualTo(10));
+		});
+
+		Section(host, "type").Raise(UiConfigEvents.Reset);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(host.ById("fontSize").Number(UiConfigProperties.Value),
+				Is.EqualTo(ActionButtonWidgetData.DefaultFontSizePercent));
+			Assert.That(host.ById("labelX").Number(UiConfigProperties.Value), Is.EqualTo(10));
+		});
+	}
+
+	[Test]
+	public void Resetting_a_section_of_a_state_makes_it_inherit_the_button_again()
+	{
+		var host = Render(new
+		{
+			stateMode = true,
+			fontSize = 20,
+			labelColor = "#111111",
+			states = new object[] { new { id = "off", label = "Off" }, new { id = "on", label = "On" } }
+		});
+		host.ById("activeStateId").Change("on");
+
+		Assert.That(Section(host, "type").Flag(UiConfigProperties.Modified), Is.Not.True);
+
+		host.ById("states.on.appearance.fontSize").Change(40d);
+		host.ById("states.on.appearance.labelColor").Change("#ff0000");
+
+		Assert.That(Section(host, "type").Flag(UiConfigProperties.Modified), Is.True);
+
+		Section(host, "type").Raise(UiConfigEvents.Reset);
+		var on = ReadStates(host).First(s => Id(s) == "on").GetProperty("appearance");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(on.TryGetProperty("fontSize", out _), Is.False);
+			Assert.That(on.GetProperty("labelColor").GetString(), Is.EqualTo("#ff0000"));
+			Assert.That(host.ById("states.on.appearance.fontSize").Number(UiConfigProperties.Value), Is.EqualTo(20));
+			Assert.That(Section(host, "type").Flag(UiConfigProperties.Modified), Is.Not.True);
+			Assert.That(Section(host, "look").Flag(UiConfigProperties.Modified), Is.True);
+		});
+	}
+
+	[Test]
+	public void Resetting_a_section_of_an_additional_label_keeps_its_text_and_position()
+	{
+		var host = Render(new
+		{
+			stateMode = false,
+			label = "Main",
+			extraLabels = new object[]
+			{
+				new { id = "a", label = "Two", fontSize = 22, labelX = 0, labelY = 100, labelColor = "#00ff00" }
+			}
+		});
+		host.ById("labelPicker").Change("1");
+
+		Section(host, "type").Raise(UiConfigEvents.Reset);
+		var extra = ReadExtraLabels(host).Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(extra.TryGetProperty("fontSize", out _), Is.False);
+			Assert.That(extra.GetProperty("label").GetString(), Is.EqualTo("Two"));
+			Assert.That(extra.GetProperty("labelX").GetDouble(), Is.EqualTo(0));
+			Assert.That(extra.GetProperty("labelY").GetDouble(), Is.EqualTo(100));
+			Assert.That(extra.GetProperty("labelColor").GetString(), Is.EqualTo("#00ff00"));
+			Assert.That(Section(host, "type").Flag(UiConfigProperties.Modified), Is.Not.True);
+			Assert.That(Section(host, "look").Flag(UiConfigProperties.Modified), Is.True);
 		});
 	}
 
@@ -1377,8 +1889,7 @@ public class ActionButtonWidgetConfigTests
 				Is.EqualTo(2));
 			Assert.That(host.ById("states.on.appearance.labelOutlineWidth").Flag(UiConfigProperties.Disabled),
 				Is.Not.True);
-			Assert.That(host.ById("states.on.appearance.labelBoxBorderWidth").Flag(UiConfigProperties.Disabled),
-				Is.True);
+			Assert.That(host.FindById("states.on.appearance.labelBoxBorderWidth"), Is.Null);
 		});
 
 		host.ById("states.on.appearance.labelOutlineWidth").Change(2.5d);
@@ -1486,7 +1997,8 @@ public class ActionButtonWidgetConfigTests
 		object data,
 		double aspectRatio = 1,
 		WidgetStateOption? liveState = null,
-		IFontCatalog? fonts = null)
+		IFontCatalog? fonts = null,
+		ActionButtonLabelClipboard? clipboard = null)
 	{
 		var registry = new FakeIntegrationRegistry();
 		var clock = TimeProvider.System;
@@ -1504,7 +2016,31 @@ public class ActionButtonWidgetConfigTests
 				"en",
 				clock,
 				new Devices.Surfaces.StubIconPackCache(),
-				CancellationToken.None)));
+				CancellationToken.None) { LabelClipboard = clipboard ?? new ActionButtonLabelClipboard() }));
+	}
+
+	private static UiTestNode BySuffix(UiTestHost host, string suffix)
+	{
+		return host.ById(DescendantIds(host.Root).Single(id => id.EndsWith(suffix, StringComparison.Ordinal)));
+	}
+
+	private static UiTestNode Section(UiTestHost host, string name)
+	{
+		return host.ById(DescendantIds(host.Root)
+			.Single(id => id[(id.LastIndexOf('.') + 1)..] is var key
+				&& (key == name || key.StartsWith($"{name}-", StringComparison.Ordinal))));
+	}
+
+	private static bool HasSuffix(UiTestHost host, string suffix)
+	{
+		return DescendantIds(host.Root).Any(id => id.EndsWith(suffix, StringComparison.Ordinal));
+	}
+
+	private static List<JsonElement> ReadExtraLabels(UiTestHost host, string id = "extraLabels")
+	{
+		var value = host.ById(id).Property(UiConfigProperties.Value);
+
+		return value is { ValueKind: JsonValueKind.Array } array ? [.. array.EnumerateArray()] : [];
 	}
 
 	private static object[] FlowWith(params string[] blockIds)
@@ -1594,15 +2130,15 @@ public class ActionButtonWidgetConfigTests
 			["label"] = host.ById("label").Text(UiConfigProperties.Value),
 			["fontFaceId"] = host.ById("fontFaceId").Text(UiConfigProperties.Value),
 			["fontSize"] = host.ById("fontSize").Number(UiConfigProperties.Value),
-			["textAlign"] = host.ById("textAlign").Text(UiConfigProperties.Value),
-			["labelPosition"] = host.ById("labelPosition").Text(UiConfigProperties.Value),
+			["labelX"] = host.ById("labelX").Number(UiConfigProperties.Value),
+			["labelY"] = host.ById("labelY").Number(UiConfigProperties.Value),
 			["labelColor"] = host.ById("labelColor").Text(UiConfigProperties.Value),
 			["labelBoxColor"] = host.ById("labelBoxColor").Text(UiConfigProperties.Value),
 			["labelShadow"] = host.ById("labelShadow").Flag(UiConfigProperties.Value),
 			["labelOutlineColor"] = host.ById("labelOutlineColor").Text(UiConfigProperties.Value),
-			["labelOutlineWidth"] = host.ById("labelOutlineWidth").Number(UiConfigProperties.Value),
+			["labelOutlineWidth"] = host.FindById("labelOutlineWidth")?.Number(UiConfigProperties.Value) ?? 1,
 			["labelBoxBorderColor"] = host.ById("labelBoxBorderColor").Text(UiConfigProperties.Value),
-			["labelBoxBorderWidth"] = host.ById("labelBoxBorderWidth").Number(UiConfigProperties.Value),
+			["labelBoxBorderWidth"] = host.FindById("labelBoxBorderWidth")?.Number(UiConfigProperties.Value) ?? 1,
 			["backgroundColor"] = host.ById("backgroundColor").Text(UiConfigProperties.Value),
 			["icon"] = host.ById("icon").Property(UiConfigProperties.Value),
 			["iconDisplay"] = host.FindById("iconDisplay")?.Property(UiConfigProperties.Value),

@@ -29,14 +29,26 @@ internal sealed class RunRemoteScriptActionDefinition : IDynamicOptionsActionDef
 
 	public IReadOnlyList<ActionParameter> Parameters { get; } =
 	[
-		ActionParameter.DynamicChoice("instance",
-			AppStrings.Integrations.Delegation.Actions.InstanceLabel(),
-			AppStrings.Integrations.Delegation.Actions.InstanceDescription(),
-			placeholder: AppStrings.Integrations.Delegation.Actions.InstancePlaceholder()),
-		ActionParameter.DynamicChoice("scriptId",
-			AppStrings.Integrations.Delegation.Actions.ScriptLabel(),
-			AppStrings.Integrations.Delegation.Actions.ScriptDescription(),
-			required: true),
+		new()
+		{
+			Name = "instance",
+			Type = ActionParameterType.DynamicChoice,
+			DynamicOptions = true,
+			Label = AppStrings.Integrations.Delegation.Actions.InstanceLabel(),
+			Description = AppStrings.Integrations.Delegation.Actions.InstanceDescription(),
+			Placeholder = AppStrings.Integrations.Delegation.Actions.InstancePlaceholder(),
+			LiteralOnly = true
+		},
+		new()
+		{
+			Name = "scriptId",
+			Type = ActionParameterType.DynamicChoice,
+			DynamicOptions = true,
+			Label = AppStrings.Integrations.Delegation.Actions.ScriptLabel(),
+			Description = AppStrings.Integrations.Delegation.Actions.ScriptDescription(),
+			Required = true,
+			LiteralOnly = true
+		},
 		ActionParameter.Duration("timeout",
 			AppStrings.Integrations.Delegation.Actions.TimeoutLabel(),
 			AppStrings.Integrations.Delegation.Actions.TimeoutDescription(),

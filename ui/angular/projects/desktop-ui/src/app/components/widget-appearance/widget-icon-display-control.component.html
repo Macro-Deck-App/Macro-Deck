@@ -53,7 +53,8 @@
           [max]="limits.zoom.max"
           [placeholder]="actionMode ? unchangedPlaceholder : ''"
           [ngModel]="numberValue('zoom')"
-          (ngModelChange)="onNumberChange('zoom', $event)" />
+          (ngModelChange)="onNumberTyped('zoom', $event)"
+          (blurred)="onNumberLeft('zoom')" />
       </div>
     </div>
 
@@ -76,7 +77,8 @@
           [max]="limits.opacity.max"
           [placeholder]="actionMode ? unchangedPlaceholder : ''"
           [ngModel]="numberValue('opacity')"
-          (ngModelChange)="onNumberChange('opacity', $event)" />
+          (ngModelChange)="onNumberTyped('opacity', $event)"
+          (blurred)="onNumberLeft('opacity')" />
       </div>
     </div>
 
@@ -91,7 +93,8 @@
           [max]="limits.offset.max"
           [placeholder]="actionMode ? unchangedPlaceholder : ''"
           [ngModel]="numberValue('offsetX')"
-          (ngModelChange)="onNumberChange('offsetX', $event)" />
+          (ngModelChange)="onNumberTyped('offsetX', $event)"
+          (blurred)="onNumberLeft('offsetX')" />
       </div>
       <div class="form-group form-group--dense">
         <label for="icon-offset-y">{{ 'macrodeck.app:Widgets.Appearance.IconDisplay.PositionYLabel' | translate }}</label>
@@ -103,7 +106,8 @@
           [max]="limits.offset.max"
           [placeholder]="actionMode ? unchangedPlaceholder : ''"
           [ngModel]="numberValue('offsetY')"
-          (ngModelChange)="onNumberChange('offsetY', $event)" />
+          (ngModelChange)="onNumberTyped('offsetY', $event)"
+          (blurred)="onNumberLeft('offsetY')" />
       </div>
       <shared-button
         class="idc-reset"

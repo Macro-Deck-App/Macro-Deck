@@ -5,7 +5,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
 
 use crate::logging;
 use crate::update_window;
@@ -76,9 +76,7 @@ pub(crate) fn write_stored(dir: &Path, appearance: &Appearance) -> std::io::Resu
 }
 
 fn config_dir(app: &AppHandle) -> PathBuf {
-    app.path()
-        .app_config_dir()
-        .unwrap_or_else(|_| Path::new(".").to_path_buf())
+    crate::portable::app_config_dir(app).unwrap_or_else(|_| Path::new(".").to_path_buf())
 }
 
 pub fn current(app: &AppHandle) -> Appearance {

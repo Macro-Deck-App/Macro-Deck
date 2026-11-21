@@ -621,15 +621,25 @@ internal sealed class FakeWidgetIconService : IWidgetIconService
 internal sealed class FakeLabelTextService : ILabelTextService
 {
 	private readonly Dictionary<(Guid WidgetId, string State), string> _texts = [];
+	private readonly Dictionary<(Guid WidgetId, string State), IReadOnlyList<string?>> _extras = [];
 
 	public void Set(Guid widgetId, string state, string text)
 	{
 		_texts[(widgetId, state)] = text;
 	}
 
-	public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
+	public void SetExtras(Guid widgetId, string state, params string?[] texts)
 	{
-		return Task.FromResult(_texts.GetValueOrDefault((widgetId, state)));
+		_extras[(widgetId, state)] = texts;
+	}
+
+	public Task<LabelTexts> ResolveTexts(
+		Guid widgetId,
+		string state,
+		CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult(new LabelTexts(_texts.GetValueOrDefault((widgetId, state)),
+			_extras.GetValueOrDefault((widgetId, state)) ?? []));
 	}
 
 	public Task<string?> ResolvePreview(LabelImagePreviewRequest request, CancellationToken cancellationToken = default)

@@ -396,7 +396,11 @@
 .config-node-slider-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+}
+
+.config-node-slider-row > shared-input {
+  flex: 0 0 4.375rem;
 }
 
 .config-node-slider-row > shared-select,
@@ -406,7 +410,10 @@
 }
 
 .config-node-slider {
-  flex: 1 1 auto;
+  @include ds.control-slider;
+  flex: 1 1 0;
+  min-width: 3.75rem;
+  width: auto;
 }
 
 .config-node-array {

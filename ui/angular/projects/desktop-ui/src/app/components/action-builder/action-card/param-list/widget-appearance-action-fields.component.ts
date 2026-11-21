@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, WIDGET_APPEARANCE_RESET, WIDGET_TARGET_SELF, WidgetBorder, WidgetIconDisplay, WidgetIconRef, iconAppearanceVariantName, iconPackRef, iconPackReferenceOf } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, WIDGET_APPEARANCE_RESET, WIDGET_TARGET_SELF, WidgetBorder, WidgetType, WidgetIconDisplay, WidgetIconRef, iconAppearanceVariantName, iconPackRef, iconPackReferenceOf } from '@macro-deck/runtime';
 import { TranslatePipe } from '@shared';
 import { ActionOptionsService } from '../../../../services/action-options.service';
 import { ColorPickerComponent } from '../../../forms/color-picker/color-picker.component';
@@ -24,6 +24,11 @@ type AppearanceKind = 'label' | 'background' | 'labelColor' | 'accentColor' | 'i
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isSupported()) {
+      @if (labelNumberParameter(); as labelNumber) {
+        <div class="form-group form-group--dense"><label>{{ labelNumber.label }}</label><shared-select
+          [ariaLabel]="labelNumber.label" [options]="labelNumberOptions" [ngModel]="stringValue('labelNumber') || '1'"
+          (ngModelChange)="write('labelNumber', $event)" /></div>
+      }
       @switch (kind) {
         @case ('label') {
           <div class="form-group form-group--dense"><label>{{ 'macrodeck.app:ActionBuilder.WidgetAppearance.LabelField' | translate }}</label>
@@ -97,6 +102,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
   protected readonly store = inject(ActionFlowStore);
   private readonly options = inject(ActionOptionsService);
   protected readonly supportedProperties = signal<Set<string> | null>(null);
+  private readonly targetType = signal<string | null>(null);
   private readonly loadedAppearanceOptions = signal<SelectOption[] | null>(null);
   protected readonly resetValue = WIDGET_APPEARANCE_RESET;
   private capabilityRequest = 0;
@@ -126,6 +132,10 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
     const current = this.stringValue('iconAppearance');
     if (current === '' || options.some(option => option.value === current)) return options;
     return [{ value: current, label: iconAppearanceVariantName(current) ?? current }, ...options];
+  }
+
+  protected get labelNumberOptions(): SelectOption[] {
+    return (this.parameter('labelNumber')?.options ?? []).map(option => ({ value: `${option.value}`, label: option.label }));
   }
 
   protected get framingReset(): boolean {
@@ -212,6 +222,11 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
     return supported === null || supported.has(WidgetAppearanceActionFieldsComponent.propertyFor(this.kind));
   }
 
+  protected labelNumberParameter(): ActionBlockParameter | undefined {
+    const type = this.targetType();
+    return type === null || type === WidgetType.ActionButton ? this.parameter('labelNumber') : undefined;
+  }
+
   protected parameter(name: string): ActionBlockParameter | undefined {
     return this.block.parameters?.find(parameter => parameter.name === name);
   }
@@ -230,6 +245,7 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
     const request = ++this.capabilityRequest;
     if (!lookupTarget) {
       this.supportedProperties.set(null);
+      this.targetType.set(null);
       return;
     }
     try {
@@ -237,10 +253,14 @@ export class WidgetAppearanceActionFieldsComponent implements OnInit, OnChanges 
         integrationId: 'app.macro-deck.widget', actionId: this.block.actionId ?? '', parameterName: 'widget',
       });
       if (request !== this.capabilityRequest) return;
-      const properties = response.options.find(option => option.value === lookupTarget)?.metadata?.['appearanceProperties'];
+      const metadata = response.options.find(option => option.value === lookupTarget)?.metadata;
+      const properties = metadata?.['appearanceProperties'];
       this.supportedProperties.set(properties ? new Set(properties.split(',')) : null);
+      this.targetType.set(metadata?.['type'] ?? null);
     } catch {
-      if (request === this.capabilityRequest) this.supportedProperties.set(null);
+      if (request !== this.capabilityRequest) return;
+      this.supportedProperties.set(null);
+      this.targetType.set(null);
     }
   }
 

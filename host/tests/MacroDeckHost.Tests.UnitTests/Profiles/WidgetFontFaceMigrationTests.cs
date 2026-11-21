@@ -101,6 +101,29 @@ public class WidgetFontFaceMigrationTests
 	}
 
 	[Test]
+	public void Normalize_StoredIdOfAHiddenDuplicateFace_IsRewrittenOnExtraLabelsToo()
+	{
+		var catalog = new FakeFontCatalog { Aliases = { ["ubuntu-400-5-upright-3"] = "ubuntu-400-5-upright" } };
+		var widget = ActionButtonWidget("""
+										{"extraLabels":[{"id":"x","label":"X","fontFaceId":"ubuntu-400-5-upright-3"}],
+										"states":[{"id":"a","label":"A","appearance":{"extraLabels":[
+										{"id":"y","label":"Y"},{"id":"z","label":"Z","fontFaceId":"ubuntu-400-5-upright-3"}]}}]}
+										""");
+
+		var changed = WidgetFontFaceMigration.Normalize(widget, catalog);
+
+		var data = JsonNode.Parse(widget.Data!)!.AsObject();
+		var stateLabels = data["states"]![0]!["appearance"]!["extraLabels"]!.AsArray();
+		Assert.Multiple(() =>
+		{
+			Assert.That(changed, Is.True);
+			Assert.That(data["extraLabels"]![0]!["fontFaceId"]!.GetValue<string>(), Is.EqualTo("ubuntu-400-5-upright"));
+			Assert.That(stateLabels[0]!.AsObject().ContainsKey("fontFaceId"), Is.False);
+			Assert.That(stateLabels[1]!["fontFaceId"]!.GetValue<string>(), Is.EqualTo("ubuntu-400-5-upright"));
+		});
+	}
+
+	[Test]
 	public void Normalize_StoredIdThatIsNotAnAlias_LeavesTheWidgetUntouched()
 	{
 		var widget = ActionButtonWidget("""{"fontFaceId":"roboto-400-5-upright"}""");

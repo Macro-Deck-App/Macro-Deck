@@ -548,7 +548,7 @@ pub fn spawn(app: &AppHandle) {
         let host_dir = host::host_dir(&app);
         let public_key = public_key(&app);
         let version = crate::updater::current_version(&app);
-        let cache_dir = app.path().app_cache_dir().ok();
+        let cache_dir = crate::portable::app_cache_dir(&app).ok();
         let stat_dir = host_dir.clone();
         let stat = tauri::async_runtime::spawn_blocking(move || {
             stat_pass(

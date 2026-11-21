@@ -10,7 +10,11 @@ internal static class HttpActions
 		return
 		[
 			new SendRequestActionDefinition(client, variables),
-			new GetJsonValueActionDefinition(client, variables)
+			new GetJsonValueActionDefinition(client, variables),
+			new SetJsonValueActionDefinition(variables),
+			new RemoveJsonValueActionDefinition(variables),
+			new CountJsonItemsActionDefinition(variables),
+			new AppendJsonArrayItemActionDefinition(variables)
 		];
 	}
 }

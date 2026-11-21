@@ -46,6 +46,26 @@ public class WidgetVariableIndexTests
 	}
 
 	[Test]
+	public void A_variable_used_only_in_an_extra_label_still_marks_the_button_for_a_label_refresh()
+	{
+		var root = Widget("""{"label":"static","extraLabels":[{"id":"a","label":"{{ vars.cpu }}"}]}""");
+		var state = Widget("""
+						   {"stateMode":true,"states":[{"id":"on","label":"On","appearance":{"extraLabels":[{"id":"b","label":"{{ vars.ram }}"}]}}]}
+						   """);
+		var cache = new StubFolderCache();
+		cache.AddFolder(root, state);
+		var index = new WidgetVariableIndex(cache);
+
+		index.Rebuild();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(index.FindLabelReferences("cpu"), Is.EquivalentTo([root.Id]));
+			Assert.That(index.LabelReferences(state.Id, "ram"), Is.True);
+		});
+	}
+
+	[Test]
 	public void Rebuild_ignoresNonActionButtonWidgets()
 	{
 		var clock = Widget("{\"label\":\"{{ vars.cpu }}\"}", WidgetTypeIds.Clock);

@@ -881,9 +881,12 @@ public class ActionButtonWidgetUiProviderTests
 
 	private sealed class FakeLabelTextService : ILabelTextService
 	{
-		public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
+		public Task<LabelTexts> ResolveTexts(
+			Guid widgetId,
+			string state,
+			CancellationToken cancellationToken = default)
 		{
-			return Task.FromResult<string?>("resolved-label");
+			return Task.FromResult(new LabelTexts("resolved-label", ["resolved-extra"]));
 		}
 
 		public Task<string?> ResolvePreview(

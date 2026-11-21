@@ -229,12 +229,12 @@ describe('ConfigFieldComponent', () => {
     });
     fixture.detectChanges();
 
-    await component.loadWidgetOptions();
+    await component.loadSourceOptions();
 
     expect(optionsRequests.length).toBe(1);
     expect(optionsRequests[0]['optionsSourceId']).toBe('macrodeck.widgets');
     expect(optionsRequests[0]['widgetTypes']).toEqual(['ActionButton']);
-    expect(component.widgetOptions()).toEqual([{ value: 'w1', label: 'Button (Default / Home)' }]);
+    expect(component.sourceOptions()).toEqual([{ value: 'w1', label: 'Button (Default / Home)' }]);
   });
 
   it('emits the picked widget id', () => {
@@ -249,6 +249,92 @@ describe('ConfigFieldComponent', () => {
     picker.valueChange.emit('w1');
 
     expect(emitted).toBe('w1');
+  });
+
+  describe('an autocomplete field', () => {
+    function comboboxInput(): HTMLInputElement {
+      return fixture.nativeElement.querySelector('shared-combobox input.cb-input') as HTMLInputElement;
+    }
+
+    function suggestions(): HTMLButtonElement[] {
+      return Array.from(document.querySelectorAll<HTMLButtonElement>('.cb-option'));
+    }
+
+    function typeInto(input: HTMLInputElement, text: string): void {
+      input.dispatchEvent(new Event('focus'));
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    }
+
+    async function settle(): Promise<void> {
+      await fixture.whenStable();
+      fixture.detectChanges();
+    }
+
+    it('suggests what the options source returns when opened', async () => {
+      component.field = field(ActionParameterType.Autocomplete, { optionsSourceId: 'system.processes' });
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('input.cf-input')).toBeNull();
+      comboboxInput().dispatchEvent(new Event('focus'));
+      await settle();
+
+      expect(optionsRequests.length).toBe(1);
+      expect(optionsRequests[0]['optionsSourceId']).toBe('system.processes');
+      expect(optionsRequests[0]['parameterName']).toBe('field');
+      expect(suggestions().map(o => o.textContent?.trim())).toEqual(['Button (Default / Home)']);
+    });
+
+    it('submits the suggestion the user picks', async () => {
+      component.field = field(ActionParameterType.Autocomplete, { optionsSourceId: 'system.processes' });
+      const emitted: unknown[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+      fixture.detectChanges();
+
+      comboboxInput().dispatchEvent(new Event('focus'));
+      await settle();
+      suggestions()[0].click();
+
+      expect(emitted).toEqual(['w1']);
+    });
+
+    it('submits a typed value that is not one of the suggestions', async () => {
+      component.field = field(ActionParameterType.Autocomplete, { optionsSourceId: 'system.processes' });
+      const emitted: unknown[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+      fixture.detectChanges();
+
+      typeInto(comboboxInput(), 'my-game.exe');
+
+      expect(emitted[emitted.length - 1]).toBe('my-game.exe');
+    });
+
+    it('shows no suggestions instead of failing when the options source errors', async () => {
+      const service = TestBed.inject(ActionOptionsService);
+      spyOn(service, 'getOptions').and.returnValue(Promise.reject(new Error('offline')));
+      component.field = field(ActionParameterType.Autocomplete, { optionsSourceId: 'system.processes' });
+      fixture.detectChanges();
+
+      comboboxInput().dispatchEvent(new Event('focus'));
+      await settle();
+
+      expect(suggestions().length).toBe(0);
+      expect(component.sourceOptionsLoading()).toBeFalse();
+    });
+
+    it('filters its own options without asking the host when it has no options source', async () => {
+      component.field = field(ActionParameterType.Autocomplete, {
+        options: [{ value: 'obs64.exe', label: 'obs64.exe' }, { value: 'spotify.exe', label: 'spotify.exe' }],
+      });
+      fixture.detectChanges();
+
+      typeInto(comboboxInput(), 'spot');
+      await settle();
+
+      expect(suggestions().map(o => o.textContent?.trim())).toEqual(['spotify.exe']);
+      expect(optionsRequests).toEqual([]);
+    });
   });
 
   describe('a list of folders', () => {

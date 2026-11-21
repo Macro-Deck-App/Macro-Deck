@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Net;
 using System.Text.Json;
 using MacroDeck.Signing;
 using MacroDeck.Signing.Registry;
@@ -146,6 +145,14 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		StoreRegistryRefreshTrigger trigger,
 		CancellationToken cancellationToken = default)
 	{
+		return Refresh(trigger, false, cancellationToken);
+	}
+
+	public Task<Result<RegistryRefreshError>> Refresh(
+		StoreRegistryRefreshTrigger trigger,
+		bool force,
+		CancellationToken cancellationToken = default)
+	{
 		lock (_inflightLock)
 		{
 			if (_inflight is null)
@@ -154,7 +161,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 				// Task.Run so the run's finally, which clears the slot under this lock, cannot execute before
 				// the slot is assigned. The run uses the refresher's own token: one caller leaving must not stop it.
 				var token = _lifetime.Token;
-				_inflight = Task.Run(() => RunShared(token), CancellationToken.None);
+				_inflight = Task.Run(() => RunShared(force, token), CancellationToken.None);
 			}
 
 			return _inflight.WaitAsync(cancellationToken);
@@ -179,7 +186,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		_gate.Dispose();
 	}
 
-	private async Task<Result<RegistryRefreshError>> RunShared(CancellationToken cancellationToken)
+	private async Task<Result<RegistryRefreshError>> RunShared(bool force, CancellationToken cancellationToken)
 	{
 		var state = StoreRegistryRefreshRunState.Failed;
 		RegistryRefreshError? error = null;
@@ -189,7 +196,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			await _gate.WaitAsync(cancellationToken);
 			try
 			{
-				var result = await RefreshUntilConsistent(cancellationToken);
+				var result = await RefreshUntilConsistent(force, cancellationToken);
 				// StoreHttp reports a cancelled fetch as a network failure; a stopping host is not a failed refresh.
 				if (!result.Success)
 				{
@@ -237,7 +244,9 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		}
 	}
 
-	private async Task<Result<RegistryRefreshError>> RefreshUntilConsistent(CancellationToken cancellationToken)
+	private async Task<Result<RegistryRefreshError>> RefreshUntilConsistent(
+		bool force,
+		CancellationToken cancellationToken)
 	{
 		for (var attempt = 0;; attempt++)
 		{
@@ -245,7 +254,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			Attempt outcome;
 			try
 			{
-				outcome = await RefreshCore(staging, cancellationToken);
+				outcome = await RefreshCore(staging, force, cancellationToken);
 			}
 			finally
 			{
@@ -253,7 +262,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			}
 
 			// Every attempt verifies from scratch, so waiting only defers a failure and never admits anything
-			// unverified; a mismatch that outlasts the waits fails with its own error as before.
+			// unverified; a stale snapshot that outlasts the waits still fails as a rollback.
 			if (outcome.Result.Success
 				|| !outcome.MayBeUpdateRace
 				|| attempt >= _options.UpdateRaceRetryDelays.Count
@@ -295,6 +304,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 
 	private async Task<Attempt> RefreshCore(
 		string staging,
+		bool force,
 		CancellationToken cancellationToken)
 	{
 		Directory.CreateDirectory(staging);
@@ -311,24 +321,78 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			return Result.Fail(RegistryRefreshError.NetworkFailure, manifestFetch.FailureMessage);
 		}
 
-		_tracker.Log(StoreRegistryRefreshStep.FetchingSignature);
-		var signatureFetch = await Fetch(client,
-			SignatureFileName,
-			_options.MaxRegistryFileBytes,
+		RegistryManifestDocument? announced;
+		try
+		{
+			announced = JsonSerializer.Deserialize<RegistryManifestDocument>(manifestFetch.Content!,
+				StoreRegistryJson.Options);
+		}
+		catch (JsonException ex)
+		{
+			return Result.Fail(RegistryRefreshError.Malformed, ex.Message);
+		}
+
+		if (announced is null || announced.Files.Count == 0)
+		{
+			return Result.Fail(RegistryRefreshError.Malformed, "The registry manifest is unusable.");
+		}
+
+		var state = _stateStore.Load(Origin);
+		var accepted = state?.AcceptedSequence ?? 0;
+		if (announced.Sequence < accepted)
+		{
+			return new Attempt(Result.Fail(RegistryRefreshError.SequenceRollback,
+					$"The registry offered sequence {announced.Sequence}, below the accepted {accepted}."),
+				true);
+		}
+
+		if (!force
+			&& announced.Sequence == accepted
+			&& string.Equals(state?.ManifestSha256, manifestFetch.Sha256, StringComparison.OrdinalIgnoreCase)
+			&& _status.HasCatalog)
+		{
+			_stateStore.Save(state! with { LastSuccessAt = _timeProvider.GetUtcNow() });
+			_status = _status with { LastSuccessAt = _timeProvider.GetUtcNow() };
+			_tracker.Log(StoreRegistryRefreshStep.UpToDate, sequence: announced.Sequence);
+			return Result.Ok<RegistryRefreshError>();
+		}
+
+		_tracker.Log(StoreRegistryRefreshStep.DownloadingFiles, announced.Files.Count);
+		using var archiveClient = CreateClient(StoreHttp.RegistryClientName, _options.DownloadTimeout);
+		var archiveFetch = await StoreHttp.Fetch(archiveClient,
+			_options.ArchiveUrl,
+			_options.MaxRegistryArchiveBytes,
 			null,
 			cancellationToken);
-		if (!signatureFetch.Success)
+		if (!archiveFetch.Success)
 		{
-			return Result.Fail(RegistryRefreshError.NetworkFailure, signatureFetch.FailureMessage);
+			return Result.Fail(archiveFetch.ExceededLimit
+					? RegistryRefreshError.BudgetExceeded
+					: RegistryRefreshError.NetworkFailure,
+				archiveFetch.FailureMessage);
+		}
+
+		using var archive = StoreRegistryArchive.Open(archiveFetch.Content!, out var archiveFailure);
+		if (archive is null)
+		{
+			return Result.Fail(RegistryRefreshError.Malformed, archiveFailure);
+		}
+
+		var archivedManifest = archive.Read(ManifestFileName, _options.MaxRegistryFileBytes, null);
+		var archivedSignature = archive.Read(SignatureFileName, _options.MaxRegistryFileBytes, null);
+		if (!archivedManifest.Success || !archivedSignature.Success)
+		{
+			return Result.Fail(RegistryRefreshError.Malformed,
+				archivedManifest.FailureMessage ?? archivedSignature.FailureMessage);
 		}
 
 		RegistryManifestDocument? manifest;
 		RegistrySignatureFile? signature;
 		try
 		{
-			manifest = JsonSerializer.Deserialize<RegistryManifestDocument>(manifestFetch.Content!,
+			manifest = JsonSerializer.Deserialize<RegistryManifestDocument>(archivedManifest.Content!,
 				StoreRegistryJson.Options);
-			signature = JsonSerializer.Deserialize<RegistrySignatureFile>(signatureFetch.Content!,
+			signature = JsonSerializer.Deserialize<RegistrySignatureFile>(archivedSignature.Content!,
 				StoreRegistryJson.Options);
 		}
 		catch (JsonException ex)
@@ -344,23 +408,11 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			return Result.Fail(RegistryRefreshError.Malformed, "The registry manifest or signature is unusable.");
 		}
 
-		var state = _stateStore.Load(Origin);
-		var accepted = state?.AcceptedSequence ?? 0;
 		if (manifest.Sequence < accepted)
 		{
 			return new Attempt(Result.Fail(RegistryRefreshError.SequenceRollback,
-					$"The registry offered sequence {manifest.Sequence}, below the accepted {accepted}."),
+					$"The registry archive holds sequence {manifest.Sequence}, below the accepted {accepted}."),
 				true);
-		}
-
-		if (manifest.Sequence == accepted
-			&& string.Equals(state?.ManifestSha256, manifestFetch.Sha256, StringComparison.OrdinalIgnoreCase)
-			&& _status.HasCatalog)
-		{
-			_stateStore.Save(state! with { LastSuccessAt = _timeProvider.GetUtcNow() });
-			_status = _status with { LastSuccessAt = _timeProvider.GetUtcNow() };
-			_tracker.Log(StoreRegistryRefreshStep.UpToDate, sequence: manifest.Sequence);
-			return Result.Ok<RegistryRefreshError>();
 		}
 
 		if (manifest.Files.Count > _options.MaxRegistryFiles
@@ -370,26 +422,23 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 				"The registry manifest declares more data than this host will download.");
 		}
 
-		_tracker.Log(StoreRegistryRefreshStep.DownloadingFiles, manifest.Files.Count);
-		if (await DownloadDeclaredFiles(client, manifest, staging, cancellationToken) is { } downloadFailure)
+		if (await ExtractDeclaredFiles(archive, manifest, staging, cancellationToken) is { } extractFailure)
 		{
-			return downloadFailure;
+			return extractFailure;
 		}
 
 		await File.WriteAllBytesAsync(Path.Combine(staging, ManifestFileName),
-			manifestFetch.Content!,
+			archivedManifest.Content!,
 			cancellationToken);
 		await File.WriteAllBytesAsync(Path.Combine(staging, SignatureFileName),
-			signatureFetch.Content!,
+			archivedSignature.Content!,
 			cancellationToken);
 
 		_tracker.Log(StoreRegistryRefreshStep.Verifying);
 		var verified = await VerifyTree(staging, accepted, cancellationToken);
 		if (!verified.Success)
 		{
-			return new Attempt(Result.Fail(verified.Error!.Value, verified.FailureMessage),
-				verified.CertificateMissing
-				|| verified.Error is RegistryRefreshError.SizeMismatch or RegistryRefreshError.SignatureInvalid);
+			return Result.Fail(verified.Error!.Value, verified.FailureMessage);
 		}
 
 		if (RevokedSigningKey(staging, verified) is { } revokedReason)
@@ -419,7 +468,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		{
 			Origin = Origin,
 			AcceptedSequence = manifest.Sequence,
-			ManifestSha256 = manifestFetch.Sha256,
+			ManifestSha256 = archivedManifest.Sha256,
 			CertificateId = verified.CertificateId,
 			SignedAt = signature.SignedAt,
 			LastSuccessAt = fetchedAt
@@ -441,8 +490,8 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		return Result.Ok<RegistryRefreshError>();
 	}
 
-	private async Task<Attempt?> DownloadDeclaredFiles(
-		HttpClient client,
+	private async Task<Attempt?> ExtractDeclaredFiles(
+		StoreRegistryArchive archive,
 		RegistryManifestDocument manifest,
 		string staging,
 		CancellationToken cancellationToken)
@@ -462,23 +511,24 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 					$"'{file.Path}' declares {file.Size} bytes, above the per-file limit.");
 			}
 
-			var fetch = await Fetch(client,
-				file.Path,
-				_options.MaxRegistryFileBytes,
-				file.Size,
-				cancellationToken);
-			if (!fetch.Success)
+			if (!archive.Contains(file.Path))
 			{
-				return new Attempt(Result.Fail(fetch.SizeMismatch
-							? RegistryRefreshError.SizeMismatch
-							: RegistryRefreshError.NetworkFailure,
-						fetch.FailureMessage),
-					fetch.SizeMismatch || fetch.StatusCode == (int)HttpStatusCode.NotFound);
+				return Result.Fail(RegistryRefreshError.Malformed,
+					$"The registry archive does not contain the declared '{file.Path}'.");
+			}
+
+			var extracted = archive.Read(file.Path, _options.MaxRegistryFileBytes, file.Size);
+			if (!extracted.Success)
+			{
+				return Result.Fail(extracted.SizeMismatch
+						? RegistryRefreshError.SizeMismatch
+						: RegistryRefreshError.Malformed,
+					extracted.FailureMessage);
 			}
 
 			var destination = Path.Combine(staging, Path.Combine(file.Path.Split('/')));
 			Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-			await File.WriteAllBytesAsync(destination, fetch.Content!, cancellationToken);
+			await File.WriteAllBytesAsync(destination, extracted.Content!, cancellationToken);
 			_tracker.ReportProgress(++completed, manifest.Files.Count);
 		}
 
@@ -535,10 +585,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		if (await ReadCertificate(root, signature.KeyId, cancellationToken) is not { } certificate)
 		{
 			return VerifiedTree.Fail(RegistryRefreshError.CertificateUntrusted,
-					$"The registry snapshot does not carry certificate '{signature.KeyId}'.") with
-				{
-					CertificateMissing = true
-				};
+				$"The registry snapshot does not carry certificate '{signature.KeyId}'.");
 		}
 
 		(byte[] Bytes, byte[] Signature)? issuer = null;
@@ -554,10 +601,7 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 			if (issuer is null)
 			{
 				return VerifiedTree.Fail(RegistryRefreshError.CertificateUntrusted,
-						$"The registry snapshot does not carry issuer certificate '{issuerId}'.") with
-					{
-						CertificateMissing = true
-					};
+					$"The registry snapshot does not carry issuer certificate '{issuerId}'.");
 			}
 		}
 
@@ -788,8 +832,6 @@ public sealed class StoreRegistryRefresher : IStoreRegistryRefresher, IDisposabl
 		public RegistryRefreshError? Error { get; init; }
 
 		public string? FailureMessage { get; init; }
-
-		public bool CertificateMissing { get; init; }
 
 		public static VerifiedTree Fail(RegistryRefreshError error, string message)
 		{

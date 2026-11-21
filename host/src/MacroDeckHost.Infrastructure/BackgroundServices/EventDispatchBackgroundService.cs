@@ -11,6 +11,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 {
 	private readonly IEventBus _bus;
 	private readonly IEventSubscriptionIndex _index;
+	private readonly IVariableEventAudience _variableAudience;
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly StartupReadiness _readiness;
 	private readonly BuiltInIntegrationRegistration _builtInRegistration;
@@ -23,6 +24,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 		IHostApplicationLifetime lifetime,
 		IEventBus bus,
 		IEventSubscriptionIndex index,
+		IVariableEventAudience variableAudience,
 		IServiceScopeFactory scopeFactory,
 		StartupReadiness readiness,
 		BuiltInIntegrationRegistration builtInRegistration,
@@ -31,6 +33,7 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 	{
 		_bus = bus;
 		_index = index;
+		_variableAudience = variableAudience;
 		_scopeFactory = scopeFactory;
 		_readiness = readiness;
 		_builtInRegistration = builtInRegistration;
@@ -44,10 +47,10 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 
 		// Rebuilt first so events raised during this wait queue in the bus instead of being dropped.
 		await _builtInRegistration.Completed.WaitAsync(stoppingToken);
-		_readiness.MarkEventDispatchReady();
+		_readiness.MarkEventDispatchReady(_bus.Publish);
 
 		var reader = _bus.Reader;
-		while (await reader.WaitToReadAsync(stoppingToken))
+		do
 		{
 			while (reader.TryRead(out var occurrence))
 			{
@@ -56,7 +59,11 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 					Dispatch(subscription, occurrence, stoppingToken);
 				}
 			}
+
+			// Everything held during startup was queued before the first drain, so it has been matched by now.
+			_readiness.MarkStartupEventsDispatched();
 		}
+		while (await reader.WaitToReadAsync(stoppingToken));
 	}
 
 	private IReadOnlyList<EventSubscription> Resolve(EventOccurrence occurrence)
@@ -72,7 +79,8 @@ public sealed class EventDispatchBackgroundService : HostReadyBackgroundService
 
 	private void Dispatch(EventSubscription subscription, EventOccurrence occurrence, CancellationToken stoppingToken)
 	{
-		if (EventSubscriptionMatcher.QuickReject(subscription, occurrence))
+		if (EventSubscriptionMatcher.QuickReject(subscription, occurrence)
+			|| occurrence.Target is null && !_variableAudience.Reaches(subscription.Owner, occurrence))
 		{
 			return;
 		}

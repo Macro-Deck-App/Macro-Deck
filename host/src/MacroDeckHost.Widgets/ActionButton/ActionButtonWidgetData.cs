@@ -143,7 +143,67 @@ public sealed record ActionButtonResolvedAppearance
 
 	public required double FontSizePercent { get; init; }
 
+	public double LabelX { get; init; } = ActionButtonLabelJson.Center;
+
+	public double LabelY { get; init; } = ActionButtonLabelJson.Center;
+
+	public IReadOnlyList<ActionButtonResolvedLabel> ExtraLabels { get; init; } = [];
+
 	public ActionButtonBorder? Border { get; init; }
+
+	public ActionButtonResolvedLabel PrimaryLabel
+		=> new()
+		{
+			Text = Label,
+			Color = LabelColor,
+			BoxColor = LabelBoxColor,
+			Shadow = LabelShadow,
+			OutlineColor = LabelOutlineColor,
+			OutlineWidth = LabelOutlineWidth,
+			BoxBorderColor = LabelBoxBorderColor,
+			BoxBorderWidth = LabelBoxBorderWidth,
+			FontFace = FontFace,
+			FontSizePercent = FontSizePercent,
+			X = LabelX,
+			Y = LabelY
+		};
+}
+
+public sealed record ActionButtonResolvedLabel
+{
+	public static ActionButtonResolvedLabel Empty { get; } = new();
+
+	public string? Text { get; init; }
+
+	public string Color { get; init; } = ActionButtonWidgetData.DefaultLabelColor;
+
+	public string? BoxColor { get; init; }
+
+	public bool Shadow { get; init; } = true;
+
+	public string? OutlineColor { get; init; }
+
+	public double OutlineWidth { get; init; }
+
+	public string? BoxBorderColor { get; init; }
+
+	public double BoxBorderWidth { get; init; }
+
+	public bool HasOutline => OutlineColor is not null && OutlineWidth > 0;
+
+	public bool HasBoxBorder => BoxBorderColor is not null && BoxBorderWidth > 0;
+
+	public bool HasBox => BoxColor is not null || HasBoxBorder;
+
+	public string? FontFace { get; init; }
+
+	public double FontSizePercent { get; init; } = ActionButtonWidgetData.DefaultFontSizePercent;
+
+	public double X { get; init; } = ActionButtonLabelJson.Center;
+
+	public double Y { get; init; } = ActionButtonLabelJson.Center;
+
+	public string TextAlign => ActionButtonLabelJson.TextAlignOf(X);
 }
 
 /// <summary>Which action-button trigger names are wired to a flow, read straight off the stored
@@ -213,6 +273,8 @@ public sealed class ActionButtonWidgetData
 	public const double DefaultLabelStrokeWidth = 1;
 	public const double MaxLabelOutlineWidth = 3;
 	public const double MaxLabelBoxBorderWidth = 5;
+	public const string DefaultLabelColor = "#ffffff";
+	public const double DefaultFontSizePercent = 14;
 
 	private readonly ActionButtonStateModel _model;
 
@@ -315,13 +377,18 @@ public sealed class ActionButtonWidgetData
 		// that carries none does.
 		var borderNode = appearance?["border"] as JsonObject ?? root["border"] as JsonObject;
 
+		var x = ActionButtonLabelJson.ReadX(appearance)
+			?? ActionButtonLabelJson.ReadX(root) ?? ActionButtonLabelJson.Center;
+		var y = ActionButtonLabelJson.ReadY(appearance)
+			?? ActionButtonLabelJson.ReadY(root) ?? ActionButtonLabelJson.Center;
+
 		return new ActionButtonResolvedAppearance
 		{
 			Label = ReadString(appearance, "label") ?? ReadString(root, "label"),
 			BackgroundColor = WidgetColor.NormalizeBackground(ReadString(appearance, "backgroundColor"))
 				?? WidgetColor.NormalizeBackground(ReadString(root, "backgroundColor")),
 			LabelColor = WidgetColor.Normalize(ReadString(appearance, "labelColor"))
-				?? WidgetColor.Normalize(ReadString(root, "labelColor")) ?? "#ffffff",
+				?? WidgetColor.Normalize(ReadString(root, "labelColor")) ?? DefaultLabelColor,
 			LabelBoxColor = WidgetColor.Normalize(ReadString(appearance, "labelBoxColor"))
 				?? WidgetColor.Normalize(ReadString(root, "labelBoxColor")),
 			LabelShadow = ReadBool(appearance, "labelShadow") ?? ReadBool(root, "labelShadow") ?? true,
@@ -337,10 +404,55 @@ public sealed class ActionButtonWidgetData
 					?? ReadDouble(root, "labelBoxBorderWidth"),
 					MaxLabelBoxBorderWidth),
 			FontFace = Trimmed(ReadString(appearance, "fontFaceId")) ?? Trimmed(ReadString(root, "fontFaceId")),
-			TextAlign = ReadString(appearance, "textAlign") ?? ReadString(root, "textAlign") ?? "center",
-			LabelPosition = ReadString(appearance, "labelPosition") ?? ReadString(root, "labelPosition") ?? "center",
-			FontSizePercent = ReadDouble(appearance, "fontSize") ?? ReadDouble(root, "fontSize") ?? 14,
+			TextAlign = ActionButtonLabelJson.TextAlignOf(x),
+			LabelPosition = ActionButtonLabelJson.LabelPositionOf(y),
+			FontSizePercent = ReadDouble(appearance, "fontSize")
+				?? ReadDouble(root, "fontSize") ?? DefaultFontSizePercent,
+			LabelX = x,
+			LabelY = y,
+			ExtraLabels = ActionButtonLabelJson.ActiveExtraLabels(_model, stateId).Select(ResolveExtraLabel).ToList(),
 			Border = ActionButtonBorder.Resolve(borderNode)
+		};
+	}
+
+	public int ExtraLabelSlots => ActionButtonLabelJson.ExtraLabelSlots(_model);
+
+	public bool UsesLabelLayer
+	{
+		get
+		{
+			if (ExtraLabelSlots > 0)
+			{
+				return true;
+			}
+
+			return StateMode
+				? States.Any(state => IsOffPreset(Resolve(state.Id)))
+				: IsOffPreset(Resolve(null));
+		}
+	}
+
+	private static bool IsOffPreset(ActionButtonResolvedAppearance appearance)
+	{
+		return !ActionButtonLabelJson.IsPreset(appearance.LabelX) || !ActionButtonLabelJson.IsPreset(appearance.LabelY);
+	}
+
+	private static ActionButtonResolvedLabel ResolveExtraLabel(JsonObject label)
+	{
+		return new ActionButtonResolvedLabel
+		{
+			Text = ReadString(label, "label"),
+			Color = WidgetColor.Normalize(ReadString(label, "labelColor")) ?? DefaultLabelColor,
+			BoxColor = WidgetColor.Normalize(ReadString(label, "labelBoxColor")),
+			Shadow = ReadBool(label, "labelShadow") ?? true,
+			OutlineColor = WidgetColor.Normalize(ReadString(label, "labelOutlineColor")),
+			OutlineWidth = LabelStrokeWidth(ReadDouble(label, "labelOutlineWidth"), MaxLabelOutlineWidth),
+			BoxBorderColor = WidgetColor.Normalize(ReadString(label, "labelBoxBorderColor")),
+			BoxBorderWidth = LabelStrokeWidth(ReadDouble(label, "labelBoxBorderWidth"), MaxLabelBoxBorderWidth),
+			FontFace = Trimmed(ReadString(label, "fontFaceId")),
+			FontSizePercent = ReadDouble(label, "fontSize") ?? DefaultFontSizePercent,
+			X = ActionButtonLabelJson.ReadX(label) ?? ActionButtonLabelJson.Center,
+			Y = ActionButtonLabelJson.ReadY(label) ?? ActionButtonLabelJson.Center
 		};
 	}
 

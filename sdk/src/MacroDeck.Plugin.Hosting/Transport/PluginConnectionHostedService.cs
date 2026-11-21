@@ -48,6 +48,14 @@ internal sealed class PluginConnectionHostedService(
 	IPluginAssetUploader assetUploader,
 	IPluginHostAssetReceiver hostAssets) : IHostedService, IAsyncDisposable
 {
+	// The const names compile into this assembly, so a newer Protocol package next to an older Hosting
+	// cannot opt it into a behaviour it does not implement.
+	private static readonly IReadOnlyList<string> _implementedHostApiFeatures =
+	[
+		Protocol.Callbacks.HostApiFeatures.ScriptInputColor,
+		Protocol.Callbacks.HostApiFeatures.EventBindingResolvedValue
+	];
+
 	private readonly ILogger _logger = logger.ForContext<PluginConnectionHostedService>();
 
 	private readonly PluginHostOptions _options = options.Value;
@@ -432,7 +440,7 @@ internal sealed class PluginConnectionHostedService(
 			DeclaredName = metadata.Name,
 			DeclaredVersion = metadata.Version,
 			Sdk = sdkUsage,
-			HostApiFeatures = Protocol.Callbacks.HostApiFeatures.All
+			HostApiFeatures = _implementedHostApiFeatures
 		};
 	}
 

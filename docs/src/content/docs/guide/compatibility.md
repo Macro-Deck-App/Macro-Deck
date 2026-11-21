@@ -59,16 +59,28 @@ slow network loads them too slowly. The desktop app always uses 256 px.
 
 ### HTTPS is needed for some web client features
 
-Installing the web client as an app (PWA) and **Keep display awake** only work when the web client
-is opened at its `https://` address. Turn on HTTPS in **Settings > Network**. Macro Deck signs its
-certificate with its own authority, so install and trust that authority once on every device you
-use.
+Installing the web client as an app (PWA) only works when the web client is opened at its
+`https://` address, and **Keep display awake** works best there. Turn on HTTPS in
+**Settings > Network**. Macro Deck signs its certificate with its own authority, so install and
+trust that authority once on every device you use.
 
 ### Keeping the display awake
 
-**Keep display awake** needs a browser that supports it. Many older browsers do not, and the
-setting then says so. Even where it is supported, battery saver can refuse it, and the browser
-pauses it while the screen is off.
+**Keep display awake** uses the browser's own wake lock where it can, which needs the `https://`
+address and a browser that supports it. Elsewhere, such as at an `http://` address or in an older
+browser, it keeps the display awake by playing a tiny silent video in a loop instead:
+
+- This also stops the Silk browser on an Amazon Echo Show from closing the deck after a while, so
+  in Silk the video plays even when the browser's own wake lock is available.
+- After the page is reloaded, the browser only lets the video start after a tap. The setting then
+  says **Tap anywhere to keep the display awake**, and the first tap anywhere on the deck starts it.
+- The video has a silent sound track, so it can pause music playing in another app on the same
+  device.
+- Not every browser keeps the screen on for a video this small. If the display still turns off,
+  open the web client at its `https://` address.
+
+Battery saver can refuse to keep the display awake, and the browser pauses it while the screen is
+off.
 
 ### USB connections
 

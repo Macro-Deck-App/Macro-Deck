@@ -12,6 +12,7 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 {
 	private readonly VariableRegistry _registry;
 	private readonly IMediator _mediator;
+	private readonly TimeProvider _clock;
 	private readonly VariableTemplateRenderer _renderer;
 	private readonly SemaphoreSlim _gate = new(1, 1);
 	private readonly SemaphoreSlim _signal = new(0, 1);
@@ -21,11 +22,12 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 	private HashSet<string> _pending = new(StringComparer.Ordinal);
 	private int _signalled;
 
-	public TemplateVariableSynchronizer(VariableRegistry registry, IMediator mediator)
+	public TemplateVariableSynchronizer(VariableRegistry registry, IMediator mediator, TimeProvider? clock = null)
 	{
 		_registry = registry;
 		_mediator = mediator;
-		_renderer = new VariableTemplateRenderer(registry);
+		_clock = clock ?? TimeProvider.System;
+		_renderer = new VariableTemplateRenderer(registry, _clock);
 	}
 
 	internal bool HasPendingChanges
@@ -56,6 +58,11 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 		_names.TryRemove(entity.Id, out var previous);
 		_reads.TryRemove(entity.Id, out _);
 		Enqueue(entity.Name, previous);
+	}
+
+	public void NoteMinuteElapsed()
+	{
+		Enqueue(TemplateClock.Name, null);
 	}
 
 	public void Forget(Guid id)
@@ -228,14 +235,14 @@ public sealed class TemplateVariableSynchronizer : IDisposable
 			DecimalPlaces = type == VariableType.Numeric ? decimalPlaces : null
 		};
 
-		return Evaluate(probe, template, new VariableTemplateRenderer(_registry));
+		return Evaluate(probe, template, new VariableTemplateRenderer(_registry, _clock));
 	}
 
 	public bool WouldCloseCycle(VariableEntity variable, string name, string template)
 	{
 		var probe = variable.CopyWithValue(variable.Value);
 		probe.Name = name;
-		return Evaluate(probe, template, new VariableTemplateRenderer(_registry)).Error?.Code
+		return Evaluate(probe, template, new VariableTemplateRenderer(_registry, _clock)).Error?.Code
 			== VariableTemplateError.CircularReference;
 	}
 

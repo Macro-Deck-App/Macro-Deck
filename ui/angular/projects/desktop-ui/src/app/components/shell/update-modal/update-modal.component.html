@@ -105,7 +105,7 @@
           {{ appStrings.Update.Details.LaterAction | translate }}
         </shared-button>
         @if (updates.canInstall() && !updates.aptManaged()) {
-          @if (updates.externalDownload()) {
+          @if (updates.manualDownload()) {
             <shared-button variant="primary" (click)="openDownloadPage()">
               {{ appStrings.Settings.Update.OpenDownloadPageAction | translate }}
             </shared-button>

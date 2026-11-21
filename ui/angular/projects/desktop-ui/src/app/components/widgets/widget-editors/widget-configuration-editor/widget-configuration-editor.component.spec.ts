@@ -11,6 +11,7 @@ import {
   UiSessionService, WidgetTypeCatalogService, WidgetTypeInfo,
 } from '@shared';
 import { provideLocalizationTesting } from '../../../../../testing/localization-test-support';
+import { ActionConfigSessionFlusher } from '../../../action-builder/services/action-config-session-flusher.service';
 import { UiRenderContext } from '../../../ui-render/ui-render-context';
 import { WidgetConfigurationEditorComponent } from './widget-configuration-editor.component';
 
@@ -35,6 +36,13 @@ class FakeUiSessionHandle implements UiSessionHandle {
 
   send(event: UiNodeEvent): void {
     this.sent.push(event);
+  }
+
+  answerFlushWith: (() => void) | null = null;
+
+  flush(): Promise<void> {
+    this.answerFlushWith?.();
+    return Promise.resolve();
   }
 
   close(): void {
@@ -871,6 +879,23 @@ describe('WidgetConfigurationEditorComponent', () => {
     expect(data['title']).toBe('CPU');
     // A key the tree never mentions is still untouched by the reconciliation.
     expect(data['historyLength']).toBe(120);
+  });
+
+  it('carries the revision a flush waited for into the draft before the page saves it', async () => {
+    const fixture = await createFixture(widget({ data: { label: '' } as never }));
+    configHandle().root.set(configRoot([propertiesRegion([stringField('label', '')])]));
+    await settle(fixture);
+
+    configHandle().answerFlushWith = () => configHandle().root.set(configRoot([
+      propertiesRegion([stringField('label', 'Typed'), stringField('labelX', '50')]),
+    ]));
+    await TestBed.inject(ActionConfigSessionFlusher).flushAll();
+
+    expect(fixture.componentInstance.widget.data as unknown).toEqual({ label: 'Typed', labelX: '50' });
+
+    await settle(fixture);
+    expect(fixture.componentInstance.widget.data as unknown).toEqual({ label: 'Typed', labelX: '50' });
+    expect(opens.filter(request => request.kind === 'config').length).toBe(1);
   });
 
   // Giving a key up is as much a part of the draft as setting one. An Action Button entering state

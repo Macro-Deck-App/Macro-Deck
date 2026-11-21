@@ -1,6 +1,6 @@
 ---
 interface Props {
-	packages: ('windows' | 'macos' | 'appimage' | 'deb' | 'rpm')[];
+	packages: ('windows' | 'portable' | 'macos' | 'appimage' | 'deb' | 'rpm')[];
 }
 
 const { packages } = Astro.props;
@@ -19,6 +19,7 @@ const releasesPage = 'https://github.com/Macro-Deck-App/Macro-Deck/releases';
 	const releasesPage = 'https://github.com/Macro-Deck-App/Macro-Deck/releases';
 	const packages: Record<string, { label: string; suffix: string }> = {
 		windows: { label: '.exe', suffix: '-setup.exe' },
+		portable: { label: 'portable .zip', suffix: '-portable.zip' },
 		macos: { label: '.dmg', suffix: '.dmg' },
 		appimage: { label: '.AppImage', suffix: '.AppImage' },
 		deb: { label: '.deb', suffix: '.deb' },

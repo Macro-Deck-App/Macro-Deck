@@ -98,7 +98,7 @@ declare global {
     notes: string | null;
     notesUrl: string | null;
     error: string | null;
-    installStrategy: 'inApp' | 'externalDownload' | 'apt';
+    installStrategy: 'inApp' | 'externalDownload' | 'apt' | 'portable';
     downloadUrl: string;
     publishedAt: string | null;
     channel: 'stable' | 'beta';
@@ -140,7 +140,7 @@ declare global {
     publishedAt: string | null;
     channel: string | null;
     betaInstalled: boolean;
-    installStrategy: 'inApp' | 'externalDownload' | 'apt';
+    installStrategy: 'inApp' | 'externalDownload' | 'apt' | 'portable';
     downloadUrl: string | null;
     partialCheck: string | null;
     error: string | null;

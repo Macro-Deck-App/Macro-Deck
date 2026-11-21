@@ -92,6 +92,8 @@ internal sealed class DeviceSurfaceComparisonTests
 				var type when type == typeof(DeviceSurfaceAppearance) => null,
 				var type when type == typeof(IReadOnlyList<DeviceInteractionKind>)
 					=> new[] { DeviceInteractionKind.LongPress, DeviceInteractionKind.Release },
+				var type when type == typeof(IReadOnlyList<DeviceSurfaceLabel>)
+					=> new[] { new DeviceSurfaceLabel { Text = "changed" } },
 				var type when type == typeof(IReadOnlyDictionary<string, string>)
 					=> new Dictionary<string, string>(StringComparer.Ordinal) { ["changed"] = "1" },
 				_ => throw new NotSupportedException(

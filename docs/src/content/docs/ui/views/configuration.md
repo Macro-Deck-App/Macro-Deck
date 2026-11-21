@@ -525,6 +525,48 @@ has to tolerate a missing answer, and an action that cannot be undone should not
 child `UiConfigButton`s, each drawn with its icon and label and each asking first if it declares a question.
 A renderer that predates `menu` declines it and draws the node's `Fallback`.
 
+## Collapsible sections
+
+`UiConfigSection` is a titled group of fields the user can collapse, for a form with more settings than fit
+comfortably on one screen. `Label` is the header's caption and the children are the section's body, which is
+not drawn while the section is collapsed.
+
+```csharp
+new UiConfigSection
+{
+    Key = "appearance",
+    Label = "Appearance",
+    DefaultExpanded = false,
+    MemoryKey = "my-plugin.appearance",
+    Modified = UiValue.From(() => color.Value.Length > 0 || !shadow.Value),
+    Events = [UiEventHandler.On(UiConfigEvents.Reset, () =>
+    {
+        color.Value = string.Empty;
+        shadow.Value = true;
+    })],
+    Children =
+    [
+        new UiColorInput { Key = "color", Label = "Colour", Binding = Bind.To(color) },
+        new UiBooleanInput { Key = "shadow", Label = "Shadow", Binding = Bind.To(shadow) },
+    ],
+    Fallback = new UiConfigStack { Children = [/* the same fields, always shown */] },
+}
+```
+
+- **Expansion belongs to the client.** `DefaultExpanded` (absent means open) is only where a user with no
+  remembered choice starts. With a `MemoryKey` the client remembers the user's choice under that name, on that
+  client, and applies it to every section carrying the same name, in any form. Without one the choice lasts
+  as long as the open form. Your provider is never told the state and cannot set it, though it may declare
+  `expand` and `collapse` to hear about a change.
+- **`Modified` marks the header**, so a collapsed section still shows that it holds settings that differ from
+  their defaults. You compute it; the section does not compare anything itself.
+- **`reset` is yours to implement.** Declaring a handler for it puts a reset control in the header while
+  `Modified` is true. The handler returns the section's own fields to their defaults; the section clears
+  nothing by itself, and without a handler no control is drawn.
+
+A renderer that predates `section` declines it and draws the node's `Fallback`, so give it one that shows the
+same fields unless the form is only ever drawn by a renderer you know.
+
 ## Putting a question to the user
 
 `UiConfigDialog` is a modal dialog shown for as long as the node is in the tree, so a provider opens it by

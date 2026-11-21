@@ -263,9 +263,9 @@ internal sealed class ContractWidgetIcons : IWidgetIconService
 
 internal sealed class ContractLabelText : ILabelTextService
 {
-	public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
+	public Task<LabelTexts> ResolveTexts(Guid widgetId, string state, CancellationToken cancellationToken = default)
 	{
-		return Task.FromResult<string?>(null);
+		return Task.FromResult(LabelTexts.None);
 	}
 
 	public Task<string?> ResolvePreview(LabelImagePreviewRequest request, CancellationToken cancellationToken = default)

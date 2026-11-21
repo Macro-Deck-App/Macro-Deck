@@ -284,14 +284,28 @@ see only your own events, never which widget or automation holds the trigger.
 | --- | --- |
 | `EventId` | Provider-local event id, without the `integrationId::` prefix. |
 | `Parameters` | The configuration parameters the user set, by name. A parameter left empty is absent. |
-| `EventBindingValue.Value` | The value as the editor stored it: a scalar, an object for a `KeyboardCombo`, or a variable reference the host resolves only when it matches an occurrence. `null` for the state operators. |
+| `EventBindingValue.Value` | The value as the editor stored it: a scalar, an object for a `KeyboardCombo`, or a variable reference such as `{"$var":"scene"}`, which stays unresolved here. `null` for the state operators. |
+| `EventBindingValue.ResolvedValue` | What a `$var` reference in `Value` currently holds, seen from the trigger's widget or automation, in the shape the host compares (a Numeric variable as its stored text). `null` for a literal, a template or an `$event` reference, for a variable that does not exist or has no value, and on a Macro Deck that predates it. |
 | `EventBindingValue.Operator` | `==`, `!=`, `>`, `<`, `>=`, `<=`, or one of `isEmpty`, `isNotEmpty`, `isAvailable`, `isNotAvailable`. |
 
 A trigger can also carry a filter the host evaluates on its own, so a value in `GetBindings()` does not
 guarantee the trigger fires for it.
 
+A user can bind a parameter to a variable or a script input instead of picking a value. Read
+`ResolvedValue ?? Value` to get the value to act on in either case:
+
+```csharp
+var scenes = _events.GetBindings()
+	.Select(binding => binding.Parameters.GetValueOrDefault("scene"))
+	.Select(value => value?.ResolvedValue ?? value?.Value)
+	.Where(value => value is { ValueKind: JsonValueKind.String })
+	.Select(value => value!.Value.GetString()!)
+	.ToList();
+```
+
 `BindingsChanged` fires on a thread-pool thread after the list changed for your integration, and only
-then: moving a widget or editing another plugin's trigger does not raise it. Out of process,
+then: moving a widget or editing another plugin's trigger does not raise it. A change of a variable one of
+your bindings refers to changes its `ResolvedValue` and raises it too. Out of process,
 `GetBindings()` serves the host's last `event-bindings` push, so it is empty until the first push
 arrives. Against a host that predates this API it stays empty and `BindingsChanged` never fires, so treat
 an empty list as "nothing bound", never as an error.
@@ -360,9 +374,9 @@ with `Parameters` set to `null`; the real publisher sends nothing to the host in
 
 Events are one provider-shaped capability per plugin: `describe` returns the merged catalogue of every
 `IEventProvider` in the process, `options` routes to `IDynamicEventOptionsProvider`. The catalogue is
-snapshot-backed. Occurrences travel as the fire-and-forget
-[`event.publish`](/reference/websocket/#events-logs-and-state) message; the host qualifies the id with
-the authenticated plugin id. What the user bound arrives as the push-only
+snapshot-backed. Occurrences travel as the
+[`event.publish`](/reference/websocket/#events-logs-and-state) message, which gets no reply unless
+the host refuses it; the host qualifies the id with the authenticated plugin id. What the user bound arrives as the push-only
 [`host.state`](/reference/websocket/#host-callbacks) api `event-bindings`, scoped to the plugin's own
 events and sent on registration and whenever that list changes. See
 [capability parity](/reference/capability-parity/).

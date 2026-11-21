@@ -124,11 +124,11 @@ fn open(app: &AppHandle) {
 
     let title = localization::t(keys::HOST_ERROR_WINDOW_TITLE);
     let handle = app.clone();
-    let built = WebviewWindowBuilder::new(
+    let built = crate::portable::with_webview_data(WebviewWindowBuilder::new(
         app,
         HOST_ERROR_WINDOW,
         WebviewUrl::CustomProtocol(page_url()),
-    )
+    ))
     .title(&title)
     .inner_size(760.0, 620.0)
     .min_inner_size(520.0, 420.0)

@@ -320,6 +320,13 @@ public static class UiConfigProperties
 	/// <summary>How many lines of text a code editor shows - see <see cref="UiCodeInput.Rows" />.</summary>
 	public const string Rows = "rows";
 
+	/// <summary>Whether a section's fields differ from their defaults, which its header marks.</summary>
+	public const string Modified = "modified";
+
+	/// <summary>The name a client remembers a section's expansion under. Never the expansion itself, which is
+	/// per-client.</summary>
+	public const string MemoryKey = "memoryKey";
+
 #pragma warning restore CA1720
 
 	/// <summary>The property keys this package ships names for, in declaration order. Not exhaustive - see the
@@ -337,6 +344,6 @@ public static class UiConfigProperties
 		Reorderable, Searchable, OffersStateProvider, OffersIconProvider, StateProviderBlockId, IconProviderBlockId,
 		ConfirmTitle, ConfirmMessage, ConfirmLabel, ConfirmDanger, PromptValue, AllowTransparent, AllowVariables, Unit,
 		FixedCount, FixedColors, MaxCount, Spans, Variant, Accent, RailTitle, Selected, Badge, IconWithLabel, Align,
-		Gap, Rows
+		Gap, Rows, Modified, MemoryKey
 	];
 }

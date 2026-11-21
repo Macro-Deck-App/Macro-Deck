@@ -50,6 +50,10 @@ public static class WidgetVariableReferenceParser
 		}
 
 		var liquidNames = CollectNamesAfter(data, VarsPrefix);
+		if (hasLiquid && TemplateClock.Mentions(data))
+		{
+			liquidNames.Add(TemplateClock.Name);
+		}
 
 		var labelNames = hasLiquid ? liquidNames : WidgetVariableReferences.Empty.LabelNames;
 
@@ -72,9 +76,18 @@ public static class WidgetVariableReferenceParser
 	// Dynamic access, vars[name], names nothing after the prefix and is not collected.
 	public static IReadOnlySet<string> ReferencedNames(string? template)
 	{
-		return VariableTemplateRenderer.ContainsLiquid(template)
-			? CollectNamesAfter(template!, VarsPrefix)
-			: WidgetVariableReferences.Empty.LabelNames;
+		if (!VariableTemplateRenderer.ContainsLiquid(template))
+		{
+			return WidgetVariableReferences.Empty.LabelNames;
+		}
+
+		var names = CollectNamesAfter(template!, VarsPrefix);
+		if (TemplateClock.Mentions(template))
+		{
+			names.Add(TemplateClock.Name);
+		}
+
+		return names;
 	}
 
 	private static (string IntegrationId, string ActionId)? ReadProviderReference(string data, string key)

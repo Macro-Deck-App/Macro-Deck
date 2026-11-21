@@ -61,7 +61,7 @@ describe('SecretApprovalsPageComponent', () => {
   let api: jasmine.SpyObj<ApiService>;
 
   async function render(...responses: GetSecretApprovalsResponse[]): Promise<void> {
-    api = jasmine.createSpyObj<ApiService>('ApiService', ['getSecretApprovals', 'approveSecretBlock', 'onNotification']);
+    api = jasmine.createSpyObj<ApiService>('ApiService', ['getSecretApprovals', 'approveSecretBlock', 'declineSecretBlock', 'onNotification']);
     api.getSecretApprovals.and.returnValues(...responses.map(response => Promise.resolve(response)));
     api.onNotification.and.callFake(() => new Subject());
     Object.assign(api, { connectionState$: new BehaviorSubject('disconnected') });
@@ -98,8 +98,17 @@ describe('SecretApprovalsPageComponent', () => {
     return Array.from(card.querySelectorAll('[data-testid="approval-row"]'));
   }
 
+  function footerButton(card: HTMLElement, label: string): HTMLButtonElement {
+    const buttons = Array.from(card.querySelectorAll<HTMLButtonElement>('.approval-card-footer button'));
+    return buttons.find(button => button.textContent?.trim() === label) as HTMLButtonElement;
+  }
+
   function approveButton(card: HTMLElement): HTMLButtonElement {
-    return card.querySelector('.approval-card-footer button') as HTMLButtonElement;
+    return footerButton(card, 'Approve');
+  }
+
+  function declineButton(card: HTMLElement): HTMLButtonElement {
+    return footerButton(card, 'Decline');
   }
 
   it('says so when no step waits for approval', async () => {
@@ -182,6 +191,36 @@ describe('SecretApprovalsPageComponent', () => {
     });
     expect(cards().length).toBe(0);
     expect(TestBed.inject(SecretApprovalService).count()).toBe(0);
+  });
+
+  it('declines the step as it was shown and removes it from the list', async () => {
+    await render({ count: 1, items: [changedAutomationStep()] }, { count: 0, items: [] });
+    api.declineSecretBlock.and.resolveTo({ success: true, error: null });
+
+    declineButton(cards()[0]).click();
+    await settle();
+
+    expect(api.declineSecretBlock).toHaveBeenCalledOnceWith({
+      ownerKind: 'automation',
+      ownerId: 'automation-1',
+      blockId: 'block-1',
+      fingerprint: 'fp-1'
+    });
+    expect(api.approveSecretBlock).not.toHaveBeenCalled();
+    expect(cards().length).toBe(0);
+    expect(TestBed.inject(SecretApprovalService).count()).toBe(0);
+  });
+
+  it('keeps the step listed and says so when declining fails', async () => {
+    await render({ count: 1, items: [changedAutomationStep()] }, { count: 1, items: [changedAutomationStep()] });
+    api.declineSecretBlock.and.rejectWith(new Error('offline'));
+
+    declineButton(cards()[0]).click();
+    await settle();
+
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent)
+      .toContain('The step could not be declined.');
+    expect(cards().length).toBe(1);
   });
 
   it('explains a step that changed while it was on screen and shows it again as it is now', async () => {

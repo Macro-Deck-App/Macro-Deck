@@ -8,6 +8,9 @@ public static class MacroDeckDataRootResolver
 	public const string DataDirEnvironmentVariable = "MACRODECK_DATA_DIR";
 	public const string PortableEnvironmentVariable = "MACRODECK_PORTABLE";
 	public const string PackagedMarkerFileName = ".macro-deck-packaged";
+	public const string PortableMarkerFileName = "portable";
+	public const string PortableDataDirectoryName = "Data";
+	public const string ShellExecutableEnvironmentVariable = "MACRODECK_SHELL_EXECUTABLE";
 
 	public static string Resolve(DataRootEnvironment environment)
 	{
@@ -30,6 +33,12 @@ public static class MacroDeckDataRootResolver
 		if (BuildConfig.Channel == BuildChannel.Development)
 		{
 			return Path.Combine(environment.WorkingDirectory, BuildConfig.DataRootDirectoryName);
+		}
+
+		var portableDataRoot = ResolvePortableMarkerDataRoot(environment);
+		if (portableDataRoot is not null)
+		{
+			return portableDataRoot;
 		}
 
 		var markerPath = Path.Combine(environment.BaseDirectory, PackagedMarkerFileName);
@@ -66,10 +75,32 @@ public static class MacroDeckDataRootResolver
 			return true;
 		}
 
+		if (BuildConfig.Channel == BuildChannel.Development)
+		{
+			return false;
+		}
+
 		// An unmarked Production publish is a copied build folder, which ADR 0002 deliberately treats as
-		// portable. A Development build roots its data under the working directory instead.
-		return BuildConfig.Channel != BuildChannel.Development
-			&& !environment.FileExists(Path.Combine(environment.BaseDirectory, PackagedMarkerFileName));
+		// portable.
+		return ResolvePortableMarkerDataRoot(environment) is not null
+			|| !environment.FileExists(Path.Combine(environment.BaseDirectory, PackagedMarkerFileName));
+	}
+
+	// The marker sits beside the desktop app, not the host, so both processes agree on one folder.
+	// The host lives in a host folder below the app, which is the fallback when no shell started it.
+	private static string? ResolvePortableMarkerDataRoot(DataRootEnvironment environment)
+	{
+		var shellExecutable = environment.GetEnvironmentVariable(ShellExecutableEnvironmentVariable);
+		var shellDirectory = string.IsNullOrWhiteSpace(shellExecutable)
+			? Path.GetFullPath(Path.Combine(environment.BaseDirectory, ".."))
+			: Path.GetDirectoryName(Path.GetFullPath(shellExecutable));
+		if (shellDirectory is null
+			|| !environment.FileExists(Path.Combine(shellDirectory, PortableMarkerFileName)))
+		{
+			return null;
+		}
+
+		return Path.Combine(shellDirectory, PortableDataDirectoryName);
 	}
 
 	private static string GetPlatformDataRoot(DataRootEnvironment environment)

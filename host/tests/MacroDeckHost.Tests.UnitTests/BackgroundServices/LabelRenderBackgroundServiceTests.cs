@@ -73,6 +73,34 @@ internal sealed class LabelRenderBackgroundServiceTests
 		});
 	}
 
+	[Test]
+	public async Task Process_pushes_the_extra_label_texts_with_the_primary_one_and_none_for_a_button_without_them()
+	{
+		var withExtras = Guid.NewGuid();
+		var plain = Guid.NewGuid();
+		_subscriptions.Add("conn-1", withExtras.ToString(), "on");
+		_subscriptions.Add("conn-1", plain.ToString(), "on");
+		_labelText.TextByState[(withExtras, "on")] = "Main";
+		_labelText.ExtraTextsByState[(withExtras, "on")] = ["42 %", null];
+		_labelText.TextByState[(plain, "on")] = "Plain";
+
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(withExtras);
+		_queue.Enqueue(plain);
+
+		await WaitUntil(() => _transport.Sent.Count == 2 && _renderSignals.LabelChanges.Count == 2);
+
+		var rich = _transport.Sent.Single(evt => evt.WidgetId == withExtras.ToString());
+		Assert.Multiple(() =>
+		{
+			Assert.That(rich.Text, Is.EqualTo("Main"));
+			Assert.That(rich.ExtraTexts, Is.EqualTo(new[] { "42 %", null }));
+			Assert.That(_renderSignals.LabelChanges.Single(evt => evt.WidgetId == withExtras.ToString()).ExtraTexts,
+				Is.EqualTo(new[] { "42 %", null }));
+			Assert.That(_transport.Sent.Single(evt => evt.WidgetId == plain.ToString()).ExtraTexts, Is.Null);
+		});
+	}
+
 	// A widget nobody is subscribed to must neither be pushed to clients nor raise the render signal -
 	// Process returns before it ever resolves or raises anything for it.
 	[Test]
@@ -96,6 +124,66 @@ internal sealed class LabelRenderBackgroundServiceTests
 		});
 	}
 
+	[Test]
+	public async Task A_minute_render_pushes_a_label_only_when_its_text_changed()
+	{
+		var unchanged = Guid.NewGuid();
+		var changed = Guid.NewGuid();
+		_subscriptions.Add("conn-1", unchanged.ToString(), "on");
+		_subscriptions.Add("conn-1", changed.ToString(), "on");
+		_labelText.TextByState[(unchanged, "on")] = "Mon";
+		_labelText.TextByState[(changed, "on")] = "12:00";
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(unchanged);
+		_queue.Enqueue(changed);
+		await WaitUntil(() => _transport.Sent.Count == 2);
+
+		_labelText.TextByState[(changed, "on")] = "12:01";
+		_queue.EnqueueIfChanged(unchanged);
+		_queue.EnqueueIfChanged(changed);
+		await WaitUntil(() => _transport.Sent.Count >= 3);
+		_queue.Enqueue(unchanged);
+		await WaitUntil(() => _transport.Sent.Count >= 4);
+
+		Assert.That(_transport.Sent.Select(sent => sent.Text), Is.EqualTo(new[] { "Mon", "12:00", "12:01", "Mon" }));
+	}
+
+	[Test]
+	public async Task A_minute_render_pushes_when_only_an_extra_label_changed()
+	{
+		var widgetId = Guid.NewGuid();
+		_subscriptions.Add("conn-1", widgetId.ToString(), "on");
+		_labelText.TextByState[(widgetId, "on")] = "Main";
+		_labelText.ExtraTextsByState[(widgetId, "on")] = ["12:00"];
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 1);
+
+		_labelText.ExtraTextsByState[(widgetId, "on")] = ["12:01"];
+		_queue.EnqueueIfChanged(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 2);
+
+		Assert.That(_transport.Sent[1].ExtraTexts, Is.EqualTo(new[] { "12:01" }));
+	}
+
+	[Test]
+	public async Task A_minute_render_pushes_to_a_viewer_that_joined_after_everyone_left()
+	{
+		var widgetId = Guid.NewGuid();
+		_subscriptions.Add("conn-1", widgetId.ToString(), "on");
+		_labelText.TextByState[(widgetId, "on")] = "Mon";
+		await _service.StartAsync(CancellationToken.None);
+		_queue.Enqueue(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 1);
+
+		_subscriptions.RemoveConnection("conn-1");
+		_subscriptions.Add("conn-2", widgetId.ToString(), "on");
+		_queue.EnqueueIfChanged(widgetId);
+		await WaitUntil(() => _transport.Sent.Count == 2);
+
+		Assert.That(_transport.Sent[1].Text, Is.EqualTo("Mon"));
+	}
+
 	private static async Task WaitUntil(Func<bool> condition, int timeoutMs = 15000)
 	{
 		var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
@@ -114,9 +202,15 @@ internal sealed class LabelRenderBackgroundServiceTests
 	{
 		public Dictionary<(Guid WidgetId, string State), string> TextByState { get; } = [];
 
-		public Task<string?> ResolveText(Guid widgetId, string state, CancellationToken cancellationToken = default)
+		public Dictionary<(Guid WidgetId, string State), IReadOnlyList<string?>> ExtraTextsByState { get; } = [];
+
+		public Task<LabelTexts> ResolveTexts(
+			Guid widgetId,
+			string state,
+			CancellationToken cancellationToken = default)
 		{
-			return Task.FromResult(TextByState.TryGetValue((widgetId, state), out var text) ? text : null);
+			return Task.FromResult(new LabelTexts(TextByState.GetValueOrDefault((widgetId, state)),
+				ExtraTextsByState.GetValueOrDefault((widgetId, state)) ?? []));
 		}
 
 		public Task<string?> ResolvePreview(

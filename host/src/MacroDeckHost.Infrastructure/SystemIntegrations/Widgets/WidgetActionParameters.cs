@@ -1,6 +1,7 @@
 using System.Globalization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Widgets;
+using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Localization;
 
 namespace MacroDeckHost.Infrastructure.SystemIntegrations.Widgets;
@@ -9,6 +10,7 @@ internal static class WidgetActionParameters
 {
 	public const string Target = "widget";
 	public const string State = "state";
+	public const string LabelNumber = "labelNumber";
 
 	public const string Unchanged = "";
 
@@ -53,6 +55,30 @@ internal static class WidgetActionParameters
 			Description = AppStrings.Integrations.Widgets.Actions.StateDescription(),
 			DefaultValue = defaultValue
 		};
+	}
+
+	public static ActionParameter LabelNumberParameter()
+	{
+		return ActionParameter.Choice(LabelNumber,
+			[
+				.. Enumerable.Range(1, ActionButtonLabelJson.MaxLabels)
+					.Select(number => new ActionParameterOption
+					{
+						Value = number.ToString(CultureInfo.InvariantCulture),
+						Label = AppStrings.Widgets.Editor.LabelNumber(number)
+					})
+			],
+			AppStrings.Integrations.Widgets.Actions.LabelNumberLabel(),
+			AppStrings.Integrations.Widgets.Actions.LabelNumberDescription(),
+			"1");
+	}
+
+	// Absent, and a flow saved before the parameter existed, both mean the primary label.
+	public static int? ReadLabelNumber(ActionExecutionContext context)
+	{
+		return ReadNumber(context, LabelNumber) is { } number && number == Math.Floor(number) && number != 1
+			? (int)Math.Clamp(number, int.MinValue, int.MaxValue)
+			: null;
 	}
 
 	public static DynamicOptionsResult ResolveStateOptions(IWidgetApi? widgets, DynamicOptionsContext context)

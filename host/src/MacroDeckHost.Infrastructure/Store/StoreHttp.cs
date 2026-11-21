@@ -16,6 +16,8 @@ internal sealed record StoreFetch
 
 	public int? StatusCode { get; init; }
 
+	public bool ExceededLimit { get; init; }
+
 	public static StoreFetch Ok(byte[] content)
 	{
 		return new StoreFetch
@@ -26,14 +28,19 @@ internal sealed record StoreFetch
 		};
 	}
 
-	public static StoreFetch Fail(string message, bool sizeMismatch = false, int? statusCode = null)
+	public static StoreFetch Fail(
+		string message,
+		bool sizeMismatch = false,
+		int? statusCode = null,
+		bool exceededLimit = false)
 	{
 		return new StoreFetch
 		{
 			Success = false,
 			FailureMessage = message,
 			SizeMismatch = sizeMismatch,
-			StatusCode = statusCode
+			StatusCode = statusCode,
+			ExceededLimit = exceededLimit
 		};
 	}
 }
@@ -98,7 +105,10 @@ internal static class StoreHttp
 				total += read;
 				if (total > limit)
 				{
-					return StoreFetch.Fail($"'{url}' exceeded {limit} bytes.", expectedSize is > 0);
+					return StoreFetch.Fail($"'{url}' exceeded {limit} bytes.",
+						expectedSize is > 0,
+						null,
+						true);
 				}
 
 				buffer.Write(chunk, 0, read);

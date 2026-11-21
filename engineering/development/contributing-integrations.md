@@ -27,7 +27,7 @@ New integrations must be implemented inside the `MacroDeckHost.Integrations` pro
 `ProjectReferenceTests` in `host/tests/MacroDeckHost.Tests.UnitTests/Architecture` fails the build if another Macro Deck project is referenced. See [`MacroDeckHost.Integrations.csproj`](https://github.com/Macro-Deck-App/Macro-Deck/blob/main/host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj). Two other project settings matter for integration authors:
 
 - `*.svg` and `*.png` files are compiled in as `EmbeddedResource`. Brand icons live in the integration's `Icons/` folder and are loaded from the assembly at runtime rather than from disk (see Step 5).
-- `InternalsVisibleTo` is granted to the four unit test projects (`MacroDeckHost.Tests.UnitTests` and its `.Windows`, `.MacOS`, `.Linux` variants), so internal helpers can be tested directly. No host project gets it: apart from the public types of system integration folders, the host reaches the integrations only through the public `IntegrationDiscovery`.
+- `InternalsVisibleTo` is granted to the four unit test projects (`MacroDeckHost.Tests.UnitTests` and its `.Windows`, `.MacOS`, `.Linux` variants) and to `MacroDeckHost.Tests.PlatformInput`, so internal helpers can be tested directly. No host project gets it: apart from the public types of system integration folders, the host reaches the integrations only through the public `IntegrationDiscovery`.
 
 ### The platform library
 

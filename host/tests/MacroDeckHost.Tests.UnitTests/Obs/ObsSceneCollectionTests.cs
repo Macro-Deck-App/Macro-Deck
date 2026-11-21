@@ -261,6 +261,34 @@ internal sealed class ObsSceneCollectionTests
 		});
 	}
 
+	[Test]
+	public async Task A_scene_collection_that_loads_longer_than_a_request_may_take_keeps_obs_connected()
+	{
+		var sessions = 0;
+		await using var server = new FakeObsWebSocketServer(requestType
+				=> requestType == "SetCurrentSceneCollection" ? null : ObsRequestException.NotReady,
+			ObsServerFault.None,
+			session => Volatile.Write(ref sessions, session));
+		await using var connection = new ObsConnection(new ObsClient(null, null, null, TimeSpan.FromMilliseconds(500)),
+			server.Url,
+			null,
+			TimeSpan.FromMilliseconds(20),
+			pollInterval: TimeSpan.FromMilliseconds(100));
+		connection.Start();
+		await WaitForAsync(() => connection.Status == ObsConnectionStatus.Connected);
+
+		var result = await connection.SetSceneCollectionAsync("Large");
+		await Task.Delay(TimeSpan.FromSeconds(1));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Code, Is.EqualTo(ObsRequestException.TimedOut));
+			Assert.That(connection.Status, Is.EqualTo(ObsConnectionStatus.Connected));
+			Assert.That(connection.IsConnected, Is.True);
+			Assert.That(Volatile.Read(ref sessions), Is.EqualTo(1));
+		});
+	}
+
 	private static async Task WaitForAsync(Func<bool> condition)
 	{
 		var stopwatch = Stopwatch.StartNew();

@@ -1069,6 +1069,9 @@ Bağlantı noktasını kullanan uygulamayı (veya hâlâ çalışan bir Macro De
   <data name="Bootstrapper.Mcp.TokenMissing" xml:space="preserve">
     <value>{variable} ayarlanmamış. Claude Desktop uzantısını Ayarlar &gt; Yapay zekâ istemcileri bölümünden yeniden yükleyin.</value>
   </data>
+  <data name="Bootstrapper.Mcp.TokenNotStored" xml:space="preserve">
+    <value>Bu uzantının erişim belirteci bu bilgisayarda kayıtlı değil. Ayarlar &gt; Yapay zekâ istemcileri bölümünde yeni bir belirteç oluşturun ve uzantıyı yeniden yükleyin.</value>
+  </data>
   <data name="Bootstrapper.Mcp.NotRunning" xml:space="preserve">
     <value>Macro Deck çalışmıyor. Macro Deck'i başlatıp yeniden deneyin.</value>
   </data>
@@ -1126,6 +1129,10 @@ Bağlantı noktasını kullanan uygulamayı (veya hâlâ çalışan bir Macro De
   <data name="Bootstrapper.Tray.Show" xml:space="preserve">
     <value>Göster</value>
   </data>
+  <data name="Bootstrapper.Tray.UpdateAvailableTooltip" xml:space="preserve">
+    <value>Macro Deck: {version} güncellemesi mevcut</value>
+    <comment>[version:string]</comment>
+  </data>
   <data name="Bootstrapper.Tray.UpdateTo" xml:space="preserve">
     <value>{version} sürümüne güncelle</value>
     <comment>[version:string]</comment>
@@ -1144,6 +1151,10 @@ Macro Deck APT deposundan yüklendi; yeni sürüm orada yayımlandığında sudo
   </data>
   <data name="Bootstrapper.Update.AptManaged" xml:space="preserve">
     <value>Macro Deck APT deposundan yüklendi ve apt tarafından güncellenir. sudo apt update &amp;&amp; sudo apt upgrade komutunu çalıştırın.</value>
+  </data>
+  <data name="Bootstrapper.Update.AvailableNotification" xml:space="preserve">
+    <value>Macro Deck {version} kullanıma sunuldu. Yenilikleri görmek ve güncellemek için Macro Deck simgesinin menüsünü açın.</value>
+    <comment>[version:string]</comment>
   </data>
   <data name="Bootstrapper.Update.AvailableTitle" xml:space="preserve">
     <value>Güncelleme mevcut</value>
@@ -1168,11 +1179,6 @@ Macro Deck APT deposundan yüklendi; yeni sürüm orada yayımlandığında sudo
   </data>
   <data name="Bootstrapper.Update.CheckFailed" xml:space="preserve">
     <value>Güncellemeler denetlenemedi: {error}</value>
-  </data>
-  <data name="Bootstrapper.Update.ConfirmDownload" xml:space="preserve">
-    <value>Macro Deck {version} kullanılabilir.
-
-Şimdi indirip yüklemek ister misiniz?</value>
   </data>
   <data name="Bootstrapper.Update.DownloadAndInstall" xml:space="preserve">
     <value>İndir ve yükle</value>
@@ -1219,6 +1225,14 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Bootstrapper.Update.PartialCheckFailed.Other" xml:space="preserve">
     <value>{names} güncelleme kaynakları denetlenemedi.</value>
     <comment>[plural]</comment>
+  </data>
+  <data name="Bootstrapper.Update.PortableAvailable" xml:space="preserve">
+    <value>Macro Deck {version} kullanılabilir.
+
+Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro Deck web sitesinden indirin ve program dosyalarını değiştirin. Data klasörünü koruyun. Macro Deck çalışmaya devam edecek.</value>
+  </data>
+  <data name="Bootstrapper.Update.PortableNotSupported" xml:space="preserve">
+    <value>Macro Deck'in bu taşınabilir kopyası güncellemeleri kendisi yüklemez. Yeni taşınabilir ZIP dosyasını {downloadPageUrl} adresinden indirin, Macro Deck'ten çıkın ve program dosyalarını değiştirin. Data klasörünü koruyun.</value>
   </data>
   <data name="Bootstrapper.UpdateWindow.CancelDownload" xml:space="preserve">
     <value>İndirmeyi iptal et</value>
@@ -1486,6 +1500,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Deck.ApplicationAddFailed" xml:space="preserve">
     <value>Uygulama eklenemedi</value>
   </data>
+  <data name="Deck.CopyStyleFailed" xml:space="preserve">
+    <value>Stil kopyalanamadı</value>
+  </data>
   <data name="Deck.DeleteWidgetHeading.One" xml:space="preserve">
     <value>Widget'ı sil</value>
     <comment>[plural]</comment>
@@ -1572,6 +1589,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Deck.PasteNoFit" xml:space="preserve">
     <value>Kopyalanan widget'lar bu Deck'te hiçbir yere sığmıyor. Onları oraya yapıştırmak için boş bir hücreye sağ tıklayın.</value>
+  </data>
+  <data name="Deck.PasteStyleFailed" xml:space="preserve">
+    <value>Stil yapıştırılamadı</value>
   </data>
   <data name="Deck.PinWidgetFailed" xml:space="preserve">
     <value>Widget sabitlenemedi</value>
@@ -2545,6 +2565,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Actions.ProviderTimeout" xml:space="preserve">
     <value>Eylem zamanında yanıt vermedi</value>
   </data>
+  <data name="Errors.Actions.SecretApprovalDeclined" xml:space="preserve">
+    <value>Bu adım bir gizli bilgi kullanıyor ve reddedildi, bu yüzden çalışmıyor.</value>
+  </data>
   <data name="Errors.Actions.SecretApprovalPending" xml:space="preserve">
     <value>Bu adım bir gizli bilgi kullanıyor ve onayınızı bekliyor.</value>
   </data>
@@ -2980,6 +3003,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Errors.Mcp.ExtensionTokenInvalid" xml:space="preserve">
     <value>Bu erişim belirteci artık kullanılamaz. Uzantıyı indirmek için yeni bir belirteç oluşturun.</value>
   </data>
+  <data name="Errors.Mcp.ExtensionTokenNotStored" xml:space="preserve">
+    <value>Macro Deck erişim belirtecini bu bilgisayarın kimlik bilgisi deposuna kaydedemedi, bu nedenle uzantı oluşturulmadı. Yeniden deneyin veya istemcinizi istemci yapılandırmasıyla bağlayın.</value>
+  </data>
   <data name="Errors.Mcp.ExtensionUnavailable" xml:space="preserve">
     <value>Claude Desktop uzantısı yalnızca macOS ve Windows'a yüklenmiş Macro Deck uygulamasında kullanılabilir.</value>
   </data>
@@ -3312,6 +3338,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Errors.Widgets.ProviderDidNotHandle" xml:space="preserve">
     <value>Hiçbir sağlayıcı widget'ı işlemedi</value>
+  </data>
+  <data name="Errors.Widgets.StyleInvalid" xml:space="preserve">
+    <value>Kopyalanan stil geçerli değil. Yeniden kopyalayın.</value>
+  </data>
+  <data name="Errors.Widgets.StyleRejected" xml:space="preserve">
+    <value>Stil bu seçime uygulanamıyor.</value>
   </data>
   <data name="Errors.Widgets.TooManyFavorites" xml:space="preserve">
     <value>En fazla {max} widget favori olabilir.</value>
@@ -5628,6 +5660,27 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Deck.Actions.ChangeProfileName" xml:space="preserve">
     <value>Profili şuna değiştir</value>
   </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersDescription" xml:space="preserve">
+    <value>Dolaşılacak klasörler, seçildikleri sırayla.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleFoldersLabel" xml:space="preserve">
+    <value>Klasörler</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderAlphabetical" xml:space="preserve">
+    <value>Alfabetik</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderCustom" xml:space="preserve">
+    <value>Özel</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderDescription" xml:space="preserve">
+    <value>Klasör sırası ve Alfabetik, açık profildeki tüm klasörleri dolaşır. Özel yalnızca seçilen klasörleri dolaşır.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderFolderOrder" xml:space="preserve">
+    <value>Klasör sırası</value>
+  </data>
+  <data name="Integrations.Deck.Actions.CycleOrderLabel" xml:space="preserve">
+    <value>Sıra</value>
+  </data>
   <data name="Integrations.Deck.Actions.DeviceDescription" xml:space="preserve">
     <value>İsteğe bağlı. Yalnızca bu aygıt gezinir. Boş bırakırsanız eylemi çalıştıran aygıt gezinir; hiçbiri çalıştırmadıysa tüm aygıtlar gezinir.</value>
   </data>
@@ -5655,11 +5708,29 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Deck.Actions.GoToParentName" xml:space="preserve">
     <value>Üst klasöre git</value>
   </data>
+  <data name="Integrations.Deck.Actions.NextFolderDescription" xml:space="preserve">
+    <value>Seçilen sırada sonraki klasöre geçer.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.NextFolderName" xml:space="preserve">
+    <value>Sonraki klasör</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderDescription" xml:space="preserve">
+    <value>Seçilen sırada önceki klasöre geçer.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.PreviousFolderName" xml:space="preserve">
+    <value>Önceki klasör</value>
+  </data>
   <data name="Integrations.Deck.Actions.ProfileDescription" xml:space="preserve">
     <value>Geçilecek profil.</value>
   </data>
   <data name="Integrations.Deck.Actions.ProfileLabel" xml:space="preserve">
     <value>Profil</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapDescription" xml:space="preserve">
+    <value>Son klasörden sonra ilk klasöre, ilk klasörden önce son klasöre geçilir. Kapalıyken iki uçta da bir şey olmaz.</value>
+  </data>
+  <data name="Integrations.Deck.Actions.WrapLabel" xml:space="preserve">
+    <value>Başa dön</value>
   </data>
   <data name="Integrations.Deck.Errors.DeviceNotConnected" xml:space="preserve">
     <value>'{deviceId}' aygıtı bağlı değil.</value>
@@ -5675,6 +5746,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Deck.Errors.NoProfileSelected" xml:space="preserve">
     <value>Hiçbir profil seçilmedi.</value>
+  </data>
+  <data name="Integrations.Deck.Errors.OpenFolderNotFound" xml:space="preserve">
+    <value>Açık klasör bulunamadı.</value>
   </data>
   <data name="Integrations.Deck.Errors.ProfileNotFound" xml:space="preserve">
     <value>'{profileId}' profili yok.</value>
@@ -7460,6 +7534,84 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.GoogleCalendar.Issues.SignInExpiredTitle" xml:space="preserve">
     <value>{account} için Google oturumunun süresi doldu</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemDescription" xml:space="preserve">
+    <value>JSON içindeki bir yoldaki dizinin sonuna bir öğe ekler ve sonucu bir değişkene kaydeder. Eksik bir dizi oluşturulur.</value>
+  </data>
+  <data name="Integrations.Http.Actions.AppendJsonArrayItemName" xml:space="preserve">
+    <value>JSON dizisine ekle</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsDescription" xml:space="preserve">
+    <value>JSON içindeki bir yoldaki dizinin öğe sayısını veya nesnenin özellik sayısını bir değişkene kaydeder.</value>
+  </data>
+  <data name="Integrations.Http.Actions.CountJsonItemsName" xml:space="preserve">
+    <value>JSON öğelerini say</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonEditPathDescription" xml:space="preserve">
+    <value>Özellikler ve dizi indeksleri, ör. data.items[0].name veya tüm belge için yalnızca "$".</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputDescription" xml:space="preserve">
+    <value>Üzerinde çalışılacak JSON. İçinde saklanan JSON'u kullanmak için bir değişken ekleyin.</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonInputLabel" xml:space="preserve">
+    <value>JSON</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueLabel" xml:space="preserve">
+    <value>Değer</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeBoolean" xml:space="preserve">
+    <value>Doğru veya yanlış</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeJson" xml:space="preserve">
+    <value>JSON parçası</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeLabel" xml:space="preserve">
+    <value>Değer türü</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNull" xml:space="preserve">
+    <value>Null</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeNumber" xml:space="preserve">
+    <value>Sayı</value>
+  </data>
+  <data name="Integrations.Http.Actions.JsonValueTypeText" xml:space="preserve">
+    <value>Metin</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueDescription" xml:space="preserve">
+    <value>JSON içindeki bir yoldaki özelliği veya dizi öğesini kaldırır ve sonucu bir değişkene kaydeder.</value>
+  </data>
+  <data name="Integrations.Http.Actions.RemoveJsonValueName" xml:space="preserve">
+    <value>JSON değerini kaldır</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueDescription" xml:space="preserve">
+    <value>JSON içindeki bir yola bir değer yazar ve sonucu bir değişkene kaydeder. Yol üzerindeki eksik nesneler oluşturulur.</value>
+  </data>
+  <data name="Integrations.Http.Actions.SetJsonValueName" xml:space="preserve">
+    <value>JSON değerini ayarla</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonInput" xml:space="preserve">
+    <value>JSON geçerli değil.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonPath" xml:space="preserve">
+    <value>JSON yolu geçerli değil.</value>
+  </data>
+  <data name="Integrations.Http.Errors.InvalidJsonValue" xml:space="preserve">
+    <value>Değer, seçilen değer türüyle eşleşmiyor.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonPathBlocked" xml:space="preserve">
+    <value>Yol JSON ile uyuşmuyor: bir özellik adı orada bir nesne, bir indeks ise bir dizi gerektirir.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonRootNotRemovable" xml:space="preserve">
+    <value>Belgenin tamamı kaldırılamaz. İçinde bir yol seçin.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotArray" xml:space="preserve">
+    <value>Bu yoldaki değer bir dizi değil.</value>
+  </data>
+  <data name="Integrations.Http.Errors.JsonValueNotContainer" xml:space="preserve">
+    <value>Bu yoldaki değer bir dizi veya nesne değil.</value>
+  </data>
+  <data name="Integrations.Http.Errors.NoJsonValueAtPath" xml:space="preserve">
+    <value>JSON'da bu yolda bir değer yok.</value>
   </data>
   <data name="Integrations.MicrosoftCalendar.Config.AuthorizationNotCompleted" xml:space="preserve">
     <value>Microsoft oturum açma işlemi iptal edildi veya tamamlanmadı. Yeniden açmak için devam edin.</value>
@@ -11634,6 +11786,118 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.System.Actions.ShowNotification.Failed" xml:space="preserve">
     <value>Bildirim gösterilemedi.</value>
   </data>
+  <data name="Integrations.System.Actions.AskQuestion.Name" xml:space="preserve">
+    <value>Soru sor</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Description" xml:space="preserve">
+    <value>Akışı duraklatır, deck üzerinde bir soru sorar ve yanıtı bir değişkene kaydeder.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindLabel" xml:space="preserve">
+    <value>Soru türü</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindConfirm" xml:space="preserve">
+    <value>Evet veya hayır</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindChoose" xml:space="preserve">
+    <value>Listeden seçim</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.KindText" xml:space="preserve">
+    <value>Metin girişi</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TitleLabel" xml:space="preserve">
+    <value>Soru</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.MessageLabel" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesLabel" xml:space="preserve">
+    <value>Seçenekler</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesDescription" xml:space="preserve">
+    <value>Her satıra bir seçenek veya bir JSON dizisi. Listeyi bir değişkenden almak için değişken ekleyin. En fazla 50 seçenek, her biri en fazla 100 karakter.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.PlaceholderLabel" xml:space="preserve">
+    <value>Yer tutucu</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DefaultTextLabel" xml:space="preserve">
+    <value>Varsayılan metin</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetLabel" xml:space="preserve">
+    <value>Sorulacak yer</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetOrigin" xml:space="preserve">
+    <value>Widget'a basan cihaz</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetDevice" xml:space="preserve">
+    <value>Seçilen bir cihaz</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TargetAll" xml:space="preserve">
+    <value>Bağlı tüm istemciler</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.DeviceLabel" xml:space="preserve">
+    <value>Cihaz</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutLabel" xml:space="preserve">
+    <value>Zaman aşımı</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutDescription" xml:space="preserve">
+    <value>Sorunun yanıt için ne kadar bekleyeceği, en fazla 9 dakika.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableLabel" xml:space="preserve">
+    <value>Yanıt değişkeni</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerVariableDescription" xml:space="preserve">
+    <value>true veya false, seçilen öğe ya da girilen metin atanır. Yanıt yoksa false veya boş metin atanır.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableLabel" xml:space="preserve">
+    <value>Konum değişkeni</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.IndexVariableDescription" xml:space="preserve">
+    <value>Seçilen öğenin 0'dan başlayan konumu, yanıt yoksa -1 atanır.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableLabel" xml:space="preserve">
+    <value>Sonuç değişkeni</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.OutcomeVariableDescription" xml:space="preserve">
+    <value>answered, cancelled, timedOut veya noClient atanır.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.One" xml:space="preserve">
+    <value>{count} saniye sonra kapanır.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintSeconds.Other" xml:space="preserve">
+    <value>{count} saniye sonra kapanır.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.One" xml:space="preserve">
+    <value>{count} dakika sonra kapanır.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TimeoutHintMinutes.Other" xml:space="preserve">
+    <value>{count} dakika sonra kapanır.</value>
+    <comment>[plural]</comment>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NotInitialized" xml:space="preserve">
+    <value>Sorular henüz kullanılamıyor.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.Failed" xml:space="preserve">
+    <value>Soru gösterilemedi.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.NoChoices" xml:space="preserve">
+    <value>Seçenek listesi boş.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.TooManyChoices" xml:space="preserve">
+    <value>Listede {max} seçenekten fazlası var.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoiceTooLong" xml:space="preserve">
+    <value>Bir seçenek {max} karakterden uzun.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.ChoicesTooLarge" xml:space="preserve">
+    <value>Seçenek listesi gösterilemeyecek kadar büyük.</value>
+  </data>
+  <data name="Integrations.System.Actions.AskQuestion.AnswerNotStored" xml:space="preserve">
+    <value>Yanıt {variable} değişkenine kaydedilemedi. Değişkenin türünü kontrol edin.</value>
+  </data>
   <data name="Integrations.System.Actions.SetVolume.Description" xml:space="preserve">
     <value>Seçili ses aygıtının ses düzeyini belirli bir seviyeye ayarlar.</value>
   </data>
@@ -11925,6 +12189,66 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.System.Variables.FocusedAppBundleId" xml:space="preserve">
     <value>Ön plandaki uygulamanın paket kimliği</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationTitle" xml:space="preserve">
+    <value>İzlenen uygulama</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationDescription" xml:space="preserve">
+    <value>Macro Deck bu uygulamanın çalışıp çalışmadığını, kaç işlemi ve penceresi olduğunu ve pencerelerinin nasıl gösterildiğini bildirir.</value>
+  </data>
+  <data name="Integrations.System.Config.NamePlaceholder" xml:space="preserve">
+    <value>Oyun</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationLabel" xml:space="preserve">
+    <value>Uygulama</value>
+  </data>
+  <data name="Integrations.System.Config.ApplicationFieldDescription" xml:space="preserve">
+    <value>chrome gibi çalışan bir işlem veya programın yolu.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterName" xml:space="preserve">
+    <value>Bu uygulama için bir ad girin.</value>
+  </data>
+  <data name="Integrations.System.Config.EnterApplication" xml:space="preserve">
+    <value>Çalışan bir uygulama seçin veya bir programın yolunu girin.</value>
+  </data>
+  <data name="Integrations.System.Config.EntryLimitReached" xml:space="preserve">
+    <value>Macro Deck en fazla {count} uygulamayı izler. Başka bir uygulama eklemek için birini kaldırın.</value>
+  </data>
+  <data name="Integrations.System.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Benzersiz bir değişken adı oluşturulamadı. Uygulamayı yeniden adlandırın ve tekrar deneyin.</value>
+  </data>
+  <data name="Integrations.System.Config.UnknownStep" xml:space="preserve">
+    <value>Bilinmeyen kurulum adımı.</value>
+  </data>
+  <data name="Integrations.System.Variables.AppRunning" xml:space="preserve">
+    <value>Çalışıyor</value>
+  </data>
+  <data name="Integrations.System.Variables.AppInstances" xml:space="preserve">
+    <value>Çalışan işlemler</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindows" xml:space="preserve">
+    <value>Açık pencereler</value>
+  </data>
+  <data name="Integrations.System.Variables.AppWindowState" xml:space="preserve">
+    <value>Pencere durumu</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppWindowState" xml:space="preserve">
+    <value>Ön plandaki uygulamanın pencere durumu</value>
+  </data>
+  <data name="Integrations.System.Variables.FocusedAppInstances" xml:space="preserve">
+    <value>Ön plandaki uygulamanın işlemleri</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateUnavailableTitle" xml:space="preserve">
+    <value>Pencere durumları kullanılamıyor</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateWaylandDescription" xml:space="preserve">
+    <value>Wayland, Macro Deck'in diğer uygulamaların pencerelerini okumasına izin vermez. İzlenen uygulamalar çalışıp çalışmadıklarını ve kaç işlemleri olduğunu bildirmeye devam eder, ancak pencere durumu ve pencere sayısı kullanılamaz.</value>
+  </data>
+  <data name="Integrations.System.Issues.WindowStateAccessibilityDescription" xml:space="preserve">
+    <value>Macro Deck'in pencere durumlarını okuyabilmesi için Erişilebilirlik erişimi gerekir. Sistem Ayarları &gt; Gizlilik ve Güvenlik &gt; Erişilebilirlik altında Macro Deck'e izin verin. O zamana kadar izlenen uygulamaların pencere durumu ve pencere sayısı kullanılamaz.</value>
+  </data>
+  <data name="Integrations.System.Issues.GrantAccessibilityAction" xml:space="preserve">
+    <value>Erişim izni verin</value>
   </data>
   <data name="Integrations.Twitch.Actions.AccountDescription" xml:space="preserve">
     <value>Eylemi hangi bağlı Twitch hesabının gerçekleştireceği.</value>
@@ -13295,6 +13619,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Integrations.Variables.Actions.FileDescription" xml:space="preserve">
     <value>Dosyanın tam yolu. Yoksa oluşturulur; klasörün zaten var olması gerekir.</value>
   </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateName" xml:space="preserve">
+    <value>Şablon değişkenini yenile</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateDescription" xml:space="preserve">
+    <value>Bir şablon değişkenini yeniden işler, örneğin yeni bir rastgele sayı almak için.</value>
+  </data>
+  <data name="Integrations.Variables.Actions.RefreshTemplateVariableDescription" xml:space="preserve">
+    <value>Yeniden işlenecek şablon değişkeni. Onu okuyan değişkenler yeni değerini izler.</value>
+  </data>
   <data name="Integrations.Variables.Errors.NoVariableSelected" xml:space="preserve">
     <value>Hiçbir değişken seçilmedi.</value>
   </data>
@@ -13318,6 +13651,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Variables.Errors.VariableValueUnavailable" xml:space="preserve">
     <value>Değişkenin şu anda bir değeri yok.</value>
+  </data>
+  <data name="Integrations.Variables.Errors.NotATemplateVariable" xml:space="preserve">
+    <value>Değişken bir şablon değişkeni değil.</value>
   </data>
   <data name="Integrations.Variables.Errors.FileWriteFailed" xml:space="preserve">
     <value>Dosya yazılamadı.</value>
@@ -14110,6 +14446,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Integrations.Widgets.Actions.LabelLabel" xml:space="preserve">
     <value>Etiket</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberDescription" xml:space="preserve">
+    <value>Hangi etiketin değiştirileceği. Etiket 1 ana etikettir; henüz olmayan bir etiket eklenir.</value>
+  </data>
+  <data name="Integrations.Widgets.Actions.LabelNumberLabel" xml:space="preserve">
+    <value>Değiştirilecek etiket</value>
   </data>
   <data name="Integrations.Widgets.Actions.LabelPlaceholder" xml:space="preserve">
     <value>Düğme etiketi</value>
@@ -15831,6 +16173,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="SecretApprovals.ChangedTag" xml:space="preserve">
     <value>Değişti</value>
   </data>
+  <data name="SecretApprovals.Decline" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="SecretApprovals.DeclineFailed" xml:space="preserve">
+    <value>Adım reddedilemedi.</value>
+  </data>
   <data name="SecretApprovals.EmptyHeading" xml:space="preserve">
     <value>Onay bekleyen bir şey yok</value>
   </data>
@@ -15838,7 +16186,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Gizli bilgi kullanan tüm adımlar onaylandı.</value>
   </data>
   <data name="SecretApprovals.Intro" xml:space="preserve">
-    <value>Gizli bilgi kullanan adımlar yalnızca onaylandıktan sonra çalışır. Nelerin değiştiğini inceleyin, ardından onaylayın.</value>
+    <value>Gizli bilgi kullanan adımlar yalnızca onaylandıktan sonra çalışır. Nelerin değiştiğini inceleyin, ardından onaylayın veya reddedin.</value>
   </data>
   <data name="SecretApprovals.LoadFailed" xml:space="preserve">
     <value>Onaylar yüklenemedi.</value>
@@ -16496,6 +16844,15 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Backups.RecoveryKeyRowLabel" xml:space="preserve">
     <value>Kurtarma anahtarı</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmHeading" xml:space="preserve">
+    <value>Yeni bir kurtarma anahtarı oluşturulsun mu?</value>
+  </data>
+  <data name="Settings.Backups.RegenerateConfirmMessage" xml:space="preserve">
+    <value>Daha önce alınan yedekler, daha önce kaydettiğiniz kurtarma anahtarına hâlâ ihtiyaç duyar; bu yüzden o anahtarı da saklayın. Yeni anahtar ardından gösterilir.</value>
+  </data>
+  <data name="Settings.Backups.RegenerateRecoveryKeyButton" xml:space="preserve">
+    <value>Yeni kurtarma anahtarı oluştur</value>
   </data>
   <data name="Settings.Backups.Remote" xml:space="preserve">
     <value>Uzak</value>
@@ -17273,7 +17630,7 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>Claude Desktop için indir</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopHint" xml:space="preserve">
-    <value>Macro Deck'i yüklemek için indirilen dosyayı Claude Desktop'ta açın. Dosya bu belirteci içerdiğinden yüklemeden sonra silin.</value>
+    <value>Macro Deck'i yüklemek için indirilen dosyayı Claude Desktop'ta açın. Dosya herhangi bir belirteç içermez: Macro Deck belirteci bu bilgisayarın kimlik bilgisi deposunda saklar.</value>
   </data>
   <data name="Settings.Mcp.ClaudeDesktopSaveFailed" xml:space="preserve">
     <value>Claude Desktop uzantısı kaydedilemedi</value>
@@ -17313,6 +17670,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Settings.Mcp.EndpointHint" xml:space="preserve">
     <value>Bu bilgisayarda bu adresi kullanın. Ağınızdaki başka bir bilgisayarda 127.0.0.1 yerine bu bilgisayarın ağ adresini yazın. Her bağlantı için bir erişim belirteci gerekir.</value>
   </data>
+  <data name="Settings.Mcp.EndpointHintLocalOnly" xml:space="preserve">
+    <value>Bu bilgisayarda bu adresi kullanın. Her bağlantı için bir erişim belirteci gerekir. Başka bir bilgisayardaki yapay zekâ istemcisini bağlamak için diğer cihazlardaki yapay zekâ istemcilerine izin verin.</value>
+  </data>
   <data name="Settings.Mcp.EndpointLabel" xml:space="preserve">
     <value>Sunucu adresi</value>
   </data>
@@ -17324,6 +17684,12 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Mcp.LoadFailed" xml:space="preserve">
     <value>Yapay zekâ istemcisi ayarları yüklenemedi</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessDescription" xml:space="preserve">
+    <value>Kapalıyken yalnızca bu bilgisayardaki yapay zekâ istemcileri bağlanabilir. HTTPS açılmadıkça ağ bağlantıları şifrelenmez; bu nedenle güvenilmeyen bir ağda erişim belirteci ve bir yapay zekâ istemcisi için girilen gizli değerler okunabilir.</value>
+  </data>
+  <data name="Settings.Mcp.NetworkAccessLabel" xml:space="preserve">
+    <value>Diğer cihazlardaki yapay zekâ istemcilerine izin ver</value>
   </data>
   <data name="Settings.Mcp.NeverUsed" xml:space="preserve">
     <value>Hiçbir zaman</value>
@@ -17852,6 +18218,10 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Settings.Update.AvailableInApp" xml:space="preserve">
     <value>{version} sürümü kullanılabilir.</value>
+    <comment>[version:string]</comment>
+  </data>
+  <data name="Settings.Update.AvailablePortable" xml:space="preserve">
+    <value>{version} sürümü kullanılabilir. Taşınabilir ZIP dosyasını Macro Deck web sitesinden indirin ve program dosyalarını değiştirin. Data klasörünü koruyun.</value>
     <comment>[version:string]</comment>
   </data>
   <data name="Settings.Update.BetaToggleDescription" xml:space="preserve">
@@ -19196,6 +19566,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Store.RegistryRefresh.Error.Unknown" xml:space="preserve">
     <value>Beklenmeyen bir hata oluştu.</value>
   </data>
+  <data name="Store.RegistryRefresh.ForceRefresh" xml:space="preserve">
+    <value>Zorla yenile</value>
+  </data>
   <data name="Store.RegistryRefresh.Heading" xml:space="preserve">
     <value>Mağaza kayıt defteri yenileme</value>
   </data>
@@ -19689,6 +20062,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="UiRender.ReloadOptions" xml:space="preserve">
     <value>Seçenekleri yeniden yükle</value>
+  </data>
+  <data name="UiRender.SectionModified" xml:space="preserve">
+    <value>Varsayılandan farklı</value>
   </data>
   <data name="UiRender.UnsupportedField" xml:space="preserve">
     <value>Bu alan, bu Macro Deck sürümünde desteklenmiyor</value>
@@ -20298,6 +20674,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="WebClient.KeepAwake.Active" xml:space="preserve">
     <value>Ekran uyanık tutuluyor.</value>
+  </data>
+  <data name="WebClient.KeepAwake.AwaitingTap" xml:space="preserve">
+    <value>Ekranı açık tutmak için herhangi bir yere dokunun.</value>
   </data>
   <data name="WebClient.KeepAwake.Denied" xml:space="preserve">
     <value>Tarayıcı veya işletim sistemi ekranın açık kalmasını reddetti (ör. pil tasarrufu).</value>
@@ -21031,6 +21410,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
     <value>{count} widget'ı kopyala</value>
     <comment>[plural]</comment>
   </data>
+  <data name="Widgets.ContextMenu.CopyStyle" xml:space="preserve">
+    <value>Stili kopyala</value>
+  </data>
   <data name="Widgets.ContextMenu.Cut" xml:space="preserve">
     <value>Kes</value>
   </data>
@@ -21062,6 +21444,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.ContextMenu.Paste" xml:space="preserve">
     <value>Yapıştır</value>
+  </data>
+  <data name="Widgets.ContextMenu.PasteStyle" xml:space="preserve">
+    <value>Stili yapıştır</value>
   </data>
   <data name="Widgets.ContextMenu.Pin" xml:space="preserve">
     <value>Sabitle</value>
@@ -21130,6 +21515,9 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   <data name="Widgets.CursorPositionTooltip" xml:space="preserve">
     <value>Ekrandaki fare konumu</value>
   </data>
+  <data name="Widgets.Editor.AddLabel" xml:space="preserve">
+    <value>Etiket ekle</value>
+  </data>
   <data name="Widgets.Editor.AddRule" xml:space="preserve">
     <value>Kural ekle</value>
   </data>
@@ -21189,6 +21577,33 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Widgets.Editor.ConfigTooLargeNoRestoreMessage" xml:space="preserve">
     <value>Bu yapılandırma görsel düzenleyici için fazla büyük. Burada yeniden düzenlemek için JSON modunda eylem ya da olayları kaldırın.</value>
+  </data>
+  <data name="Widgets.Editor.LabelNumber" xml:space="preserve">
+    <value>Etiket {number}</value>
+  </data>
+  <data name="Widgets.Editor.LabelPicker" xml:space="preserve">
+    <value>Düzenlenen etiket</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionText" xml:space="preserve">
+    <value>Metin</value>
+  </data>
+  <data name="Widgets.Editor.LabelSectionTypography" xml:space="preserve">
+    <value>Tipografi</value>
+  </data>
+  <data name="Widgets.Editor.LabelX" xml:space="preserve">
+    <value>Yatay konum (%)</value>
+  </data>
+  <data name="Widgets.Editor.LabelY" xml:space="preserve">
+    <value>Dikey konum (%)</value>
+  </data>
+  <data name="Widgets.Editor.ManageThisLabel" xml:space="preserve">
+    <value>Bu etiketi yönetin</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelAsNew" xml:space="preserve">
+    <value>Yeni etiket olarak yapıştırın</value>
+  </data>
+  <data name="Widgets.Editor.PasteLabelReplace" xml:space="preserve">
+    <value>Kopyalanan etiketle değiştirin</value>
   </data>
   <data name="Widgets.Editor.RestoreLastWorkingAction" xml:space="preserve">
     <value>Son çalışan sürümü geri yükle</value>
@@ -25596,5 +26011,336 @@ Macro Deck web sitesinden indirin ve yüklediğiniz AppImage, DEB veya RPM dosya
   </data>
   <data name="Mcp.SecretEntry.ValueLabel" xml:space="preserve">
     <value>Gizli değer</value>
+  </data>
+  <data name="Integrations.Ping.Name" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Online" xml:space="preserve">
+    <value>Çevrimiçi</value>
+  </data>
+  <data name="Integrations.Ping.Variables.Latency" xml:space="preserve">
+    <value>Gecikme</value>
+  </data>
+  <data name="Integrations.Ping.Variables.PacketLoss" xml:space="preserve">
+    <value>Paket kaybı</value>
+  </data>
+  <data name="Integrations.Ping.Variables.LastSeen" xml:space="preserve">
+    <value>Son yanıt</value>
+  </data>
+  <data name="Integrations.Ping.Events.Category" xml:space="preserve">
+    <value>Ping</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Name" xml:space="preserve">
+    <value>Hedef çevrimiçi</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOnline.Description" xml:space="preserve">
+    <value>Bir ping hedefi çevrimdışı olduktan sonra yeniden yanıt verdiğinde.</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Name" xml:space="preserve">
+    <value>Hedef çevrimdışı</value>
+  </data>
+  <data name="Integrations.Ping.Events.TargetOffline.Description" xml:space="preserve">
+    <value>Bir ping hedefi, hata eşiği kadar arka arkaya pinge yanıt vermediğinde.</value>
+  </data>
+  <data name="Integrations.Ping.Events.Target" xml:space="preserve">
+    <value>Hedef</value>
+  </data>
+  <data name="Integrations.Ping.Events.Host" xml:space="preserve">
+    <value>Ana bilgisayar</value>
+  </data>
+  <data name="Integrations.Ping.Events.Latency" xml:space="preserve">
+    <value>Gecikme (ms)</value>
+  </data>
+  <data name="Integrations.Ping.Config.UnknownStep" xml:space="preserve">
+    <value>Bilinmeyen kurulum adımı.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterName" xml:space="preserve">
+    <value>Bu hedef için bir ad girin.</value>
+  </data>
+  <data name="Integrations.Ping.Config.EnterHost" xml:space="preserve">
+    <value>Bir ana bilgisayar adı, IPv4 adresi veya IPv6 adresi girin.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalOutOfRange" xml:space="preserve">
+    <value>{minimum} ile {maximum} arasında tam sayı olarak saniye girin.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutOutOfRange" xml:space="preserve">
+    <value>{minimum} ile {maximum} arasında tam sayı olarak milisaniye girin.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutNotBelowInterval" xml:space="preserve">
+    <value>Zaman aşımı aralıktan kısa olmalıdır.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdOutOfRange" xml:space="preserve">
+    <value>{minimum} ile {maximum} arasında bir tam sayı girin.</value>
+  </data>
+  <data name="Integrations.Ping.Config.NamePlaceholder" xml:space="preserve">
+    <value>NAS</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostLabel" xml:space="preserve">
+    <value>Ana bilgisayar</value>
+  </data>
+  <data name="Integrations.Ping.Config.HostDescription" xml:space="preserve">
+    <value>Ping atılacak cihazın ana bilgisayar adı, IPv4 veya IPv6 adresi.</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalLabel" xml:space="preserve">
+    <value>Aralık (saniye)</value>
+  </data>
+  <data name="Integrations.Ping.Config.IntervalDescription" xml:space="preserve">
+    <value>Hedefe ne sıklıkla ping atılacağı.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutLabel" xml:space="preserve">
+    <value>Zaman aşımı (milisaniye)</value>
+  </data>
+  <data name="Integrations.Ping.Config.TimeoutDescription" xml:space="preserve">
+    <value>Her yanıt için ne kadar bekleneceği.</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdLabel" xml:space="preserve">
+    <value>Çevrimdışı sayılmadan önceki hata sayısı</value>
+  </data>
+  <data name="Integrations.Ping.Config.FailureThresholdDescription" xml:space="preserve">
+    <value>Hedefin çevrimdışı sayılması için arka arkaya kaç pingin başarısız olması gerektiği; böylece tek bir kayıp paket yok sayılır.</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetTitle" xml:space="preserve">
+    <value>Ping hedefi</value>
+  </data>
+  <data name="Integrations.Ping.Config.TargetDescription" xml:space="preserve">
+    <value>Macro Deck bu cihaza düzenli olarak ping atar ve yanıt verip vermediğini ve ne kadar hızlı yanıt verdiğini gösterir.</value>
+  </data>
+  <data name="Integrations.Ping.Config.VariableIdentityExhausted" xml:space="preserve">
+    <value>Benzersiz bir değişken adı oluşturulamadı. Hedefi yeniden adlandırın ve tekrar deneyin.</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Title" xml:space="preserve">
+    <value>Ping'e izin verilmiyor</value>
+  </data>
+  <data name="Integrations.Ping.Issues.NotPermitted.Description" xml:space="preserve">
+    <value>Bu sistem Macro Deck'in ping isteği göndermesine izin vermiyor, bu nedenle ping hedefleri kontrol edilemiyor. Linux'ta ayrıcalıksız ping'e net.ipv4.ping_group_range ayarıyla izin verin.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Name" xml:space="preserve">
+    <value>Ping durumu</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Description" xml:space="preserve">
+    <value>Bir ping hedefinin erişilebilir olup olmadığını ve ne kadar hızlı yanıt verdiğini gösterir.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NoTarget" xml:space="preserve">
+    <value>Ping hedefi yok</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Online" xml:space="preserve">
+    <value>Çevrimiçi</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Offline" xml:space="preserve">
+    <value>Çevrimdışı</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Waiting" xml:space="preserve">
+    <value>Yanıt bekleniyor</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NotPermitted" xml:space="preserve">
+    <value>Ping'e izin verilmiyor</value>
+  </data>
+  <data name="Integrations.Ping.Widget.TimedOut" xml:space="preserve">
+    <value>Yanıt yok</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Unreachable" xml:space="preserve">
+    <value>Erişilemiyor</value>
+  </data>
+  <data name="Integrations.Ping.Widget.NameNotResolved" xml:space="preserve">
+    <value>Ad bulunamadı</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Failed" xml:space="preserve">
+    <value>Ping başarısız</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Latency" xml:space="preserve">
+    <value>{latency} ms</value>
+  </data>
+  <data name="Integrations.Ping.Widget.PacketLoss" xml:space="preserve">
+    <value>%{loss} paket kaybı</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.Target" xml:space="preserve">
+    <value>Hedef</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.TargetDescription" xml:space="preserve">
+    <value>Bu widget'ın gösterdiği ping hedefi.</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.FirstTarget" xml:space="preserve">
+    <value>İlk hedef</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayName" xml:space="preserve">
+    <value>Görünen ad</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.DisplayNamePlaceholder" xml:space="preserve">
+    <value>Hedefin adı</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowLatency" xml:space="preserve">
+    <value>Gecikmeyi göster</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowPacketLoss" xml:space="preserve">
+    <value>Paket kaybını göster</value>
+  </data>
+  <data name="Integrations.Ping.Widget.Config.ShowHistory" xml:space="preserve">
+    <value>Gecikme geçmişini göster</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Name" xml:space="preserve">
+    <value>Wake on LAN</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceName" xml:space="preserve">
+    <value>Cihazı uyandır</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.WakeDeviceDescription" xml:space="preserve">
+    <value>Kayıtlı bir cihaza Wake on LAN sihirli paketi gönderir. Gönderilen bir paket, cihazın uyandığını doğrulamaz.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceLabel" xml:space="preserve">
+    <value>Cihaz</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DeviceDescription" xml:space="preserve">
+    <value>Uyandırılacak kayıtlı cihaz</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Actions.DevicePlaceholder" xml:space="preserve">
+    <value>Bir cihaz seçin</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Title" xml:space="preserve">
+    <value>Cihaz ekle</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.Description" xml:space="preserve">
+    <value>Macro Deck'ten uyandırmak için bir cihaz kaydedin. Wake on LAN, cihazın donanım yazılımında ve ağ bağdaştırıcısı ayarlarında açık olmalıdır.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.UnknownStep" xml:space="preserve">
+    <value>Bu kurulum adımı bilinmiyor. Yeniden başlayın.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacLabel" xml:space="preserve">
+    <value>MAC adresi</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacDescription" xml:space="preserve">
+    <value>Cihazın ağ bağdaştırıcısının donanım adresi</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.MacInvalid" xml:space="preserve">
+    <value>12 onaltılık basamaktan oluşan bir MAC adresi girin, örneğin AA:BB:CC:DD:EE:FF.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastLabel" xml:space="preserve">
+    <value>Yayın adresi</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastDescription" xml:space="preserve">
+    <value>Bu ağ için 255.255.255.255 değerini koruyun veya cihazın alt ağının yayın adresini girin, örneğin 192.168.2.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.BroadcastInvalid" xml:space="preserve">
+    <value>Bir IPv4 adresi girin, örneğin 192.168.1.255.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortLabel" xml:space="preserve">
+    <value>Bağlantı noktası</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortDescription" xml:space="preserve">
+    <value>Paketin gönderildiği UDP bağlantı noktası. Çoğu cihaz 9 numaralı bağlantı noktasını dinler.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PortInvalid" xml:space="preserve">
+    <value>1 ile 65535 arasında bir bağlantı noktası girin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsLabel" xml:space="preserve">
+    <value>Paket sayısı</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsDescription" xml:space="preserve">
+    <value>Kaç paket gönderileceği. Her zaman uyanmayan bir cihaza birden fazla gönderin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.PacketsInvalid" xml:space="preserve">
+    <value>1 ile 10 arasında bir sayı girin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayLabel" xml:space="preserve">
+    <value>Paketler arası gecikme (ms)</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayDescription" xml:space="preserve">
+    <value>İki paket arasında beklenecek süre, milisaniye cinsinden</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Config.DelayInvalid" xml:space="preserve">
+    <value>0 ile 10000 milisaniye arasında bir gecikme girin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.NoDevice" xml:space="preserve">
+    <value>Uyandırılacak bir cihaz seçin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.DeviceNotFound" xml:space="preserve">
+    <value>Seçilen cihaz artık mevcut değil. Başka bir cihaz seçin.</value>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.InvalidDevice" xml:space="preserve">
+    <value>{device} için kaydedilen ayarlar geçerli değil. Cihazı düzenleyin ve yeniden kaydedin.</value>
+    <comment>[device:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendDenied" xml:space="preserve">
+    <value>Paketin {address} adresine gönderilmesine izin verilmedi. Yayınlara izin verildiğini ve macOS'ta Macro Deck'in yerel ağ erişimi olduğunu kontrol edin.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.Unreachable" xml:space="preserve">
+    <value>{address} adresine giden bir yol yok. Yayın adresini ve macOS'ta Macro Deck'in yerel ağ erişimi olduğunu kontrol edin.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Integrations.WakeOnLan.Errors.SendFailed" xml:space="preserve">
+    <value>Paket {address} adresine gönderilemedi.</value>
+    <comment>[address:string]</comment>
+  </data>
+  <data name="Cli.Help.Title" xml:space="preserve">
+    <value>Macro Deck komut satırı seçenekleri:</value>
+  </data>
+  <data name="Cli.Help.ShowHelp" xml:space="preserve">
+    <value>Bu yardımı gösterir ve çıkar.</value>
+  </data>
+  <data name="Cli.Help.Version" xml:space="preserve">
+    <value>Yüklü Macro Deck sürümünü gösterir ve çıkar.</value>
+  </data>
+  <data name="Cli.Help.ListPlugins" xml:space="preserve">
+    <value>Yüklü eklentileri başlatmadan listeler ve çıkar.</value>
+  </data>
+  <data name="Cli.Help.DisablePlugins" xml:space="preserve">
+    <value>Macro Deck'i yüklü eklentileri başlatmadan başlatır. Eklentileri Geliştirici araçlarında tek tek başlatın. Yalnızca bu oturum için geçerlidir.</value>
+  </data>
+  <data name="Cli.Help.Quit" xml:space="preserve">
+    <value>Çalışan Macro Deck’ten çıkar.</value>
+  </data>
+  <data name="Cli.Version.Channel" xml:space="preserve">
+    <value>Kanal: {channel}</value>
+  </data>
+  <data name="Cli.Version.Commit" xml:space="preserve">
+    <value>Commit: {commit}</value>
+  </data>
+  <data name="Cli.ListPlugins.Directory" xml:space="preserve">
+    <value>Eklenti klasörü: {path}</value>
+  </data>
+  <data name="Cli.ListPlugins.DirectoryUnreadable" xml:space="preserve">
+    <value>Eklenti klasörü okunamadı: {error}</value>
+  </data>
+  <data name="Cli.ListPlugins.None" xml:space="preserve">
+    <value>Yüklü eklenti yok.</value>
+  </data>
+  <data name="Cli.ListPlugins.Name" xml:space="preserve">
+    <value>Ad: {name}</value>
+  </data>
+  <data name="Cli.ListPlugins.ActiveVersion" xml:space="preserve">
+    <value>Etkin sürüm: {version}</value>
+  </data>
+  <data name="Cli.ListPlugins.OtherVersions" xml:space="preserve">
+    <value>Diğer yüklü sürümler: {versions}</value>
+  </data>
+  <data name="Cli.ListPlugins.NoActiveVersion" xml:space="preserve">
+    <value>Kullanılabilir etkin sürüm yok.</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestInvalid" xml:space="preserve">
+    <value>{version} sürümünün bildirimi geçersiz ({error}).</value>
+  </data>
+  <data name="Cli.ListPlugins.ManifestMissing" xml:space="preserve">
+    <value>{version} sürümünün bildirimi yok.</value>
+  </data>
+  <data name="Cli.ListPlugins.UnreadableFolder" xml:space="preserve">
+    <value>{folder}: geçerli bir eklenti klasörü değil.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostMissing" xml:space="preserve">
+    <value>Macro Deck ana bilgisayarı bulunamadı. Macro Deck'i yeniden yükleyin.</value>
+  </data>
+  <data name="Bootstrapper.Cli.HostFailed" xml:space="preserve">
+    <value>Macro Deck ana bilgisayarı çalıştırılamadı: {error}</value>
+  </data>
+  <data name="Bootstrapper.Cli.AlreadyRunning" xml:space="preserve">
+    <value>Macro Deck zaten çalışıyor. Önce Macro Deck'ten çıkın, ardından {option} ile yeniden başlatın.</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabled" xml:space="preserve">
+    <value>Eklentiler devre dışı</value>
+  </data>
+  <data name="Shell.Statusbar.PluginsDisabledTooltip" xml:space="preserve">
+    <value>Macro Deck --disable-plugins ile başlatıldı. Yüklü eklentiler bu oturumda otomatik olarak başlamaz. Bunları Geliştirici araçlarında tek tek başlatın.</value>
+  </data>
+  <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
+    <value>Macro Deck --disable-plugins ile başlatıldığı için yüklü eklentiler otomatik olarak başlatılmadı. Bunları burada tek tek başlatın. Burada başlatma veya durdurma yalnızca bu oturum için geçerlidir.</value>
   </data>
 </root>

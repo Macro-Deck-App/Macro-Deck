@@ -14,7 +14,7 @@ public class IntegrationEventPublisherBindingsTests
 	public void SetUp()
 	{
 		_index = new EventSubscriptionIndex(new StubFolderCache(), new StubAutomationCache());
-		_tracker = new EventBindingTracker(_index, Serilog.Core.Logger.None);
+		_tracker = EventBindingTrackers.Create(_index);
 		_publisher = new IntegrationEventPublisher("com.hotkeys",
 			new RecordingEventBus(),
 			_tracker,

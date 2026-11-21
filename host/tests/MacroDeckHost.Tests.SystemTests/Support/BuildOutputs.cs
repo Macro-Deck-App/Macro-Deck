@@ -9,6 +9,8 @@ internal static class BuildOutputs
 
 	public const string MisbehavingAssemblyName = "MacroDeck.Plugin.Testing.Tests.MisbehavingPlugin";
 
+	public const string OldestSdkAssemblyName = "MacroDeckHost.Tests.OldestSdkPlugin";
+
 	private static string Configuration
 		=> AppContext.BaseDirectory.Contains("Debug", StringComparison.Ordinal) ? "Debug" : "Release";
 
@@ -34,9 +36,14 @@ internal static class BuildOutputs
 		return FixtureBuildDirectory(MisbehavingAssemblyName);
 	}
 
-	private static string FixtureBuildDirectory(string assemblyName)
+	public static string OldestSdkBuildDirectory()
 	{
-		var directory = BinDirectory("sdk", "tests", "fixtures", assemblyName);
+		return FixtureBuildDirectory(OldestSdkAssemblyName, "host");
+	}
+
+	private static string FixtureBuildDirectory(string assemblyName, string area = "sdk")
+	{
+		var directory = BinDirectory(area, "tests", "fixtures", assemblyName);
 		Existing(Path.Combine(directory, assemblyName + ".dll"));
 		return directory;
 	}

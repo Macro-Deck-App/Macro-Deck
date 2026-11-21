@@ -21,7 +21,10 @@ public sealed record EventBindingDto
 		{
 			EventId = EventId,
 			Parameters = Parameters.ToDictionary(pair => pair.Key,
-				pair => new EventBindingValue(pair.Value.Value, pair.Value.Operator),
+				pair => new EventBindingValue(pair.Value.Value, pair.Value.Operator)
+				{
+					ResolvedValue = pair.Value.ResolvedValue
+				},
 				StringComparer.Ordinal)
 		};
 	}
@@ -31,6 +34,12 @@ public sealed record EventBindingDto
 public sealed record EventBindingValueDto
 {
 	public JsonElement? Value { get; init; }
+
+	/// <summary>
+	/// What a <c>$var</c> reference in <see cref="Value" /> currently resolves to; absent otherwise. Sent only
+	/// to a session that declared <see cref="HostApiFeatures.EventBindingResolvedValue" />.
+	/// </summary>
+	public JsonElement? ResolvedValue { get; init; }
 
 	public string Operator { get; init; } = "==";
 }

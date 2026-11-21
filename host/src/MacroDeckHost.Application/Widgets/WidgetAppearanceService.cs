@@ -35,9 +35,8 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 	private readonly IWidgetService _widgetService;
 	private readonly IWidgetDataWriteLock _writeLock;
 	private readonly WidgetDerivedStateStore _derivedStates;
-	private readonly IWidgetTypeRegistry _widgetTypes;
 	private readonly IWidgetDataSchemaProvider _schemas;
-	private readonly WidgetAppearanceSchemaProbe _schemaProbe;
+	private readonly WidgetProviderAppearance _providerAppearance;
 	private readonly ILogger _logger;
 
 	public WidgetAppearanceService(
@@ -56,9 +55,8 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		_widgetService = widgetService;
 		_writeLock = writeLock;
 		_derivedStates = derivedStates;
-		_widgetTypes = widgetTypes;
 		_schemas = schemas;
-		_schemaProbe = schemaProbe;
+		_providerAppearance = new WidgetProviderAppearance(widgetTypes, schemas, schemaProbe);
 		_logger = logger.ForContext<WidgetAppearanceService>();
 	}
 
@@ -74,7 +72,7 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 			{
 				var data = WidgetAppearanceJson.ParseDataBag(widget.Data);
 				var (states, currentStateId) = ResolveTargetStates(widget, data);
-				var providerSupported = ProviderSupported(widget);
+				var providerSupported = _providerAppearance.Supported(widget);
 
 				result.Add(new WidgetTargetInfo
 				{
@@ -112,6 +110,15 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		WidgetAppearanceRequest request,
 		CancellationToken cancellationToken = default)
 	{
+		if (!WidgetAppearanceJson.IsValidLabelNumber(request.Patch.LabelNumber))
+		{
+			_logger.Warning(
+				"Widget appearance change on widget {WidgetId} skipped: label number {LabelNumber} does not exist",
+				request.WidgetId,
+				request.Patch.LabelNumber);
+			return WidgetAppearanceOutcome.Rejected;
+		}
+
 		if (request.Patch.IsEmpty && request.ClearProperties.Count == 0)
 		{
 			return WidgetAppearanceOutcome.Unchanged;
@@ -150,7 +157,7 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 			? WithoutIcon(requestedPatch, request.ClearProperties)
 			: (requestedPatch, request.ClearProperties);
 
-		var providerSupported = ProviderSupported(widget);
+		var providerSupported = _providerAppearance.Supported(widget);
 		var before = providerSupported is null ? null : data.DeepClone().AsObject();
 
 		var changed = WidgetAppearanceJson.Apply(data, widget.Type, patch, states, providerSupported);
@@ -158,7 +165,12 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		{
 			foreach (var state in states)
 			{
-				changed |= WidgetAppearanceJson.ClearProperty(data, widget.Type, property, state, providerSupported);
+				changed |= WidgetAppearanceJson.ClearProperty(data,
+					widget.Type,
+					property,
+					state,
+					providerSupported,
+					patch.LabelNumber);
 			}
 		}
 
@@ -175,32 +187,6 @@ public sealed class WidgetAppearanceService : IWidgetAppearanceService
 		}
 
 		return await Write(widget, data) ? WidgetAppearanceOutcome.Changed : WidgetAppearanceOutcome.WriteFailed;
-	}
-
-	private List<WidgetAppearanceProperty>? ProviderSupported(WidgetEntity widget)
-	{
-		if (!_widgetTypes.TryResolve(widget.Type, out var entry) || entry.IsBuiltIn)
-		{
-			return null;
-		}
-
-		var supported = new List<WidgetAppearanceProperty>
-		{
-			WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor
-		};
-
-		var declared = entry.Descriptor.AppearanceProperties ?? [];
-		var hasSchema = _schemas.TryGet(widget.Type, out var schema);
-		foreach (var property in WidgetAppearanceJson.ProviderOptionalProperties)
-		{
-			if (declared.Contains(property)
-				&& (!hasSchema || _schemaProbe.Accepts(widget.Type, schema!, widget.Data ?? string.Empty, property)))
-			{
-				supported.Add(property);
-			}
-		}
-
-		return supported;
 	}
 
 	// Border writes keep their behaviour from before provider types could declare more, schema or not, so

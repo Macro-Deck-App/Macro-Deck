@@ -17,14 +17,21 @@ public sealed class VariablesIntegration : IIntegration, ISystemIntegration
 	// the host installs its variable lookup here once it is built.
 	internal static VariableReader? HostVariableReader { get; set; }
 
+	internal static TemplateVariableRefresh? HostTemplateVariableRefresh { get; set; }
+
 	public VariablesIntegration()
-		: this(() => HostVariableReader)
+		: this(() => HostVariableReader, () => HostTemplateVariableRefresh)
 	{
 	}
 
-	internal VariablesIntegration(Func<VariableReader?> reader)
+	internal VariablesIntegration(Func<VariableReader?> reader, Func<TemplateVariableRefresh?> refresh)
 	{
-		Actions = [new SetVariableActionDefinition(() => _variables), new WriteVariableToFileActionDefinition(reader)];
+		Actions =
+		[
+			new SetVariableActionDefinition(() => _variables),
+			new WriteVariableToFileActionDefinition(reader),
+			new RefreshTemplateVariableActionDefinition(refresh)
+		];
 	}
 
 	public string Id => IntegrationId;

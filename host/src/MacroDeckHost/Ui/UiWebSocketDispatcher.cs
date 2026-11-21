@@ -400,10 +400,10 @@ public sealed class UiWebSocketDispatcher : IDisposable
 		state = LabelGroups.Normalize(state);
 		_subscriptions.Add(_connectionId, widgetId, state);
 		await _transport.AddToGroup(_connectionId, LabelGroups.For(widgetId, state), cancellationToken);
-		var text = Guid.TryParse(widgetId, out var id)
-			? await _labelText.ResolveText(id, state, cancellationToken)
-			: null;
-		return new LabelTextUpdatedEvent { WidgetId = widgetId, State = state, Text = text };
+		var texts = Guid.TryParse(widgetId, out var id)
+			? await _labelText.ResolveTexts(id, state, cancellationToken)
+			: LabelTexts.None;
+		return LabelTextUpdatedEvent.From(widgetId, state, texts);
 	}
 
 	private async Task<object?> UnsubscribeLabel(string widgetId, string state, CancellationToken cancellationToken)

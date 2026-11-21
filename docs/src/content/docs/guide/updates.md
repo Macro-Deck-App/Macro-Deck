@@ -9,8 +9,12 @@ Choose how Macro Deck handles new versions in **Settings > About**, under **Upda
 | Mode | What happens when a new version is out |
 | --- | --- |
 | **Off** | Nothing. Macro Deck only looks for updates when you check yourself. |
-| **Notify only** | Macro Deck tells you and asks before it downloads and installs anything. This is the default. |
+| **Notify only** | Macro Deck tells you with a notification and installs nothing until you choose to. This is the default. |
 | **Automatic** | Macro Deck downloads the update in the background and installs it when you quit Macro Deck. Windows and macOS only. |
+
+A [portable copy](/guide/installation/#portable-mode-windows) of Macro Deck never installs updates itself and
+has no **Automatic** mode: when a new version is out, it points you to the download page. Download the new
+portable `.zip`, quit Macro Deck, replace the program files and keep the `Data` folder.
 
 If Macro Deck cannot reach the update server, for example while you are offline, a notification says it could
 not check for updates. You see it once: while checks keep failing, Macro Deck does not warn again until a check
@@ -44,30 +48,32 @@ longer installs it on quit.
 ## When the Macro Deck window is closed
 
 Macro Deck keeps checking for updates while it runs in the background, for example after it started with
-your computer or after you closed its window. When it finds a new version then, it opens a small update
-window with the release notes, so you do not have to open Macro Deck to see it. The window opens without
-taking the keyboard focus, so whatever you are typing or playing keeps it. On Windows, Macro Deck also
-waits while Windows reports a fullscreen game, a fullscreen app or a presentation, and opens the window
-once you are back on the desktop.
+your computer or after you closed its window. When it finds a new version then, it never opens a window or
+a dialog on its own, so whatever you are typing or playing is not interrupted. Instead:
 
-- In **Notify only**, choose **Download & install**. The window shows the download, then Macro Deck
-  restarts to install the update.
-- In **Automatic**, the update window does not open. The update downloads in the background and installs
+- a system notification says which version is available, once per version while Macro Deck runs. If your
+  system holds notifications back, for example during Focus or Do Not Disturb, the tray icon still shows the
+  update;
+- the Macro Deck icon in the system tray or menu bar shows the update, see below;
+- the notification in the Macro Deck window shows it the next time you open it.
+
+To see the release notes and install, open **Update to** in the Macro Deck icon's menu.
+
+- In **Notify only**, choose **Download & install** in the update window. The window shows the download, then
+  Macro Deck restarts to install the update.
+- In **Automatic**, Macro Deck shows no notification. The update downloads in the background and installs
   when you quit Macro Deck.
-- **Later**, or closing the window, leaves the update for now.
+- **Later**, or closing the window, leaves the update for now. The tray icon keeps showing it.
 
 If an update cannot be downloaded or installed, the **Software update** dialog says so and points to
 [macro-deck.app/download](https://macro-deck.app/download), where you can download the latest version
 and install it by hand. If the dialog keeps failing on Windows, open the update from the tray icon's
 menu instead: that window does not depend on the main window's connection to Macro Deck.
 
-The update window opens on its own at most once per version while Macro Deck runs, when an update is found
-in the background. It never opens in **Off** or **Automatic** mode, and not when you open the Macro Deck
-window before it appears.
-
-While an update is waiting, the Macro Deck icon in the system tray or menu bar shows a small arrow in its
-top-right corner, which goes away once Macro Deck is up to date. The icon's menu has an **Update to**
-entry with the new version. It opens the update window right away and brings it to the front.
+While an update is waiting, the Macro Deck icon in the system tray or menu bar shows a large arrow badge in
+its top-right corner, which goes away once Macro Deck is up to date. On Windows and macOS, the icon's tooltip
+names the new version. The icon's menu starts with an **Update to** entry, marked with the same badge, that
+opens the update window right away and brings it to the front.
 
 With **Before Macro Deck updates** turned on in **Settings > Backups**, Macro Deck makes a backup before it
 installs. The update window shows the backup with its progress and, once it can be estimated, the time left,

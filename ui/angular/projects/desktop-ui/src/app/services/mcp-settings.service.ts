@@ -50,6 +50,22 @@ export class McpSettingsService {
     return response;
   }
 
+  async setNetworkAccess(allowed: boolean): Promise<void> {
+    const previous = !!this.endpoint()?.networkClientsAllowed;
+    this.applyNetworkAccess(allowed);
+    try {
+      const response = await this.api.setMcpNetworkAccess({ allowed });
+      this.applyNetworkAccess(response.allowed);
+    } catch (error) {
+      this.applyNetworkAccess(previous);
+      throw error;
+    }
+  }
+
+  private applyNetworkAccess(allowed: boolean): void {
+    this.endpoint.update(endpoint => endpoint ? { ...endpoint, networkClientsAllowed: allowed } : endpoint);
+  }
+
   async setPolicy(integrationId: string, mode: McpRiskMode | null): Promise<McpTokenActionResponse> {
     const response = await this.api.setMcpPolicy({ integrationId, mode });
     if (response.success) {

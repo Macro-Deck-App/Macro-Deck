@@ -191,4 +191,133 @@ public class ActionButtonWidgetDataTests
 
 		Assert.That(config.CanAdvanceState, Is.False);
 	}
+
+	[Test]
+	public void A_label_position_cascades_state_then_root_and_stays_within_the_button()
+	{
+		var config = Parse("""
+						   {"stateMode":true,"labelX":12,"labelY":250,
+						    "states":[{"id":"a","label":"A","appearance":{"labelX":40}},{"id":"b","label":"B"},
+						              {"id":"c","label":"C","appearance":{"textAlign":"right"}}]}
+						   """);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(config.Resolve("a").LabelX, Is.EqualTo(40));
+			Assert.That(config.Resolve("b").LabelX, Is.EqualTo(12));
+			Assert.That(config.Resolve("c").LabelX, Is.EqualTo(100), "a state's alignment is its own position");
+			Assert.That(config.Resolve("a").LabelY, Is.EqualTo(100));
+			Assert.That(Parse("{}").Resolve(null).LabelX, Is.EqualTo(50));
+		});
+	}
+
+	[TestCase("left", "top", 0, 0)]
+	[TestCase("center", "center", 50, 50)]
+	[TestCase("right", "bottom", 100, 100)]
+	public void A_button_saved_with_an_alignment_sits_at_that_preset_position(
+		string textAlign,
+		string labelPosition,
+		double x,
+		double y)
+	{
+		var config = Parse($$"""{"label":"Main","textAlign":"{{textAlign}}","labelPosition":"{{labelPosition}}"}""");
+		var appearance = config.Resolve(null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(appearance.LabelX, Is.EqualTo(x));
+			Assert.That(appearance.LabelY, Is.EqualTo(y));
+			Assert.That(appearance.TextAlign, Is.EqualTo(textAlign));
+			Assert.That(appearance.LabelPosition, Is.EqualTo(labelPosition));
+			Assert.That(config.UsesLabelLayer, Is.False);
+		});
+	}
+
+	[Test]
+	public void A_free_position_wins_over_a_stored_alignment_and_only_a_position_off_the_presets_needs_the_layer()
+	{
+		var onPreset = Parse("""{"label":"Main","textAlign":"center","labelX":0,"labelY":100}""");
+		var free = Parse("""{"label":"Main","textAlign":"right","labelX":20}""");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(onPreset.Resolve(null).TextAlign, Is.EqualTo("left"));
+			Assert.That(onPreset.Resolve(null).LabelPosition, Is.EqualTo("bottom"));
+			Assert.That(onPreset.UsesLabelLayer, Is.False);
+			Assert.That(free.Resolve(null).LabelX, Is.EqualTo(20));
+			Assert.That(free.UsesLabelLayer, Is.True);
+		});
+	}
+
+	[Test]
+	public void An_extra_label_takes_defaults_for_what_it_leaves_unset_and_never_the_primary_labels_values()
+	{
+		var config = Parse("""
+						   {"label":"Main","labelColor":"#00ff00","fontSize":30,"textAlign":"left",
+						    "extraLabels":[{"id":"a","label":"Extra","labelPosition":"bottom","labelX":7}]}
+						   """);
+		var extra = config.Resolve(null).ExtraLabels.Single();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(extra.Text, Is.EqualTo("Extra"));
+			Assert.That(extra.Color, Is.EqualTo("#ffffff"));
+			Assert.That(extra.FontSizePercent, Is.EqualTo(14));
+			Assert.That(extra.X, Is.EqualTo(7));
+			Assert.That(extra.Y, Is.EqualTo(100));
+			Assert.That(extra.Shadow, Is.True);
+		});
+	}
+
+	[Test]
+	public void A_button_shows_at_most_three_extra_labels_however_many_its_data_holds()
+	{
+		var config = Parse("""
+						   {"extraLabels":[{"label":"1"},{"label":"2"},"not a label",{"label":"3"},{"label":"4"},{"label":"5"}]}
+						   """);
+
+		Assert.That(config.Resolve(null).ExtraLabels.Select(label => label.Text), Is.EqualTo(new[] { "1", "2", "3" }));
+	}
+
+	[Test]
+	public void Each_state_owns_its_extra_labels_and_never_shows_the_buttons_or_another_states()
+	{
+		var config = Parse("""
+						   {"stateMode":true,"extraLabels":[{"id":"r","label":"Button level"}],
+						    "states":[{"id":"a","label":"A","appearance":{"extraLabels":[{"id":"x","label":"Only A"}]}},
+						              {"id":"b","label":"B"}]}
+						   """);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(config.Resolve("a").ExtraLabels.Select(label => label.Text), Is.EqualTo(new[] { "Only A" }));
+			Assert.That(config.Resolve("b").ExtraLabels, Is.Empty);
+			Assert.That(config.ExtraLabelSlots, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public void Extra_labels_the_current_mode_never_shows_do_not_change_how_the_button_is_drawn()
+	{
+		var stateMode = Parse("""
+							  {"stateMode":true,"extraLabels":[{"id":"r","label":"Button level"}],
+							   "states":[{"id":"a","label":"A"},{"id":"b","label":"B"}]}
+							  """);
+		var plain = Parse("""
+						  {"stateMode":false,"label":"Main",
+						   "states":[{"id":"a","label":"A","appearance":{"extraLabels":[{"id":"x","label":"Dormant"}]}}]}
+						  """);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(stateMode.UsesLabelLayer, Is.False);
+			Assert.That(plain.UsesLabelLayer, Is.False);
+			Assert.That(plain.Resolve(null).ExtraLabels, Is.Empty);
+		});
+	}
+
+	private static ActionButtonWidgetData Parse(string json)
+	{
+		return ActionButtonWidgetData.Parse(JsonDocument.Parse(json).RootElement);
+	}
 }

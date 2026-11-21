@@ -406,6 +406,7 @@ public class Startup
 		services.AddHostedService<BackupScheduleBackgroundService>();
 		services.AddHostedService<VariableInitializeBackgroundService>();
 		services.AddHostedService<TemplateVariableBackgroundService>();
+		services.AddHostedService<MinuteClockBackgroundService>();
 		services.AddHostedService<FileVariableShutdownBackgroundService>();
 		services.AddHostedService<IntegrationVariablePollingBackgroundService>();
 		services.AddHostedService<VariableBindingRestoreBackgroundService>();
@@ -545,6 +546,7 @@ public class Startup
 		services.AddScoped<IEventTriggerContextResolver, EventTriggerContextResolver>();
 
 		services.AddSingleton<VariableRegistry>();
+		services.AddSingleton<IVariableEventAudience, VariableEventAudience>();
 		services.AddSingleton<IColorReferenceResolver, ColorReferenceResolver>();
 		services.AddSingleton<ColorChangeSignal>();
 		services.AddSingleton<PluginColorWatches>();
@@ -571,6 +573,7 @@ public class Startup
 		services.AddSingleton<WidgetLayoutGate>();
 		services.AddScoped<IWidgetService, WidgetService>();
 		services.AddScoped<IWidgetAppearanceService, WidgetAppearanceService>();
+		services.AddScoped<IWidgetStyleService, WidgetStyleService>();
 		services.AddScoped<IFlowExecutor, FlowExecutor>();
 		services.AddSingleton<IActionExecutionCoordinator, ActionExecutionCoordinator>();
 		services.AddScoped<IScriptRunner, ScriptRunner>();
@@ -679,6 +682,7 @@ public class Startup
 		services.AddScoped<IPluginAccessTokenRepository, PluginAccessTokenRepository>();
 		services.AddScoped<IPluginTokenService, PluginTokenService>();
 		services.AddScoped<IMcpAccessTokenRepository, McpAccessTokenRepository>();
+		services.AddSingleton<IMcpExtensionTokenStore, ShellMcpExtensionTokenStore>();
 		services.AddScoped<IMcpTokenService, McpTokenService>();
 		services.AddMacroDeckMcp();
 		services.AddScoped<IPluginRegistrationService, PluginRegistrationService>();
@@ -707,7 +711,14 @@ public class Startup
 		services.AddMacroDeckPluginPackaging();
 		services.AddSingleton(PluginSupervisorOptions.Default);
 		services.AddSingleton<IPluginInstallationCatalog, PluginInstallationCatalog>();
-		services.AddSingleton<IPluginRuntimeStateStore, PluginRuntimeStateStore>();
+		services.AddSingleton<PluginRuntimeStateStore>();
+		services.AddSingleton<IPluginRuntimeStateStore>(provider =>
+		{
+			var persistent = provider.GetRequiredService<PluginRuntimeStateStore>();
+			return provider.GetRequiredService<HostSession>().PluginsDisabledAtStartup
+				? new SessionPluginRuntimeStateStore(persistent)
+				: persistent;
+		});
 		services.AddSingleton<IPluginProcessJournal, PluginProcessJournal>();
 		services.AddSingleton<IProcessTable, ProcessTable>();
 		services.AddSingleton<IPluginOrphanReaper, PluginOrphanReaper>();
@@ -1079,6 +1090,10 @@ public class Startup
 			}
 
 			session.MarkRestoreFailed(HostStartupFacts.RestoreFailure);
+			if (HostStartupFacts.PluginsDisabled)
+			{
+				session.MarkPluginsDisabledAtStartup();
+			}
 
 			return session;
 		});
@@ -1106,7 +1121,9 @@ public class Startup
 		services.AddSingleton<IHostOptionsSource, ProcessesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, AudioDevicesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, VariablesOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, EventVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, UserVariablesOptionsSource>();
+		services.AddSingleton<IHostOptionsSource, TemplateVariablesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, MusicPlayerInstancesOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, CalendarAccountsOptionsSource>();
 		services.AddSingleton<IHostOptionsSource, CalendarCalendarsOptionsSource>();
@@ -1272,26 +1289,39 @@ public class Startup
 				endpoints.MapMacroDeckMcp();
 			}
 
-			endpoints.MapFallbackToFile("admin/{**path}", "admin/index.html").AllowAnonymous();
+			endpoints.MapFallback("admin/{**path:file}", RespondNotFound).AllowAnonymous();
+			endpoints.MapFallbackToFile("admin/{**path:nonfile}", "admin/index.html").AllowAnonymous();
 
 			// One route per packaged device target (issue #727). Registered from what is on disk rather
 			// than from a list in the host, so adding a target is a build change and nothing else.
 			foreach (var targetId in WebClientTargets.Discover(env.WebRootPath))
 			{
 				endpoints
-					.MapFallbackToFile($"{WebClientTargets.RootDirectoryName}/{targetId}/{{**path}}",
+					.MapFallback($"{WebClientTargets.RootDirectoryName}/{targetId}/{{**path:file}}", RespondNotFound)
+					.AllowAnonymous();
+				endpoints
+					.MapFallbackToFile($"{WebClientTargets.RootDirectoryName}/{targetId}/{{**path:nonfile}}",
 						$"{WebClientTargets.RootDirectoryName}/{targetId}/index.html")
 					.AllowAnonymous();
 			}
 
+			// A missing file must not fall through to a shell or, with no endpoint at all, to the
+			// fallback authorization policy, which answers an anonymous request with 401.
+			endpoints.MapFallback("{**path:file}", RespondNotFound).AllowAnonymous();
 			if (SpaPlaceholder.IsClientMissing(env.WebRootPath))
 			{
 				endpoints.MapFallback(SpaPlaceholder.Handle).AllowAnonymous();
 			}
 			else
 			{
-				endpoints.MapFallbackToFile("{**path}", "index.html").AllowAnonymous();
+				endpoints.MapFallbackToFile("{**path:nonfile}", "index.html").AllowAnonymous();
 			}
 		});
+	}
+
+	private static Task RespondNotFound(HttpContext context)
+	{
+		context.Response.StatusCode = StatusCodes.Status404NotFound;
+		return Task.CompletedTask;
 	}
 }

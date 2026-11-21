@@ -12,11 +12,11 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, RUN_SCRIPT_WIDGET_PARAM, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptActionRole, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
+import { ActionBlock, ActionBlockParameter, AppStrings, ComparisonOperator, containsLiquid, EventDefinition, HotkeyValue, KEYBOARD_INTEGRATION_ID, KeyboardComboValue, KeyboardSequenceValue, ParameterValue, RUN_SCRIPT_WIDGET_PARAM, SecretReference, WIDGET_APPEARANCE_RESET, WIDGET_INTEGRATION_ID, WidgetIconRef, defaultParameterValue, iconPackRef, iconPackReferenceOf, isEventFilterParameter, isEventReference, isHotkeyValue, isRunScriptActionRole, isSecretReference, isStateOperator, isVariableReference, variableTokenText } from '@macro-deck/runtime';
 import { ButtonComponent, CheckboxComponent, InputComponent, LocalizationService, OverlayPanelComponent, ToggleSwitchComponent, TranslatePipe } from '@shared';
-import type { SecretKind, VariableType } from '@macro-deck/runtime';
+import type { SecretKind, Variable, VariableType } from '@macro-deck/runtime';
 import { normalizeHttpsUrl } from '../../../../domain/url-input.util';
-import { filterOperatorsFor, supportsFilterOperator } from '../../../../domain/event-parameter-refinement.util';
+import { USER_VARIABLES_OPTIONS_SOURCE_ID, filterOperatorsFor, supportsFilterOperator } from '../../../../domain/event-parameter-refinement.util';
 import { comparisonOperatorOptions } from '../../default-action-defs';
 import { ActionFlowStore } from '../../services/action-flow.store';
 import { ActionOptionsService } from '../../../../services/action-options.service';
@@ -38,6 +38,7 @@ import { WIDGET_TARGET_SELF, WidgetTargetPickerComponent } from '../../../forms/
 import { SelectComponent, SelectOption } from '../../../forms/select/select.component';
 import { SelectCaretComponent } from '../../../forms/select-caret/select-caret.component';
 import { WidgetIconControlComponent } from '../../../widget-appearance/widget-icon-control.component';
+import { VariableCreateDialogComponent } from '../../../variables/variable-create-dialog.component';
 
 const GROUP_PARAMETER_TYPES: ReadonlySet<string> = new Set([
   'keyvalue', 'keyboard-combo', 'keyboard-sequence', 'icon', 'object', 'array',
@@ -73,6 +74,7 @@ let nextParamRowId = 0;
     SelectCaretComponent,
     ButtonComponent,
     OverlayPanelComponent,
+    VariableCreateDialogComponent,
     forwardRef(() => ParamRowComponent),
     TranslatePipe,
   ],
@@ -107,6 +109,7 @@ export class ParamRowComponent implements OnInit, OnChanges {
   private loadedSiblings: string | null = null;
   readonly dynLoading = signal(false);
   readonly dynError = signal<string | null>(null);
+  readonly creatingVariable = signal(false);
 
   private filterDebounce: ReturnType<typeof setTimeout> | null = null;
 
@@ -369,10 +372,16 @@ export class ParamRowComponent implements OnInit, OnChanges {
       case 'number':
       case 'boolean':
       case 'duration':
+      case 'autocomplete':
+      case 'dynamic-choice':
         return true;
       default:
         return false;
     }
+  }
+
+  get externalPickerVariables(): Variable[] {
+    return this.eventId ? this.store.variables() : this.store.pickerVariables();
   }
 
   get acceptedVariableTypes(): VariableType[] | undefined {
@@ -382,7 +391,6 @@ export class ParamRowComponent implements OnInit, OnChanges {
       case 'string':
       case 'url':
       case 'ipaddress':
-      case 'autocomplete':
         return ['text', 'numeric', 'boolean', 'color'];
       case 'color':
         return ['color'];
@@ -483,8 +491,8 @@ export class ParamRowComponent implements OnInit, OnChanges {
   private resolveOptionLabel(value: string): string | undefined {
     if (!value) return undefined;
     const candidates = this.dynOptions()
-      ?? (this.param.options ?? []).map(o => ({ value: `${o.value}`, label: o.label }));
-    const match = candidates.find(o => o.value === value);
+      ?? (this.param.options ?? []).map((o): ComboboxOption => ({ value: `${o.value}`, label: o.label }));
+    const match = candidates.find(o => o.value === value && !o.disabled);
     return match?.label && match.label !== value ? match.label : undefined;
   }
 
@@ -498,6 +506,19 @@ export class ParamRowComponent implements OnInit, OnChanges {
 
   onClearVariable(): void {
     this.onChange(defaultParameterValue(this.param));
+  }
+
+  get createsUserVariable(): boolean {
+    return !this.eventId && this.param.optionsSourceId === USER_VARIABLES_OPTIONS_SOURCE_ID;
+  }
+
+  openCreateVariable(): void {
+    this.creatingVariable.set(true);
+  }
+
+  onVariableCreated(variable: Variable): void {
+    this.onOptionChange(variable.name);
+    this.fetchDynamicOptions(this.param.type === 'autocomplete' ? variable.name : undefined, true);
   }
 
   loadDynamicOptions(filter?: string): void {
@@ -610,6 +631,12 @@ export class ParamRowComponent implements OnInit, OnChanges {
     if (!this.param.required || !this.stringValue || options.some(option => option.value === this.stringValue)) {
       return options;
     }
+    if (this.param.type === 'autocomplete' && containsLiquid(this.stringValue)) {
+      return options;
+    }
+    if (this.hasListSiblingBoundToReference()) {
+      return options;
+    }
 
     const label = this.param.valueLabel || this.stringValue;
     return [{
@@ -617,6 +644,13 @@ export class ParamRowComponent implements OnInit, OnChanges {
       label: this.localization.translateKey(AppStrings.ActionBuilder.Param.ConfigurationNoLongerAvailable, { label }),
       disabled: true,
     }, ...options];
+  }
+
+  private hasListSiblingBoundToReference(): boolean {
+    return (this.block?.parameters ?? [])
+      .some(sibling => sibling.name !== this.param.name
+        && (sibling.type === 'autocomplete' || sibling.type === 'dynamic-choice')
+        && (isVariableReference(sibling.value) || isEventReference(sibling.value)));
   }
 
   private mergeDraftStateOptions(

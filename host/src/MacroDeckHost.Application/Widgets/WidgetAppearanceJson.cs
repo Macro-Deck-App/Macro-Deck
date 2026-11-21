@@ -84,6 +84,17 @@ public static class WidgetAppearanceJson
 		string stateId,
 		IReadOnlyCollection<WidgetAppearanceProperty>? providerSupported)
 	{
+		return ClearProperty(data, type, property, stateId, providerSupported, null);
+	}
+
+	public static bool ClearProperty(
+		JsonObject data,
+		string type,
+		WidgetAppearanceProperty property,
+		string stateId,
+		IReadOnlyCollection<WidgetAppearanceProperty>? providerSupported,
+		int? labelNumber)
+	{
 		if (providerSupported is not null)
 		{
 			return providerSupported.Contains(property)
@@ -101,7 +112,7 @@ public static class WidgetAppearanceJson
 		{
 			(WidgetTypeIds.Slider, WidgetAppearanceProperty.AccentColor) => Remove(data, "color"),
 			(WidgetTypeIds.HistoryGraph, WidgetAppearanceProperty.AccentColor) => Remove(data, "accentColor"),
-			(WidgetTypeIds.ActionButton, _) => ClearOnActionButton(data, property, stateId),
+			(WidgetTypeIds.ActionButton, _) => ClearOnActionButton(data, property, stateId, labelNumber),
 			(WidgetTypeIds.HistoryGraph, _) => ClearOn(data, property, "title"),
 			_ => ClearOn(data, property, "label")
 		};
@@ -315,7 +326,7 @@ public static class WidgetAppearanceJson
 				return false;
 			}
 
-			var changed = ApplyLabelProperties(stateObject, patch);
+			var changed = ApplyActionButtonLabel(stateObject, patch);
 			changed |= SetIcon(stateObject, patch.IconId);
 			changed |= SetIconAppearance(stateObject, patch.IconAppearance);
 			changed |= ApplyIconDisplay(stateObject, patch);
@@ -324,7 +335,7 @@ public static class WidgetAppearanceJson
 			return changed;
 		}
 
-		var flatChanged = ApplyLabelProperties(data, patch);
+		var flatChanged = ApplyActionButtonLabel(data, patch);
 		flatChanged |= ApplyBorder(data, patch);
 
 		if (patch.IconId is not null
@@ -393,7 +404,7 @@ public static class WidgetAppearanceJson
 		return true;
 	}
 
-	private static bool HoistLegacyMomentaryIcon(JsonObject data)
+	internal static bool HoistLegacyMomentaryIcon(JsonObject data)
 	{
 		if (data["states"] is not JsonArray states)
 		{
@@ -429,7 +440,105 @@ public static class WidgetAppearanceJson
 		return changed;
 	}
 
-	private static bool ClearOnActionButton(JsonObject data, WidgetAppearanceProperty property, string stateId)
+	public static bool IsValidLabelNumber(int? labelNumber)
+	{
+		return labelNumber is null or >= 1 and <= ActionButtonLabelJson.MaxLabels;
+	}
+
+	private static bool AddressesExtraLabel(int? labelNumber, out int index)
+	{
+		index = (labelNumber ?? 1) - 2;
+
+		return index >= 0;
+	}
+
+	private static bool IsLabelProperty(WidgetAppearanceProperty property)
+	{
+		return property is WidgetAppearanceProperty.Label
+			or WidgetAppearanceProperty.LabelColor
+			or WidgetAppearanceProperty.Font;
+	}
+
+	private static bool HasLabelChange(WidgetAppearancePatch patch)
+	{
+		return patch.Label is not null
+			|| patch.LabelColor is not null
+			|| patch.FontFaceId is not null
+			|| patch.FontSize is not null
+			|| patch.TextAlign is not null
+			|| patch.LabelPosition is not null;
+	}
+
+	private static bool ApplyActionButtonLabel(JsonObject target, WidgetAppearancePatch patch)
+	{
+		if (!AddressesExtraLabel(patch.LabelNumber, out var index))
+		{
+			return ApplyLabelProperties(target, patch);
+		}
+
+		var changed = SetIfPresent(target, "backgroundColor", patch.BackgroundColor);
+		if (!HasLabelChange(patch))
+		{
+			return changed;
+		}
+
+		if (target[ActionButtonLabelJson.ExtraLabelsKey] is not JsonArray labels)
+		{
+			labels = [];
+			target[ActionButtonLabelJson.ExtraLabelsKey] = labels;
+		}
+
+		var created = false;
+		while (labels.Count <= index)
+		{
+			labels.Add(new JsonObject());
+			created = true;
+		}
+
+		if (created)
+		{
+			ActionButtonLabelJson.NormalizeList(target);
+			labels = (JsonArray)target[ActionButtonLabelJson.ExtraLabelsKey]!;
+		}
+
+		if (labels[index] is not JsonObject label)
+		{
+			return changed | created;
+		}
+
+		return changed | created | ApplyLabelProperties(label, patch with { BackgroundColor = null });
+	}
+
+	private static bool ClearOnActionButtonTarget(
+		JsonObject target,
+		WidgetAppearanceProperty property,
+		int? labelNumber)
+	{
+		if (!IsLabelProperty(property) || !AddressesExtraLabel(labelNumber, out var index))
+		{
+			return ClearLabelOn(target, property);
+		}
+
+		var labels = ActionButtonLabelJson.ReadExtraLabels(target);
+
+		return index < labels.Count && ClearLabelOn(labels[index], property);
+	}
+
+	// The free position is an Action Button key: another widget type may own keys of the same name.
+	private static bool ClearLabelOn(JsonObject label, WidgetAppearanceProperty property)
+	{
+		var changed = ClearOn(label, property, "label");
+
+		return property == WidgetAppearanceProperty.Font
+			? changed | Remove(label, ActionButtonLabelJson.XKey, ActionButtonLabelJson.YKey)
+			: changed;
+	}
+
+	private static bool ClearOnActionButton(
+		JsonObject data,
+		WidgetAppearanceProperty property,
+		string stateId,
+		int? labelNumber)
 	{
 		if (IsStateMode(data))
 		{
@@ -438,10 +547,10 @@ public static class WidgetAppearanceJson
 				return false;
 			}
 
-			return ClearOn(stateObject, property, "label");
+			return ClearOnActionButtonTarget(stateObject, property, labelNumber);
 		}
 
-		var changed = ClearOn(data, property, "label");
+		var changed = ClearOnActionButtonTarget(data, property, labelNumber);
 
 		if (property is WidgetAppearanceProperty.Icon
 				or WidgetAppearanceProperty.IconDisplay
@@ -467,11 +576,7 @@ public static class WidgetAppearanceJson
 			WidgetAppearanceProperty.IconDisplay => Remove(target, "iconDisplay"),
 			WidgetAppearanceProperty.IconColor => Remove(target, "iconColor"),
 			WidgetAppearanceProperty.IconAppearance => target["icon"] is JsonObject icon && Remove(icon, "appearance"),
-			WidgetAppearanceProperty.Font => Remove(target,
-				"fontFaceId",
-				"fontSize",
-				"textAlign",
-				"labelPosition"),
+			WidgetAppearanceProperty.Font => Remove(target, "fontFaceId", "fontSize", "textAlign", "labelPosition"),
 			WidgetAppearanceProperty.Border => Remove(target, "border"),
 			WidgetAppearanceProperty.BorderColor => target["border"] is JsonObject border && Remove(border, "color"),
 			_ => false
@@ -566,6 +671,10 @@ public static class WidgetAppearanceJson
 		changed |= SetIfPresent(target, "fontSize", patch.FontSize);
 		changed |= SetIfPresent(target, "textAlign", patch.TextAlign);
 		changed |= SetIfPresent(target, "labelPosition", patch.LabelPosition);
+
+		// An alignment is one of the preset positions, so it replaces a free position on its axis.
+		changed |= patch.TextAlign is not null && Remove(target, ActionButtonLabelJson.XKey);
+		changed |= patch.LabelPosition is not null && Remove(target, ActionButtonLabelJson.YKey);
 		return changed;
 	}
 

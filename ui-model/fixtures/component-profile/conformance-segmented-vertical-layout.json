@@ -1,0 +1,51 @@
+{
+  "cases": [
+    {
+      "basis": 240,
+      "tile": {
+        "width": 240,
+        "height": 240
+      },
+      "nodes": {
+        "conformance.choices": {
+          "width": 240.0,
+          "height": 134.4,
+          "trackRadius": 16.8,
+          "segmentFace": {
+            "left": 2.688,
+            "top": 69.888,
+            "width": 234.624,
+            "height": 28.224
+          },
+          "faceRadius": 14.112
+        }
+      }
+    },
+    {
+      "basis": 240,
+      "tile": {
+        "width": 20,
+        "height": 240
+      },
+      "nodes": {
+        "conformance.choices": {
+          "width": 20.0,
+          "height": 134.4,
+          "trackRadius": 10.0,
+          "segmentFace": {
+            "left": 1.6,
+            "top": 68.8,
+            "width": 16.8,
+            "height": 30.4
+          },
+          "faceRadius": 8.4
+        }
+      }
+    }
+  ],
+  "withoutSegmentedVersion2": {
+    "draws": "conformance.choicesRow",
+    "notDrawn": "conformance.choices",
+    "note": "A reader whose ui.segmented is version 1 never draws conformance.choices: it asks for version 2, so the reader draws its fallback, the same choices in one row. Had the producer not asked for version 2, that reader would ignore direction and squeeze every choice into one row of the list."
+  }
+}

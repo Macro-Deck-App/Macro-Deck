@@ -22,6 +22,8 @@ public sealed class SecretApprovalKey
 	// until the user approves it explicitly.
 	public List<string> Unknown { get; set; } = [];
 
+	public List<string> Declined { get; set; } = [];
+
 	// Shown as the approved side of a diff only; it never approves anything.
 	public string? Superseded { get; set; }
 }

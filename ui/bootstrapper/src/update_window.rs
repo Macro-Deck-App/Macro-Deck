@@ -26,132 +26,7 @@ const CONTENT_SECURITY_POLICY: &str =
 static OFFERED_VERSION: Mutex<Option<String>> = Mutex::new(None);
 static ACTION_ERROR: Mutex<Option<(String, String)>> = Mutex::new(None);
 static BUILDING: AtomicBool = AtomicBool::new(false);
-static FOCUS_REQUESTED: AtomicBool = AtomicBool::new(false);
 static INSTALLING: AtomicBool = AtomicBool::new(false);
-static BACKGROUND_OFFER: Mutex<BackgroundOffer> = Mutex::new(BackgroundOffer {
-    pending: None,
-    waiting: false,
-});
-
-const BUSY_RECHECK_INTERVAL: Duration = Duration::from_secs(30);
-const QUNS_ACCEPTS_NOTIFICATIONS: i32 = 5;
-const QUNS_QUIET_TIME: i32 = 6;
-// Windows also reports this for any packaged app (Store, MSIX) in front, windowed or fullscreen,
-// so only a foreground window that covers its monitor counts as busy.
-const QUNS_APP: i32 = 7;
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-enum Opening {
-    Deliberate,
-    Background,
-}
-
-#[derive(Default, Debug)]
-pub(crate) struct BackgroundOffer {
-    pending: Option<String>,
-    waiting: bool,
-}
-
-#[derive(PartialEq, Eq, Debug)]
-pub(crate) enum BackgroundStep {
-    Wait,
-    Show(String),
-    Drop,
-}
-
-impl BackgroundOffer {
-    pub(crate) fn offer(&mut self, version: &str) -> bool {
-        self.pending = Some(version.to_string());
-        !std::mem::replace(&mut self.waiting, true)
-    }
-
-    pub(crate) fn withdraw(&mut self) {
-        self.pending = None;
-    }
-
-    pub(crate) fn next(
-        &mut self,
-        main_window_open: bool,
-        update_window_open: bool,
-        mode_offers_window: bool,
-        user_free: bool,
-    ) -> BackgroundStep {
-        let wanted = !main_window_open && !update_window_open && mode_offers_window;
-        if self.pending.is_some() && wanted && !user_free {
-            return BackgroundStep::Wait;
-        }
-        self.waiting = false;
-        match self.pending.take() {
-            Some(version) if wanted => BackgroundStep::Show(version),
-            _ => BackgroundStep::Drop,
-        }
-    }
-}
-
-fn focus_after_build(opening: Opening, focus_requested: bool) -> bool {
-    opening == Opening::Deliberate || focus_requested
-}
-
-#[cfg_attr(not(windows), allow(dead_code))]
-pub(crate) fn accepts_interruption(notification_state: i32, foreground_fullscreen: bool) -> bool {
-    match notification_state {
-        QUNS_ACCEPTS_NOTIFICATIONS | QUNS_QUIET_TIME => true,
-        QUNS_APP => !foreground_fullscreen,
-        _ => false,
-    }
-}
-
-#[cfg_attr(not(windows), allow(dead_code))]
-pub(crate) fn covers(window: [i32; 4], monitor: [i32; 4]) -> bool {
-    let [left, top, right, bottom] = window;
-    let [monitor_left, monitor_top, monitor_right, monitor_bottom] = monitor;
-    left <= monitor_left && top <= monitor_top && right >= monitor_right && bottom >= monitor_bottom
-}
-
-// Failing to ask Windows must not hold the offer back forever.
-#[cfg(windows)]
-fn user_is_free() -> bool {
-    match unsafe { windows::Win32::UI::Shell::SHQueryUserNotificationState() } {
-        Ok(state) => accepts_interruption(state.0, foreground_covers_its_monitor()),
-        Err(_) => true,
-    }
-}
-
-#[cfg(windows)]
-fn foreground_covers_its_monitor() -> bool {
-    use windows::Win32::Foundation::RECT;
-    use windows::Win32::Graphics::Gdi::{
-        GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONULL,
-    };
-    use windows::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowRect};
-
-    let bounds = |rect: RECT| [rect.left, rect.top, rect.right, rect.bottom];
-    unsafe {
-        let window = GetForegroundWindow();
-        if window.is_invalid() {
-            return false;
-        }
-        let mut rect = RECT::default();
-        if GetWindowRect(window, &mut rect).is_err() {
-            return false;
-        }
-        let monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONULL);
-        if monitor.is_invalid() {
-            return false;
-        }
-        let mut info = MONITORINFO {
-            cbSize: std::mem::size_of::<MONITORINFO>() as u32,
-            ..Default::default()
-        };
-        GetMonitorInfoW(monitor, &mut info).as_bool()
-            && covers(bounds(rect), bounds(info.rcMonitor))
-    }
-}
-
-#[cfg(not(windows))]
-fn user_is_free() -> bool {
-    true
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -257,7 +132,7 @@ fn offer_actions(strategy: UpdateInstallStrategy) -> Vec<WindowAction> {
             later,
             action(ActionId::Install, keys::UPDATE_DOWNLOAD_AND_INSTALL, true),
         ],
-        UpdateInstallStrategy::ExternalDownload => vec![
+        UpdateInstallStrategy::ExternalDownload | UpdateInstallStrategy::Portable => vec![
             later,
             action(
                 ActionId::DownloadPage,
@@ -274,6 +149,7 @@ fn offer_status(strategy: UpdateInstallStrategy, version: Option<&str>) -> Optio
         UpdateInstallStrategy::InApp => return None,
         UpdateInstallStrategy::ExternalDownload => keys::UPDATE_EXTERNAL_AVAILABLE,
         UpdateInstallStrategy::Apt => keys::UPDATE_APT_AVAILABLE,
+        UpdateInstallStrategy::Portable => keys::UPDATE_PORTABLE_AVAILABLE,
     };
     version
         .map(|version| localization::t_args(key, &[("version", version)]))
@@ -459,59 +335,16 @@ pub(crate) fn claim_offer(offered: &mut Option<String>, version: &str) -> bool {
     true
 }
 
-pub fn offer(app: &AppHandle, version: &str) {
+pub fn announce(version: &str) -> bool {
     let claimed = claim_offer(
         &mut OFFERED_VERSION.lock().unwrap_or_else(|e| e.into_inner()),
         version,
     );
     if claimed {
         *ACTION_ERROR.lock().unwrap_or_else(|e| e.into_inner()) = None;
-        logging::info(&format!("[update-window] offering {version}"));
-        let start_waiting = BACKGROUND_OFFER
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .offer(version);
-        if start_waiting {
-            let app = app.clone();
-            tauri::async_runtime::spawn(async move { open_when_user_is_free(app).await });
-        }
+        logging::info(&format!("[update-window] announcing {version}"));
     }
-}
-
-async fn open_when_user_is_free(app: AppHandle) {
-    let mut logged_wait = false;
-    loop {
-        let main_window_open = app.get_webview_window(crate::window::MAIN_WINDOW).is_some();
-        let update_window_open = app.get_webview_window(UPDATE_WINDOW).is_some();
-        let mode_offers_window = updater::update_window_offered_in_background(&app);
-        let user_free = user_is_free();
-        let step = BACKGROUND_OFFER
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .next(
-                main_window_open,
-                update_window_open,
-                mode_offers_window,
-                user_free,
-            );
-        match step {
-            BackgroundStep::Wait => {
-                if !logged_wait {
-                    logging::info("[update-window] waiting until the user is not busy");
-                    logged_wait = true;
-                }
-                tokio::time::sleep(BUSY_RECHECK_INTERVAL).await;
-            }
-            BackgroundStep::Show(version) => {
-                logging::info(&format!(
-                    "[update-window] opening {version} without taking focus"
-                ));
-                open(&app, Opening::Background);
-                return;
-            }
-            BackgroundStep::Drop => return,
-        }
-    }
+    claimed
 }
 
 fn page_url() -> tauri::Url {
@@ -546,67 +379,50 @@ fn focus(app: &AppHandle) {
 }
 
 pub fn show(app: &AppHandle) {
-    BACKGROUND_OFFER
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .withdraw();
     let app = app.clone();
-    tauri::async_runtime::spawn(async move { open(&app, Opening::Deliberate) });
+    tauri::async_runtime::spawn(async move { open(&app) });
 }
 
 // Called from an async task like the main window: building inside a main-thread
 // closure can deadlock WebView2.
-fn open(app: &AppHandle, opening: Opening) {
+fn open(app: &AppHandle) {
     if app.get_webview_window(UPDATE_WINDOW).is_some() {
-        if opening == Opening::Deliberate {
-            focus(app);
-        }
+        focus(app);
         return;
     }
-    // Reset before claiming BUILDING, so a tray click during a running build keeps its request.
-    FOCUS_REQUESTED.store(false, Ordering::SeqCst);
     if BUILDING.swap(true, Ordering::SeqCst) {
-        if opening == Opening::Deliberate {
-            FOCUS_REQUESTED.store(true, Ordering::SeqCst);
-            if app.get_webview_window(UPDATE_WINDOW).is_some() {
-                focus(app);
-            }
-        }
         return;
     }
-    let built = build(app, opening);
+    let built = build(app);
     BUILDING.store(false, Ordering::SeqCst);
-    let focus_requested = FOCUS_REQUESTED.swap(false, Ordering::SeqCst);
     if built {
         paint_background(app);
-        if focus_after_build(opening, focus_requested) {
-            focus(app);
-        }
-    } else if app.get_webview_window(UPDATE_WINDOW).is_none() {
-        *OFFERED_VERSION.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        focus(app);
     }
 }
 
-fn build(app: &AppHandle, opening: Opening) -> bool {
+fn build(app: &AppHandle) -> bool {
     let opener = app.clone();
-    let builder =
-        WebviewWindowBuilder::new(app, UPDATE_WINDOW, WebviewUrl::CustomProtocol(page_url()))
-            .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
-            .inner_size(560.0, 640.0)
-            .min_inner_size(420.0, 420.0)
-            .center()
-            .focused(opening == Opening::Deliberate)
-            .zoom_hotkeys_enabled(false)
-            // Release-note links must open in the browser, never inside this window.
-            .on_navigation(move |url| {
-                if is_own_page(url) {
-                    return true;
-                }
-                if url.scheme() == "https" {
-                    let _ = crate::external_url::open(&opener, url.as_str());
-                }
-                false
-            });
+    let builder = crate::portable::with_webview_data(WebviewWindowBuilder::new(
+        app,
+        UPDATE_WINDOW,
+        WebviewUrl::CustomProtocol(page_url()),
+    ))
+    .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
+    .inner_size(560.0, 640.0)
+    .min_inner_size(420.0, 420.0)
+    .center()
+    .zoom_hotkeys_enabled(false)
+    // Release-note links must open in the browser, never inside this window.
+    .on_navigation(move |url| {
+        if is_own_page(url) {
+            return true;
+        }
+        if url.scheme() == "https" {
+            let _ = crate::external_url::open(&opener, url.as_str());
+        }
+        false
+    });
 
     let theme = window_theme(&appearance::current(app));
     let builder = match theme {
@@ -680,11 +496,6 @@ pub async fn wait_until_closed(app: &AppHandle, limit: Duration) {
 }
 
 pub fn close(app: &AppHandle) {
-    // An offer still waiting for the user has no window yet, so it is withdrawn before that check.
-    BACKGROUND_OFFER
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .withdraw();
     if app.get_webview_window(UPDATE_WINDOW).is_none() {
         return;
     }
@@ -1106,6 +917,23 @@ mod tests {
     }
 
     #[test]
+    fn a_portable_copy_points_to_the_download_page_with_its_own_wording() {
+        let portable = view(&state(UpdateInstallStrategy::Portable).snapshot(), None);
+
+        assert_eq!(
+            action_ids(&portable),
+            [ActionId::Later, ActionId::DownloadPage]
+        );
+        assert_eq!(primary(&portable), Some(ActionId::DownloadPage));
+        let status = portable
+            .status
+            .expect("a portable copy explains the manual update");
+        assert!(status.text.contains("3.1.0"));
+        assert!(status.text.contains("Data"));
+        assert!(!status.text.contains("AppImage"));
+    }
+
+    #[test]
     fn the_tray_offers_a_known_update_until_a_check_finds_none() {
         let mut state = state(UpdateInstallStrategy::InApp);
         assert_eq!(offered_version(&state.snapshot()), Some("3.1.0"));
@@ -1137,155 +965,18 @@ mod tests {
     }
 
     #[test]
-    fn the_window_opens_on_its_own_only_once_per_version() {
+    fn an_update_is_announced_only_once_per_version() {
         let mut offered = None;
 
         assert!(claim_offer(&mut offered, "3.1.0"));
         assert!(
             !claim_offer(&mut offered, "3.1.0"),
-            "Later must not be undone by the next check"
+            "the next check must not notify again"
         );
         assert!(
             claim_offer(&mut offered, "3.2.0"),
             "a newer release is offered again"
         );
-    }
-
-    #[test]
-    fn a_background_offer_waits_while_the_user_is_busy_and_then_opens_once() {
-        let mut offer = BackgroundOffer::default();
-        assert!(offer.offer("3.1.0"), "the first offer starts waiting");
-
-        assert_eq!(offer.next(false, false, true, false), BackgroundStep::Wait);
-        assert_eq!(offer.next(false, false, true, false), BackgroundStep::Wait);
-        assert_eq!(
-            offer.next(false, false, true, true),
-            BackgroundStep::Show("3.1.0".to_string())
-        );
-        assert_eq!(offer.next(false, false, true, true), BackgroundStep::Drop);
-    }
-
-    #[test]
-    fn an_offer_withdrawn_before_it_opened_never_appears() {
-        let mut offer = BackgroundOffer::default();
-        offer.offer("3.1.0");
-        assert_eq!(offer.next(false, false, true, false), BackgroundStep::Wait);
-
-        offer.withdraw();
-
-        assert_eq!(
-            offer.next(false, false, true, true),
-            BackgroundStep::Drop,
-            "Later, the tray entry or a withdrawn update must not be undone once the user is free"
-        );
-    }
-
-    #[test]
-    fn a_background_offer_is_dropped_once_macro_deck_shows_a_window_anyway() {
-        let mut main_opened = BackgroundOffer::default();
-        main_opened.offer("3.1.0");
-        assert_eq!(
-            main_opened.next(true, false, true, true),
-            BackgroundStep::Drop
-        );
-
-        let mut update_opened = BackgroundOffer::default();
-        update_opened.offer("3.1.0");
-        assert_eq!(
-            update_opened.next(false, true, true, false),
-            BackgroundStep::Drop
-        );
-    }
-
-    #[test]
-    fn a_newer_offer_while_waiting_replaces_the_pending_one_without_a_second_wait() {
-        let mut offer = BackgroundOffer::default();
-        assert!(offer.offer("3.1.0"));
-        assert!(!offer.offer("3.2.0"));
-
-        assert_eq!(
-            offer.next(false, false, true, true),
-            BackgroundStep::Show("3.2.0".to_string())
-        );
-    }
-
-    #[test]
-    fn an_offer_after_the_wait_ended_starts_a_new_wait() {
-        let mut offer = BackgroundOffer::default();
-        offer.offer("3.1.0");
-        offer.withdraw();
-        assert_eq!(offer.next(false, false, true, true), BackgroundStep::Drop);
-
-        assert!(offer.offer("3.2.0"));
-    }
-
-    #[test]
-    fn a_background_window_takes_focus_only_when_the_user_asked_for_it_meanwhile() {
-        assert!(!focus_after_build(Opening::Background, false));
-        assert!(focus_after_build(Opening::Background, true));
-        assert!(focus_after_build(Opening::Deliberate, false));
-    }
-
-    #[test]
-    fn a_background_offer_opens_only_while_windows_accepts_interruptions() {
-        const QUNS_NOT_PRESENT: i32 = 1;
-        const QUNS_BUSY: i32 = 2;
-        const QUNS_RUNNING_D3D_FULL_SCREEN: i32 = 3;
-        const QUNS_PRESENTATION_MODE: i32 = 4;
-
-        for busy in [
-            QUNS_NOT_PRESENT,
-            QUNS_BUSY,
-            QUNS_RUNNING_D3D_FULL_SCREEN,
-            QUNS_PRESENTATION_MODE,
-        ] {
-            assert!(!accepts_interruption(busy, false), "state {busy} must wait");
-        }
-        assert!(accepts_interruption(QUNS_ACCEPTS_NOTIFICATIONS, false));
-        assert!(accepts_interruption(QUNS_QUIET_TIME, false));
-    }
-
-    #[test]
-    fn a_packaged_app_holds_the_offer_back_only_while_it_fills_its_monitor() {
-        let monitor = [0, 0, 1920, 1080];
-        let borderless_game = [0, 0, 1920, 1080];
-        let maximized_above_taskbar = [-8, -8, 1928, 1040];
-        let windowed = [200, 100, 1400, 900];
-
-        assert!(!accepts_interruption(
-            QUNS_APP,
-            covers(borderless_game, monitor)
-        ));
-        assert!(accepts_interruption(
-            QUNS_APP,
-            covers(maximized_above_taskbar, monitor)
-        ));
-        assert!(accepts_interruption(QUNS_APP, covers(windowed, monitor)));
-    }
-
-    #[test]
-    fn a_background_offer_is_dropped_when_the_update_mode_no_longer_offers_the_window() {
-        let mut offer = BackgroundOffer::default();
-        offer.offer("3.1.0");
-        assert_eq!(offer.next(false, false, true, false), BackgroundStep::Wait);
-
-        assert_eq!(
-            offer.next(false, false, false, true),
-            BackgroundStep::Drop,
-            "switching to Off or Automatic during the wait must not open the window later"
-        );
-    }
-
-    #[cfg(windows)]
-    #[test]
-    fn the_notification_states_match_the_windows_definitions() {
-        use windows::Win32::UI::Shell::{
-            QUNS_ACCEPTS_NOTIFICATIONS as ACCEPTS, QUNS_APP as APP, QUNS_QUIET_TIME as QUIET,
-        };
-
-        assert_eq!(QUNS_ACCEPTS_NOTIFICATIONS, ACCEPTS.0);
-        assert_eq!(QUNS_QUIET_TIME, QUIET.0);
-        assert_eq!(QUNS_APP, APP.0);
     }
 
     #[test]

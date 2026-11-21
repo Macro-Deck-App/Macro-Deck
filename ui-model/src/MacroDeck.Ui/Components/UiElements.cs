@@ -1728,6 +1728,28 @@ public sealed record UiToggle : UiComponentLeaf
 /// </summary>
 public sealed record UiSegmented : UiComponentContainer
 {
+	/// <summary>
+	/// The axis the segments are laid out along - see <see cref="UiComponentDirections" />. Absent means
+	/// <see cref="UiComponentDirections.Horizontal" />.
+	///
+	/// <para>
+	/// <see cref="UiComponentDirections.Vertical" /> needs <c>ui.segmented</c> component version 2: a version 1
+	/// reader ignores the value and lays every segment out in one row. A producer that sets it therefore also
+	/// sets <see cref="Dsl.UiElement.RequiredComponentVersion" /> to 2 and supplies a
+	/// <see cref="Dsl.UiElement.Fallback" />.
+	/// </para>
+	///
+	/// <para>
+	/// <b>The vertical geometry is normative.</b> Segments stack top to bottom, each an equal share of the
+	/// height. With <c>s</c> the segment height and <c>e = min(s, width)</c>, the track's corner radius is
+	/// <c>e / 2</c>, the face is inset by <c>0.08 e</c> on every side with a corner radius of
+	/// <c>e / 2 - 0.08 e</c>, and a press selects by its vertical position. Where its parent gives it no
+	/// height, as along a <see cref="UiList" />'s scroll axis, a vertical segmented is <c>0.14</c> of the basis
+	/// tall per segment, so a long list of choices scrolls.
+	/// </para>
+	/// </summary>
+	public UiValue<string> Direction { get; init; }
+
 	/// <summary>The zero-based index of the selected segment. Absent means none.</summary>
 	public UiValue<int> Selected { get; init; }
 
@@ -1745,6 +1767,7 @@ public sealed record UiSegmented : UiComponentContainer
 
 		base.DeclareProperties(properties);
 
+		properties.Set(UiComponentProperties.Direction, Direction);
 		properties.Set(UiComponentProperties.Selected, Selected);
 		properties.Set(UiComponentProperties.LevelColor, LevelColor);
 	}

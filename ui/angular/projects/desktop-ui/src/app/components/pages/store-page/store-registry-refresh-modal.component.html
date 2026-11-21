@@ -1,43 +1,81 @@
-<shared-modal [heading]="heading()" size="medium" [showFooter]="false" (close)="onClose()">
+<shared-modal [heading]="heading()" size="medium" (close)="onClose()">
   <div
-    class="refresh-status"
-    [class.refresh-status-succeeded]="state() === 'Succeeded'"
-    [class.refresh-status-failed]="state() === 'Failed'"
-    role="status">
+    class="srr"
+    [class.srr-succeeded]="state() === 'Succeeded'"
+    [class.srr-failed]="state() === 'Failed' || state() === 'Cancelled'">
+    <div class="srr-head" role="status">
+      <span class="srr-badge" aria-hidden="true">
+        @if (state() === 'Succeeded') {
+          <span class="icon icon-lg icon-check"></span>
+        } @else if (state() === 'Running') {
+          <span class="icon icon-lg icon-refresh srr-badge-spin"></span>
+        } @else {
+          <span class="icon icon-lg icon-alert-triangle"></span>
+        }
+      </span>
+      <div class="srr-titles">
+        <span class="srr-title">{{ stateText() }}</span>
+        @if (outcome(); as line) {
+          <span class="srr-subtitle">{{ line.text }}</span>
+          @if (line.detail) {
+            <span class="srr-step-detail">{{ line.detail }}</span>
+          }
+        }
+      </div>
+      @if (progress(); as current) {
+        <span class="srr-percent">{{ current.percent }}%</span>
+      }
+    </div>
+
     @if (state() === 'Running') {
-      <span class="refresh-spinner" aria-hidden="true"></span>
-    } @else if (state() === 'Succeeded') {
-      <span class="icon icon-check icon-sm" aria-hidden="true"></span>
-    } @else {
-      <span class="icon icon-alert-triangle icon-sm" aria-hidden="true"></span>
+      <div
+        class="srr-bar"
+        [class.srr-bar-indeterminate]="!progress()"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="progress()?.percent ?? null"
+        [attr.aria-valuetext]="progress()?.text ?? null"
+        [attr.aria-label]="stateText()">
+        <div class="srr-bar-fill" [style.width.%]="progress()?.percent ?? 100"></div>
+      </div>
+      @if (progress(); as current) {
+        <p class="srr-detail">{{ current.text }}</p>
+      }
     }
-    <span class="refresh-status-text">{{ stateText() }}</span>
+
+    <ol class="srr-steps" [attr.aria-label]="logLabel()" aria-live="polite">
+      @for (line of lines(); track line.key) {
+        <li
+          class="srr-step"
+          [class.srr-step-done]="line.state === 'done'"
+          [class.srr-step-current]="line.state === 'current'"
+          [class.srr-step-failed]="line.state === 'failed'">
+          <span class="srr-marker" aria-hidden="true">
+            @if (line.state === 'done') {
+              <span class="icon icon-check"></span>
+            } @else if (line.state === 'current') {
+              <span class="srr-spinner"></span>
+            } @else {
+              <span class="icon icon-alert-triangle"></span>
+            }
+          </span>
+          <span class="srr-step-text">
+            <span>{{ line.text }}</span>
+            @if (line.detail) {
+              <span class="srr-step-detail">{{ line.detail }}</span>
+            }
+          </span>
+          <span class="srr-step-time">{{ line.time }}</span>
+        </li>
+      }
+    </ol>
   </div>
 
-  @if (progress(); as current) {
-    <div
-      class="refresh-progress"
-      role="progressbar"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      [attr.aria-valuenow]="current.percent"
-      [attr.aria-valuetext]="current.text">
-      <div class="refresh-progress-fill" [style.width.%]="current.percent"></div>
-    </div>
-    <p class="refresh-progress-text">{{ current.text }}</p>
-  }
-
-  <ol class="refresh-log" [attr.aria-label]="logLabel()" aria-live="polite">
-    @for (line of lines(); track line.key) {
-      <li class="refresh-log-line" [class.refresh-log-line-failed]="line.failed">
-        <span class="refresh-log-time">{{ line.time }}</span>
-        <span class="refresh-log-message">
-          <span>{{ line.text }}</span>
-          @if (line.detail) {
-            <span class="refresh-log-detail">{{ line.detail }}</span>
-          }
-        </span>
-      </li>
+  <div modal-footer class="srr-footer">
+    @if (upToDate()) {
+      <shared-button variant="secondary" (click)="onForceRefresh()">{{ forceRefreshLabel() }}</shared-button>
     }
-  </ol>
+    <shared-button variant="primary" (click)="onClose()">{{ doneLabel() }}</shared-button>
+  </div>
 </shared-modal>

@@ -121,7 +121,8 @@ internal sealed class RemoteWidgetApi(
 			BorderStyle = patch.BorderStyle,
 			BorderColor = patch.BorderColor,
 			AccentColor = patch.AccentColor,
-			IconAppearance = patch.IconAppearance
+			IconAppearance = patch.IconAppearance,
+			LabelNumber = patch.LabelNumber
 		};
 	}
 

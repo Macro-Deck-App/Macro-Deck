@@ -24,6 +24,7 @@ describe('AiClientsSettingsComponent', () => {
       'deleteMcpToken',
       'getMcpPolicy',
       'setMcpPolicy',
+      'setMcpNetworkAccess',
       'onNotification',
       'downloadClaudeDesktopExtension',
       'removeMcpAllowedAction',
@@ -64,6 +65,7 @@ describe('AiClientsSettingsComponent', () => {
       ],
     });
     api.setMcpPolicy.and.resolveTo({ success: true });
+    api.setMcpNetworkAccess.and.callFake(request => Promise.resolve({ allowed: request.allowed }));
     api.deleteMcpToken.and.resolveTo({ success: true });
     api.removeMcpAllowedAction.and.resolveTo({ success: true });
 
@@ -108,6 +110,36 @@ describe('AiClientsSettingsComponent', () => {
       jasmine.stringContaining('Old laptop'),
     ]);
     expect(query(f, 'mcp-connection-row')[0]?.textContent).toContain('claude-code 2.1');
+  });
+
+  it('keeps AI clients on this computer until network access is turned on', async () => {
+    const f = await create();
+    const hint = () => f.nativeElement.querySelector('.ai-clients__hint')?.textContent ?? '';
+    const toggle = query(f, 'mcp-network-access')[0].querySelector('input') as HTMLInputElement;
+
+    expect(toggle.checked).toBeFalse();
+    expect(hint()).not.toContain('replace 127.0.0.1');
+
+    toggle.click();
+    await settle(f);
+
+    expect(api.setMcpNetworkAccess).toHaveBeenCalledWith({ allowed: true });
+    expect(toggle.checked).toBeTrue();
+    expect(hint()).toContain('replace 127.0.0.1');
+  });
+
+  it('shows network access as it was when turning it off fails', async () => {
+    api.getMcpEndpoint.and.resolveTo({ available: true, url: ENDPOINT, contractVersion: '1', networkClientsAllowed: true });
+    api.setMcpNetworkAccess.and.rejectWith(new Error('offline'));
+    const f = await create();
+    const toggle = query(f, 'mcp-network-access')[0].querySelector('input') as HTMLInputElement;
+
+    toggle.click();
+    await settle(f);
+
+    expect(api.setMcpNetworkAccess).toHaveBeenCalledWith({ allowed: false });
+    expect(toggle.checked).toBeTrue();
+    expect(toast.show).toHaveBeenCalled();
   });
 
   it('lists what a token may always do and asks again once an action is removed', async () => {

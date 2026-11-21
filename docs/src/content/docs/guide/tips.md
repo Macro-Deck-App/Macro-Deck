@@ -11,12 +11,22 @@ Unlock the deck to edit it, lock it to press buttons.
 | --- | --- |
 | Ctrl/Cmd + A | Select all widgets |
 | Ctrl/Cmd + C, X, V | Copy, cut, paste widgets |
+| Ctrl/Cmd + Shift + C, V | Copy a widget's style, paste it onto the selection |
 | Delete | Delete the selection |
 | Esc | Clear the selection |
 | Shift + click on Save | Save and close the widget editor |
 
 - **Select several widgets** by dragging a box around them. Hold Ctrl/Cmd to add to the selection.
 - **Paste somewhere specific:** right-click a free cell.
+- **Give several widgets the same look:** right-click the widget that looks right and choose
+  **Copy Style**, then select the others, right-click one of them and choose **Paste Style**. Only the
+  look is copied: colors, font and label styling, border, and an Action Button's icon color, zoom and
+  position. Labels, icons, actions and variables stay as they are.
+  - A button with several states passes on the look it is showing right now, and the buttons you paste
+    onto take it for all of their states.
+  - Between different widget types only what both have is copied, such as the background color and
+    the border. Widgets from plugins and integrations take the border and, where they support it, the
+    background color.
 - **Try a button without opening it:** right-click it and choose **Run**. It runs the Short Press actions
   as if you pressed the button, so a button set to **Cycle states on tap** also moves to its next state.
 - **Drop an image, an app or a shortcut** on a tile to use it as the background.
@@ -32,8 +42,34 @@ Unlock the deck to edit it, lock it to press buttons.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
 - **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
   outline with **Label Outline** and the width next to it, or frame it with **Label Box Border** and its
-  width. A width can be changed once its color is set. Each state can have its own. Hardware devices and
+  width. A width appears once its color is set. Each state can have its own. Hardware devices and
   the Companion app keep the default label look for now.
+- **Place an Action Button's label anywhere:** in the **Label** tab, **Horizontal position** and
+  **Vertical position** slide the label across the button, from 0 (flush left or top) over 50 (centered)
+  to 100 (flush right or bottom), so it always stays inside the button. **Align** and **Position** are
+  shortcuts for the nine usual places and set the two sliders for you. **Reset** next to the **Position**
+  heading puts the label back in the center; in a state it returns to the position the button itself has.
+- **Drag a label in the preview:** in an Action Button's editor, grab a label in the button preview at
+  the top and drag it where you want it. The position sliders follow, and dragging another label picks
+  it in the list.
+- **Fold away label settings you do not need:** the **Label** tab is split into **Text**, **Typography**,
+  **Position** and **Appearance**. Click a heading to collapse or expand it; Macro Deck remembers that for
+  every button. A dot next to a heading shows that something in it differs from the default, and **Reset**
+  beside the dot returns only that section to its defaults.
+- **Give an Action Button several labels:** in the **Label** tab, choose **Add label**. A button can have
+  up to four. The list at the top of the tab picks the label you are editing, and each one has its own
+  text, font, size, color and position. The menu next to the list works on the label you picked:
+  **Duplicate** adds a copy of it, **Copy** remembers it, **Paste as new label** and **Replace with copied
+  label** bring a copied label into this or any other button or state, and **Remove** deletes it. The
+  first label cannot be removed.
+  - Every label can show variables, and a label whose text cannot be shown displays `n/v` on its own
+    while the others stay as they are.
+  - A button with several states keeps a separate set of extra labels for each state. Turning **Multi
+    state** on therefore hides the extra labels you added before; they are kept and return when you turn
+    it off again.
+  - **Set Label**, **Set Label Color** and **Set Font** have a **Label to change** setting. It starts at
+    **Label 1**; picking a label the button does not have yet adds it.
+  - Hardware devices and the Companion app show only the first label until they support more.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
@@ -156,7 +192,8 @@ Deaths: {{ vars.deaths }}
 
 Random values work the same way. Use `{{ math.random 1 7 }}` for a whole number from 1 to 6 (the maximum is
 not included) and `{{ math.uuid }}` for a random unique id. Put one in the value of a **Set Variable** action
-to store a new random number in a variable each time the action runs. For a Boolean or Color variable, the
+to store a new random number in a variable each time the action runs. A template variable that already holds
+`math.random` gets a new number from the **Refresh Template Variable** action. For a Boolean or Color variable, the
 `{{ }}` button next to the value switches the field to a template; empty the field and click elsewhere to go back.
 
 ## A folder that opens by itself
@@ -189,8 +226,10 @@ to store a new random number in a variable each time the action runs. For a Bool
 A step that uses a stored secret, such as a webhook URL or a token, only runs in the form you saved it in
 the app. If something else changed it, the step pauses, Macro Deck tells you in the notifications, and
 **Approvals** appears in the sidebar and lists it with what changed. Check the values, then choose
-**Approve**. Until then the step is skipped and the rest of the flow still runs. Once nothing is waiting,
-**Approvals** leaves the sidebar again.
+**Approve**. Until then the step is skipped and the rest of the flow still runs. If you did not make that
+change, choose **Decline**: the step leaves the list and keeps being skipped. To use the step again, edit
+it in the app. If it is changed outside the app once more, it shows up in **Approvals** again. Once nothing
+is waiting, **Approvals** leaves the sidebar again.
 
 ## Share and back up
 

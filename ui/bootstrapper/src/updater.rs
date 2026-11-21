@@ -32,12 +32,8 @@
 // it deliberately lives outside the state mutex because snapshot() is read on
 // every progress tick and the payload can be ~100 MB.
 //
-// Native dialogs are the fallback channel, not the primary one: when the host
-// is reachable, it is told about every state transition over
-// /api/host/update-state and the desktop UI drives the rest through
-// get_update_state/the update-state event. A dialog only fires when that
-// report failed - the host is down, or was never brought up - so the user has
-// at least one way to hear about an update.
+// A background check never opens a window or dialog: the host hears about every state change,
+// and an OS notification announces a found version wherever the host cannot show it.
 
 use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -46,7 +42,6 @@ use std::time::Duration;
 use semver::Version;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
-use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use tauri_plugin_updater::{Error as UpdaterError, RemoteRelease, Update, UpdaterExt};
 
 use crate::host;
@@ -102,6 +97,7 @@ pub enum UpdateInstallStrategy {
     InApp,
     ExternalDownload,
     Apt,
+    Portable,
 }
 
 impl UpdateInstallStrategy {
@@ -112,7 +108,14 @@ impl UpdateInstallStrategy {
 
 const APT_REPOSITORY_HOST: &str = "packages.macro-deck.app";
 
-fn install_strategy_for(target_os: &str, apt_managed: bool) -> UpdateInstallStrategy {
+fn install_strategy_for(
+    target_os: &str,
+    apt_managed: bool,
+    portable: bool,
+) -> UpdateInstallStrategy {
+    if portable {
+        return UpdateInstallStrategy::Portable;
+    }
     match target_os {
         "linux" if apt_managed => UpdateInstallStrategy::Apt,
         "linux" => UpdateInstallStrategy::ExternalDownload,
@@ -122,7 +125,11 @@ fn install_strategy_for(target_os: &str, apt_managed: bool) -> UpdateInstallStra
 
 pub(crate) fn install_strategy() -> UpdateInstallStrategy {
     let os = std::env::consts::OS;
-    install_strategy_for(os, os == "linux" && installed_from_apt_repository())
+    install_strategy_for(
+        os,
+        os == "linux" && installed_from_apt_repository(),
+        crate::portable::data_dir().is_some(),
+    )
 }
 
 fn installed_from_apt_repository() -> bool {
@@ -202,7 +209,9 @@ pub(crate) fn periodic_action(mode: UpdateMode, strategy: UpdateInstallStrategy)
         (UpdateMode::Off, _) => PeriodicAction::Skip,
         (
             UpdateMode::NotifyOnly | UpdateMode::Automatic,
-            UpdateInstallStrategy::ExternalDownload | UpdateInstallStrategy::Apt,
+            UpdateInstallStrategy::ExternalDownload
+            | UpdateInstallStrategy::Apt
+            | UpdateInstallStrategy::Portable,
         ) => PeriodicAction::Check(CheckAction::ExternalNotify),
         (UpdateMode::NotifyOnly, UpdateInstallStrategy::InApp) => {
             PeriodicAction::Check(CheckAction::ConfirmThenInstall)
@@ -213,13 +222,6 @@ pub(crate) fn periodic_action(mode: UpdateMode, strategy: UpdateInstallStrategy)
     }
 }
 
-pub(crate) fn update_window_offered_in_background(app: &AppHandle) -> bool {
-    matches!(
-        periodic_action(update_mode::current(app), install_strategy()),
-        PeriodicAction::Check(CheckAction::ExternalNotify | CheckAction::ConfirmThenInstall)
-    )
-}
-
 fn external_download_refusal(strategy: UpdateInstallStrategy) -> Option<String> {
     match strategy {
         UpdateInstallStrategy::InApp => None,
@@ -228,6 +230,10 @@ fn external_download_refusal(strategy: UpdateInstallStrategy) -> Option<String> 
             &[("downloadPageUrl", DOWNLOAD_PAGE_URL)],
         )),
         UpdateInstallStrategy::Apt => Some(localization::t(keys::UPDATE_APT_MANAGED)),
+        UpdateInstallStrategy::Portable => Some(localization::t_args(
+            keys::UPDATE_PORTABLE_NOT_SUPPORTED,
+            &[("downloadPageUrl", DOWNLOAD_PAGE_URL)],
+        )),
     }
 }
 
@@ -535,10 +541,8 @@ fn main_window_open(app: &AppHandle) -> bool {
     app.get_webview_window(window::MAIN_WINDOW).is_some()
 }
 
-// Reports the newly-available version to the host, if it has not already
-// been successfully reported. Returns whether the host now knows (or already
-// knew) about it - `run_check` uses that to decide whether a native dialog is
-// still owed as a fallback; `report_state` just needs the report attempted.
+// Returns whether the host now knows the available version, which decides whether a
+// notification is owed while the main window is open.
 async fn report_availability(app: &AppHandle, snapshot: &UpdateSnapshot) -> bool {
     let signal = lock_state(app).take_availability_signal();
     let Some(version) = signal else {
@@ -878,10 +882,6 @@ pub(crate) async fn run_check(app: &AppHandle, trigger: CheckTrigger) {
     }
 }
 
-// Reports the newly-available version to the host, if it has not already
-// been successfully reported. Returns whether the host now knows (or already
-// knew) about it - the caller uses that to decide whether a native dialog is
-// still owed as a fallback.
 async fn report_and_signal(app: &AppHandle) -> bool {
     let snapshot = lock_state(app).snapshot();
     report_availability(app, &snapshot).await
@@ -906,33 +906,53 @@ fn restore_parked_download(app: &AppHandle, now: u64, partial_check: Option<Stri
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum FoundUpdateStep {
     Download,
-    UpdateWindow,
-    NativeDialog,
+    Notify,
+    Claim,
     Nothing,
 }
 
 pub(crate) fn found_update_step(
     action: CheckAction,
     main_window_open: bool,
+    update_window_open: bool,
     reported: bool,
 ) -> FoundUpdateStep {
     match action {
         CheckAction::DownloadThenInstall => FoundUpdateStep::Download,
-        _ if !main_window_open => FoundUpdateStep::UpdateWindow,
-        _ if reported => FoundUpdateStep::Nothing,
-        _ => FoundUpdateStep::NativeDialog,
+        _ if update_window_open => FoundUpdateStep::Claim,
+        _ if main_window_open && reported => FoundUpdateStep::Nothing,
+        _ => FoundUpdateStep::Notify,
     }
 }
 
 async fn run_action(app: &AppHandle, action: CheckAction, update: Update, reported: bool) {
-    match found_update_step(action, main_window_open(app), reported) {
+    let update_window_open = app
+        .get_webview_window(update_window::UPDATE_WINDOW)
+        .is_some();
+    match found_update_step(action, main_window_open(app), update_window_open, reported) {
         FoundUpdateStep::Download => download_then_install(app, update).await,
-        FoundUpdateStep::UpdateWindow => update_window::offer(app, &update.version),
-        FoundUpdateStep::NativeDialog if action == CheckAction::ExternalNotify => {
-            notify_external_download(app, &update);
+        FoundUpdateStep::Notify => notify_available(app, &update.version).await,
+        FoundUpdateStep::Claim => {
+            update_window::announce(&update.version);
         }
-        FoundUpdateStep::NativeDialog => confirm_then_download_and_install(app, update).await,
         FoundUpdateStep::Nothing => {}
+    }
+}
+
+async fn notify_available(app: &AppHandle, version: &str) {
+    if !update_window::announce(version) {
+        return;
+    }
+    let shown = notifications::show_now(
+        app,
+        localization::t(keys::UPDATE_AVAILABLE_TITLE),
+        localization::t_args(keys::UPDATE_AVAILABLE_NOTIFICATION, &[("version", version)]),
+    )
+    .await;
+    if !shown {
+        logging::warn(&format!(
+            "[updater] the system did not show the notification for {version}"
+        ));
     }
 }
 
@@ -1214,95 +1234,6 @@ async fn download_then_install(app: &AppHandle, update: Update) {
     emit_state_and_report(app).await;
 }
 
-async fn confirm_then_download_and_install(app: &AppHandle, update: Update) {
-    let download_and_install = app
-        .dialog()
-        .message(localization::t_args(
-            keys::UPDATE_CONFIRM_DOWNLOAD,
-            &[("version", &update.version)],
-        ))
-        .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
-        .buttons(MessageDialogButtons::OkCancelCustom(
-            localization::t(keys::UPDATE_DOWNLOAD_AND_INSTALL),
-            localization::t(keys::UPDATE_LATER),
-        ))
-        .blocking_show();
-    if !download_and_install {
-        return;
-    }
-
-    {
-        let mut guard = lock_state(app);
-        if !guard.try_begin_download() {
-            return;
-        }
-    }
-    emit_state_and_report(app).await;
-
-    let bytes = match download_with_progress(app, &update).await {
-        Ok(bytes) => bytes,
-        Err(DownloadOutcome::Cancelled) => {
-            let snapshot = {
-                let mut guard = lock_state(app);
-                guard.record_cancelled();
-                guard.snapshot()
-            };
-            emit_state(app);
-            host::report_cancelled(app, &snapshot).await;
-            clear_pending_download();
-            return;
-        }
-        Err(DownloadOutcome::Failed(error)) => {
-            logging::error(&format!("[updater] download failed: {error}"));
-            {
-                let mut guard = lock_state(app);
-                guard.record_install_failed(error);
-            }
-            emit_state_and_report(app).await;
-            clear_pending_download();
-            return;
-        }
-    };
-
-    {
-        let mut guard = lock_state(app);
-        guard.record_downloaded();
-    }
-    emit_state_and_report(app).await;
-
-    if let Err(error) = install_downloaded(app, update, bytes).await {
-        logging::error(&format!("[updater] install failed: {error}"));
-    }
-}
-
-fn notify_external_download(app: &AppHandle, update: &Update) {
-    if install_strategy() == UpdateInstallStrategy::Apt {
-        app.dialog()
-            .message(localization::t_args(
-                keys::UPDATE_APT_AVAILABLE,
-                &[("version", &update.version)],
-            ))
-            .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
-            .blocking_show();
-        return;
-    }
-    let open = app
-        .dialog()
-        .message(localization::t_args(
-            keys::UPDATE_EXTERNAL_AVAILABLE,
-            &[("version", &update.version)],
-        ))
-        .title(localization::t(keys::UPDATE_AVAILABLE_TITLE))
-        .buttons(MessageDialogButtons::OkCancelCustom(
-            localization::t(keys::UPDATE_OPEN_DOWNLOAD_PAGE),
-            localization::t(keys::UPDATE_LATER),
-        ))
-        .blocking_show();
-    if open {
-        let _ = crate::external_url::open(app, DOWNLOAD_PAGE_URL);
-    }
-}
-
 // A locked host stops at once and the install restarts the app, so the window would only flash.
 const BACKUP_SKIPPED_NOTICE_TIME: std::time::Duration = std::time::Duration::from_secs(5);
 
@@ -1571,7 +1502,7 @@ mod tests {
     #[test]
     fn install_strategy_is_external_download_on_linux() {
         assert_eq!(
-            install_strategy_for("linux", false),
+            install_strategy_for("linux", false, false),
             UpdateInstallStrategy::ExternalDownload
         );
     }
@@ -1579,7 +1510,7 @@ mod tests {
     #[test]
     fn install_strategy_is_apt_on_linux_installed_from_the_apt_repository() {
         assert_eq!(
-            install_strategy_for("linux", true),
+            install_strategy_for("linux", true, false),
             UpdateInstallStrategy::Apt
         );
     }
@@ -1587,11 +1518,11 @@ mod tests {
     #[test]
     fn install_strategy_is_in_app_on_windows_and_macos() {
         assert_eq!(
-            install_strategy_for("windows", false),
+            install_strategy_for("windows", false, false),
             UpdateInstallStrategy::InApp
         );
         assert_eq!(
-            install_strategy_for("macos", true),
+            install_strategy_for("macos", true, false),
             UpdateInstallStrategy::InApp
         );
     }
@@ -1599,9 +1530,19 @@ mod tests {
     #[test]
     fn an_unknown_target_keeps_the_in_app_strategy() {
         assert_eq!(
-            install_strategy_for("freebsd", false),
+            install_strategy_for("freebsd", false, false),
             UpdateInstallStrategy::InApp
         );
+    }
+
+    #[test]
+    fn a_portable_copy_never_installs_in_app_on_any_platform() {
+        for os in ["windows", "macos", "linux"] {
+            assert_eq!(
+                install_strategy_for(os, true, true),
+                UpdateInstallStrategy::Portable
+            );
+        }
     }
 
     #[test]
@@ -1609,6 +1550,7 @@ mod tests {
         assert!(UpdateInstallStrategy::InApp.installs_in_app());
         assert!(!UpdateInstallStrategy::ExternalDownload.installs_in_app());
         assert!(!UpdateInstallStrategy::Apt.installs_in_app());
+        assert!(!UpdateInstallStrategy::Portable.installs_in_app());
     }
 
     const README_SOURCE: &str = "Types: deb\nURIs: https://packages.macro-deck.app\nSuites: stable\nComponents: main\nArchitectures: amd64\nSigned-By: /etc/apt/keyrings/macro-deck.asc\n";
@@ -1686,6 +1628,28 @@ mod tests {
     }
 
     #[test]
+    fn a_portable_copy_refuses_the_in_app_install_and_names_the_download_page() {
+        let reason = external_download_refusal(UpdateInstallStrategy::Portable)
+            .expect("a portable copy must refuse the in-app install");
+        assert!(reason.contains(DOWNLOAD_PAGE_URL));
+        assert!(!reason.contains("AppImage"));
+    }
+
+    #[test]
+    fn a_portable_copy_still_checks_and_notifies_unless_updates_are_off() {
+        for mode in [UpdateMode::NotifyOnly, UpdateMode::Automatic] {
+            assert_eq!(
+                periodic_action(mode, UpdateInstallStrategy::Portable),
+                PeriodicAction::Check(CheckAction::ExternalNotify)
+            );
+        }
+        assert_eq!(
+            periodic_action(UpdateMode::Off, UpdateInstallStrategy::Portable),
+            PeriodicAction::Skip
+        );
+    }
+
+    #[test]
     fn in_app_install_has_no_refusal() {
         assert!(external_download_refusal(UpdateInstallStrategy::InApp).is_none());
     }
@@ -1725,6 +1689,10 @@ mod tests {
         assert_eq!(
             serde_json::to_value(UpdateInstallStrategy::Apt).unwrap(),
             "apt"
+        );
+        assert_eq!(
+            serde_json::to_value(UpdateInstallStrategy::Portable).unwrap(),
+            "portable"
         );
     }
 
@@ -2203,13 +2171,13 @@ mod tests {
     }
 
     #[test]
-    fn a_found_update_opens_the_update_window_when_the_main_window_is_closed() {
+    fn a_found_update_is_announced_by_notification_when_the_main_window_is_closed() {
         for action in [CheckAction::ConfirmThenInstall, CheckAction::ExternalNotify] {
             for reported in [true, false] {
                 assert_eq!(
-                    found_update_step(action, false, reported),
-                    FoundUpdateStep::UpdateWindow,
-                    "{action:?} must be visible without opening Macro Deck (reported: {reported})"
+                    found_update_step(action, false, false, reported),
+                    FoundUpdateStep::Notify,
+                    "{action:?} must not open a window (reported: {reported})"
                 );
             }
         }
@@ -2218,23 +2186,49 @@ mod tests {
     #[test]
     fn with_the_main_window_open_a_reported_update_stays_in_the_notification_center() {
         assert_eq!(
-            found_update_step(CheckAction::ConfirmThenInstall, true, true),
+            found_update_step(CheckAction::ConfirmThenInstall, true, false, true),
             FoundUpdateStep::Nothing
-        );
-        assert_eq!(
-            found_update_step(CheckAction::ConfirmThenInstall, true, false),
-            FoundUpdateStep::NativeDialog,
-            "an unreported update still needs the native dialog fallback"
         );
     }
 
     #[test]
-    fn automatic_mode_downloads_regardless_of_the_main_window() {
-        for open in [true, false] {
+    fn an_update_the_host_could_not_announce_gets_a_notification_instead_of_a_dialog() {
+        for action in [CheckAction::ConfirmThenInstall, CheckAction::ExternalNotify] {
             assert_eq!(
-                found_update_step(CheckAction::DownloadThenInstall, open, false),
-                FoundUpdateStep::Download
+                found_update_step(action, true, false, false),
+                FoundUpdateStep::Notify
             );
+        }
+    }
+
+    #[test]
+    fn an_open_update_window_takes_the_announcement_without_a_notification() {
+        for action in [CheckAction::ConfirmThenInstall, CheckAction::ExternalNotify] {
+            for main_window_open in [true, false] {
+                for reported in [true, false] {
+                    assert_eq!(
+                        found_update_step(action, main_window_open, true, reported),
+                        FoundUpdateStep::Claim
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn automatic_mode_downloads_regardless_of_the_windows() {
+        for main_window_open in [true, false] {
+            for update_window_open in [true, false] {
+                assert_eq!(
+                    found_update_step(
+                        CheckAction::DownloadThenInstall,
+                        main_window_open,
+                        update_window_open,
+                        false
+                    ),
+                    FoundUpdateStep::Download
+                );
+            }
         }
     }
 }

@@ -66,10 +66,12 @@ public sealed record WidgetAppearancePatch
 	/// <summary>Font size as a percentage of the widget's smaller dimension, matching stored data.</summary>
 	public double? FontSize { get; init; }
 
-	/// <summary>"left", "center" or "right".</summary>
+	/// <summary>"left", "center" or "right". On an Action Button these are three preset positions, and
+	/// setting one replaces a free horizontal position the user chose for the label.</summary>
 	public string? TextAlign { get; init; }
 
-	/// <summary>"top", "center" or "bottom".</summary>
+	/// <summary>"top", "center" or "bottom". On an Action Button these are three preset positions, and
+	/// setting one replaces a free vertical position the user chose for the label.</summary>
 	public string? LabelPosition { get; init; }
 
 	/// <summary>A <c>WidgetBorderStyle</c> value; "off" removes the border.</summary>
@@ -86,6 +88,20 @@ public sealed record WidgetAppearancePatch
 	/// that predates this property ignores it.
 	/// </summary>
 	public string? AccentColor { get; init; }
+
+	/// <summary>
+	/// Which label of an Action Button <see cref="Label" />, <see cref="LabelColor" />,
+	/// <see cref="FontFaceId" />, <see cref="FontSize" />, <see cref="TextAlign" /> and
+	/// <see cref="LabelPosition" /> change, and which one a cleared
+	/// <see cref="WidgetAppearanceProperty.Label" />, <see cref="WidgetAppearanceProperty.LabelColor" /> or
+	/// <see cref="WidgetAppearanceProperty.Font" /> resets: <c>1</c> is the primary label, <c>2</c> to
+	/// <c>4</c> are the button's extra labels in their stored order. Absent means <c>1</c>. A label that
+	/// does not exist yet is created, together with any before it, with no text, so a patch that only
+	/// colours label 3 leaves an invisible label behind. A number outside <c>1</c> to <c>4</c> rejects the
+	/// request. Every other property and every other widget type ignores it, and it does not make a patch
+	/// non-empty on its own. A host that predates this property ignores it and changes the primary label.
+	/// </summary>
+	public int? LabelNumber { get; init; }
 
 	public bool IsEmpty => Label is null
 		&& BackgroundColor is null
