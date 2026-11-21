@@ -260,6 +260,13 @@ jobs:
           fi
           endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
           dest="s3://${R2_BUCKET}/releases/"
+          # A stable hotfix publishes beta too, so without this it would pull beta clients back
+          # from a newer beta. sync fails on a real error and only skips keys that do not exist.
+          aws s3 sync "${dest}" published-manifests/ \
+            --exclude '*' --include 'latest-*.json' --include 'beta-*.json' \
+            --endpoint-url "${endpoint}" \
+            --no-progress
+          node ci/scripts/drop-superseded-manifests.mjs release-assets published-manifests
           echo "Publishing ${VERSION} channel manifests to ${dest}"
           while IFS= read -r -d '' manifest; do
             name="$(basename "${manifest}")"
