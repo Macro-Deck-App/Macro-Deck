@@ -5,8 +5,9 @@ import mermaid from 'astro-mermaid';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
-import { copyFile } from 'node:fs/promises';
+import { copyFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { channel, site, sourceBranch } from './channel.mjs';
 
 // Starlight's bundled sitemap integration only writes sitemap-index.xml, but crawlers
 // look for /sitemap.xml, so serve the same index there. Its hook must run after the
@@ -35,6 +36,21 @@ const sitemapXmlAlias = {
 	},
 };
 
+// The beta docs run ahead of every release, so search engines must never list them in place
+// of the released docs. The header covers the static downloads as well as the pages.
+const betaNoIndex = {
+	name: 'beta-noindex',
+	hooks: {
+		'astro:build:done': async ({ dir }) => {
+			if (channel !== 'beta') {
+				return;
+			}
+			await writeFile(fileURLToPath(new URL('_headers', dir)), '/*\n  X-Robots-Tag: noindex\n');
+			await writeFile(fileURLToPath(new URL('robots.txt', dir)), 'User-agent: *\nAllow: /\n');
+		},
+	},
+};
+
 // Where this documentation and the code it describes actually live. Used for
 // "Edit this page" and for every link into a source file.
 const repo = 'https://github.com/Macro-Deck-App/Macro-Deck';
@@ -43,7 +59,7 @@ const repo = 'https://github.com/Macro-Deck-App/Macro-Deck';
 const projectRepo = 'https://github.com/Macro-Deck-App/Macro-Deck';
 
 export default defineConfig({
-	site: 'https://docs.macro-deck.app',
+	site,
 	// No `base`: the site is served from the root of its own domain.
 	integrations: [
 		// Must precede Starlight so ```mermaid fences are transformed before rendering.
@@ -59,9 +75,11 @@ export default defineConfig({
 			head: [
 				{ tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/favicon-192.png' } },
 				{ tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
+				...(channel === 'beta' ? [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex' } }] : []),
 			],
 			customCss: ['./src/styles/theme.css'],
 			components: {
+				Banner: './src/components/Banner.astro',
 				Footer: './src/components/Footer.astro',
 				SiteTitle: './src/components/SiteTitle.astro',
 			},
@@ -71,7 +89,7 @@ export default defineConfig({
 				// The website's donation page offers GitHub Sponsors and Ko-fi.
 				{ icon: 'heart', label: 'Donate', href: 'https://macro-deck.app/donate' },
 			],
-			editLink: { baseUrl: `${repo}/edit/main/docs/` },
+			editLink: { baseUrl: `${repo}/edit/${sourceBranch}/docs/` },
 			plugins: [
 				// Renders the hand-authored plugin protocol REST surface under /reference/rest/.
 				starlightOpenAPI([
@@ -356,5 +374,6 @@ export default defineConfig({
 			],
 		}),
 		sitemapXmlAlias,
+		betaNoIndex,
 	],
 });

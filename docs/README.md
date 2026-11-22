@@ -24,7 +24,22 @@ npm run build
 npm run dev
 ```
 
-Run these commands from `docs/`. The production workflow and Cloudflare configuration are the source of truth for deployment details.
+Run these commands from `docs/`. Set `DOCS_CHANNEL=beta` to build the beta channel.
+
+## Channels and deployment
+
+The site is built in two channels from one Cloudflare Worker, configured in [`channel.mjs`](channel.mjs) and [`wrangler.jsonc`](wrangler.jsonc) and deployed by [the Docs workflow](../.github/workflows/docs.yml):
+
+| Channel | Built from | Served at | Deployed by |
+| --- | --- | --- | --- |
+| Stable | `production` | <https://docs.macro-deck.app> | `wrangler deploy` on every push to `production` |
+| Beta | `main` | <https://beta.docs.macro-deck.app> | `wrangler versions upload --preview-alias beta` on every push to `main` |
+
+The stable docs describe the released app. A docs-only fix goes to `production` in a pull request, goes live when it merges, and is merged back into `main` like any other change there. Their "Edit page" links open the file on `production` for that reason.
+
+The beta docs run ahead of every release. Each page carries a banner pointing to the stable docs, and the whole channel is served with `noindex` so search engines never list it in place of the released docs.
+
+The Worker's custom domain `docs.macro-deck.app` is enabled for production and preview in the Cloudflare dashboard, so the preview alias `beta` is served at its wildcard subdomain. The deploy job uses the GitHub environment `docs`, which holds the Cloudflare secrets, allows only `main` and `production`, and has no required reviewers so deploys run unattended. Running the workflow by hand with "Deploy" redeploys the branch it runs on.
 
 ## User guide screenshots
 
