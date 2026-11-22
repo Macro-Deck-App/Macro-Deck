@@ -1,0 +1,33 @@
+---
+import Default from '@astrojs/starlight/components/Banner.astro';
+import { channel, stableSite } from '../../channel.mjs';
+---
+
+{
+	channel === 'beta' ? (
+		<div class="beta-banner" data-pagefind-ignore>
+			<span>These are the beta docs. They describe what is on main and may cover features no release has yet.</span>
+			<a href={`${stableSite}/`}>Read the docs for the current release</a>
+		</div>
+	) : (
+		<Default />
+	)
+}
+
+<style>
+	.beta-banner {
+		padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+		background-color: var(--sl-color-orange-low);
+		color: var(--sl-color-orange-high);
+		line-height: var(--sl-line-height-headings);
+		text-align: center;
+		text-wrap: balance;
+		box-shadow: var(--sl-shadow-sm);
+	}
+
+	.beta-banner a {
+		margin-inline-start: 0.35em;
+		color: inherit;
+		font-weight: 600;
+	}
+</style>
