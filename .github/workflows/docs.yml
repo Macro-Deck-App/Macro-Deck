@@ -1,18 +1,16 @@
 name: Docs
 
-# Rebuilds the plugin documentation site whenever the SDK, the protocol, the UI model
-# or the documentation itself changes on main or in a pull request, and on demand.
-# Deployment to the production Cloudflare Worker is a manual step: run this workflow
-# from main with "Deploy" enabled.
+# production deploys docs.macro-deck.app, main uploads the preview alias beta.docs.macro-deck.app.
+# See "Channels and deployment" in docs/README.md.
 on:
   workflow_dispatch:
     inputs:
       deploy:
-        description: 'Deploy the built site to https://docs.macro-deck.app'
+        description: 'Deploy the built site (production to docs.macro-deck.app, main to beta.docs.macro-deck.app)'
         type: boolean
         default: false
   push:
-    branches: [main]
+    branches: [main, production]
     paths:
       - 'docs/**'
       - 'sdk/src/**'
@@ -42,6 +40,9 @@ jobs:
   build:
     name: Build documentation site
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    env:
+      # A build for production, or a pull request into it, is the released docs. Anything else is beta.
+      DOCS_CHANNEL: ${{ (github.base_ref || github.ref_name) == 'production' && 'stable' || 'beta' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
@@ -69,8 +70,12 @@ jobs:
 
   deploy:
     name: Deploy documentation site
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy
-    environment: production
+    if: >-
+      (github.ref == 'refs/heads/production' || github.ref == 'refs/heads/main')
+      && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy))
+    # Holds the Cloudflare secrets without required reviewers, so the deploy runs unattended.
+    # Its deployment branch policy must allow main and production only.
+    environment: docs
     needs: build
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
@@ -88,4 +93,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: docs
-          command: deploy
+          command: ${{ github.ref == 'refs/heads/production' && 'deploy' || 'versions upload --preview-alias beta' }}
