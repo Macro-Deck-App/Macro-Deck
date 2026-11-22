@@ -92,10 +92,30 @@ public sealed class HistoryGraphWidgetUiProvider : IBuiltInWidgetUiProvider
 
 		var state = new UiState<HistoryGraphViewState>(resolver.Resolve(window.Values));
 		var accent = new UiState<string?>(config.AccentColor);
-		var view = new UiView(request.Surface,
-			HistoryGraphWidgetView.Build(state, config, WidgetSafeArea.RadiusOf(request.Surface), accent));
+		var title = WidgetCaptionTemplate.Create(config.Title,
+			_variables,
+			_notifier,
+			VariableScopeWidgetId(request.Surface));
 
-		var session = new HistoryGraphWidgetSession(view, state, resolver, window, _notifier, config);
+		HistoryGraphWidgetSession session;
+
+		try
+		{
+			var view = new UiView(request.Surface,
+				HistoryGraphWidgetView.Build(state,
+					config,
+					WidgetSafeArea.RadiusOf(request.Surface),
+					accent,
+					title?.Text));
+
+			session = new HistoryGraphWidgetSession(view, state, resolver, window, _notifier, config, title);
+		}
+		catch
+		{
+			title?.Dispose();
+
+			throw;
+		}
 
 		if (request.Surface.Kind == UiSurfaceKinds.Widget
 			&& Guid.TryParse(ReadStringAttribute(request.Surface, UiWidgetSurfaceAttributes.WidgetId),

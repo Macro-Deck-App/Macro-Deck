@@ -11,7 +11,7 @@ namespace MacroDeckHost.Widgets.Configuration;
 /// exactly this and nothing else: the tree is built once from the widget's stored data into
 /// <see cref="UiState{T}" /> cells the tree's own bindings and visibility already react to, so no widget-specific
 /// dispatch logic exists to put here - unlike a widget's own rendering session (see
-/// <c>ClockWidgetSession</c>'s remarks for the same shape used there).
+/// <c>ViewWidgetUiSession</c> for the same shape used there).
 /// </summary>
 internal sealed class WidgetConfigSession : IUiSession
 {

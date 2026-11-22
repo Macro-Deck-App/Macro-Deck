@@ -23,6 +23,7 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 	private readonly IVariableHistoryWindow _window;
 	private readonly IVariableChangeNotifier _variables;
 	private readonly HashSet<string> _watched;
+	private readonly IDisposable? _title;
 	private readonly Lock _refreshSync = new();
 
 	public HistoryGraphWidgetSession(
@@ -31,7 +32,8 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 		HistoryGraphViewStateResolver resolver,
 		IVariableHistoryWindow window,
 		IVariableChangeNotifier variables,
-		HistoryGraphWidgetData config)
+		HistoryGraphWidgetData config,
+		IDisposable? title = null)
 	{
 		ArgumentNullException.ThrowIfNull(view);
 		ArgumentNullException.ThrowIfNull(state);
@@ -46,6 +48,7 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 		_resolver = resolver;
 		_window = window;
 		_variables = variables;
+		_title = title;
 		_watched = new HashSet<string>(StringComparer.Ordinal);
 
 		if (!string.IsNullOrEmpty(config.ValueVariable))
@@ -120,6 +123,7 @@ internal sealed class HistoryGraphWidgetSession : IUiSession
 
 		_window.Changed -= OnSampled;
 		_variables.Changed -= OnVariableChanged;
+		_title?.Dispose();
 		_window.Dispose();
 
 		return ValueTask.CompletedTask;

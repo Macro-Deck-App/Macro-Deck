@@ -17,7 +17,6 @@ using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
-using MacroDeckHost.Domain.Enums;
 using MacroDeckHost.Widgets.MusicPlayer;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -64,50 +63,6 @@ internal sealed record SliderDoublePressBinding(
 	IWidgetTriggerService TriggerService,
 	IUiTransport UiTransport);
 
-internal sealed class SliderLabelBinding
-{
-	private readonly VariableTemplateRenderer _renderer;
-	private readonly string? _scopeRefId;
-
-	public SliderLabelBinding(
-		string template,
-		VariableRegistry variables,
-		IVariableChangeNotifier notifier,
-		string? scopeRefId)
-	{
-		Template = template;
-		Notifier = notifier;
-		Names = WidgetVariableReferenceParser.ReferencedNames(template);
-		_scopeRefId = scopeRefId;
-		_renderer = new VariableTemplateRenderer(variables);
-		Text = new UiState<string>(Render());
-	}
-
-	public string Template { get; }
-
-	public IVariableChangeNotifier Notifier { get; }
-
-	public IReadOnlySet<string> Names { get; }
-
-	public UiState<string> Text { get; }
-
-	public string Render()
-	{
-		try
-		{
-			return _renderer.Render(Template,
-				_scopeRefId is null ? VariableScope.Global : VariableScope.Widget,
-				_scopeRefId);
-		}
-		catch (Exception e) when (e is not OutOfMemoryException and not StackOverflowException)
-		{
-			// User written text rendered on a variable change: a broken template shows itself instead of
-			// faulting the session.
-			return Template;
-		}
-	}
-}
-
 /// <summary>
 /// Drives one Slider widget's UI session: follows the bound variable's value and range, holds the user's
 /// own value against a refresh for a few seconds after an interaction so the level does not fight their
@@ -144,7 +99,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 	private readonly SliderVariableBinding? _variable;
 	private readonly SliderDoublePressBinding? _doublePress;
 	private readonly Func<string?, CancellationToken, Task>? _routeDoublePress;
-	private readonly SliderLabelBinding? _label;
+	private readonly WidgetCaptionTemplate? _label;
 	private readonly bool _interactive;
 	private readonly CancellationTokenSource _lifetime = new();
 
@@ -193,7 +148,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		bool isWidgetSurface,
 		SliderVariableBinding? variable,
 		SliderDoublePressBinding? doublePress = null,
-		SliderLabelBinding? label = null,
+		WidgetCaptionTemplate? label = null,
 		Func<string?, CancellationToken, Task>? routeDoublePress = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
@@ -262,12 +217,6 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 			// (idempotent, _viewSync-guarded) resolve.
 			_variable.Notifier.Changed += OnVariableChanged;
 			RefreshFromVariable();
-		}
-
-		if (_label is not null)
-		{
-			_label.Notifier.Changed += OnLabelVariableChanged;
-			RefreshLabel();
 		}
 	}
 
@@ -343,10 +292,7 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 			_variable.Notifier.Changed -= OnVariableChanged;
 		}
 
-		if (_label is not null)
-		{
-			_label.Notifier.Changed -= OnLabelVariableChanged;
-		}
+		_label?.Dispose();
 
 		await _lifetime.CancelAsync().ConfigureAwait(false);
 
@@ -690,25 +636,6 @@ internal sealed class SliderWidgetSession : IUiSession, IOriginAwareUiSession
 		if (string.Equals(args.Name, _variable!.Name, StringComparison.Ordinal))
 		{
 			RefreshFromVariable();
-		}
-	}
-
-	private void OnLabelVariableChanged(object? sender, VariableChangedEventArgs args)
-	{
-		if (_label!.Names.Contains(args.Name))
-		{
-			RefreshLabel();
-		}
-	}
-
-	private void RefreshLabel()
-	{
-		lock (_viewSync)
-		{
-			using (_view!.Batch())
-			{
-				_label!.Text.Value = _label.Render();
-			}
 		}
 	}
 

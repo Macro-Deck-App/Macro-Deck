@@ -14,7 +14,8 @@ internal static class ClockWidgetView
 
 	public static UiElement Build(
 		ClockWidgetData config,
-		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
+		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
+		UiText? caption = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
 
@@ -23,7 +24,7 @@ internal static class ClockWidgetView
 
 		if (config.ShowLabel && (config.Label is not null || config.TimeZone is not null))
 		{
-			children.Add(Caption(config, reference));
+			children.Add(Caption(config, reference, caption));
 		}
 
 		children.AddRange(Face(config, reference));
@@ -80,14 +81,17 @@ internal static class ClockWidgetView
 		};
 	}
 
-	private static UiElement Caption(ClockWidgetData config, UiValue<UiTimeReference> reference)
+	private static UiElement Caption(
+		ClockWidgetData config,
+		UiValue<UiTimeReference> reference,
+		UiText? caption)
 	{
 		if (config.Label is { } label)
 		{
 			return new UiTextRun
 			{
 				Key = "caption",
-				Text = UiText.Of(label),
+				Text = caption ?? UiText.Of(label),
 				Size = 0.08,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Secondary,

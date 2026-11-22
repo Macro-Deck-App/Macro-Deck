@@ -16,7 +16,8 @@ internal static class TimerWidgetView
 		UiState<TimerFace> face,
 		TimerWidgetSettings settings,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
-		IReadOnlyList<UiEventHandler>? events = null)
+		IReadOnlyList<UiEventHandler>? events = null,
+		UiText? caption = null)
 	{
 		ArgumentNullException.ThrowIfNull(face);
 		ArgumentNullException.ThrowIfNull(settings);
@@ -35,7 +36,7 @@ internal static class TimerWidgetView
 				{
 					Key = "finishedGate",
 					Condition = () => face.Value.IsFinished,
-					Content = () => Finished(settings, safeArea)
+					Content = () => Finished(settings, safeArea, caption)
 				},
 				new UiWhen
 				{
@@ -45,7 +46,7 @@ internal static class TimerWidgetView
 					{
 						Key = "clockLayer",
 						Fill = true,
-						Children = [Ring(face, settings, safeArea), Readout(face, settings, safeArea)]
+						Children = [Ring(face, settings, safeArea), Readout(face, settings, safeArea, caption)]
 					}
 				}
 			]
@@ -86,7 +87,11 @@ internal static class TimerWidgetView
 		};
 	}
 
-	private static UiStack Readout(UiState<TimerFace> face, TimerWidgetSettings settings, UiSize safeArea)
+	private static UiStack Readout(
+		UiState<TimerFace> face,
+		TimerWidgetSettings settings,
+		UiSize safeArea,
+		UiText? caption)
 	{
 		var children = new List<UiElement>
 		{
@@ -118,7 +123,7 @@ internal static class TimerWidgetView
 
 		if (settings is { ShowLabel: true, Label: { } label })
 		{
-			children.Add(Caption(label, null));
+			children.Add(Caption(label, null, caption));
 		}
 
 		return new UiStack
@@ -160,7 +165,7 @@ internal static class TimerWidgetView
 		};
 	}
 
-	private static UiButton Finished(TimerWidgetSettings settings, UiSize safeArea)
+	private static UiButton Finished(TimerWidgetSettings settings, UiSize safeArea, UiText? caption)
 	{
 		var children = new List<UiElement>
 		{
@@ -179,7 +184,7 @@ internal static class TimerWidgetView
 
 		if (settings is { ShowLabel: true, Label: { } label })
 		{
-			children.Insert(0, Caption(label, AlertTextColor));
+			children.Insert(0, Caption(label, AlertTextColor, caption));
 		}
 
 		return new UiButton
@@ -215,12 +220,12 @@ internal static class TimerWidgetView
 		};
 	}
 
-	private static UiTextRun Caption(string label, string? color)
+	private static UiTextRun Caption(string label, string? color, UiText? caption)
 	{
 		return new UiTextRun
 		{
 			Key = "caption",
-			Text = UiText.Of(label),
+			Text = caption ?? UiText.Of(label),
 			Size = 0.075,
 			MinSize = 0.055,
 			Weight = UiComponentTextWeights.SemiBold,

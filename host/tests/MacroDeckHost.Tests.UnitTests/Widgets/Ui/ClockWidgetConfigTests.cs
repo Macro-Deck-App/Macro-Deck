@@ -3,6 +3,7 @@ using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Config;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeck.Ui.Testing;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
 using MacroDeckHost.Domain.Widgets;
@@ -78,7 +79,7 @@ public class ClockWidgetConfigTests
 	[Test]
 	public async Task A_config_surface_naming_a_different_widget_type_is_declined()
 	{
-		var provider = new ClockWidgetUiProvider();
+		var provider = new ClockWidgetUiProvider(new VariableRegistry(), new VariableChangeNotifier());
 		var surface = ConfigSurface(WidgetTypeIds.Weather, "{}");
 
 		var session = await provider.CreateSessionAsync(new UiSessionRequest { Surface = surface, UiModelVersion = 1 },

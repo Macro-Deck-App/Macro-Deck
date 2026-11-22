@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using MacroDeck.Sdk.Ui;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
@@ -6,6 +7,7 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
 using MacroDeckHost.Application.Timers;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
+using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Widgets;
 using MacroDeckHost.Tests.UnitTests.TestSupport;
@@ -20,6 +22,8 @@ public class TimerWidgetUiTests
 	private CountdownWidgetUiProvider _countdowns = null!;
 	private StopwatchWidgetUiProvider _stopwatches = null!;
 	private CountdownDurationDrafts _drafts = null!;
+	private VariableRegistry _variables = null!;
+	private VariableChangeNotifier _notifier = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -27,7 +31,13 @@ public class TimerWidgetUiTests
 		_harness = new TimerWidgetHarness();
 		_transport = new RecordingUiTransport();
 		_drafts = new CountdownDurationDrafts();
-		var sessions = new TimerWidgetSessionFactory(_harness.Coordinator, _harness.LockState, _transport);
+		_variables = new VariableRegistry();
+		_notifier = new VariableChangeNotifier();
+		var sessions = new TimerWidgetSessionFactory(_harness.Coordinator,
+			_harness.LockState,
+			_transport,
+			_variables,
+			_notifier);
 		_countdowns = new CountdownWidgetUiProvider(sessions, _drafts);
 		_stopwatches = new StopwatchWidgetUiProvider(sessions);
 	}
@@ -64,8 +74,12 @@ public class TimerWidgetUiTests
 		string triggerType)
 	{
 		var mixer = new VirtualWidgetFixture(widgetType, "{}");
-		var sessions
-			= new TimerWidgetSessionFactory(_harness.Coordinator, _harness.LockState, _transport, mixer.Press);
+		var sessions = new TimerWidgetSessionFactory(_harness.Coordinator,
+			_harness.LockState,
+			_transport,
+			_variables,
+			_notifier,
+			mixer.Press);
 		IBuiltInWidgetUiProvider provider = widgetType == WidgetTypeIds.Countdown
 			? new CountdownWidgetUiProvider(sessions, _drafts)
 			: new StopwatchWidgetUiProvider(sessions);
@@ -301,6 +315,80 @@ public class TimerWidgetUiTests
 		});
 	}
 
+	[TestCase(UiSurfaceKinds.Widget)]
+	[TestCase(UiSurfaceKinds.Preview)]
+	public async Task A_timer_label_shows_the_variables_value_and_follows_its_changes(string kind)
+	{
+		var round = TextVariable("round_name", "Warm-up");
+		var countdown = await _harness.AddCountdownAsync();
+		countdown.Data = WithLabel(countdown.Data, "{{ vars.round_name }}");
+
+		await using var session = await OpenAsync(_countdowns, countdown, kind);
+		var initial = CaptionText(session);
+
+		round.Value = "Final";
+		_notifier.Publish("round_name");
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(initial, Is.EqualTo("Warm-up"));
+			Assert.That(CaptionText(session), Is.EqualTo("Final"));
+		});
+	}
+
+	[Test]
+	public async Task A_virtual_timer_label_renders_its_template_from_global_variables()
+	{
+		TextVariable("round_name", "Warm-up");
+		var data = WithLabel("{}", "{{ vars.round_name }}");
+		var mixer = new VirtualWidgetFixture(WidgetTypeIds.Stopwatch, data);
+		var sessions = new TimerWidgetSessionFactory(_harness.Coordinator,
+			_harness.LockState,
+			_transport,
+			_variables,
+			_notifier,
+			mixer.Press);
+
+		await using var session = (await new StopwatchWidgetUiProvider(sessions)
+			.CreateSessionAsync(mixer.Request(WidgetTypeIds.Stopwatch, data), CancellationToken.None))!;
+
+		Assert.That(CaptionText(session), Is.EqualTo("Warm-up"));
+	}
+
+	private Domain.Entities.VariableEntity TextVariable(string name, string value)
+	{
+		var variable = new Domain.Entities.VariableEntity
+		{
+			Id = Guid.NewGuid(),
+			Name = name,
+			Scope = Domain.Enums.VariableScope.Global,
+			Type = Domain.Enums.VariableType.Text,
+			Classification = Domain.Enums.VariableClassification.User,
+			Value = value,
+			UpdatedAt = DateTime.UtcNow
+		};
+		_variables.Upsert(variable);
+
+		return variable;
+	}
+
+	private static string WithLabel(string? data, string label)
+	{
+		var node = JsonNode.Parse(data ?? "{}")!.AsObject();
+		node["label"] = label;
+		node["showLabel"] = true;
+
+		return node.ToJsonString();
+	}
+
+	private static string? CaptionText(IUiSession session)
+	{
+		return Walk(session.BuildTree().Root)
+			.Single(node => node.Id == "caption" || node.Id.EndsWith(".caption", StringComparison.Ordinal))
+			.Properties["text"]
+			.GetString();
+	}
+
 	private static async Task<IUiSession> OpenAsync(
 		IUiProvider provider,
 		Domain.Entities.WidgetEntity widget,
@@ -365,6 +453,13 @@ public class TimerWidgetUiTests
 		return node.Id.EndsWith(key, StringComparison.Ordinal)
 			? node
 			: node.Children.Select(child => Find(child, key)).FirstOrDefault(found => found is not null);
+	}
+
+	private static IEnumerable<UiNode> Walk(UiNode node)
+	{
+		return new[] { node }
+			.Concat(node.Children.SelectMany(Walk))
+			.Concat(node.Fallback is null ? [] : Walk(node.Fallback));
 	}
 
 	private static IReadOnlyList<string> Events(UiNode node)

@@ -20,7 +20,8 @@ internal static class GaugesWidgetView
 		GaugesWidgetData config,
 		IReadOnlyList<UiState<GaugeFace>> faces,
 		IReadOnlyDictionary<string, UiResource>? icons = null,
-		int cornerRadius = WidgetSafeArea.DefaultCornerRadius)
+		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
+		UiText? title = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
 		ArgumentNullException.ThrowIfNull(faces);
@@ -34,12 +35,12 @@ internal static class GaugesWidgetView
 
 		var children = new List<UiElement>();
 
-		if (config.Title is { } title)
+		if (config.Title is { } plainTitle)
 		{
 			children.Add(new UiTextRun
 			{
 				Key = "title",
-				Text = UiText.Of(title),
+				Text = title ?? UiText.Of(plainTitle),
 				Size = _titleSize,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Primary,

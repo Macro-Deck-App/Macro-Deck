@@ -41,7 +41,8 @@ internal static class HistoryGraphWidgetView
 		UiState<HistoryGraphViewState> state,
 		HistoryGraphWidgetData config,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
-		UiState<string?>? accentColor = null)
+		UiState<string?>? accentColor = null,
+		UiText? title = null)
 	{
 		ArgumentNullException.ThrowIfNull(state);
 		ArgumentNullException.ThrowIfNull(config);
@@ -59,7 +60,7 @@ internal static class HistoryGraphWidgetView
 		var layer = new UiLayer
 		{
 			Key = "historyGraph",
-			Children = [Chart(state, accent, config.ThresholdsEnabled), Labels(state, config, safeArea), value],
+			Children = [Chart(state, accent, config.ThresholdsEnabled), Labels(state, config, safeArea, title), value],
 
 			// An older reader that cannot layer draws the card's substance - the value - rather than a
 			// placeholder: the labels and the chart are context for a number, not the point of the widget.
@@ -100,7 +101,8 @@ internal static class HistoryGraphWidgetView
 	private static UiStack Labels(
 		UiState<HistoryGraphViewState> state,
 		HistoryGraphWidgetData config,
-		UiSize safeArea)
+		UiSize safeArea,
+		UiText? title)
 	{
 		var children = new List<UiElement>();
 
@@ -109,7 +111,7 @@ internal static class HistoryGraphWidgetView
 			children.Add(new UiTextRun
 			{
 				Key = "title",
-				Text = UiText.Of(config.Title),
+				Text = title ?? UiText.Of(config.Title),
 				Size = _titleSize,
 				Weight = UiComponentTextWeights.SemiBold,
 				Role = UiComponentTextRoles.Primary

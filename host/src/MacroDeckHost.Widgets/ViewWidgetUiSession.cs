@@ -4,19 +4,19 @@ using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Patches;
 using MacroDeck.Ui.Runtime;
 
-namespace MacroDeckHost.Widgets.Clock;
+namespace MacroDeckHost.Widgets;
 
-// No state, no notifier and no scheduler: a clock's tree is built once and every reader advances it
-// against its own synchronised clock, so this session exists only to carry the view and its events.
-internal sealed class ClockWidgetSession : IUiSession
+internal sealed class ViewWidgetUiSession : IUiSession
 {
 	private readonly UiView _view;
+	private readonly IDisposable? _owned;
 
-	public ClockWidgetSession(UiView view)
+	public ViewWidgetUiSession(UiView view, IDisposable? owned = null)
 	{
 		ArgumentNullException.ThrowIfNull(view);
 
 		_view = view;
+		_owned = owned;
 		_view.Changed += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
@@ -43,6 +43,9 @@ internal sealed class ClockWidgetSession : IUiSession
 
 	public ValueTask DisposeAsync()
 	{
+		_owned?.Dispose();
+		_view.Dispose();
+
 		return ValueTask.CompletedTask;
 	}
 }
