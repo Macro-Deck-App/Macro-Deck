@@ -107,6 +107,16 @@ Contributions and feedback are welcome. Please read the [contribution guidelines
 - [Discord community](https://discord.macro-deck.app/)
 - [Macro Deck website](https://macro-deck.app/)
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=macro-deck-app%2Fmacro-deck&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=macro-deck-app/macro-deck&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=macro-deck-app/macro-deck&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=macro-deck-app/macro-deck&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ## License
 
 Macro Deck is open-source software licensed under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for additional legal notices and [THIRD-PARTY-NOTICES](THIRD-PARTY-NOTICES) for the third-party components Macro Deck includes and their licenses.
