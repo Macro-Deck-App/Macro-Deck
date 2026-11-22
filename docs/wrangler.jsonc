@@ -4,6 +4,8 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "macro-deck-dev-docs",
 	"compatibility_date": "2026-08-14",
+	// The beta docs are a preview alias. Wrangler defaults this to false on every deploy.
+	"preview_urls": true,
 	"assets": {
 		"directory": "./dist",
 		"not_found_handling": "404-page"
