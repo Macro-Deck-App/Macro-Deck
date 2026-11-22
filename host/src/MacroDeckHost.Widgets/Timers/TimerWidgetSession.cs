@@ -27,6 +27,7 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 	private readonly IUiTransport _transport;
 	private readonly UiState<TimerFace> _face;
 	private readonly UiView _view;
+	private readonly WidgetCaptionTemplate? _caption;
 	private readonly Lock _sync = new();
 
 	private string? _pendingOriginClientId;
@@ -39,7 +40,8 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 		TimerWidgetSettings settings,
 		TimerWidgetCoordinator timers,
 		IHostLockState lockState,
-		IUiTransport transport)
+		IUiTransport transport,
+		WidgetCaptionTemplate? caption = null)
 	{
 		ArgumentNullException.ThrowIfNull(surface);
 		ArgumentNullException.ThrowIfNull(config);
@@ -50,6 +52,7 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 		_timers = timers;
 		_lockState = lockState;
 		_transport = transport;
+		_caption = caption;
 		_face = new UiState<TimerFace>(CurrentFace());
 
 		IReadOnlyList<UiEventHandler> events =
@@ -59,7 +62,7 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 		];
 
 		_view = new UiView(surface,
-			TimerWidgetView.Build(_face, settings, WidgetSafeArea.RadiusOf(surface), events));
+			TimerWidgetView.Build(_face, settings, WidgetSafeArea.RadiusOf(surface), events, caption?.Text));
 		_view.Changed += (_, _) => Changed?.Invoke(this, EventArgs.Empty);
 		_view.HandlerFaulted += (_, fault)
 			=> Faulted?.Invoke(this, new UiSessionFaultedEventArgs(fault.Exception.Message, fault.Exception));
@@ -101,6 +104,7 @@ internal sealed class TimerWidgetSession : IUiSession, IOriginAwareUiSession
 	public ValueTask DisposeAsync()
 	{
 		_timers.Store.Changed -= OnTimerChanged;
+		_caption?.Dispose();
 
 		lock (_sync)
 		{

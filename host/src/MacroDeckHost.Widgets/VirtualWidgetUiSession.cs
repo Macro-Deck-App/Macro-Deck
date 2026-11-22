@@ -19,6 +19,7 @@ internal sealed class VirtualWidgetUiSession : IUiSession, IOriginAwareUiSession
 	private readonly VirtualWidgetPress _press;
 	private readonly IHostLockState _lockState;
 	private readonly UiView _view;
+	private readonly IDisposable? _owned;
 	private readonly Lock _sync = new();
 
 	private string? _pendingOriginClientId;
@@ -29,7 +30,8 @@ internal sealed class VirtualWidgetUiSession : IUiSession, IOriginAwareUiSession
 		IReadOnlyDictionary<string, string> triggerTypeByEventName,
 		VirtualWidgetPress press,
 		IHostLockState lockState,
-		Func<IReadOnlyList<UiEventHandler>, UiElement> build)
+		Func<IReadOnlyList<UiEventHandler>, UiElement> build,
+		IDisposable? owned = null)
 	{
 		ArgumentNullException.ThrowIfNull(surface);
 		ArgumentNullException.ThrowIfNull(triggerTypeByEventName);
@@ -38,6 +40,7 @@ internal sealed class VirtualWidgetUiSession : IUiSession, IOriginAwareUiSession
 		_widgetId = widgetId;
 		_press = press;
 		_lockState = lockState;
+		_owned = owned;
 
 		var events = new List<UiEventHandler>();
 
@@ -83,6 +86,7 @@ internal sealed class VirtualWidgetUiSession : IUiSession, IOriginAwareUiSession
 
 	public ValueTask DisposeAsync()
 	{
+		_owned?.Dispose();
 		_view.Dispose();
 		return ValueTask.CompletedTask;
 	}

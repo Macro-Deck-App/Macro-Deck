@@ -24,7 +24,7 @@ internal static class SliderWidgetView
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
 		int cornerRadius = WidgetSafeArea.DefaultCornerRadius,
-		SliderLabelBinding? label = null,
+		WidgetCaptionTemplate? label = null,
 		UiState<string?>? accentColor = null)
 	{
 		ArgumentNullException.ThrowIfNull(config);
@@ -77,7 +77,7 @@ internal static class SliderWidgetView
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
-		SliderLabelBinding? label,
+		WidgetCaptionTemplate? label,
 		UiState<string?> accent)
 	{
 		var hasLead = HasLead(config, icon);
@@ -122,7 +122,7 @@ internal static class SliderWidgetView
 		UiState<SliderWidgetReadout> state,
 		UiResource? icon,
 		IReadOnlyList<UiEventHandler> sliderEvents,
-		SliderLabelBinding? label,
+		WidgetCaptionTemplate? label,
 		UiState<string?> accent)
 	{
 		var children = new List<UiElement>();
@@ -154,7 +154,7 @@ internal static class SliderWidgetView
 		return icon is not null || config.ShowLabel && config.Label is not null;
 	}
 
-	private static UiStack Lead(SliderWidgetData config, UiResource? icon, SliderLabelBinding? labelBinding)
+	private static UiStack Lead(SliderWidgetData config, UiResource? icon, WidgetCaptionTemplate? labelBinding)
 	{
 		var children = new List<UiElement>();
 
@@ -174,7 +174,7 @@ internal static class SliderWidgetView
 			children.Add(new UiTextRun
 			{
 				Key = "label",
-				Text = labelBinding is null ? UiText.Of(label) : UiText.From(() => labelBinding.Text.Value),
+				Text = labelBinding is null ? UiText.Of(label) : labelBinding.Text,
 				Size = 0.11,
 				MinSize = 0.075,
 				Weight = UiComponentTextWeights.Medium,

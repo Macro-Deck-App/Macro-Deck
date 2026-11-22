@@ -85,11 +85,24 @@ public sealed class GaugesWidgetUiProvider : IBuiltInWidgetUiProvider
 		var gauges = config.Shown;
 		var icons = await ResolveIconsAsync(gauges, cancellationToken).ConfigureAwait(false);
 
-		var resolver = new GaugesViewStateResolver(_variables, VariableScopeWidgetId(request.Surface));
+		var scopeWidgetId = VariableScopeWidgetId(request.Surface);
+		var resolver = new GaugesViewStateResolver(_variables, scopeWidgetId);
 		var faces = gauges.Select(gauge => new UiState<GaugeFace>(resolver.Resolve(gauge))).ToList();
-		var view = new UiView(request.Surface, GaugesWidgetView.Build(config, faces, icons, cornerRadius));
+		var title = WidgetCaptionTemplate.Create(config.Title, _variables, _notifier, scopeWidgetId);
 
-		return new GaugesWidgetSession(view, gauges, faces, resolver, _notifier);
+		try
+		{
+			var view = new UiView(request.Surface,
+				GaugesWidgetView.Build(config, faces, icons, cornerRadius, title?.Text));
+
+			return new GaugesWidgetSession(view, gauges, faces, resolver, _notifier, title);
+		}
+		catch
+		{
+			title?.Dispose();
+
+			throw;
+		}
 	}
 
 	private async Task<Dictionary<string, UiResource>> ResolveIconsAsync(

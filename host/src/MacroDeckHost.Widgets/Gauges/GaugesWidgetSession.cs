@@ -14,6 +14,7 @@ internal sealed class GaugesWidgetSession : IUiSession
 	private readonly IReadOnlyList<UiState<GaugeFace>> _faces;
 	private readonly GaugesViewStateResolver _resolver;
 	private readonly IVariableChangeNotifier _variables;
+	private readonly IDisposable? _title;
 	private readonly Dictionary<string, List<int>> _watched = new(StringComparer.Ordinal);
 	private readonly Lock _refreshSync = new();
 
@@ -22,7 +23,8 @@ internal sealed class GaugesWidgetSession : IUiSession
 		IReadOnlyList<GaugeConfig> gauges,
 		IReadOnlyList<UiState<GaugeFace>> faces,
 		GaugesViewStateResolver resolver,
-		IVariableChangeNotifier variables)
+		IVariableChangeNotifier variables,
+		IDisposable? title = null)
 	{
 		ArgumentNullException.ThrowIfNull(view);
 		ArgumentNullException.ThrowIfNull(gauges);
@@ -35,6 +37,7 @@ internal sealed class GaugesWidgetSession : IUiSession
 		_faces = faces;
 		_resolver = resolver;
 		_variables = variables;
+		_title = title;
 
 		for (var i = 0; i < gauges.Count; i++)
 		{
@@ -84,6 +87,7 @@ internal sealed class GaugesWidgetSession : IUiSession
 	public ValueTask DisposeAsync()
 	{
 		_variables.Changed -= OnVariableChanged;
+		_title?.Dispose();
 
 		return ValueTask.CompletedTask;
 	}

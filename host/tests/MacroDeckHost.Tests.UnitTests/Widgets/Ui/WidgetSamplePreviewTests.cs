@@ -163,7 +163,7 @@ public class WidgetSamplePreviewTests
 	[Test]
 	public async Task The_clock_draws_a_time_the_reader_resolves_itself()
 	{
-		var provider = new ClockWidgetUiProvider();
+		var provider = new ClockWidgetUiProvider(new VariableRegistry(), new VariableChangeNotifier());
 
 		var sample = await Tree(provider, true);
 

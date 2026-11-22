@@ -147,43 +147,53 @@ public sealed class SliderWidgetUiProvider : IBuiltInWidgetUiProvider
 			? new SliderDoublePressBinding(widgetId, _folderCache, _triggerService, _uiTransport)
 			: null;
 
-		var label = config.ShowLabel && VariableTemplateRenderer.ContainsLiquid(config.Label)
-			? new SliderLabelBinding(config.Label!, _variables, _variableNotifier, scopeWidgetId?.ToString())
+		var label = config.ShowLabel
+			? WidgetCaptionTemplate.Create(config.Label, _variables, _variableNotifier, scopeWidgetId?.ToString())
 			: null;
 
-		var virtualWidgetId = _virtualPress?.VirtualWidgetIdOf(request.Surface);
-		var session = new SliderWidgetSession(state,
-			_lockState,
-			_timeProvider,
-			isWidgetSurface,
-			variable,
-			doublePress,
-			label,
-			virtualWidgetId is null
-				? null
-				: (originClientId, ct) => _virtualPress!.RouteAsync(virtualWidgetId,
-					WidgetTriggerTypes.DoublePress,
-					originClientId,
-					ct));
-
-		var accent = new UiState<string?>(config.Color);
-		var element = SliderWidgetView.Build(variable is null ? config : config with { ValueVariable = variable.Name },
-			state,
-			icon,
-			session.BuildEvents(),
-			WidgetSafeArea.RadiusOf(request.Surface),
-			label,
-			accent);
-		var view = new UiView(request.Surface, element);
-
-		session.Attach(view);
-
-		if (isWidgetSurface && scopeWidgetId is { } followed)
+		try
 		{
-			session.FollowAccentColor(_renderSignals, followed.ToString(), config, accent);
-		}
+			var virtualWidgetId = _virtualPress?.VirtualWidgetIdOf(request.Surface);
+			var session = new SliderWidgetSession(state,
+				_lockState,
+				_timeProvider,
+				isWidgetSurface,
+				variable,
+				doublePress,
+				label,
+				virtualWidgetId is null
+					? null
+					: (originClientId, ct) => _virtualPress!.RouteAsync(virtualWidgetId,
+						WidgetTriggerTypes.DoublePress,
+						originClientId,
+						ct));
 
-		return session;
+			var accent = new UiState<string?>(config.Color);
+			var element = SliderWidgetView.Build(
+				variable is null ? config : config with { ValueVariable = variable.Name },
+				state,
+				icon,
+				session.BuildEvents(),
+				WidgetSafeArea.RadiusOf(request.Surface),
+				label,
+				accent);
+			var view = new UiView(request.Surface, element);
+
+			session.Attach(view);
+
+			if (isWidgetSurface && scopeWidgetId is { } followed)
+			{
+				session.FollowAccentColor(_renderSignals, followed.ToString(), config, accent);
+			}
+
+			return session;
+		}
+		catch
+		{
+			label?.Dispose();
+
+			throw;
+		}
 	}
 
 	private static Guid? SurfaceGuid(UiSurface surface, string attribute)
