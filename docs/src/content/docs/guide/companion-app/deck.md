@@ -27,7 +27,9 @@ Macro Deck, its integrations and plugins can show short messages and ask questio
 appears at the top of the deck and closes by itself or with its close button; at most three are shown at once and
 the rest follow. A question opens over the deck, sometimes with fields to fill in, and closes once you pick one
 of its buttons, or with the close button when it may be dismissed. If a question has no buttons of its own, **OK**
-closes it. Each one says where it comes from, so a plugin can never pass for Macro Deck itself.
+closes it. Each one says where it comes from, so a plugin can never pass for Macro Deck itself. A question can offer
+a list of choices, one under the other: swipe to scroll through it and tap a choice to pick it. Scrolling never
+picks one.
 
 ![Two messages from Macro Deck at the top of the deck on Android](../../../../assets/guide/companion/android-notifications.png)
 
