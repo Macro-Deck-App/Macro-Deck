@@ -146,6 +146,16 @@ first picture arrives, the widget says it is connecting, or why the video is not
 The phone loads the video through your computer, from Macro Deck, so the plugin's video source does not
 need to be reachable from the phone, and a video works the same over the network and over USB.
 
+## Profiles from plugins
+
+A plugin can bring profiles of its own, see [Virtual profiles](/features/virtual-profiles/). With Macro Deck
+3.0.1 or later the app shows them like your own profiles: each tile shows what the plugin gives it and reacts to
+presses. With an older Macro Deck their tiles stay empty.
+
+When the plugin removes a tile, or the plugin is turned off, the tile loses its content but keeps its place on
+the grid. Once the plugin is turned on again, its tiles come back when you open another folder or profile. Tiles
+the plugin adds appear once you switch to another profile and back, or once the app connects again.
+
 ## When the computer is locked
 
 While the computer running Macro Deck is locked, the deck shows a lock screen and the connection reads
