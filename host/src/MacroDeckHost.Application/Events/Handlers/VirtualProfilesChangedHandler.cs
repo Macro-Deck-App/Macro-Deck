@@ -1,90 +1,35 @@
-using MacroDeck.Sdk.Profiles;
 using MacroDeckHost.Application.Profiles;
-using MacroDeckHost.Application.Ui.Sessions;
-using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using Mediator;
 
 namespace MacroDeckHost.Application.Events.Handlers;
 
-public sealed class VirtualProfilesChangedHandler : INotificationHandler<VirtualProfilesChangedNotification>
+public sealed class VirtualProfilesChangedHandler
+	: INotificationHandler<VirtualProfilesChangedNotification>,
+		INotificationHandler<IntegrationStateChangedNotification>,
+		INotificationHandler<IntegrationCatalogChangedNotification>
 {
-	private readonly UiSessionRegistry _sessions;
-	private readonly WidgetUiProviderRegistry _widgetUiProviders;
+	private readonly VirtualProfileAnnouncer _announcer;
 
-	public VirtualProfilesChangedHandler(UiSessionRegistry sessions, WidgetUiProviderRegistry widgetUiProviders)
+	public VirtualProfilesChangedHandler(VirtualProfileAnnouncer announcer)
 	{
-		_sessions = sessions;
-		_widgetUiProviders = widgetUiProviders;
+		_announcer = announcer;
 	}
 
 	public ValueTask Handle(VirtualProfilesChangedNotification notification, CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(notification);
-
-		var previous = WidgetsById(notification.IntegrationId, notification.Previous);
-		var current = WidgetsById(notification.IntegrationId, notification.Current);
-
-		foreach (var (widgetId, before) in previous)
-		{
-			if (!current.TryGetValue(widgetId, out var after))
-			{
-				Close(widgetId);
-			}
-			else if (!string.Equals(before.Type, after.Type, StringComparison.Ordinal))
-			{
-				_widgetUiProviders.EvictWidget(widgetId);
-				Invalidate(widgetId);
-			}
-			else if (before != after)
-			{
-				Invalidate(widgetId);
-			}
-		}
-
-		return ValueTask.CompletedTask;
+		return new ValueTask(_announcer.AnnounceAsync(notification.IntegrationId, cancellationToken));
 	}
 
-	private static Dictionary<string, VirtualWidgetDescriptor> WidgetsById(
-		string integrationId,
-		IReadOnlyList<VirtualProfileDescriptor> profiles)
+	public ValueTask Handle(IntegrationStateChangedNotification notification, CancellationToken cancellationToken)
 	{
-		var widgets = new Dictionary<string, VirtualWidgetDescriptor>(StringComparer.Ordinal);
-
-		foreach (var profile in profiles)
-		{
-			foreach (var folder in profile.Folders)
-			{
-				foreach (var widget in folder.Widgets)
-				{
-					if (VirtualWidgetIds.TryCreate(integrationId, profile.Id, folder.Id, widget.Id, out var widgetId))
-					{
-						widgets.TryAdd(widgetId, widget);
-					}
-				}
-			}
-		}
-
-		return widgets;
+		ArgumentNullException.ThrowIfNull(notification);
+		return new ValueTask(_announcer.AnnounceAsync(notification.IntegrationId, cancellationToken));
 	}
 
-	private void Invalidate(string widgetId)
+	public ValueTask Handle(IntegrationCatalogChangedNotification notification, CancellationToken cancellationToken)
 	{
-		foreach (var session in _sessions.SessionsForWidget(widgetId))
-		{
-			_sessions.TryInvalidate(session.SessionId,
-				UiSessionErrorCodes.WidgetReconfigured,
-				"The widget was reconfigured and its view has to be built again.",
-				true);
-		}
-	}
-
-	private void Close(string widgetId)
-	{
-		foreach (var session in _sessions.SessionsForWidget(widgetId))
-		{
-			_sessions.TryClose(session.SessionId, "The widget was removed by its integration.");
-		}
-
-		_widgetUiProviders.EvictWidget(widgetId);
+		ArgumentNullException.ThrowIfNull(notification);
+		return new ValueTask(_announcer.AnnounceAsync(notification.IntegrationId, cancellationToken));
 	}
 }

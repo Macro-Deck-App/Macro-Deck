@@ -99,6 +99,8 @@ public class HostStatePushTests
 			.SetName("A script change pushes the scripts state");
 		yield return new TestCaseData(new ProfileDeletedNotification(Guid.NewGuid()), HostApis.Deck)
 			.SetName("A deck change pushes the deck state");
+		yield return new TestCaseData(new VirtualProfilesAnnouncedNotification("com.example.plugin"), HostApis.Deck)
+			.SetName("A virtual profile change pushes the deck state");
 	}
 
 	[TestCaseSource(nameof(StateChanges))]

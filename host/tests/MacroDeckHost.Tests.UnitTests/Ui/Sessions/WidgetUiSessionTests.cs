@@ -15,6 +15,7 @@ using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Sessions.InProcess;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
+using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
 using MacroDeckHost.Application.Variables;
 using MacroDeckHost.Application.Variables.Colors;
 using MacroDeckHost.Application.Widgets;
@@ -46,6 +47,7 @@ internal sealed class WidgetUiSessionTests
 	private NoPluginConnections _connections = null!;
 	private UnavailableWidgetSessionRecovery _recovery = null!;
 	private ProfileRegistry _profiles = null!;
+	private FakeProfileProviderIntegration _mixer = null!;
 
 	private const string VolumeMixer = "com.example.volume-mixer";
 	private const string MixerWidgetId = VolumeMixer + "::mixer:page-1:app-0";
@@ -58,7 +60,8 @@ internal sealed class WidgetUiSessionTests
 		_registry = new UiSessionRegistry(_time);
 		_folders = new FakeFolderCache();
 		_integrations = new StubIntegrationRegistry();
-		_integrations.Add(new FakeProfileProviderIntegration(VolumeMixer, MixerProfile("""{"label":"Spotify"}""")));
+		_mixer = new FakeProfileProviderIntegration(VolumeMixer, MixerProfile("""{"label":"Spotify"}"""));
+		_integrations.Add(_mixer);
 		_widgetTypes = new WidgetTypeRegistry(new RecordingMediator());
 		_profiles = new ProfileRegistry(new EmptyProfileCache(),
 			_folders,
@@ -957,11 +960,7 @@ internal sealed class WidgetUiSessionTests
 		await changed.Ready;
 		await unchanged.Ready;
 
-		await new VirtualProfilesChangedHandler(_registry, _widgetProviders).Handle(
-			new VirtualProfilesChangedNotification(VolumeMixer,
-				[MixerProfile("""{"label":"Spotify"}""")],
-				[MixerProfile("""{"label":"Spotify 40%"}""")]),
-			CancellationToken.None);
+		await ChangeMixer(new ObservingUiTransport(), MixerProfile("""{"label":"Spotify 40%"}"""));
 
 		Assert.Multiple(() =>
 		{
@@ -971,18 +970,58 @@ internal sealed class WidgetUiSessionTests
 	}
 
 	[Test]
-	public async Task A_widget_its_provider_removed_closes_its_session()
+	public async Task A_changed_virtual_widget_is_rebuilt_before_clients_hear_of_the_change()
 	{
 		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = MixerWidgetId }, DeviceA, false);
 		await ticket.Ready;
+		var transport = new ObservingUiTransport();
+		bool? endedWhenAnnounced = null;
+		transport.OnSend = message =>
+		{
+			if (message is WidgetsUpdatedEvent)
+			{
+				endedWhenAnnounced = _registry.WasEnded(ticket.SessionId);
+			}
+		};
 
-		await new VirtualProfilesChangedHandler(_registry, _widgetProviders).Handle(
-			new VirtualProfilesChangedNotification(VolumeMixer,
-				[MixerProfile("""{"label":"Spotify"}""")],
-				[new VirtualProfileDescriptor("mixer", "Mixer", ProfileLayout.Grid(1, 1), [])]),
+		await ChangeMixer(transport, MixerProfile("""{"label":"Spotify 40%"}"""));
+
+		Assert.That(endedWhenAnnounced, Is.True);
+	}
+
+	[Test]
+	public async Task A_widget_its_provider_removed_closes_its_session_before_clients_hear_it_is_gone()
+	{
+		var ticket = _opener.Open(new OpenWidgetUiSessionRequest { WidgetId = MixerWidgetId }, DeviceA, false);
+		await ticket.Ready;
+		var transport = new ObservingUiTransport();
+		bool? endedWhenAnnounced = null;
+		transport.OnSend = message =>
+		{
+			if (message is WidgetsDeletedEvent)
+			{
+				endedWhenAnnounced = _registry.WasEnded(ticket.SessionId);
+			}
+		};
+
+		await ChangeMixer(transport, new VirtualProfileDescriptor("mixer", "Mixer", ProfileLayout.Grid(1, 1), []));
+
+		Assert.That(endedWhenAnnounced, Is.True);
+	}
+
+	private async Task ChangeMixer(ObservingUiTransport transport, VirtualProfileDescriptor profile)
+	{
+		using var announcer = TestVirtualProfileAnnouncer.Create(_profiles,
+			_integrations,
+			transport,
+			_registry,
+			_widgetProviders,
+			new RecordingMediator());
+		await announcer.AnnounceAsync(VolumeMixer);
+		_mixer.Profiles = [profile];
+		await new VirtualProfilesChangedHandler(announcer).Handle(
+			new VirtualProfilesChangedNotification(VolumeMixer, [], [profile]),
 			CancellationToken.None);
-
-		Assert.That(_registry.WasEnded(ticket.SessionId), Is.True);
 	}
 
 	private static VirtualProfileDescriptor MixerProfile(string appData)

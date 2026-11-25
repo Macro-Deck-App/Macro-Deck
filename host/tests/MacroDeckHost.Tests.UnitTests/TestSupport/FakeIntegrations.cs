@@ -581,13 +581,13 @@ internal sealed class FakeWritableVariableProviderIntegration : FakeVariableProv
 
 internal sealed class FakeProfileProviderIntegration : IIntegration, IProfileProvider
 {
-	private readonly IReadOnlyList<VirtualProfileDescriptor> _profiles;
-
 	public FakeProfileProviderIntegration(string id, params VirtualProfileDescriptor[] profiles)
 	{
 		Id = id;
-		_profiles = profiles;
+		Profiles = profiles;
 	}
+
+	public IReadOnlyList<VirtualProfileDescriptor> Profiles { get; set; }
 
 	public string Id { get; }
 	public LocalizedText Name => Id;
@@ -619,7 +619,7 @@ internal sealed class FakeProfileProviderIntegration : IIntegration, IProfilePro
 
 	public IReadOnlyList<VirtualProfileDescriptor> GetProfiles()
 	{
-		return _profiles;
+		return Profiles;
 	}
 
 	public Task HandleWidgetInteractionAsync(

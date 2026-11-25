@@ -125,14 +125,17 @@ failed trigger to the client.
 `GetProfiles` is read every time the host lists profiles or opens a virtual folder, so returning a new
 list is enough in process. Keep it cheap and side-effect free, and build it from state you already hold.
 An out-of-process plugin must tell the host to read it again with
-`CatalogChanged(CapabilityKinds.VirtualProfiles)` on an injected `IPluginCatalogNotifier`. Tiles that are
-open on a deck then redraw from the new data of their widget, and a tile whose widget you removed stops
-drawing. A widget you added appears the next time the deck loads the folder. An in-process provider has
-no change signal, so its open tiles keep their data until the deck reloads.
+`CatalogChanged(CapabilityKinds.VirtualProfiles)` on an injected `IPluginCatalogNotifier`. Macro Deck then
+compares the new profiles with the ones it last served and tells every open deck, hardware deck and plugin
+deck state what changed: widgets and folders you added appear, ones you removed disappear, and a widget you
+moved or gave new data redraws in its new place. An in-process provider has no change signal, so its open
+tiles keep their data until the deck reloads.
 
 ## Edge cases
 
-- **A disabled integration's profiles disappear** from the list, along with their folders.
+- **A disabled or removed integration's profiles disappear** from the list and from open decks, along with
+  their folders. A deck showing one moves to another profile and stays there when the integration is
+  enabled again; the profile is back in the list.
 - **A profile id that `GetProfiles` no longer returns** opens with no folders.
 - **Read-only means read-only.** The user can't move, add or edit widgets in a virtual profile. Offer
   configuration through your integration instead.
