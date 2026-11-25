@@ -292,6 +292,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Zvýrazňující barva</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Barva ikony</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Písmo</value>
   </data>

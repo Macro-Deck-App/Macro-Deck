@@ -588,7 +588,8 @@ public class WidgetAppearanceServiceTests
 	private static readonly WidgetAppearanceProperty[] _providerDeclaration =
 	[
 		WidgetAppearanceProperty.BackgroundColor, WidgetAppearanceProperty.Label,
-		WidgetAppearanceProperty.LabelColor, WidgetAppearanceProperty.Font, WidgetAppearanceProperty.AccentColor
+		WidgetAppearanceProperty.LabelColor, WidgetAppearanceProperty.Font, WidgetAppearanceProperty.AccentColor,
+		WidgetAppearanceProperty.IconColor
 	];
 
 	[Test]
@@ -624,11 +625,97 @@ public class WidgetAppearanceServiceTests
 	public async Task ProviderType_IconPropertiesInItsDeclaration_AreNotOffered()
 	{
 		var fixture = await Fixture.ForProviderType(Frame([
-			WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconDisplay, WidgetAppearanceProperty.IconColor
+			WidgetAppearanceProperty.Icon, WidgetAppearanceProperty.IconDisplay, WidgetAppearanceProperty.IconAppearance
 		]));
 
 		Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
 			Is.EqualTo(new[] { WidgetAppearanceProperty.Border, WidgetAppearanceProperty.BorderColor }));
+	}
+
+	[Test]
+	public async Task ProviderType_DeclaringIconColor_StoresItUnderItsKey_AndResetRemovesIt()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.IconColor]), """{"keep":1}""");
+
+		var set = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			IconColor = "#ef4444cc"
+		}));
+		var stored = fixture.Widget.Data;
+		var reset = await fixture.Service.ApplyWithOutcomeAsync(new WidgetAppearanceRequest
+		{
+			WidgetId = _widgetId.ToString(),
+			Patch = new WidgetAppearancePatch(),
+			ClearProperties = [WidgetAppearanceProperty.IconColor]
+		});
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.IconColor));
+			Assert.That(set, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(stored, Is.EqualTo("""{"keep":1,"iconColor":"#ef4444cc"}"""));
+			Assert.That(reset, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(fixture.Widget.Data, Is.EqualTo("""{"keep":1}"""));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_EmptyIconColor_RemovesTheKey()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.IconColor]),
+			"""{"iconColor":"#ef4444"}""");
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			IconColor = string.Empty
+		}));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Changed));
+			Assert.That(fixture.Widget.Data, Is.EqualTo("{}"));
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_NotDeclaringIconColor_IsNotOfferedIt_AndKeepsItsData()
+	{
+		var fixture = await Fixture.ForProviderType(Frame([WidgetAppearanceProperty.AccentColor]));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			IconColor = "#ef4444"
+		}));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Not.Contain(WidgetAppearanceProperty.IconColor));
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Unchanged));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task ProviderType_IconColorItsSchemaForbids_IsNotOffered_AndNotWritten()
+	{
+		var fixture = await Fixture.ForProviderType(Frame(
+			[WidgetAppearanceProperty.IconColor, WidgetAppearanceProperty.Label],
+			"""{"type":"object","properties":{"label":{"type":"string"}},"additionalProperties":false}"""));
+
+		var outcome = await fixture.Service.ApplyWithOutcomeAsync(Patch(new WidgetAppearancePatch
+		{
+			IconColor = "#ef4444"
+		}));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Service.GetWidgets().Single().AppearanceProperties,
+				Does.Contain(WidgetAppearanceProperty.Label).And.Not.Contain(WidgetAppearanceProperty.IconColor));
+			Assert.That(outcome, Is.EqualTo(WidgetAppearanceOutcome.Unchanged));
+			Assert.That(fixture.Widgets.Updated, Is.Empty);
+		});
 	}
 
 	[Test]

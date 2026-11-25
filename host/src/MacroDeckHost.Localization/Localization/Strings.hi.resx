@@ -14475,7 +14475,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>ऊपर</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>स्लाइडर या इतिहास ग्राफ़ का एक्सेंट रंग बदलता है। जब उसकी रंग सीमाएं चालू हों, तब इसका कोई प्रभाव नहीं होता।</value>
+    <value>किसी विजेट का एक्सेंट रंग बदलता है, जैसे स्लाइडर या इतिहास ग्राफ़। स्लाइडर या इतिहास ग्राफ़ पर, जब उसकी रंग सीमाएं चालू हों, तब इसका कोई प्रभाव नहीं होता।</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>एक्सेंट रंग सेट करें</value>

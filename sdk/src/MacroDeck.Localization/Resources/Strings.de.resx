@@ -290,6 +290,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Akzentfarbe</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Symbolfarbe</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Schriftart</value>
   </data>

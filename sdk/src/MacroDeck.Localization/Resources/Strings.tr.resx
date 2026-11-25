@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Vurgu rengi</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Simge rengi</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Yazı tipi</value>
   </data>

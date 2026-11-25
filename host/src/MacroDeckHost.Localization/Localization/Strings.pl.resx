@@ -14474,7 +14474,7 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
     <value>Na górze</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Zmienia kolor akcentu suwaka lub wykresu historii. Nie działa, gdy włączone są progi kolorów.</value>
+    <value>Zmienia kolor akcentu widżetu, na przykład suwaka lub wykresu historii. W przypadku suwaka i wykresu historii nie działa, gdy włączone są progi kolorów.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Ustaw kolor akcentu</value>

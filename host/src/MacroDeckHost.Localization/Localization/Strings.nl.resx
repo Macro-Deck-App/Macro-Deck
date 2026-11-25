@@ -14475,7 +14475,7 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
     <value>Boven</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Wijzigt de accentkleur van een schuifregelaar of geschiedenisgrafiek. Heeft geen effect zolang de kleurdrempels aan staan.</value>
+    <value>Wijzigt de accentkleur van een widget, zoals een schuifregelaar of geschiedenisgrafiek. Heeft bij een schuifregelaar of geschiedenisgrafiek geen effect zolang de kleurdrempels aan staan.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Accentkleur instellen</value>

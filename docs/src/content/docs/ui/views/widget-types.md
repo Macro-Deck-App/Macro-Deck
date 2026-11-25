@@ -232,9 +232,9 @@ new WidgetTypeDescriptor("frame", MyStrings.FrameName(), DataSchema: FrameSchema
 A widget of your type can share the appearance settings of Macro Deck's own widgets. Every type gets a
 **border**: Macro Deck draws the ring around the tile from the `border` key of the widget's stored data, and
 the Set Border action writes it, with or without a declaration. `AppearanceProperties` adds any of
-`BackgroundColor`, `Label`, `LabelColor`, `Font` and `AccentColor`. For each one you list, the widget appearance
-actions (Set Background Color, Set Label, Set Label Color, Set Label Font, Set Accent Color) accept a widget of your
-type and write the value to the stored data, under these keys:
+`BackgroundColor`, `Label`, `LabelColor`, `Font`, `AccentColor` and `IconColor`. For each one you list, the widget
+appearance actions (Set Background Color, Set Label, Set Label Color, Set Label Font, Set Accent Color, Set Icon
+Color) accept a widget of your type and write the value to the stored data, under these keys:
 
 | Key | Property | Value |
 | --- | --- | --- |
@@ -247,6 +247,7 @@ type and write the value to the stored data, under these keys:
 | `textAlign` | `Font` | `left`, `center` or `right` |
 | `labelPosition` | `Font` | `top`, `center` or `bottom` |
 | `accentColor` | `AccentColor` | `#rrggbb` or `#rrggbbaa` |
+| `iconColor` | `IconColor` | `#rrggbb` or `#rrggbbaa` |
 
 `UiWidgetAppearanceKeys` holds the names. Clearing a setting removes its key. Other values of
 `WidgetAppearanceProperty`, such as `Icon`, are ignored for a provider's type, and so is
@@ -284,13 +285,18 @@ instead of storing data your configuration could no longer save:
     "fontSize": { "type": "number" },
     "textAlign": { "type": "string" },
     "labelPosition": { "type": "string" },
-    "accentColor": { "type": "string" }
+    "accentColor": { "type": "string" },
+    "iconColor": { "type": "string" }
   }
 }
 ```
 
 The [widget configuration view](/ui/views/widget-configuration/#standard-appearance-fields) has ready-made
 fields for the same keys.
+
+`IconColor` was added after the other properties. A Macro Deck release older than it ignores the value in your
+declaration, so Set Icon Color does not offer your widgets there; on a newer release a type that already
+listed it starts receiving `iconColor`, provided its `DataSchema` allows the key.
 
 - **A background can be `transparent`.** The Set Background Color action stores whatever value it is given,
   and the configuration field offers Transparent when you opt in with

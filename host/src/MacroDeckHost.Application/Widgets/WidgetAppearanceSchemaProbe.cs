@@ -55,6 +55,7 @@ public sealed class WidgetAppearanceSchemaProbe
 			WidgetAppearanceProperty.Label => new WidgetAppearancePatch { Label = "Label" },
 			WidgetAppearanceProperty.LabelColor => new WidgetAppearancePatch { LabelColor = "#000000" },
 			WidgetAppearanceProperty.AccentColor => new WidgetAppearancePatch { AccentColor = "#000000" },
+			WidgetAppearanceProperty.IconColor => new WidgetAppearancePatch { IconColor = "#000000" },
 			WidgetAppearanceProperty.Font => new WidgetAppearancePatch
 			{
 				FontFaceId = "sample", FontSize = 12, TextAlign = "center", LabelPosition = "center"

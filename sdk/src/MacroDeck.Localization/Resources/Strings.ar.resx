@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>لون التمييز</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>لون الأيقونة</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>الخط</value>
   </data>

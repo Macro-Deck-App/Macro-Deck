@@ -96,7 +96,7 @@ the host can serve a widget. A provider that ignores `sample` or `ghost` keeps b
 did.
 
 For a type that declares [standard appearance](/ui/views/widget-types/#standard-appearance),
-`UiWidgetAppearance.Read(data)` returns the background, label, colours and font the user or an action set.
+`UiWidgetAppearance.Read(data)` returns the background, label, colours (accent and icon colour included) and font the user or an action set.
 
 `UiWidgetSurface` in `MacroDeck.Ui.Widgets` reads these leniently, so a missing or malformed attribute
 reads as absent rather than throwing:

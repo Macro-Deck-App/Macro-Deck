@@ -14475,7 +14475,7 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
     <value>Üst</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Bir kaydırıcının veya geçmiş grafiğinin vurgu rengini değiştirir. Renk eşikleri açıkken etkisi yoktur.</value>
+    <value>Kaydırıcı veya geçmiş grafiği gibi bir widget'ın vurgu rengini değiştirir. Kaydırıcıda veya geçmiş grafiğinde renk eşikleri açıkken etkisi yoktur.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Vurgu rengini ayarla</value>

@@ -14474,7 +14474,7 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
     <value>Haut</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Change la couleur d'accent d'un curseur ou d'un graphique d'historique. Sans effet tant que ses seuils de couleur sont activés.</value>
+    <value>Change la couleur d'accent d'un widget, par exemple un curseur ou un graphique d'historique. Sans effet sur un curseur ou un graphique d'historique tant que ses seuils de couleur sont activés.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Définir la couleur d'accent</value>

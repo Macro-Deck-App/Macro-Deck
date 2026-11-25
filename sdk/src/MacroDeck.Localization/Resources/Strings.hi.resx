@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>एक्सेंट रंग</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>आइकन रंग</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>फ़ॉन्ट</value>
   </data>

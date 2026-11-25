@@ -14472,7 +14472,7 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
     <value>Oben</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Ändert die Akzentfarbe eines Schiebereglers oder Verlaufsdiagramms. Wirkt nicht, solange seine Farbschwellen aktiv sind.</value>
+    <value>Ändert die Akzentfarbe eines Widgets, etwa eines Schiebereglers oder Verlaufsdiagramms. Wirkt bei einem Schieberegler oder Verlaufsdiagramm nicht, solange seine Farbschwellen aktiv sind.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Akzentfarbe festlegen</value>

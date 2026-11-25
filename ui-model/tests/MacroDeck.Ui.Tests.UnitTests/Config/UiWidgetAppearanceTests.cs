@@ -190,6 +190,39 @@ public class UiWidgetAppearanceTests
 	}
 
 	[Test]
+	public void All_keeps_the_fields_it_shipped_with_and_does_not_offer_the_icon_colour()
+	{
+		var view = View("{}", UiWidgetAppearanceFields.All);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That((int)UiWidgetAppearanceFields.All, Is.EqualTo(63));
+			Assert.That(Find(view.Tree.Root, UiWidgetAppearanceKeys.IconColor), Is.Null);
+		});
+	}
+
+	[Test]
+	public void The_icon_colour_field_is_built_on_request_under_the_appearance_heading_with_its_stored_value()
+	{
+		var view = View("""{"iconColor":"#ef4444"}""", UiWidgetAppearanceFields.IconColor);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(Find(view.Tree.Root, "appearance-heading"), Is.Not.Null);
+			Assert.That(Value(view, UiWidgetAppearanceKeys.IconColor).GetString(), Is.EqualTo("#ef4444"));
+			Assert.That(Find(view.Tree.Root, UiWidgetAppearanceKeys.AccentColor), Is.Null);
+		});
+	}
+
+	[Test]
+	public void Read_returns_the_icon_colour()
+	{
+		using var document = JsonDocument.Parse("""{"iconColor":"#ef4444cc"}""");
+
+		Assert.That(UiWidgetAppearance.Read(document.RootElement).IconColor, Is.EqualTo("#ef4444cc"));
+	}
+
+	[Test]
 	public void Read_returns_the_stored_values_and_null_for_missing_or_mistyped_ones()
 	{
 		using var document = JsonDocument.Parse("""

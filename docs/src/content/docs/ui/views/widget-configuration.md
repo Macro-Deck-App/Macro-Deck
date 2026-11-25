@@ -243,7 +243,7 @@ Properties = new UiWidgetProperties
 ```
 
 `UiWidgetAppearance.Section` builds Macro Deck's own appearance fields, already translated: background
-colour, label, label colour, accent colour, font (face, size, alignment, position) and border. Pick the groups
+colour, label, label colour, accent colour, icon colour, font (face, size, alignment, position) and border. Pick the groups
 with `UiWidgetAppearanceFields`, named after the `WidgetAppearanceProperty` values a
 [widget type declares](/ui/views/widget-types/#standard-appearance), so declare the same ones there for the
 appearance actions to reach them.
@@ -267,6 +267,9 @@ appearance actions to reach them.
   when your view passes that value on to its root node (see
   [widget types](/ui/views/widget-types/#standard-appearance)). `All` does not include it, and on its own it
   builds nothing.
+- The icon colour field is opt-in as well. Add `UiWidgetAppearanceFields.IconColor` for a widget that draws
+  an icon in the `iconColor` key. `All` does not include it, because it was added after `All` shipped. On a
+  Macro Deck release older than the field, its label shows as a `[[macrodeck:...]]` key.
 - Colour variables are opt-in too. Add `UiWidgetAppearanceFields.ColorVariables` and every colour field of
   the section offers the **Color** | **Variable** tabs described in
   [Offering a colour variable](#offering-a-colour-variable). `All` does not include it, and on its own it

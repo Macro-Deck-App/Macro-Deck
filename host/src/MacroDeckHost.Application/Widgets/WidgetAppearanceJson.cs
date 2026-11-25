@@ -16,7 +16,8 @@ public static class WidgetAppearanceJson
 		WidgetAppearanceProperty.Label,
 		WidgetAppearanceProperty.LabelColor,
 		WidgetAppearanceProperty.Font,
-		WidgetAppearanceProperty.AccentColor
+		WidgetAppearanceProperty.AccentColor,
+		WidgetAppearanceProperty.IconColor
 	];
 
 	public static bool Apply(
@@ -618,6 +619,11 @@ public static class WidgetAppearanceJson
 		if (supported.Contains(WidgetAppearanceProperty.AccentColor))
 		{
 			changed |= SetOrRemove(data, "accentColor", patch.AccentColor);
+		}
+
+		if (supported.Contains(WidgetAppearanceProperty.IconColor))
+		{
+			changed |= SetOrRemove(data, "iconColor", patch.IconColor);
 		}
 
 		if (supported.Contains(WidgetAppearanceProperty.Font))

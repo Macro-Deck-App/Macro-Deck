@@ -292,6 +292,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Couleur d'accent</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Couleur de l'icône</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Police</value>
   </data>

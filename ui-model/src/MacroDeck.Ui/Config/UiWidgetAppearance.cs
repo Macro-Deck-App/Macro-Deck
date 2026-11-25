@@ -44,6 +44,10 @@ public static class UiWidgetAppearanceKeys
 	/// <summary>Highlight colour as <c>#rrggbb</c>.</summary>
 	public const string AccentColor = "accentColor";
 
+	/// <summary>Colour of the icon a widget draws, as <c>#rrggbb</c> or <c>#rrggbbaa</c>. A Macro Deck release
+	/// older than this key writes it only for its own Action Button.</summary>
+	public const string IconColor = "iconColor";
+
 	/// <summary>The border object, <c>{ "style": ..., "color": "#rrggbb" }</c>. Macro Deck draws it around
 	/// the tile for every widget type except its Action Button; <c>style</c> is <c>off</c> or one of
 	/// <see cref="UiComponentBorderStyles" />, and a missing <c>color</c> draws the default ring colour.</summary>
@@ -89,7 +93,8 @@ public enum UiWidgetAppearanceFields
 	/// <summary>The border style and colour.</summary>
 	Border = 32,
 
-	/// <summary>Every field. Does not include <see cref="TransparentBackground" />, which is an opt-in.</summary>
+	/// <summary>Every field a widget type had from the start. Does not include <see cref="TransparentBackground" />,
+	/// which is an opt-in, nor <see cref="IconColor" />, which was added later and is named on its own.</summary>
 	All = BackgroundColor | Label | LabelColor | Font | AccentColor | Border,
 
 	/// <summary>With <see cref="BackgroundColor" />, the background field also offers Transparent, stored as the
@@ -103,7 +108,11 @@ public enum UiWidgetAppearanceFields
 	/// data before a session reads it; a Macro Deck release older than this option shows fixed colours only.
 	/// A presentation option with no <c>MacroDeck.Sdk.Widgets.WidgetAppearanceProperty</c> counterpart; on its
 	/// own it builds nothing.</summary>
-	ColorVariables = 128
+	ColorVariables = 128,
+
+	/// <summary><see cref="UiWidgetAppearanceKeys.IconColor" />. Not part of <see cref="All" />. A Macro Deck
+	/// release older than this field shows its label as a <c>[[macrodeck:...]]</c> key.</summary>
+	IconColor = 256
 }
 
 /// <summary>A widget's standard appearance values as read from its stored data. Null means not set.</summary>
@@ -132,6 +141,9 @@ public sealed record UiWidgetAppearanceValues
 
 	/// <summary>See <see cref="UiWidgetAppearanceKeys.AccentColor" />.</summary>
 	public string? AccentColor { get; init; }
+
+	/// <summary>See <see cref="UiWidgetAppearanceKeys.IconColor" />.</summary>
+	public string? IconColor { get; init; }
 
 	/// <summary>The border's style. Macro Deck already draws the border; read it only to react to it.</summary>
 	public string? BorderStyle { get; init; }
@@ -219,6 +231,14 @@ public static class UiWidgetAppearance
 				fields));
 		}
 
+		if (fields.HasFlag(UiWidgetAppearanceFields.IconColor))
+		{
+			children.Add(Color(data,
+				UiWidgetAppearanceKeys.IconColor,
+				MacroDeckStrings.Widgets.Appearance.IconColor(),
+				fields));
+		}
+
 		if (fields.HasFlag(UiWidgetAppearanceFields.Font))
 		{
 			children.AddRange(FontFields(data));
@@ -249,6 +269,7 @@ public static class UiWidgetAppearance
 			TextAlign = ReadString(data, UiWidgetAppearanceKeys.TextAlign),
 			LabelPosition = ReadString(data, UiWidgetAppearanceKeys.LabelPosition),
 			AccentColor = ReadString(data, UiWidgetAppearanceKeys.AccentColor),
+			IconColor = ReadString(data, UiWidgetAppearanceKeys.IconColor),
 			BorderStyle = ReadString(border, UiWidgetAppearanceKeys.BorderStyle),
 			BorderColor = ReadString(border, UiWidgetAppearanceKeys.BorderColor)
 		};

@@ -14474,7 +14474,7 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
     <value>In alto</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Cambia il colore accento di un cursore o di un grafico cronologico. Non ha effetto finché le sue soglie di colore sono attive.</value>
+    <value>Cambia il colore accento di un widget, ad esempio un cursore o un grafico cronologico. Non ha effetto su un cursore o un grafico cronologico finché le sue soglie di colore sono attive.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Imposta colore accento</value>

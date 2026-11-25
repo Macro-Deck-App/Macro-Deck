@@ -292,6 +292,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Kolor akcentu</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Kolor ikony</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Czcionka</value>
   </data>

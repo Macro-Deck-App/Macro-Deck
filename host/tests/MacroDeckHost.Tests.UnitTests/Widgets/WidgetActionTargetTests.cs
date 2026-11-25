@@ -583,6 +583,29 @@ public class WidgetActionTargetTests
 		});
 	}
 
+	[Test]
+	public async Task SetIconColor_OnAWidgetThatOffersTheIconColor_AppliesIt_AndOnOneThatDoesNot_IsUnsupported()
+	{
+		_widgets.Targets.Add(Target(SelfWidget, WidgetAppearanceProperty.IconColor));
+		_widgets.Targets.Add(Target(OtherWidget, WidgetAppearanceProperty.AccentColor));
+
+		var offered = await Execute("set-icon-color",
+			new Dictionary<string, object> { ["widget"] = SelfWidget, ["color"] = "#ef4444" },
+			SelfWidget);
+		_widgets.ApplyResult = false;
+		var unsupported = await Execute("set-icon-color",
+			new Dictionary<string, object> { ["widget"] = OtherWidget, ["color"] = "#ef4444" },
+			SelfWidget);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(offered.Status, Is.EqualTo(ActionResultStatus.Succeeded));
+			Assert.That(_widgets.Applied.First().Patch.IconColor, Is.EqualTo("#ef4444"));
+			Assert.That(unsupported.Status, Is.EqualTo(ActionResultStatus.Failed));
+			Assert.That(unsupported.ErrorCode, Is.EqualTo(ActionErrorCodes.InvalidParameter));
+		});
+	}
+
 	[TestCase(WidgetAppearanceOutcome.Rejected, ActionErrorCodes.InvalidParameter)]
 	[TestCase(WidgetAppearanceOutcome.WriteFailed, ActionErrorCodes.ProviderError)]
 	public async Task ASupportedChangeThatWasNotStored_IsAFailure_NotARepeatRun(

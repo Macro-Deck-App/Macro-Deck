@@ -14474,7 +14474,7 @@ Esta copia portátil no se actualiza sola. Descarga el ZIP portátil desde el si
     <value>Arriba</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Cambia el color de acento de un control deslizante o de un gráfico histórico. No tiene efecto mientras sus umbrales de color estén activados.</value>
+    <value>Cambia el color de acento de un widget, como un control deslizante o un gráfico histórico. No tiene efecto en un control deslizante o un gráfico histórico mientras sus umbrales de color estén activados.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Establecer color de acento</value>

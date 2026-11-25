@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Warna aksen</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Warna ikon</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Font</value>
   </data>

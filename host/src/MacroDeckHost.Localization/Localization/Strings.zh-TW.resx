@@ -14475,7 +14475,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>頂部</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>變更滑桿或歷史圖表的強調色。啟用顏色門檻時無效。</value>
+    <value>變更小工具的強調色，例如滑桿或歷史圖表。滑桿或歷史圖表啟用顏色門檻時無效。</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>設定強調色</value>
