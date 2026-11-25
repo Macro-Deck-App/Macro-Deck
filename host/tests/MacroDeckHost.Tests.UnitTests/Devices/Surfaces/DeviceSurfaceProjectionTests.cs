@@ -215,6 +215,20 @@ internal sealed class DeviceSurfaceProjectionTests
 	}
 
 	[Test]
+	public async Task A_virtual_profile_announcement_rebuilds_an_open_deck()
+	{
+		var deviceId = await _fixture.OpenDeviceAsync();
+		Assert.That(_fixture.Provider.Latest(deviceId).Widgets, Is.Empty);
+
+		_fixture.Home.Widgets.Add(DeviceSurfaceFixture.Button("added", 0, 0));
+		await new VirtualProfilesAnnouncedDeviceSurfaceHandler(_fixture.Service)
+			.Handle(new VirtualProfilesAnnouncedNotification("com.example.plugin"), CancellationToken.None);
+		await _fixture.SettleAsync();
+
+		Assert.That(_fixture.Provider.Latest(deviceId).Widgets, Has.Count.EqualTo(1));
+	}
+
+	[Test]
 	public async Task A_widget_declares_the_interactions_the_host_will_accept_for_it()
 	{
 		_fixture.Home.Widgets.AddRange([

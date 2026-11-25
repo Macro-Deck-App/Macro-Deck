@@ -104,10 +104,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 			return null;
 		}
 
-		var widget = provider.GetProfiles()
-			.FirstOrDefault(p => p.Id == localProfileId)
-			?.Folders.FirstOrDefault(f => f.Id == localFolderId)
-			?.Widgets.FirstOrDefault(w => w.Id == localWidgetId);
+		var widget = FindDescriptor(provider, localProfileId, localFolderId, localWidgetId);
 
 		return widget is null ? null : MapVirtualWidget(integrationId, localProfileId, localFolderId, widget);
 	}
@@ -124,12 +121,25 @@ public sealed class ProfileRegistry : IProfileRegistry
 		}
 
 		var integration = EnabledProviders().FirstOrDefault(i => i.Id == integrationId);
-		if (integration is not IProfileProvider provider)
+		if (integration is not IProfileProvider provider
+			|| FindDescriptor(provider, localProfileId, localFolderId, localWidgetId) is null)
 		{
 			return Task.FromResult(false);
 		}
 
 		return RouteAsync(provider, localProfileId, localFolderId, localWidgetId, interaction);
+	}
+
+	private static VirtualWidgetDescriptor? FindDescriptor(
+		IProfileProvider provider,
+		string localProfileId,
+		string localFolderId,
+		string localWidgetId)
+	{
+		return provider.GetProfiles()
+			.FirstOrDefault(p => p.Id == localProfileId)
+			?.Folders.FirstOrDefault(f => f.Id == localFolderId)
+			?.Widgets.FirstOrDefault(w => w.Id == localWidgetId);
 	}
 
 	private static async Task<bool> RouteAsync(

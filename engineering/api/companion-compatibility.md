@@ -215,6 +215,14 @@ needs `id` and `type`, reads the geometry as integers, `data` as a JSON string, 
 | `ProfileUpdatedEvent` | `{"profile":<profile>}` |
 | `ProfileDeletedEvent` | `{"profileId":"<id>"}` |
 
+Virtual profiles (a plugin's read-only profiles) use the same pushes with their virtual ids, the ids `GET` folders
+returns for them. When a plugin changes its profiles, or its integration is enabled, disabled or removed, the host
+sends `ProfileDeletedEvent` for a profile that is gone first, then `WidgetsDeletedEvent` (after closing the removed
+widgets' sessions) and `FolderDeletedEvent` (children first), then `ProfileCreatedEvent` or `ProfileUpdatedEvent`,
+`FolderCreatedEvent` (parents first, widgets included) or `FolderUpdatedEvent`, `WidgetsCreatedEvent` and
+`WidgetsUpdatedEvent`. Only what changed is sent, and a create may repeat one the Companion already holds after a
+host restart, so creates are upserts.
+
 A folder is the folder of `FolderCreatedEvent`, for example
 `{"id":"<id>","name":"Home","profileId":"<id>","order":0,"isDefault":true,"viewId":"macrodeck.widget-grid","widgets":[]}`.
 The Companion needs `id`, reads `name`, `profileId`, `parentId`, `backgroundColor`, `emptyCellStyle`, `viewId` and

@@ -46,6 +46,7 @@ public sealed class HostStatePusher(
 	INotificationHandler<ProfileCreatedNotification>,
 	INotificationHandler<ProfileUpdatedNotification>,
 	INotificationHandler<ProfileDeletedNotification>,
+	INotificationHandler<VirtualProfilesAnnouncedNotification>,
 	INotificationHandler<ScriptCreatedNotification>,
 	INotificationHandler<ScriptUpdatedNotification>,
 	INotificationHandler<ScriptDeletedNotification>,
@@ -214,6 +215,11 @@ public sealed class HostStatePusher(
 	}
 
 	public ValueTask Handle(ProfileDeletedNotification notification, CancellationToken cancellationToken)
+	{
+		return BroadcastDeckAsync(cancellationToken);
+	}
+
+	public ValueTask Handle(VirtualProfilesAnnouncedNotification notification, CancellationToken cancellationToken)
 	{
 		return BroadcastDeckAsync(cancellationToken);
 	}

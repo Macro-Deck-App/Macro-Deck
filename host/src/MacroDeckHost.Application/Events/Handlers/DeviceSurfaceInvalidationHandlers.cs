@@ -68,6 +68,9 @@ public sealed class ProfileUpdatedDeviceSurfaceHandler(IDeviceSurfaceService sur
 public sealed class ProfileDeletedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
 	: DeviceSurfaceInvalidationHandler<ProfileDeletedNotification>(surfaces);
 
+public sealed class VirtualProfilesAnnouncedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
+	: DeviceSurfaceInvalidationHandler<VirtualProfilesAnnouncedNotification>(surfaces);
+
 public sealed class IconUpdatedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
 	: DeviceSurfaceInvalidationHandler<IconUpdatedNotification>(surfaces);
 

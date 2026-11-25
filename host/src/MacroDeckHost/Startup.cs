@@ -985,6 +985,7 @@ public class Startup
 		services.AddSingleton<AutomationCache>();
 		services.AddSingleton<IAutomationCache>(sp => sp.GetRequiredService<AutomationCache>());
 		services.AddSingleton<IProfileRegistry, ProfileRegistry>();
+		services.AddSingleton<VirtualProfileAnnouncer>();
 		services.AddSingleton(provider => new VirtualWidgetPress(provider.GetRequiredService<IProfileRegistry>,
 			provider.GetRequiredService<IUiTransport>(),
 			provider.GetRequiredService<Serilog.ILogger>()));

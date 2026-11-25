@@ -41,6 +41,7 @@ public partial class UiBroadcastScopeTests
 		"MacroDeckHost.Application/Events/Handlers/WidgetsDeletedNotificationHandler.cs",
 		"MacroDeckHost.Application/Events/Handlers/WidgetsUpdatedNotificationHandler.cs",
 		"MacroDeckHost.Application/Icons/IconAppearanceService.cs",
+		"MacroDeckHost.Application/Profiles/VirtualProfileAnnouncer.cs",
 		"MacroDeckHost.Application/Rendering/WidgetStatePublisher.cs",
 		"MacroDeckHost.Application/Ui/Handlers/UpdateWidgetStateRequestMessageHandler.cs",
 		"MacroDeckHost.Application/VideoStreams/VideoStreamUiPushHandler.cs",

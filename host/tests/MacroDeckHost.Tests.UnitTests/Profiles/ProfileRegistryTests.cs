@@ -295,4 +295,23 @@ public class ProfileRegistryTests
 			Assert.That(registry.FindVirtualWidget(Guid.NewGuid().ToString()), Is.Null);
 		});
 	}
+
+	[Test]
+	public async Task A_press_on_a_widget_its_provider_dropped_is_not_routed()
+	{
+		var provider = new FakeProfileProviderIntegration("spotify", CarThing(out _, out _));
+		var registry = await BuildRegistry(new InMemoryProfileStore(), provider);
+		var widgetId = registry.GetFoldersForProfile("spotify::car-thing").Single().Widgets.Single().Id;
+		provider.Profiles = [new VirtualProfileDescriptor("car-thing", "Car Thing", ProfileLayout.Grid(2, 4), [])];
+
+		var routed = await registry.RouteWidgetInteraction("spotify::main",
+			widgetId,
+			new WidgetInteraction("onShortPress"));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(routed, Is.False);
+			Assert.That(provider.Interactions, Is.Empty);
+		});
+	}
 }
