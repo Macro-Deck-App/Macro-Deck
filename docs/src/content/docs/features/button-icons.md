@@ -179,6 +179,8 @@ belongs to the targeted state, like the icon itself.
 - A host that predates `IconColor` ignores the field, so a patch that changes only the icon colour makes
   `ApplyAsync` return `false` there. `WidgetTargetInfo.AppearanceProperties` lists `IconColor` for a
   button on a host that supports it.
+- A plugin's widget type can take the colour too. It lists `IconColor` in its
+  [standard appearance](/ui/views/widget-types/#standard-appearance) and draws the stored `iconColor` itself.
 
 ## Choosing the icon's appearance
 

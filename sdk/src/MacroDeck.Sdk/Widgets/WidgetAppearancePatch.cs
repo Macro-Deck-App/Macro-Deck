@@ -43,6 +43,9 @@ public sealed record WidgetAppearancePatch
 	/// The colour an action button draws its icon in, as <c>#rrggbb</c>: every pixel of the icon takes
 	/// the colour and keeps its own transparency. An empty string returns the icon to its own colours.
 	/// Artwork from an icon provider is never tinted. A host that predates this property ignores it.
+	/// For a provider's widget type that declares <see cref="WidgetAppearanceProperty.IconColor" /> the value
+	/// is stored as given under the <c>iconColor</c> data key, so it may also be <c>#rrggbbaa</c>, and an
+	/// empty string removes the key.
 	/// </summary>
 	public string? IconColor { get; init; }
 

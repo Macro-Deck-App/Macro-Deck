@@ -35,7 +35,9 @@ public enum WidgetAppearanceProperty
 
 	/// <summary>
 	/// The colour an action button draws its icon in - see <see cref="WidgetAppearancePatch.IconColor" />.
-	/// Clearing it returns the icon to its own colours.
+	/// Clearing it returns the icon to its own colours. A provider's widget type that lists it in
+	/// <see cref="WidgetTypeDescriptor.AppearanceProperties" /> gets the value under its <c>iconColor</c> data
+	/// key and draws it itself.
 	/// </summary>
 	IconColor = 9,
 

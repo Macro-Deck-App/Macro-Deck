@@ -14475,7 +14475,7 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
     <value>Superior</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Altera a cor de destaque de um controle deslizante ou de um gráfico de histórico. Não tem efeito enquanto os limites de cor estiverem ativados.</value>
+    <value>Altera a cor de destaque de um widget, como um controle deslizante ou um gráfico de histórico. Não tem efeito em um controle deslizante ou gráfico de histórico enquanto os limites de cor estiverem ativados.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Definir cor de destaque</value>

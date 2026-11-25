@@ -292,6 +292,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Colore accento</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Colore icona</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Carattere</value>
   </data>

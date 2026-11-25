@@ -14475,7 +14475,7 @@ Macro Deck установлен из репозитория APT, поэтому 
     <value>Вверху</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Меняет акцентный цвет ползунка или графика истории. Не действует, пока включены пороговые цвета.</value>
+    <value>Меняет акцентный цвет виджета, например ползунка или графика истории. Для ползунка и графика истории не действует, пока включены пороговые цвета.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Задать акцентный цвет</value>

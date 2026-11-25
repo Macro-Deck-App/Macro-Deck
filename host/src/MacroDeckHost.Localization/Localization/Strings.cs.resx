@@ -14474,7 +14474,7 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
     <value>Nahoře</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Změní zvýrazňující barvu posuvníku nebo grafu historie. Nemá vliv, dokud jsou zapnuté barevné prahy.</value>
+    <value>Změní zvýrazňující barvu widgetu, například posuvníku nebo grafu historie. U posuvníku a grafu historie nemá vliv, dokud jsou zapnuté barevné prahy.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Nastavit zvýrazňující barvu</value>

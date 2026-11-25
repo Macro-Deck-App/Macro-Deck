@@ -14475,7 +14475,7 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
     <value>上</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>スライダーや履歴グラフのアクセントカラーを変更します。色のしきい値が有効な間は効果がありません。</value>
+    <value>スライダーや履歴グラフなど、ウィジェットのアクセントカラーを変更します。スライダーや履歴グラフでは、色のしきい値が有効な間は効果がありません。</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>アクセントカラーの設定</value>

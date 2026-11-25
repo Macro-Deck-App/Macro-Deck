@@ -14475,7 +14475,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>顶部</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>更改滑块或历史图表的强调色。启用颜色阈值时无效。</value>
+    <value>更改组件的强调色，例如滑块或历史图表。滑块或历史图表启用颜色阈值时无效。</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>设置强调色</value>

@@ -14475,7 +14475,7 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
     <value>Atas</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Mengubah warna aksen penggeser atau grafik riwayat. Tidak berpengaruh selama ambang warnanya aktif.</value>
+    <value>Mengubah warna aksen widget, misalnya penggeser atau grafik riwayat. Tidak berpengaruh pada penggeser atau grafik riwayat selama ambang warnanya aktif.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Atur Warna Aksen</value>

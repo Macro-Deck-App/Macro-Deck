@@ -15746,7 +15746,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Widgets.Actions.PositionCenter': 'Center',
 	'macrodeck.app:Integrations.Widgets.Actions.PositionLabel': 'Position',
 	'macrodeck.app:Integrations.Widgets.Actions.PositionTop': 'Top',
-	'macrodeck.app:Integrations.Widgets.Actions.SetAccentColorDescription': 'Changes the accent color of a slider or history graph. Has no effect while its color thresholds are on.',
+	'macrodeck.app:Integrations.Widgets.Actions.SetAccentColorDescription': 'Changes the accent color of a widget, such as a slider or history graph. Has no effect on a slider or history graph while its color thresholds are on.',
 	'macrodeck.app:Integrations.Widgets.Actions.SetAccentColorName': 'Set Accent Color',
 	'macrodeck.app:Integrations.Widgets.Actions.SetBackgroundColorDescription': 'Changes a widget\'s background color.',
 	'macrodeck.app:Integrations.Widgets.Actions.SetBackgroundColorName': 'Set Background Color',

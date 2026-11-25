@@ -220,6 +220,11 @@ What did **not** need a major:
   host ignores the field, so a patch carrying only it applies nothing there and `ApplyAsync` returns
   `false`. While a Slider's or History Graph's colour thresholds are on, a stored accent has no visible
   effect.
+- A provider's widget type can declare `WidgetAppearanceProperty.IconColor` in `AppearanceProperties`, and
+  `UiWidgetAppearanceKeys`, `UiWidgetAppearanceValues` and `UiWidgetAppearanceFields` gained `IconColor`.
+  Nothing on the wire changed: the declaration is a list of numbers and the patch already carried
+  `iconColor`. An older host ignores the declared value. `UiWidgetAppearanceFields.All` keeps its value and
+  does not include the new field.
 - An Action Button can carry up to four labels. `WidgetAppearancePatch.LabelNumber` and an optional
   `labelNumber` field on the wire patch name the label a patch changes, `1` being the primary one, and
   `DeviceSurfaceAppearance` gained `LabelX`, `LabelY` and `ExtraLabels`, mirrored as optional

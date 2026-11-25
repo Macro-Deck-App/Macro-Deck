@@ -14475,7 +14475,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>위</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>슬라이더 또는 기록 그래프의 강조 색을 변경합니다. 색상 임계값이 켜져 있으면 효과가 없습니다.</value>
+    <value>슬라이더나 기록 그래프 같은 위젯의 강조 색을 변경합니다. 슬라이더나 기록 그래프에서는 색상 임계값이 켜져 있으면 효과가 없습니다.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>강조 색 설정</value>

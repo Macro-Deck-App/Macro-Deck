@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>強調色</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>圖示顏色</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>字型</value>
   </data>

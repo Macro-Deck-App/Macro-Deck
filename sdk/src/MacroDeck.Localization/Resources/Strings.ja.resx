@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>アクセントカラー</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>アイコンの色</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>フォント</value>
   </data>

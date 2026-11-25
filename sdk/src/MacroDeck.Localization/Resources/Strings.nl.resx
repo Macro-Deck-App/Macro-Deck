@@ -291,6 +291,9 @@
   <data name="Widgets.Appearance.AccentColor" xml:space="preserve">
     <value>Accentkleur</value>
   </data>
+  <data name="Widgets.Appearance.IconColor" xml:space="preserve">
+    <value>Pictogramkleur</value>
+  </data>
   <data name="Widgets.Appearance.Font" xml:space="preserve">
     <value>Lettertype</value>
   </data>

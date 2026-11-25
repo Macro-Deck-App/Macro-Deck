@@ -14477,7 +14477,7 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
     <value>Top</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorDescription" xml:space="preserve">
-    <value>Changes the accent color of a slider or history graph. Has no effect while its color thresholds are on.</value>
+    <value>Changes the accent color of a widget, such as a slider or history graph. Has no effect on a slider or history graph while its color thresholds are on.</value>
   </data>
   <data name="Integrations.Widgets.Actions.SetAccentColorName" xml:space="preserve">
     <value>Set Accent Color</value>
