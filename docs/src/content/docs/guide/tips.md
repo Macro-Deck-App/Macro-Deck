@@ -42,8 +42,8 @@ Unlock the deck to edit it, lock it to press buttons.
 - **Set Background Color** changes it from an action, and **Reset** there clears it again.
 - **Style an Action Button's label:** in the **Label** tab, turn off **Label Shadow**, give the text an
   outline with **Label Outline** and the width next to it, or frame it with **Label Box Border** and its
-  width. A width appears once its color is set. Each state can have its own. Hardware devices and
-  the Companion app keep the default label look for now.
+  width. A width appears once its color is set. Each state can have its own. The Companion app shows
+  all of this; hardware devices keep the default label look for now.
 - **Place an Action Button's label anywhere:** in the **Label** tab, **Horizontal position** and
   **Vertical position** slide the label across the button, from 0 (flush left or top) over 50 (centered)
   to 100 (flush right or bottom), so it always stays inside the button. **Align** and **Position** are
@@ -69,7 +69,8 @@ Unlock the deck to edit it, lock it to press buttons.
     it off again.
   - **Set Label**, **Set Label Color** and **Set Font** have a **Label to change** setting. It starts at
     **Label 1**; picking a label the button does not have yet adds it.
-  - Hardware devices and the Companion app show only the first label until they support more.
+  - The Companion app shows every label where you placed it. Hardware devices show only the first
+    label until they support more.
 - **Hide empty cells:** set **Empty cells** to **Transparent** in the profile's settings, and the running
   deck shows only its widgets on the folder background. A folder's grid settings can override it with
   **Visible** or **Transparent**; **Inherited** takes the value from the parent folder, then the profile.
