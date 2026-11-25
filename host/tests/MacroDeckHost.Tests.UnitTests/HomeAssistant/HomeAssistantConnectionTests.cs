@@ -106,7 +106,7 @@ internal sealed class HomeAssistantConnectionTests
 	}
 
 	[Test]
-	public async Task A_dropped_connection_keeps_the_catalogue_but_clears_the_live_state()
+	public async Task A_dropped_connection_keeps_the_last_known_home()
 	{
 		// A long retry delay so the reconnect cannot race the assertions back into "connected".
 		using var connection = Create(30_000);
@@ -114,12 +114,14 @@ internal sealed class HomeAssistantConnectionTests
 		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
 
 		_factory.Last.Drop();
-		await WaitForAsync(() => !connection.IsConnected, "the state to be cleared");
+		await WaitForAsync(() => !connection.IsConnected, "the disconnect");
 
 		Assert.Multiple(() =>
 		{
-			Assert.That(connection.State.Version, Is.Null);
-			Assert.That(connection.State.EntityCount, Is.Null);
+			Assert.That(connection.State.IsConnected, Is.False);
+			Assert.That(connection.State.Version, Is.EqualTo("2026.8.0"));
+			Assert.That(connection.State.LocationName, Is.EqualTo("Home"));
+			Assert.That(connection.State.EntityCount, Is.EqualTo(2));
 			Assert.That(connection.Catalog.Entities, Has.Count.EqualTo(2));
 		});
 	}
