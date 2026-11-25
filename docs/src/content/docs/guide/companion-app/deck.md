@@ -44,6 +44,17 @@ A press on a widget that is still loading, right after opening a folder or recon
 then goes through once. If the widget is not ready by then, or you leave the folder first, the press is not run and
 the same message appears.
 
+## Links from widgets
+
+Some widgets open a web page when you press them, for example **Open** on an article of a Feeds widget. The
+page opens in the default browser of the phone or tablet you pressed on, never on your computer or on another
+device showing the same deck. If no app on the device can open it, the app shows the address instead, with
+**Copy address** on Android and **Copy Address** on iPhone and iPad. A link only opens while the deck is on
+screen: one that arrives after you left the deck or switched to another app is not opened later.
+
+With a Macro Deck version that cannot send links to the app, the widget shows the address in its own dialog
+instead.
+
 ## Several computers at once
 
 Leaving a deck does not close its connection. Every computer you opened stays connected while the app runs,

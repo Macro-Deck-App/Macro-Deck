@@ -155,17 +155,18 @@ origin of the latest event, which may be a different client's by the time the wo
 - It accepts only an absolute `http` or `https` URL and throws `ArgumentException` for anything else, such
   as `javascript:`, `file:` or a relative path.
 - It reaches only the connection the event came from, not every tab or device that shares its client id.
-- That connection must have told Macro Deck it can open links. The web client and the desktop UI do;
-  hardware decks, older clients and clients that cannot open a browser do not.
+- That connection must have told Macro Deck it can open links. The web client, the desktop UI and the
+  Companion app do; hardware decks, older clients and clients that cannot open a browser do not.
 - It works only for a short time after the event, about 10 seconds, so answer the press with it rather
   than keep it for later work.
 - One event opens one link. A second call for the same press answers `false`. Calls from a plugin also
   count against its callback throttle.
 
 It answers `true` when the link was handed to the client. That does not prove a page opened: a browser may
-still block the new tab, in which case the web client offers the link to tap. It answers `false` when any
-of the conditions above does not hold, and a Macro Deck or client that predates it always answers `false`.
-Show the link some other way then, for example in one of your dialogs:
+still block the new tab, in which case the web client offers the link to tap, and a phone may have no app
+that opens it, in which case the Companion app shows the address with a button to copy it. It answers
+`false` when any of the conditions above does not hold, and a Macro Deck or client that predates it always
+answers `false`. Show the link some other way then, for example in one of your dialogs:
 
 ```csharp
 private async Task OpenArticleAsync(IUiEventOrigin origin, Uri link)
