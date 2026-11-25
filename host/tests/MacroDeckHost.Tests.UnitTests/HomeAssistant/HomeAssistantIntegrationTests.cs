@@ -99,6 +99,42 @@ internal sealed class HomeAssistantIntegrationTests
 	}
 
 	[Test]
+	public async Task A_lost_connection_keeps_the_last_known_home_but_reads_disconnected()
+	{
+		var client = new FakeHomeAssistantClient
+		{
+			Responses =
+			{
+				["get_states"] =
+					"""[ { "entity_id": "light.kitchen", "state": "on", "attributes": { "friendly_name": "Kitchen" } } ]""",
+				["get_config"] = """{ "location_name": "Home", "version": "2026.8.0" }""",
+				["get_services"] = "{}",
+				["config/area_registry/list"] = "[]",
+				["config/device_registry/list"] = "[]",
+				["config/entity_registry/list"] = "[]"
+			}
+		};
+		using var connection = new HomeAssistantConnection(() => client,
+			_uri,
+			"the-token",
+			reconnectDelay: TimeSpan.FromSeconds(30));
+		connection.Start();
+		await WaitForAsync(() => connection.IsConnected, "the connection to come up");
+
+		client.Drop();
+		await WaitForAsync(() => !connection.IsConnected, "the disconnect");
+		InjectConnection(connection);
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That((await _integration.ReadAsync("homeassistant-is-connected")).Value, Is.EqualTo(false));
+			Assert.That((await _integration.ReadAsync("homeassistant-version")).Value, Is.EqualTo("2026.8.0"));
+			Assert.That((await _integration.ReadAsync("homeassistant-location-name")).Value, Is.EqualTo("Home"));
+			Assert.That((await _integration.ReadAsync("homeassistant-entity-count")).Value, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
 	public async Task An_unknown_variable_answers_null()
 	{
 		Assert.That((await _integration.ReadAsync("nonsense", CancellationToken.None)).Value, Is.Null);

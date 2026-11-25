@@ -376,7 +376,7 @@ internal sealed class HomeAssistantConnection : IDisposable
 			client.EventReceived -= OnEventReceived;
 			client.Disconnected -= OnDisconnected;
 			_client = null;
-			_state = HomeAssistantState.Disconnected;
+			_state = _state with { IsConnected = false };
 			_onVariablesChanged?.Invoke();
 			_onBatteryRelevantChange?.Invoke();
 
