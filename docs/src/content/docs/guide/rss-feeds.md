@@ -56,7 +56,7 @@ shows more than one feed. Choose in its settings:
   image, when the feed has one.
 - **When tapped**: what tapping an article does, see [Tapping an article](#tapping-an-article).
 
-Articles that arrived since you added the feed and that you have not tapped yet are shown in bold.
+Articles that arrived since you added the feed and that you have not opened yet are shown in bold.
 
 ## The Featured Article widget
 
@@ -82,12 +82,14 @@ adding more widgets does not add requests to the feed.
   with the address so you can copy it.
 - **Show details**: a dialog with the image, title, author, date, description and address, and an **Open**
   button that opens the article on that device.
-- **Run the widget's actions only**: nothing opens; only the widget's actions run.
+- **Run the widget's actions only**: nothing opens. A tap anywhere on the widget runs its **Short press**,
+  **Long press** and **Double tap** actions like on any other widget. It does not mark the article as read
+  or fire **Feed article opened**.
 
-With every choice, a tap marks the article as read and fires the **Feed article opened** trigger. To run
-actions for the tapped article, open the widget's actions, add a **Feed article opened** trigger and leave
-its **Widget** on **This widget**. The actions can use the article's values, such as `{{ event.title }}` or
-`{{ event.url }}`. An empty part of the widget runs the widget's ordinary **Short press** actions.
+With **Open in the browser** and **Show details**, a tap marks the article as read and fires the **Feed
+article opened** trigger. To run actions for the tapped article, open the widget's actions, add a **Feed
+article opened** trigger and leave its **Widget** on **This widget**. The actions can use the article's
+values, such as `{{ event.title }}` or `{{ event.url }}`.
 
 Some browsers block a link that opens a little after the tap. The web client then shows the link in a bar
 you can tap to open it.
@@ -111,7 +113,8 @@ RSS feeds offers these events for automations and widget flows:
   once, it fires for the newest 20.
 - **Feed updated**, when the articles of a feed changed on a refresh.
 - **Feed update failed**, when a refresh fails after the one before worked, or fails for a different reason.
-- **Feed article opened**, when an article is tapped on a Feed List or Featured Article widget.
+- **Feed article opened**, when an article is tapped on a Feed List or Featured Article widget set to **Open
+  in the browser** or **Show details**.
 
 Each event can be limited to one **Feed**; left empty, it runs for all of them. **Feed article opened** can
 also be limited to one **Widget**. The actions it runs can use the event's values:
@@ -142,7 +145,7 @@ shows the exact names.
 | `…_latest_title`, `…_latest_url`, `…_latest_description`, `…_latest_author` | The newest article's title, link, description and author |
 | `…_latest_published` | When the newest article was published, as an ISO 8601 time |
 | `…_item_count` | How many articles Macro Deck keeps for the feed, at most 50 |
-| `…_unread_count` | Articles that arrived since you added the feed and have not been tapped in a widget |
+| `…_unread_count` | Articles that arrived since you added the feed and have not been opened from a widget |
 | `…_last_updated` | When the feed was last checked successfully, as an ISO 8601 time |
 | `…_update_status` | `ok`, `not-modified` (checked, nothing changed), `error`, or `pending` before the first check |
 | `feeds_all_item_count`, `feeds_all_unread_count` | The same counts for all feeds together |

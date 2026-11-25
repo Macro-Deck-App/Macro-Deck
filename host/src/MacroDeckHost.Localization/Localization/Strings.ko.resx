@@ -25887,7 +25887,7 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>탭할 때</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>탭할 때마다 이 위젯의 피드 글 열림 트리거도 실행됩니다.</value>
+    <value>브라우저에서 열기와 세부 정보 표시는 이 위젯의 피드 글 열림 트리거도 실행합니다.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>브라우저에서 열기</value>

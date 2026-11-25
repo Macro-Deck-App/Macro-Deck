@@ -25865,7 +25865,7 @@ Esta copia portátil no se actualiza sola. Descarga el ZIP portátil desde el si
     <value>Al tocar</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Cada toque también ejecuta los disparadores Artículo del feed abierto de este widget.</value>
+    <value>Abrir en el navegador y Mostrar detalles también ejecutan los disparadores Artículo del feed abierto de este widget.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Abrir en el navegador</value>

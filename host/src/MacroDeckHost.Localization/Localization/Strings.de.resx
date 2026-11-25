@@ -25863,7 +25863,7 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
     <value>Beim Antippen</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Jedes Antippen löst auch die Auslöser Feed-Artikel geöffnet dieses Widgets aus.</value>
+    <value>Im Browser öffnen und Details anzeigen lösen auch die Auslöser Feed-Artikel geöffnet dieses Widgets aus.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Im Browser öffnen</value>

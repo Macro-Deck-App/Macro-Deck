@@ -25865,7 +25865,7 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
     <value>Při klepnutí</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Každé klepnutí také spustí triggery Článek z kanálu otevřen tohoto widgetu.</value>
+    <value>Otevřít v prohlížeči a Zobrazit podrobnosti také spustí triggery Článek z kanálu otevřen tohoto widgetu.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Otevřít v prohlížeči</value>

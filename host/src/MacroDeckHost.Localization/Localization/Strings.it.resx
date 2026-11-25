@@ -25865,7 +25865,7 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
     <value>Al tocco</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Ogni tocco esegue anche i trigger Articolo del feed aperto di questo widget.</value>
+    <value>Apri nel browser e Mostra dettagli eseguono anche i trigger Articolo del feed aperto di questo widget.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Apri nel browser</value>

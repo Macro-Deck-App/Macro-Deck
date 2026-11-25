@@ -25887,7 +25887,7 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
     <value>點選時</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>每次點選也會執行此小工具的「已開啟訂閱來源文章」觸發器。</value>
+    <value>「在瀏覽器中開啟」和「顯示詳細資料」也會執行此小工具的「已開啟訂閱來源文章」觸發器。</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>在瀏覽器中開啟</value>

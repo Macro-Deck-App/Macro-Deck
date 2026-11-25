@@ -25869,7 +25869,7 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>点击时</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>每次点击还会运行此组件的“已打开订阅源文章”触发器。</value>
+    <value>“在浏览器中打开”和“显示详情”还会运行此组件的“已打开订阅源文章”触发器。</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>在浏览器中打开</value>
