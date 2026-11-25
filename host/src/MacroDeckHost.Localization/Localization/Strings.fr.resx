@@ -25865,7 +25865,7 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
     <value>Au toucher</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Chaque toucher déclenche aussi les déclencheurs Article de flux ouvert de ce widget.</value>
+    <value>Ouvrir dans le navigateur et Afficher les détails déclenchent aussi les déclencheurs Article de flux ouvert de ce widget.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Ouvrir dans le navigateur</value>

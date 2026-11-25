@@ -145,7 +145,7 @@ internal static class FeedWidgetView
 			{
 				Key = "article",
 				Fill = true,
-				Events = [UiEventHandler.On(UiComponentEvents.Press, _ => PressCurrent())],
+				Events = PressEvents(PressCurrent),
 				Children =
 				[
 					new UiLayer
@@ -301,7 +301,7 @@ internal static class FeedWidgetView
 				Direction = UiComponentDirections.Vertical,
 				Gap = _gap,
 				Fill = true,
-				Events = [UiEventHandler.On(UiComponentEvents.Press, _ => PressCurrent())],
+				Events = PressEvents(PressCurrent),
 				Children =
 				[
 					FeaturedTitle(false),
@@ -309,6 +309,14 @@ internal static class FeedWidgetView
 					DescriptionGate(FeaturedDescription(false) with { MaxLines = 3 })
 				]
 			};
+		}
+
+		// A tree that declares a press claims it, and a claimed press never reaches the widget's own flows.
+		private IReadOnlyList<UiEventHandler> PressEvents(Func<UiEventOutcome> handler)
+		{
+			return options.Tap == FeedWidgetTypes.FlowsTap
+				? []
+				: [UiEventHandler.On(UiComponentEvents.Press, _ => handler())];
 		}
 
 		private UiEventOutcome PressCurrent()
@@ -388,7 +396,7 @@ internal static class FeedWidgetView
 				Direction = UiComponentDirections.Horizontal,
 				Align = UiComponentAlignments.Center,
 				Gap = _gap,
-				Events = [UiEventHandler.On(UiComponentEvents.Press, _ => press(id))],
+				Events = PressEvents(() => press(id)),
 				Children =
 				[
 					new UiWhen

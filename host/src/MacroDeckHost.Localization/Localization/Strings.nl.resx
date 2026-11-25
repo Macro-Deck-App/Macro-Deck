@@ -25887,7 +25887,7 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
     <value>Bij tikken</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Elke tik voert ook de triggers Feedartikel geopend van deze widget uit.</value>
+    <value>Openen in de browser en Details tonen voeren ook de triggers Feedartikel geopend van deze widget uit.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Openen in de browser</value>

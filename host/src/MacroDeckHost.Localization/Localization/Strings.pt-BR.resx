@@ -25887,7 +25887,7 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
     <value>Ao tocar</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Cada toque também executa os gatilhos Artigo do feed aberto deste widget.</value>
+    <value>Abrir no navegador e Mostrar detalhes também executam os gatilhos Artigo do feed aberto deste widget.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Abrir no navegador</value>

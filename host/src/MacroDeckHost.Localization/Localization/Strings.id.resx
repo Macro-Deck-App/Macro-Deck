@@ -25887,7 +25887,7 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
     <value>Saat diketuk</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Setiap ketukan juga menjalankan pemicu Artikel feed dibuka pada widget ini.</value>
+    <value>Buka di browser dan Tampilkan detail juga menjalankan pemicu Artikel feed dibuka pada widget ini.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Buka di browser</value>

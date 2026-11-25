@@ -18658,7 +18658,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Widgets.Feeds.Config.SourceFeed': 'One feed',
 	'macrodeck.app:Widgets.Feeds.Config.SourceGroup': 'One group',
 	'macrodeck.app:Widgets.Feeds.Config.Tap': 'When tapped',
-	'macrodeck.app:Widgets.Feeds.Config.TapDescription': 'Every tap also runs this widget\'s Feed article opened triggers.',
+	'macrodeck.app:Widgets.Feeds.Config.TapDescription': 'Open in the browser and Show details also run this widget\'s Feed article opened triggers.',
 	'macrodeck.app:Widgets.Feeds.Config.TapDialog': 'Show details',
 	'macrodeck.app:Widgets.Feeds.Config.TapFlows': 'Run the widget\'s actions only',
 	'macrodeck.app:Widgets.Feeds.Config.TapOpen': 'Open in the browser',

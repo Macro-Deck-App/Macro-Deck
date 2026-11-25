@@ -180,7 +180,7 @@ internal sealed class FeedWidgetSession : IUiSession
 		_source.Open(row.EntryId, row.Key, _widgetId);
 
 		var origin = _origin;
-		if (origin is null || _options.Tap == FeedWidgetTypes.FlowsTap)
+		if (origin is null)
 		{
 			return UiEventOutcome.Accepted;
 		}

@@ -25887,7 +25887,7 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>टैप करने पर</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>हर टैप इस विजेट के फ़ीड लेख खोला गया ट्रिगर भी चलाता है।</value>
+    <value>ब्राउज़र में खोलें और विवरण दिखाएँ इस विजेट के फ़ीड लेख खोला गया ट्रिगर भी चलाते हैं।</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>ब्राउज़र में खोलें</value>

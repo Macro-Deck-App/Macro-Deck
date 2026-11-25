@@ -25865,7 +25865,7 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
     <value>Po dotknięciu</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Każde dotknięcie uruchamia też wyzwalacze Otwarto artykuł z kanału tego widżetu.</value>
+    <value>Otwórz w przeglądarce i Pokaż szczegóły uruchamiają też wyzwalacze Otwarto artykuł z kanału tego widżetu.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Otwórz w przeglądarce</value>

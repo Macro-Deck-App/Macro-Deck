@@ -5,6 +5,7 @@ using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Events;
 using MacroDeck.Ui.Model.Nodes;
 using MacroDeck.Ui.Model.Surfaces;
+using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Integrations.Feeds;
 using MacroDeckHost.Integrations.Feeds.Events;
 using MacroDeckHost.Integrations.Feeds.Widgets;
@@ -202,21 +203,26 @@ internal sealed class FeedWidgetTests
 		Assert.That(JsonSerializer.Serialize(dialog.BuildTree().Root), Does.Contain(SecondUrl));
 	}
 
-	[Test]
-	public async Task The_flows_mode_only_tells_the_widgets_flows()
+	[TestCase(FeedWidgetTypes.ListQualifiedId)]
+	[TestCase(FeedWidgetTypes.FeaturedQualifiedId)]
+	public async Task A_widget_that_only_runs_its_actions_leaves_every_press_to_them(string widgetType)
 	{
-		var origin = new RecordingOrigin();
-		await using var session = await OpenWidgetAsync(FeedWidgetTypes.ListQualifiedId, new { tap = "flows" });
+		await using var session = await OpenWidgetAsync(widgetType, new { tap = "flows" });
 
-		Tap(session, origin);
+		AssertLeavesPressesToFlows(session);
+	}
 
-		await CalendarTree.WaitForAsync(() => _context.RecordedEvents.Of(FeedEventIds.ItemOpened).Count == 1,
-			"no feed-item-opened event was published");
-		Assert.Multiple(() =>
-		{
-			Assert.That(origin.OpenedUrls, Is.Empty);
-			Assert.That(origin.Modals, Is.Empty);
-		});
+	[Test]
+	public async Task A_featured_article_image_that_only_runs_its_actions_leaves_every_press_to_them()
+	{
+		await ServeSecondWithImageAsync();
+		await using var session = await OpenWidgetAsync(FeedWidgetTypes.FeaturedQualifiedId,
+			new { source = "feed", feed = _newsId.ToString("D"), tap = "flows" });
+
+		await CalendarTree.WaitForAsync(() => ArtworkLayer(session.BuildTree().Root) is not null,
+			"the article image never became the tile's backdrop");
+
+		AssertLeavesPressesToFlows(session);
 	}
 
 	[Test]
@@ -246,6 +252,19 @@ internal sealed class FeedWidgetTests
 		{
 			Assert.That(nodes, Has.Some.EndsWith(FeedWidgetTypes.FlowsKey));
 			Assert.That(nodes, Has.Some.EndsWith(FeedWidgetTypes.CycleSecondsKey));
+		});
+	}
+
+	private static void AssertLeavesPressesToFlows(IUiSession session)
+	{
+		var tree = session.BuildTree();
+		var claim = UiActivationClaim.Of(JsonSerializer.SerializeToElement(tree, JsonSerializerOptions.Web));
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(CalendarTree.Texts(tree.Root), Does.Contain("Second"));
+			Assert.That(claim.Claimant, Is.Null);
+			Assert.That(claim.Absorbed, Is.False);
 		});
 	}
 

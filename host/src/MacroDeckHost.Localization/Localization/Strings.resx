@@ -25894,7 +25894,7 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
     <value>When tapped</value>
   </data>
   <data name="Widgets.Feeds.Config.TapDescription" xml:space="preserve">
-    <value>Every tap also runs this widget's Feed article opened triggers.</value>
+    <value>Open in the browser and Show details also run this widget's Feed article opened triggers.</value>
   </data>
   <data name="Widgets.Feeds.Config.TapOpen" xml:space="preserve">
     <value>Open in the browser</value>
