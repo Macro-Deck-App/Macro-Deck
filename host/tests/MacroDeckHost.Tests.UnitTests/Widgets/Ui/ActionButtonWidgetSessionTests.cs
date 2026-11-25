@@ -835,6 +835,31 @@ public class ActionButtonWidgetSessionTests
 	}
 
 	[Test]
+	public async Task An_open_tile_drops_back_to_the_single_label_row_when_its_extra_label_is_removed()
+	{
+		var fixture = Build("""{"label":"Main","stateMode":false,"extraLabels":[{"id":"a","label":"Second"}]}""",
+			true);
+
+		fixture.Host.ClearPatches();
+		fixture.Signals.RaiseDataChanged(new WidgetEntity
+		{
+			Id = _widgetId,
+			Type = WidgetTypeIds.ActionButton,
+			Data = "{\"label\":\"Main\",\"stateMode\":false}"
+		});
+		await fixture.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fixture.Host.Patches, Is.Not.Empty);
+			Assert.That(fixture.Host.FindById("actionButton.labels"), Is.Null);
+			Assert.That(fixture.Host.ById("actionButton.labelRow.labelBox.label").Text("text"), Is.EqualTo("Main"));
+		});
+
+		await fixture.Session.DisposeAsync();
+	}
+
+	[Test]
 	public async Task A_state_change_swaps_the_extra_labels_without_rebuilding_the_tile()
 	{
 		const string data = """

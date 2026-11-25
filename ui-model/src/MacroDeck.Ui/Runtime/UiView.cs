@@ -29,12 +29,15 @@ namespace MacroDeck.Ui.Runtime;
 /// <para>
 /// <b>What a structural change guarantees.</b> A <see cref="UiWhen" /> that flipped or a
 /// <see cref="UiRepeat{TItem}" /> whose item list was replaced re-materializes only the run of its parent's
-/// child list that it owns, and diffs that run by id: one <c>remove-node</c> for the top-most node of each
-/// removed subtree, <c>move-node</c> for a node that changed position, <c>insert-node</c> for new content at
-/// its <i>rendered</i> index, <c>replace-node</c> for a node whose type changed, and one <c>set-properties</c>
-/// per node whose properties differ. A node that survives keeps its id, and with it the focus and in-flight
-/// edits stable identity exists to preserve. A condition re-evaluated to the boolean it already had, or an item
-/// list that is still the same instance, emits nothing at all.
+/// child list that it owns, and diffs that run by id. Sibling runs of one parent that change in the same flush
+/// are diffed together as that parent's child list, so every removal for the parent comes before its inserts
+/// and a node with the same id in two sibling runs survives instead of being removed and inserted. The diff
+/// emits one <c>remove-node</c> for the top-most node of each removed subtree, <c>move-node</c> for a node that
+/// changed position, <c>insert-node</c> for new content at its <i>rendered</i> index, <c>replace-node</c> for a
+/// node whose type changed, and one <c>set-properties</c> per node whose properties differ. A node that
+/// survives keeps its id, and with it the focus and in-flight edits stable identity exists to preserve. A
+/// condition re-evaluated to the boolean it already had, or an item list that is still the same instance, emits
+/// nothing at all.
 /// </para>
 ///
 /// <para>
@@ -784,8 +787,15 @@ public sealed class UiView : IDisposable
 	{
 		// Indexed, not foreach: reconciling a scope can queue another one, and it can release one that is
 		// already queued.
+		var grouped = new HashSet<int>();
+
 		for (var index = 0; index < _dirtyScopes.Count; index++)
 		{
+			if (grouped.Contains(index))
+			{
+				continue;
+			}
+
 			var scope = _dirtyScopes[index];
 			scope.IsQueued = false;
 
@@ -794,7 +804,28 @@ public sealed class UiView : IDisposable
 				continue;
 			}
 
-			_reconciler.Reconcile(scope, operations);
+			var group = new List<UiStructuralScope> { scope };
+
+			if (scope.Region.Owner is { } owner)
+			{
+				for (var later = index + 1; later < _dirtyScopes.Count; later++)
+				{
+					var sibling = _dirtyScopes[later];
+
+					if (grouped.Contains(later)
+						|| sibling.IsReleased
+						|| !ReferenceEquals(sibling.Region.Owner, owner))
+					{
+						continue;
+					}
+
+					sibling.IsQueued = false;
+					grouped.Add(later);
+					group.Add(sibling);
+				}
+			}
+
+			_reconciler.Reconcile(group, operations);
 		}
 
 		_dirtyScopes.Clear();

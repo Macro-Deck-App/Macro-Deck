@@ -37,37 +37,66 @@ internal sealed class UiStructuralReconciler
 		_view = view;
 	}
 
-	/// <summary>Reconciles <paramref name="scope" /> and appends what it changed to
-	/// <paramref name="operations" />. Appends nothing when the scope's decision is the one it already
-	/// produced.</summary>
-	internal void Reconcile(UiStructuralScope scope, List<UiPatchOperation> operations)
+	internal void Reconcile(IReadOnlyList<UiStructuralScope> scopes, List<UiPatchOperation> operations)
 	{
-		if (!TryEvaluateDecision(scope, out var content))
+		UiMaterializedNode? owner = null;
+		List<UiMaterializedNode>? oldNodes = null;
+
+		foreach (var scope in scopes)
+		{
+			if (scope.IsReleased || !TryEvaluateDecision(scope, out var content))
+			{
+				continue;
+			}
+
+			var region = scope.Region;
+
+			if (region.Owner is not { } scopeOwner)
+			{
+				throw new UiViewException($"The conditional or repeat keyed '{scope.Element.Key}' declared near "
+					+ $"'{scope.ParentDeclarationPath}' occupies a slot that must always hold exactly one node - the "
+					+ "tree root or a Fallback - so its content cannot change. Move it inside the element that "
+					+ "fills the slot.");
+			}
+
+			if (oldNodes is null)
+			{
+				owner = scopeOwner;
+				oldNodes = [..scopeOwner.Children];
+			}
+
+			Rematerialize(scope, region, scopeOwner, content);
+		}
+
+		if (owner is null || oldNodes is null)
 		{
 			return;
 		}
 
-		var region = scope.Region;
-
-		if (region.Owner is not { } owner)
+		var simulated = new List<string>(oldNodes.Count);
+		foreach (var node in oldNodes)
 		{
-			throw new UiViewException($"The conditional or repeat keyed '{scope.Element.Key}' declared near "
-				+ $"'{scope.ParentDeclarationPath}' occupies a slot that must always hold exactly one node - the "
-				+ "tree root or a Fallback - so its content cannot change. Move it inside the element that "
-				+ "fills the slot.");
+			simulated.Add(node.Node.Id);
 		}
 
+		var newNodes = new List<UiMaterializedNode>();
+		owner.Region.Flatten(newNodes);
+
+		ReconcileChildLists(owner, oldNodes, newNodes, simulated, operations);
+
+		owner.Children.Clear();
+		owner.Children.AddRange(newNodes);
+		owner.MarkForRebuild();
+	}
+
+	private void Rematerialize(
+		UiStructuralScope scope,
+		UiChildRegion region,
+		UiMaterializedNode owner,
+		List<(string Segment, UiElement Element)> content)
+	{
 		var oldNodes = new List<UiMaterializedNode>();
 		region.Flatten(oldNodes);
-
-		// Captured before the region is rewritten: these are the indices every operation for this parent is
-		// measured against.
-		var baseIndex = region.BaseIndex;
-		var simulated = new List<string>(owner.Children.Count);
-		foreach (var child in owner.Children)
-		{
-			simulated.Add(child.Node.Id);
-		}
 
 		region.ReleaseNestedScopes();
 		foreach (var node in oldNodes)
@@ -96,12 +125,6 @@ internal sealed class UiStructuralReconciler
 		{
 			UiElementMaterializer.Link(node, owner, false);
 		}
-
-		ReconcileChildLists(owner, oldNodes, newNodes, baseIndex, simulated, operations);
-
-		owner.Children.Clear();
-		owner.Region.Flatten(owner.Children);
-		owner.MarkForRebuild();
 	}
 
 	/// <summary>
@@ -196,14 +219,13 @@ internal sealed class UiStructuralReconciler
 	}
 
 	/// <summary>
-	/// Diffs one run of <paramref name="parent" />'s child list by id and appends the operations that turn
+	/// Diffs <paramref name="parent" />'s child list by id and appends the operations that turn
 	/// <paramref name="oldNodes" /> into <paramref name="newNodes" />.
 	/// </summary>
 	private static void ReconcileChildLists(
 		UiMaterializedNode parent,
 		List<UiMaterializedNode> oldNodes,
 		List<UiMaterializedNode> newNodes,
-		int baseIndex,
 		List<string> simulated,
 		List<UiPatchOperation> operations)
 	{
@@ -253,7 +275,7 @@ internal sealed class UiStructuralReconciler
 				continue;
 			}
 
-			var desired = baseIndex + survivorOffset;
+			var desired = survivorOffset;
 			survivorOffset++;
 
 			var current = simulated.IndexOf(id);
@@ -294,7 +316,7 @@ internal sealed class UiStructuralReconciler
 		for (var index = 0; index < newNodes.Count; index++)
 		{
 			var node = newNodes[index];
-			var position = baseIndex + index;
+			var position = index;
 
 			if (position < simulated.Count
 				&& string.Equals(simulated[position], node.Node.Id, StringComparison.Ordinal))
@@ -323,7 +345,7 @@ internal sealed class UiStructuralReconciler
 
 		foreach (var node in newNodes)
 		{
-			if (oldById.TryGetValue(node.Node.Id, out var previous))
+			if (oldById.TryGetValue(node.Node.Id, out var previous) && !ReferenceEquals(previous, node))
 			{
 				ReconcileSurvivor(previous, node, operations);
 			}
@@ -366,7 +388,7 @@ internal sealed class UiStructuralReconciler
 			simulated.Add(child.Node.Id);
 		}
 
-		ReconcileChildLists(current, previous.Children, current.Children, 0, simulated, operations);
+		ReconcileChildLists(current, previous.Children, current.Children, simulated, operations);
 	}
 
 	private static bool FallbacksAlign(UiNode? previous, UiNode? current)
