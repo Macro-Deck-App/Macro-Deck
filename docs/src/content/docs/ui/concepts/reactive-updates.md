@@ -59,7 +59,10 @@ showHeader.Value = false;
 ```
 
 A `UiWhen` that flipped or a `UiRepeat` whose list was replaced re-materializes only the run of its parent's
-children it owns, and diffs that run by id:
+children it owns, and diffs that run by id. Runs of the same parent that change in one flush, such as the two
+branches of a `UiWhen` pair, are diffed together as that parent's child list: every removal for the parent
+comes before its inserts, and a node with the same id in both runs survives instead of being removed and
+inserted again:
 
 | Operation | Emitted for |
 |---|---|

@@ -37,10 +37,6 @@ internal sealed class UiChildRegion
 	/// </summary>
 	internal UiStructuralScope? Scope { get; }
 
-	/// <summary>This region's position among <see cref="Parent" />'s entries. Fixed for as long as the parent
-	/// region exists, since the authored structure a region tree mirrors does not change.</summary>
-	internal int IndexInParent { get; private set; }
-
 	/// <summary>
 	/// The node whose child list this region contributes to. <c>null</c> for a slot that must hold exactly one
 	/// node and therefore has no parent child list at all - the tree root and a
@@ -50,43 +46,6 @@ internal sealed class UiChildRegion
 	{
 		get => _owner ?? Parent?.Owner;
 		set => _owner = value;
-	}
-
-	/// <summary>How many nodes this region currently contributes.</summary>
-	internal int Count
-	{
-		get
-		{
-			var count = 0;
-
-			foreach (var entry in _entries)
-			{
-				count += entry.Region?.Count ?? 1;
-			}
-
-			return count;
-		}
-	}
-
-	/// <summary>The index in <see cref="Owner" />'s child list at which this region's first node sits.
-	/// </summary>
-	internal int BaseIndex
-	{
-		get
-		{
-			var baseIndex = 0;
-
-			for (var region = this; region.Parent is { } parent; region = parent)
-			{
-				for (var index = 0; index < region.IndexInParent; index++)
-				{
-					var entry = parent._entries[index];
-					baseIndex += entry.Region?.Count ?? 1;
-				}
-			}
-
-			return baseIndex;
-		}
 	}
 
 	/// <summary>Appends this region's nodes to <paramref name="into" />, in render order.</summary>
@@ -115,7 +74,7 @@ internal sealed class UiChildRegion
 	/// the scope, which reconciles into it for the rest of its life.</summary>
 	internal UiChildRegion AddRegion(UiStructuralScope scope)
 	{
-		var region = new UiChildRegion(this, scope) { IndexInParent = _entries.Count };
+		var region = new UiChildRegion(this, scope);
 
 		_entries.Add(new UiChildEntry(null, region));
 		scope.Region = region;
