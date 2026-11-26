@@ -15,6 +15,10 @@ export interface ProfileLayoutConstraint {
   widgetSpacingHonoured?: boolean;
   cornerRadiusHonoured?: boolean;
   customFolderViewsSupported?: boolean;
+  maxWidgetColumns?: number | null;
+  maxWidgetRows?: number | null;
+  maxWidgetColumnsDeviceName?: string | null;
+  maxWidgetRowsDeviceName?: string | null;
 }
 
 export type ProfileLayoutCompatibilityStatus = 'ok' | 'conflictingDevices' | 'exceedsLayout';

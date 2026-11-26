@@ -139,6 +139,7 @@ Only `grid` carries geometry, in `LayoutRegion.Grid`. Every other kind is a `Cou
 | `MinRows`, `MaxRows`, `MinColumns`, `MaxColumns` | Per-axis bounds for a configurable grid. Default 1. |
 | `SupportsRuntimeResize` | A resize applies live. When `false`, you may apply it when the device next connects. |
 | `KeySize` | Pixel size of one key, where the hardware has a fixed one. |
+| `MaxWidgetColumns`, `MaxWidgetRows` | The largest widget, per axis, on a profile this layout's device claims. `null` (default) leaves the axis unconstrained; a value below 1 reads as 1. See [widget size limits](#widget-size-limits). |
 | `RowsLocked`, `ColumnsLocked` | Derived: fixed, or configurable with min >= max on that axis. |
 
 `LayoutDescriptor.PrimaryGrid` is the one grid Macro Deck renders a deck onto, computed for you. It is null
@@ -191,6 +192,36 @@ its profile stays unconstrained until that layout appears.
 Macro Deck constrains a profile; it never rewrites one. No reflow, pagination, resizing or dropped widgets:
 a profile bigger than the device simply shows partially, as a [device session](/features/devices/#receiving-and-rendering-a-session)
 does.
+
+### Widget size limits
+
+Hardware whose keys are separate displays, like a Stream Deck, cannot draw one widget across the gaps
+between keys. Keep every widget to one key:
+
+```csharp
+new LayoutGrid
+{
+	Rows = 3,
+	Columns = 5,
+	KeySize = new LayoutKeySize(72, 72),
+	MaxWidgetColumns = 1,
+	MaxWidgetRows = 1
+}
+```
+
+For a profile its device claims:
+
+- The editor stops a resize at the limit. At a 1 x 1 limit the resize handle of a single-key widget is
+  locked, with a note naming the device.
+- Macro Deck refuses an edit that creates a widget larger than the limit or grows one past it: a resize,
+  a new widget, a paste. Agents using [MCP](/reference/mcp/) get the same refusal.
+- With several claiming devices, the smallest limit per axis applies, whatever their grids. The note names
+  the device each limit comes from.
+- Existing content is never rewritten. A widget that is already larger stays as stored, is still delivered
+  to the device at its stored size, can be moved, edited or shrunk, and shows a warning naming the device.
+  Importing a widget or folder archive and duplicating a folder copy widgets as they are, without a check.
+
+A plugin built before these members, or a layout that leaves them `null`, behaves as before.
 
 The host persists the last resolved layout with the device, not just the reference. `UnregisterLayoutAsync`
 and a stopped provider behave the same: the reference is kept, the grid stays constrained, and it refreshes

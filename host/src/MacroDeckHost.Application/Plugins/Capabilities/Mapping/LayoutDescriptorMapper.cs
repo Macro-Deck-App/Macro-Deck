@@ -45,6 +45,8 @@ public static class LayoutDescriptorMapper
 				MinColumns = dto.MinColumns,
 				MaxColumns = dto.MaxColumns,
 				SupportsRuntimeResize = dto.SupportsRuntimeResize,
+				MaxWidgetColumns = dto.MaxWidgetColumns,
+				MaxWidgetRows = dto.MaxWidgetRows,
 				KeySize = dto.KeySize is null ? null : new LayoutKeySize(dto.KeySize.Width, dto.KeySize.Height)
 			};
 	}

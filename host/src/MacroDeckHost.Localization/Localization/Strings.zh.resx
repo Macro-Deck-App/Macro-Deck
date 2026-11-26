@@ -1629,6 +1629,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>组件已导出</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device}无法显示这么大的组件。</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} 个动作</value>
     <comment>[plural] [count:int]</comment>

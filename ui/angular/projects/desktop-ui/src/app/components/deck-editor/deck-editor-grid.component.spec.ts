@@ -784,6 +784,74 @@ describe('DeckEditorGridComponent', () => {
     });
   });
 
+  describe('a device that limits widget spans', () => {
+    function limitSpans(cols: number | null, rows: number | null, device = 'Stream Deck'): void {
+      fixture.componentRef.setInput('maxWidgetCols', cols);
+      fixture.componentRef.setInput('maxWidgetRows', rows);
+      fixture.componentRef.setInput('maxWidgetColsDevice', cols === null ? null : device);
+      fixture.componentRef.setInput('maxWidgetRowsDevice', rows === null ? null : device);
+    }
+
+    it('locks the resize handle of a single-cell widget and names the device', () => {
+      limitSpans(1, 1);
+      render([gridWidget()]);
+
+      const handle = chrome().querySelector<HTMLElement>('.resize-handle')!;
+      pointer(handle, 'pointerdown', CELL_PX - 10, CELL_PX - 10);
+      pointer(document, 'pointermove', 3 * CELL_PX, CELL_PX - 10);
+      fixture.detectChanges();
+
+      expect(handle.classList).toContain('is-locked');
+      expect(handle.title).toBe('Fixed by Stream Deck');
+      expect(dragIsLive()).toBeFalse();
+    });
+
+    it('names both devices on the locked handle when each limits one axis', () => {
+      limitSpans(1, 1);
+      fixture.componentRef.setInput('maxWidgetRowsDevice', 'Macro Pad');
+      render([gridWidget()]);
+
+      expect(chrome().querySelector<HTMLElement>('.resize-handle')!.title).toBe('Fixed by Stream Deck, Macro Pad');
+    });
+
+    it('stops a resize at the limit', () => {
+      limitSpans(2, null);
+      render([gridWidget()]);
+      const commits = collect<ReadonlyMap<string, GridRect>>(component.layoutCommit);
+
+      const handle = chrome().querySelector<HTMLElement>('.resize-handle')!;
+      pointer(handle, 'pointerdown', CELL_PX - 10, CELL_PX - 10);
+      pointer(document, 'pointermove', 4 * CELL_PX - 10, CELL_PX - 10);
+      pointer(document, 'pointerup', 4 * CELL_PX - 10, CELL_PX - 10);
+
+      expect(handle.hasAttribute('title')).toBeFalse();
+      expect(commits.at(-1)?.get('w1')?.w).toBe(2);
+    });
+
+    it('flags a stored widget larger than the device shows, naming that device', () => {
+      limitSpans(1, 1);
+      render([gridWidget({ id: 'wide', w: 2 }), gridWidget({ id: 'single', x: 3 })]);
+
+      const badges = Array.from(host().querySelectorAll<HTMLElement>('.span-badge'));
+      const wideChrome = badges[0]?.closest('.widget-chrome');
+
+      expect(badges.length).toBe(1);
+      expect(badges[0].title).toBe('Stream Deck can\'t show a widget this large.');
+      expect(wideChrome?.querySelector('.resize-handle')?.classList).not.toContain('is-locked');
+      expect(host().querySelectorAll('.resize-handle.is-locked').length).toBe(1);
+    });
+
+    it('changes nothing without a limit', () => {
+      render([gridWidget({ w: 2 })]);
+
+      const handle = chrome().querySelector<HTMLElement>('.resize-handle')!;
+
+      expect(handle.classList).not.toContain('is-locked');
+      expect(handle.hasAttribute('title')).toBeFalse();
+      expect(chrome().querySelector('.span-badge')).toBeNull();
+    });
+  });
+
   describe('running a widget from its context menu', () => {
     const shortPress = (disabled = false) => [{
       triggerId: 'onShortPress',

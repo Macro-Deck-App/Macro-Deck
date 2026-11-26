@@ -1630,6 +1630,9 @@ Esta copia portátil no se actualiza sola. Descarga el ZIP portátil desde el si
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget exportado</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} no puede mostrar un widget tan grande.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} acción</value>
     <comment>[plural] [count:int]</comment>

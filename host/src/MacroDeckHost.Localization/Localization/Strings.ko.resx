@@ -1629,6 +1629,9 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>위젯을 내보냈습니다</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device}에서는 이 크기의 위젯을 표시할 수 없습니다.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>액션 {count}개</value>
     <comment>[plural] [count:int]</comment>

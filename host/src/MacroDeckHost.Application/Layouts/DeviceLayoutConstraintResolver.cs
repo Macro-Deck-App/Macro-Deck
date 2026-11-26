@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Layouts;
+using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 
 namespace MacroDeckHost.Application.Layouts;
@@ -43,45 +44,36 @@ public static class DeviceLayoutConstraintResolver
 			.Distinct()
 			.ToList();
 
+		var spans = ResolveWidgetSpans(resolved);
+
 		if (distinctPairs.Count == 1)
 		{
 			var (rows, columns) = distinctPairs[0];
 			var representative = fixedEntries[0];
-			return new DeviceGridConstraint(true,
-				true,
-				rows,
-				columns,
-				rows,
-				rows,
-				columns,
-				columns,
-				representative.Device.LayoutReference,
-				representative.Layout.Name,
-				representative.Device.Name,
-				false,
-				[],
-				Honoured(representative.Layout).Spacing,
-				Honoured(representative.Layout).CornerRadius,
-				Honoured(representative.Layout).CustomFolderViews);
+			return WithWidgetSpans(new DeviceGridConstraint(true,
+					true,
+					rows,
+					columns,
+					rows,
+					rows,
+					columns,
+					columns,
+					representative.Device.LayoutReference,
+					representative.Layout.Name,
+					representative.Device.Name,
+					false,
+					[],
+					Honoured(representative.Layout).Spacing,
+					Honoured(representative.Layout).CornerRadius,
+					Honoured(representative.Layout).CustomFolderViews),
+				spans);
 		}
 
 		if (distinctPairs.Count > 1)
 		{
-			return new DeviceGridConstraint(false,
-				false,
-				0,
-				0,
-				1,
-				int.MaxValue,
-				1,
-				int.MaxValue,
-				null,
-				null,
-				null,
-				true,
-				[
-					.. fixedEntries.Select(entry => entry.Device.Name).Distinct(StringComparer.Ordinal)
-				]);
+			return WithWidgetSpans(Unlocked(true,
+					[.. fixedEntries.Select(entry => entry.Device.Name).Distinct(StringComparer.Ordinal)]),
+				spans);
 		}
 
 		// No claiming device declares a fixed grid, so what is left is configurable layouts contributing
@@ -98,27 +90,111 @@ public static class DeviceLayoutConstraintResolver
 
 		if (distinctBounds > 1)
 		{
-			return null;
+			return spans.Columns is null && spans.Rows is null ? null : WithWidgetSpans(SpanOnly(), spans);
 		}
 
 		var single = resolved[0];
 		var singleGrid = single.Grid;
-		return new DeviceGridConstraint(singleGrid.RowsLocked,
-			singleGrid.ColumnsLocked,
-			singleGrid.Rows,
-			singleGrid.Columns,
-			singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MinRows,
-			singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MaxRows,
-			singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MinColumns,
-			singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MaxColumns,
-			single.Device.LayoutReference,
-			single.Layout.Name,
-			single.Device.Name,
+		return WithWidgetSpans(new DeviceGridConstraint(singleGrid.RowsLocked,
+				singleGrid.ColumnsLocked,
+				singleGrid.Rows,
+				singleGrid.Columns,
+				singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MinRows,
+				singleGrid.RowsLocked ? singleGrid.Rows : singleGrid.MaxRows,
+				singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MinColumns,
+				singleGrid.ColumnsLocked ? singleGrid.Columns : singleGrid.MaxColumns,
+				single.Device.LayoutReference,
+				single.Layout.Name,
+				single.Device.Name,
+				false,
+				[],
+				Honoured(single.Layout).Spacing,
+				Honoured(single.Layout).CornerRadius,
+				Honoured(single.Layout).CustomFolderViews),
+			spans);
+	}
+
+	private static DeviceGridConstraint Unlocked(bool hasConflict, IReadOnlyList<string> conflictingDeviceNames)
+	{
+		return new DeviceGridConstraint(false,
+			false,
+			0,
+			0,
+			1,
+			int.MaxValue,
+			1,
+			int.MaxValue,
+			null,
+			null,
+			null,
+			hasConflict,
+			conflictingDeviceNames);
+	}
+
+	private static DeviceGridConstraint SpanOnly()
+	{
+		return new DeviceGridConstraint(false,
+			false,
+			0,
+			0,
+			GridDefaults.MinRows,
+			GridDefaults.MaxRows,
+			GridDefaults.MinColumns,
+			GridDefaults.MaxColumns,
+			null,
+			null,
+			null,
 			false,
 			[],
-			Honoured(single.Layout).Spacing,
-			Honoured(single.Layout).CornerRadius,
-			Honoured(single.Layout).CustomFolderViews);
+			true,
+			true,
+			true,
+			null,
+			null,
+			null,
+			null,
+			false);
+	}
+
+	private static WidgetSpanLimits ResolveWidgetSpans(
+		IReadOnlyList<(DeviceEntity Device, LayoutDescriptor Layout, LayoutGrid Grid)> resolved)
+	{
+		var columns = Strictest(resolved, entry => entry.Grid.MaxWidgetColumns);
+		var rows = Strictest(resolved, entry => entry.Grid.MaxWidgetRows);
+		return new WidgetSpanLimits(columns.Limit, columns.DeviceName, rows.Limit, rows.DeviceName);
+	}
+
+	private static (int? Limit, string? DeviceName) Strictest(
+		IReadOnlyList<(DeviceEntity Device, LayoutDescriptor Layout, LayoutGrid Grid)> resolved,
+		Func<(DeviceEntity Device, LayoutDescriptor Layout, LayoutGrid Grid), int?> limitOf)
+	{
+		(int? Limit, string? DeviceName) strictest = (null, null);
+		foreach (var entry in resolved)
+		{
+			if (limitOf(entry) is not { } declared)
+			{
+				continue;
+			}
+
+			var limit = Math.Max(1, declared);
+			if (strictest.Limit is null || limit < strictest.Limit)
+			{
+				strictest = (limit, entry.Device.Name);
+			}
+		}
+
+		return strictest;
+	}
+
+	private static DeviceGridConstraint WithWidgetSpans(DeviceGridConstraint constraint, WidgetSpanLimits spans)
+	{
+		return constraint with
+		{
+			MaxWidgetColumns = spans.Columns,
+			MaxWidgetRows = spans.Rows,
+			MaxWidgetColumnsDeviceName = spans.ColumnsDeviceName,
+			MaxWidgetRowsDeviceName = spans.RowsDeviceName
+		};
 	}
 
 	/// <summary>Whether a candidate grid edit is allowed under <paramref name="constraint" />. Only the
@@ -143,7 +219,7 @@ public static class DeviceLayoutConstraintResolver
 		int? candidateRows,
 		int? candidateColumns)
 	{
-		if (constraint.HasConflict)
+		if (constraint.HasConflict || !constraint.ConstrainsGrid)
 		{
 			return true;
 		}
@@ -173,6 +249,22 @@ public static class DeviceLayoutConstraintResolver
 		return true;
 	}
 
+	public static bool AllowsWidgetSpan(
+		this DeviceGridConstraint constraint,
+		int width,
+		int height,
+		int? currentWidth,
+		int? currentHeight)
+	{
+		return WithinSpan(width, currentWidth, constraint.MaxWidgetColumns)
+			&& WithinSpan(height, currentHeight, constraint.MaxWidgetRows);
+	}
+
+	private static bool WithinSpan(int candidate, int? current, int? limit)
+	{
+		return limit is not { } max || candidate <= max || current is { } existing && candidate <= existing;
+	}
+
 	/// <summary>
 	/// Whether a grid already sitting at <paramref name="currentRows" /> x <paramref name="currentColumns" />
 	/// is bigger, on either axis, than the single fixed grid <paramref name="constraint" /> locks to. A
@@ -186,4 +278,10 @@ public static class DeviceLayoutConstraintResolver
 			&& constraint.ColumnsLocked
 			&& (currentRows > constraint.Rows || currentColumns > constraint.Columns);
 	}
+
+	private readonly record struct WidgetSpanLimits(
+		int? Columns,
+		string? ColumnsDeviceName,
+		int? Rows,
+		string? RowsDeviceName);
 }

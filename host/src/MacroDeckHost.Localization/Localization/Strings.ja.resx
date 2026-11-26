@@ -1629,6 +1629,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>ウィジェットをエクスポートしました</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} ではこの大きさのウィジェットを表示できません。</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>アクション {count} 件</value>
     <comment>[plural] [count:int]</comment>

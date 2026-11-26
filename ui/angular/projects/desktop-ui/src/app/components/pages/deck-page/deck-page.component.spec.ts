@@ -27,6 +27,7 @@ describe('DeckPageComponent copy/cut/paste', () => {
     folders: jasmine.Spy;
     pasteWidget: jasmine.Spy;
     removeWidget: jasmine.Spy;
+    widgetSpanError: jasmine.Spy;
     isCurrentProfileLocked?: unknown;
   };
   let clipboard: WidgetClipboardService;
@@ -55,6 +56,7 @@ describe('DeckPageComponent copy/cut/paste', () => {
       folders: jasmine.createSpy('folders').and.returnValue([]),
       pasteWidget: jasmine.createSpy('pasteWidget').and.resolveTo(widget({ id: 'new-widget' })),
       removeWidget: jasmine.createSpy('removeWidget').and.resolveTo({ success: true }),
+      widgetSpanError: jasmine.createSpy('widgetSpanError').and.returnValue(null),
     };
   });
 
@@ -118,6 +120,18 @@ describe('DeckPageComponent copy/cut/paste', () => {
 
     expect(folderStub.removeWidget).not.toHaveBeenCalled();
     expect(clipboard.hasContent()).toBeTrue();
+  });
+
+  it('refuses to paste a widget larger than the claiming device shows, and says why', async () => {
+    const component = createComponent();
+    folderStub.widgetSpanError.and.returnValue({ code: 'SpanLimitedByDevice', message: 'too large' });
+    clipboard.cut(widget({ id: 'src-widget', w: 2 }), 'origin-folder');
+
+    await component.onWidgetPaste({ x: 3, y: 0 });
+
+    expect(folderStub.pasteWidget).not.toHaveBeenCalled();
+    expect(folderStub.removeWidget).not.toHaveBeenCalled();
+    expect((component as unknown as { deckError: () => string | null }).deckError()).toBe('too large');
   });
 
   it('ignores paste when the clipboard is empty', async () => {
@@ -380,6 +394,7 @@ describe('DeckPageComponent keyboard shortcuts and batch actions', () => {
     pasteWidgets: jasmine.Spy;
     setWidgetsPinned: jasmine.Spy;
     setWidgetPinned: jasmine.Spy;
+    widgetSpanError: jasmine.Spy;
   };
   let clipboard: WidgetClipboardService;
   let selection: WidgetSelectionService;
@@ -431,6 +446,7 @@ describe('DeckPageComponent keyboard shortcuts and batch actions', () => {
       pasteWidgets: jasmine.createSpy('pasteWidgets').and.resolveTo({ success: true }),
       setWidgetsPinned: jasmine.createSpy('setWidgetsPinned').and.resolveTo({ success: true }),
       setWidgetPinned: jasmine.createSpy('setWidgetPinned').and.resolveTo({ success: true }),
+      widgetSpanError: jasmine.createSpy('widgetSpanError').and.returnValue(null),
     };
   });
 
