@@ -135,10 +135,25 @@ public class StreamlabsDesktopConnectionTests
 	public async Task Disconnecting_ResetsTheStateAndReportsIt()
 	{
 		var client = StreamlabsJson.Seeded("live");
-		var connection = await StartAsync(client);
+		var firstSession = true;
+
+		// The pump reconnects 20 ms after a drop: only a refused retry keeps the disconnected state observable.
+		var connection = Create(() =>
+		{
+			if (firstSession)
+			{
+				firstSession = false;
+				return client;
+			}
+
+			return new FakeStreamlabsClient { ConnectFailure = new StreamlabsRpcException("connection refused") };
+		});
+
+		connection.Start();
+		await WaitUntil(() => connection.State.IsConnected);
 
 		client.RaiseDisconnected();
-		await WaitUntil(() => !connection.State.IsConnected);
+		await WaitUntil(() => _publisher.Ids.Contains(StreamlabsDesktopEventIds.Disconnected));
 
 		Assert.Multiple(() =>
 		{
