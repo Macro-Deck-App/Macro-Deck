@@ -21979,6 +21979,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Змінити вигляд</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Згорнути панель папок</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Ви впевнені, що хочете видалити цю папку та весь її вміст? Цю дію неможливо скасувати.</value>
   </data>
@@ -21999,6 +22002,9 @@ Macro Deck встановлено з репозиторію APT, тож післ
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Дублювати</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Розгорнути панель папок</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Експортувати цю папку, її віджети та їхні значки, у файл .macroDeckFolder.</value>

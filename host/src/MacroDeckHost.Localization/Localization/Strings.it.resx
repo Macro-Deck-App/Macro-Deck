@@ -21959,6 +21959,9 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Cambia vista</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Comprimi il pannello delle cartelle</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Vuoi davvero eliminare questa cartella e tutto il suo contenuto? Questa azione non può essere annullata.</value>
   </data>
@@ -21979,6 +21982,9 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplica</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Espandi il pannello delle cartelle</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Esporta questa cartella, con i suoi widget e le relative icone, in un file .macroDeckFolder.</value>

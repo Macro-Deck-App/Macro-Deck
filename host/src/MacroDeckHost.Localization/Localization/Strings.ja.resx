@@ -21979,6 +21979,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>表示を変更</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>フォルダーパネルを折りたたむ</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>このフォルダーとその中のすべての内容を削除しますか？この操作は取り消せません。</value>
   </data>
@@ -21999,6 +22002,9 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>複製</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>フォルダーパネルを展開</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>このフォルダーのウィジェットとそのアイコンを、.macroDeckFolder ファイルにエクスポートします。</value>

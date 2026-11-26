@@ -21979,6 +21979,9 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Görünümü değiştir</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Klasör panelini daralt</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Bu klasörü ve tüm içeriğini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</value>
   </data>
@@ -21999,6 +22002,9 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Çoğalt</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Klasör panelini genişlet</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Bu klasörü - widget'ları ve simgeleriyle birlikte - bir .macroDeckFolder dosyasına aktarın.</value>

@@ -21959,6 +21959,9 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Změnit zobrazení</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Sbalit panel složek</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Opravdu odstranit tuto složku a veškerý její obsah? Tuto akci nelze vzít zpět.</value>
   </data>
@@ -21979,6 +21982,9 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplikovat</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Rozbalit panel složek</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Exportuje tuto složku – její widgety a jejich ikony – do souboru .macroDeckFolder.</value>
