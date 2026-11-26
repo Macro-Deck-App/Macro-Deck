@@ -328,6 +328,8 @@ public static class Program
 						name,
 						variableContext);
 
+			ShutdownDeadline.Arm(host);
+
 			// The shell tells a requested restart from a crash by the exit code alone, so it has to
 			// survive the graceful shutdown RunAsync performs.
 			var exitCode = await HostRunner.RunAsync(host);

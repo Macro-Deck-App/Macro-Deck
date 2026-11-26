@@ -273,7 +273,7 @@ Tests are required for every added, modified, refactored, or fixed integration b
 | Keyboard | `host/tests/MacroDeckHost.Tests.UnitTests/Keyboard` |
 | HTTP | `host/tests/MacroDeckHost.Tests.UnitTests/Http` |
 
-These folders show the useful patterns: a fake client for the external service (`FakeObsClient`, `FakeSinusBotClient`, `FakeStreamerbotClient`, `FakeTwitchHelixClient`, `FakeKeyboardInputProvider`), config flow tests (`ObsConfigFlowTests`, `WeatherConfigFlowTests`, `SinusBotConfigFlowTests`, `StreamerbotConfigFlowTests`, `TwitchConfigFlowTests`), action tests (`ObsActionsTests`, `ApplicationActionsTests`), and OS-specific parser tests (`LinuxMetricsParserTests`, `MacOSIoRegParserTests`, `NvidiaSmiParserTests`). A shared `FakeIntegration` at the test project root is available when you need a stand-in integration.
+These folders show the useful patterns: a fake client for the external service (`FakeObsClient`, `FakeSinusBotClient`, `FakeStreamerbotClient`, `FakeTwitchHelixClient`, `FakeKeyboardInputProvider`), config flow tests (`ObsConfigFlowTests`, `WeatherConfigFlowTests`, `SinusBotConfigFlowTests`, `StreamerbotConfigFlowTests`, `TwitchConfigFlowTests`), action tests (`ObsActionsTests`, `ApplicationActionsTests`), and OS-specific parser tests (`LinuxMetricsParserTests`, `MacOsPmsetParserTests`, `NvidiaSmiParserTests`). A shared `FakeIntegration` at the test project root is available when you need a stand-in integration.
 
 Run the integration tests with:
 

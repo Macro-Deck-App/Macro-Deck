@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using MacroDeckHost.Platform.Processes;
 
 namespace MacroDeckHost.Integrations.System.Metrics;
 
@@ -58,26 +57,14 @@ internal sealed class MacOsSystemMetricsService : SystemMetricsServiceBase
 		return Task.FromResult<MemoryInfo?>(new MemoryInfo(total, available));
 	}
 
-	protected override async Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken)
+	protected override Task<IReadOnlyList<GpuSample>> ReadGpuSnapshotAsync(CancellationToken cancellationToken)
 	{
-		var output = await ReadIoRegAcceleratorAsync(cancellationToken);
-		return
-		[
-			new GpuSample(MacOsIoRegParser.ParseAcceleratorModel(output),
-				MacOsIoRegParser.ParseDeviceUtilization(output))
-		];
+		return Task.FromResult<IReadOnlyList<GpuSample>>([MacOsGpuInterop.ReadAccelerator()]);
 	}
 
 	protected override Task<IReadOnlyList<DiskReading>> ReadDisksAsync(CancellationToken cancellationToken)
 	{
 		return Task.FromResult(MacOsDiskInterop.ReadDisks());
-	}
-
-	private static Task<string> ReadIoRegAcceleratorAsync(CancellationToken cancellationToken)
-	{
-		return ProcessRunner.RunAsync("ioreg",
-			["-r", "-d", "1", "-w", "0", "-c", "IOAccelerator"],
-			cancellationToken);
 	}
 
 	private static long? ReadTotalMemoryBytes()
