@@ -193,6 +193,11 @@ public class DeviceService : IDeviceService
 			return Result.Fail<DeviceError>(DeviceError.NotFound, "Device not found.");
 		}
 
+		if (!DeviceScreenSaverSupport.IsSupported(device))
+		{
+			return Result.Fail<DeviceError>(DeviceError.ValidationError, DeviceScreenSaverSupport.NotSupportedMessage);
+		}
+
 		if (_connectionTracker.OnlineDeviceConnectionCounts().GetValueOrDefault(id) <= 0)
 		{
 			return Result.Fail<DeviceError>(DeviceError.Offline, "The device is offline.");
@@ -214,6 +219,12 @@ public class DeviceService : IDeviceService
 		if (device is null)
 		{
 			return Result.Fail<DeviceEntity, DeviceError>(DeviceError.NotFound, "Device not found.");
+		}
+
+		if (enabled && !DeviceScreenSaverSupport.IsSupported(device))
+		{
+			return Result.Fail<DeviceEntity, DeviceError>(DeviceError.ValidationError,
+				DeviceScreenSaverSupport.NotSupportedMessage);
 		}
 
 		var validated = DeviceScreenSaverSettings.Validate(_screenSavers,

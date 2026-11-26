@@ -202,6 +202,51 @@ public class LayoutProviderCapabilityHandlerTests
 		});
 	}
 
+	[Test]
+	public void A_declared_no_screen_savers_round_trips_through_the_wire_json()
+	{
+		var original = new LayoutDescriptor("plus",
+			"Stream Deck +",
+			[
+				new LayoutRegion
+				{
+					Id = "grid",
+					Kind = LayoutRegionKinds.Grid,
+					Grid = new LayoutGrid { Rows = 2, Columns = 4 },
+					Visuals = new LayoutVisualCapabilities { StaticIcons = true, ScreenSavers = false }
+				}
+			],
+			new LayoutCapabilities { Visuals = new LayoutVisualCapabilities { ScreenSavers = false } });
+
+		var json = JsonSerializer.Serialize(LayoutDescriptorMapper.ToDto(original), PluginProtocolJson.Options);
+		var restored = LayoutDescriptorMapper.ToSdk(
+			JsonSerializer.Deserialize<LayoutDescriptorDto>(json, PluginProtocolJson.Options)!);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(restored.Capabilities!.Visuals!.ScreenSavers, Is.False);
+			Assert.That(restored.Regions[0].Visuals!.ScreenSavers, Is.False);
+		});
+	}
+
+	[Test]
+	public void Screen_savers_left_unset_are_not_written_so_an_older_host_reads_todays_payload()
+	{
+		var visuals = LayoutDescriptorMapper.ToDto(new LayoutDescriptor("pad",
+				"Pad",
+				[],
+				new LayoutCapabilities { Visuals = new LayoutVisualCapabilities { StaticIcons = true } }))
+			.Capabilities!.Visuals!;
+
+		var json = JsonSerializer.SerializeToElement(visuals, PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(visuals.ScreenSavers, Is.Null);
+			Assert.That(json.TryGetProperty("screenSavers", out _), Is.False);
+		});
+	}
+
 	private static LayoutDescriptor FullyPopulatedLayout()
 	{
 		return new LayoutDescriptor("xl",

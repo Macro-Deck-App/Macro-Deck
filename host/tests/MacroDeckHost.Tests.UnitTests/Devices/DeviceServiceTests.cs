@@ -1,9 +1,11 @@
 using System.Globalization;
 using System.Security.Claims;
+using MacroDeck.Sdk.Layouts;
 using MacroDeckHost.Infrastructure.Auth;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Devices;
@@ -106,6 +108,37 @@ public class DeviceServiceTests
 				CreatedAt = now
 			});
 		}
+
+		return device;
+	}
+
+	private async Task<DeviceEntity> SeedProviderDevice(bool? screenSavers)
+	{
+		var now = _time.GetUtcNow().UtcDateTime;
+		var layout = new LayoutDescriptor("xl",
+			"XL",
+			[
+				new LayoutRegion
+				{
+					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = 4, Columns = 8 }
+				}
+			],
+			new LayoutCapabilities
+				{ Visuals = new LayoutVisualCapabilities { StaticIcons = true, ScreenSavers = screenSavers } });
+		var device = new DeviceEntity
+		{
+			Id = Guid.NewGuid(),
+			SecretHash = string.Empty,
+			Name = "Stream Deck XL",
+			ClientType = DeviceClientType.Provider,
+			ProviderId = "com.example.deck",
+			ProviderDeviceId = "SERIAL-1",
+			LayoutReference = "com.example.deck::xl",
+			LayoutSnapshot = LayoutSnapshotSerializer.Serialize(layout),
+			LastSeenAt = now,
+			CreatedAt = now
+		};
+		await _devices.Create(device);
 
 		return device;
 	}
@@ -253,6 +286,98 @@ public class DeviceServiceTests
 			Assert.That(rejected.Error, Is.EqualTo(DeviceError.ValidationError));
 			Assert.That(kept.Success, Is.True);
 			Assert.That(kept.Data!.ScreenSaverIdleSeconds, Is.EqualTo(60));
+		});
+	}
+
+	[Test]
+	public async Task SetScreenSaver_refuses_to_turn_one_on_for_a_device_whose_layout_says_no_and_keeps_its_settings()
+	{
+		var device = await SeedProviderDevice(false);
+		device.ScreenSaverEnabled = true;
+		device.ScreenSaverIdleSeconds = 120;
+		device.ScreenSaverId = "com.example.photos::photos";
+		device.ScreenSaverConfiguration = "{\"album\":\"a\"}";
+
+		var result = await _service.SetScreenSaver(device.Id, true, 60, null, null);
+		var stored = await _devices.GetById(device.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(DeviceError.ValidationError));
+			Assert.That(stored!.ScreenSaverEnabled, Is.True);
+			Assert.That(stored.ScreenSaverIdleSeconds, Is.EqualTo(120));
+			Assert.That(stored.ScreenSaverId, Is.EqualTo("com.example.photos::photos"));
+			Assert.That(stored.ScreenSaverConfiguration, Is.EqualTo("{\"album\":\"a\"}"));
+			Assert.That(_transport.GroupMessages, Is.Empty);
+			Assert.That(_mediator.Published.OfType<DeviceChangedNotification>(), Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task SetScreenSaver_still_lets_a_device_whose_layout_says_no_turn_it_off()
+	{
+		var device = await SeedProviderDevice(false);
+		device.ScreenSaverEnabled = true;
+
+		var result = await _service.SetScreenSaver(device.Id, false, 300, null, null);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Success, Is.True);
+			Assert.That(result.Data!.ScreenSaverEnabled, Is.False);
+		});
+	}
+
+	[Test]
+	public async Task ShowScreenSaver_refuses_a_device_whose_layout_says_no_and_pushes_nothing()
+	{
+		var device = await SeedProviderDevice(false);
+		_providerPresence.Set(device.Id, true);
+
+		var result = await _service.ShowScreenSaver(device.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Error, Is.EqualTo(DeviceError.ValidationError));
+			Assert.That(_transport.GroupMessages, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_provider_device_whose_layout_does_not_say_keeps_todays_screen_saver_behaviour()
+	{
+		var device = await SeedProviderDevice(null);
+		_providerPresence.Set(device.Id, true);
+
+		var set = await _service.SetScreenSaver(device.Id, true, 60, null, null);
+		var show = await _service.ShowScreenSaver(device.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(set.Success, Is.True);
+			Assert.That(set.Data!.ScreenSaverEnabled, Is.True);
+			Assert.That(show.Error, Is.EqualTo(DeviceError.Offline));
+		});
+	}
+
+	[Test]
+	public async Task A_client_device_is_untouched_by_layout_screen_saver_declarations()
+	{
+		var device = await SeedDevice(false);
+		_tracker.Attach("conn-1",
+			device.Id,
+			() =>
+			{
+			});
+		_tracker.Register("conn-1", "tab-1");
+
+		var set = await _service.SetScreenSaver(device.Id, true, 60, null, null);
+		var show = await _service.ShowScreenSaver(device.Id);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(set.Success, Is.True);
+			Assert.That(show.Success, Is.True);
 		});
 	}
 

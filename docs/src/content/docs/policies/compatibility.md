@@ -233,6 +233,12 @@ What did **not** need a major:
   not been tested against. An older device provider ignores the new surface fields and draws the primary
   label only, at the third of the button `TextAlign` and `LabelPosition` name. A patch's `TextAlign` or
   `LabelPosition` now also replaces a free position the user set on that axis.
+- A layout can say its device shows no screensaver: `LayoutVisualCapabilities.ScreenSavers` and an
+  optional `screenSavers` field on the wire layout visuals. The field is a nullable `bool`, so a provider
+  built before it, a `Visuals` block that leaves it unset, and a device snapshot stored before it all read
+  as `null` and keep today's behaviour. An older host ignores the field and keeps offering what it offers
+  today. A host that knows it refuses to enable or show a screensaver for a device whose layout says
+  `false`, and keeps the device's stored settings.
 - [Video streams](/features/video-streams/) added a capability kind, `video-stream-provider`, a host API,
   `video-streams`, and `video_stream_` error reasons under the existing `CAPABILITY_UNAVAILABLE` code, all
   within major `3`. An older host rejects the kind non-fatally, and a plugin that does not implement
