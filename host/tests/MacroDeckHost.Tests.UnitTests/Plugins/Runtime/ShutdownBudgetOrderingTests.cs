@@ -33,6 +33,12 @@ internal sealed class ShutdownBudgetOrderingTests
 	}
 
 	[Test]
+	public void The_hosts_exit_deadline_leaves_the_graceful_shutdown_its_full_timeout()
+	{
+		Assert.That(PluginShutdownBudgets.HostExitDeadline, Is.GreaterThan(PluginShutdownBudgets.HostShutdownTimeout));
+	}
+
+	[Test]
 	public void The_bootstrappers_forced_stop_budget_stays_inside_its_graceful_budget()
 	{
 		var quitTimeout = ReadBootstrapperTimeout("QUIT_STOP_TIMEOUT");

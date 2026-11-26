@@ -740,8 +740,7 @@ public class Startup
 		services.AddSingleton<IPluginSupervisor, PluginSupervisor>();
 		services.AddHostedService<PluginSupervisorBackgroundService>();
 
-		// Ordered outermost largest so each layer's cap is strictly inside the next: the supervisor's
-		// plugin budget, then this host timeout, then the bootstrapper's own graceful stop timeout.
+		// Each cap sits inside the next: plugin budget, this timeout, the bootstrapper's graceful stop.
 		services.Configure<HostOptions>(options =>
 		{
 			options.ShutdownTimeout = PluginShutdownBudgets.HostShutdownTimeout;
