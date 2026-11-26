@@ -108,7 +108,7 @@ A reader without `ui.slider` draws the fallback, here the same level as a read-o
 | Event | Fires when | Payload |
 |---|---|---|
 | `adjust` (`UiComponentEvents.Adjust`) | An intermediate level while the user is still working the control | The level, a bare number |
-| `change` (`UiComponentEvents.Change`) | The interaction ended, sent once - not for a relative tap, see [Reader behaviour](#reader-behaviour) | The level, a bare number |
+| `change` (`UiComponentEvents.Change`) | The interaction ended, sent once - not for a relative tap, see [Reader behaviour](#reader-behaviour). Also sent by a press on a hardware deck | The level, a bare number |
 | `double-press` (`UiComponentEvents.DoublePress`) | A second tap completed shortly after the first, neither one a drag | None |
 
 Declare `double-press` for an action on a double tap, such as resetting to a home level. Each tap is still an
@@ -150,6 +150,11 @@ or `Fill` if declared, otherwise its content extent. See [Sizing](/ui/concepts/s
   every move so reversing at an end moves back at once. `step` snaps as usual, and the level counts as moved
   only once that snapped level differs from the snapped level at the press. An interaction whose level never
   moved sends neither `adjust` nor `change`; one that moved sends `change` even if it ended where it began.
+- **Hardware press:** when the first interactive node of a tile on a hardware deck is a slider declaring
+  `change`, a short press there sends `change` with the next level, relative or not, and a press at the top
+  sends `0`. The press step and the wrap are described under
+  [Stepping a Slider](/features/devices/#stepping-a-slider). Keyboard and deck-input activation in the
+  Macro Deck clients leaves a slider alone.
 - **Geometry is normative:** the track and thumb are implemented exactly; the fixtures in
   `ui-model/fixtures/component-profile/` resolve both at two sizes.
 

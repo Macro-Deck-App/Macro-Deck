@@ -1,8 +1,10 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.Ui.Sessions;
+using MacroDeckHost.Domain.Widgets;
 
 namespace MacroDeckHost.Tests.UnitTests.Devices.Surfaces;
 
@@ -349,5 +351,96 @@ internal sealed class DeviceTileTreeClaimTests
 			Assert.That(_fixture.Triggers.TriggerTypes, Is.EqualTo(_shortPressTriggers));
 			Assert.That(_fixture.UiOpener.OpenedWidgetIds, Is.Empty);
 		});
+	}
+
+	[TestCase(0.95, 0.1, 1.0)]
+	[TestCase(1.0, 0.1, 0.0)]
+	[TestCase(0.9, 0.1, 1.0)]
+	[TestCase(0.6, 0.4, 1.0)]
+	[TestCase(0.9, 0.3, 0.0)]
+	[TestCase(0.5, 0.01, 0.6)]
+	[TestCase(0.25, 0.25, 0.5)]
+	[TestCase(0.3, null, 0.4)]
+	[TestCase(0.3, 0.0, 0.4)]
+	public async Task A_whole_press_steps_a_claiming_slider_to_its_next_level_and_wraps_only_past_its_top(
+		double level,
+		double? step,
+		double expected)
+	{
+		TreeIs(SliderTree(level, step));
+
+		await SubmitAsync(DeviceInteractionKind.ShortPress);
+
+		var sent = _fixture.UiBroker.HostEvents.Single().Command;
+		Assert.Multiple(() =>
+		{
+			Assert.That(sent.Name, Is.EqualTo("change"));
+			Assert.That(JsonDocument.Parse(sent.Data.Utf8).RootElement.GetDouble(),
+				Is.EqualTo(expected).Within(1e-9));
+			Assert.That(_fixture.Triggers.TriggerTypes, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_slider_without_a_level_steps_from_the_start()
+	{
+		TreeIs("""{"id":"track","type":"ui.slider","properties":{"events":["change"]}}""");
+
+		await SubmitAsync(DeviceInteractionKind.ShortPress);
+
+		var sent = _fixture.UiBroker.HostEvents.Single().Command;
+		Assert.That(JsonDocument.Parse(sent.Data.Utf8).RootElement.GetDouble(), Is.EqualTo(0.1).Within(1e-9));
+	}
+
+	[Test]
+	public async Task A_released_short_press_steps_a_claiming_slider_but_a_held_one_does_not()
+	{
+		TreeIs(SliderTree(0.2, 0.1));
+
+		await HoldAsync(200);
+		var afterShortPress = SentEvents;
+		await HoldAsync(700);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(afterShortPress, Is.EqualTo(new[] { "change" }));
+			Assert.That(SentEvents, Is.EqualTo(new[] { "change" }));
+			Assert.That(_fixture.Triggers.TriggerTypes, Is.Empty);
+		});
+	}
+
+	[Test]
+	public async Task A_built_in_slider_answers_a_press_from_its_own_tree()
+	{
+		var slider = DeviceSurfaceFixture.Button("slider", 2, 0, withFlows: false);
+		slider.Type = WidgetTypeIds.Slider;
+		_fixture.Home.Widgets.Add(slider);
+		await _fixture.MutateAsync(() =>
+		{
+		});
+		TreeIs(SliderTree(0.5, 0.1));
+
+		var outcome = await SubmitAsync(DeviceInteractionKind.ShortPress, "slider");
+
+		var sent = _fixture.UiBroker.HostEvents.Single().Command;
+		Assert.Multiple(() =>
+		{
+			Assert.That(outcome, Is.EqualTo(DeviceInteractionOutcome.Accepted));
+			Assert.That(_fixture.UiOpener.OpenedWidgetIds, Is.EqualTo(new[] { "slider" }));
+			Assert.That(sent.Name, Is.EqualTo("change"));
+			Assert.That(JsonDocument.Parse(sent.Data.Utf8).RootElement.GetDouble(), Is.EqualTo(0.6).Within(1e-9));
+			Assert.That(_fixture.Triggers.TriggerTypes, Is.Empty);
+		});
+	}
+
+	private static string SliderTree(double level, double? step)
+	{
+		var properties = new JsonObject { ["level"] = level, ["events"] = new JsonArray("change") };
+		if (step is { } value)
+		{
+			properties["step"] = value;
+		}
+
+		return new JsonObject { ["id"] = "track", ["type"] = "ui.slider", ["properties"] = properties }.ToJsonString();
 	}
 }

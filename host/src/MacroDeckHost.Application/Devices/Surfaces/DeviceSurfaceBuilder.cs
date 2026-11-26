@@ -168,6 +168,11 @@ public sealed class DeviceSurfaceBuilder
 
 	private IReadOnlyList<DeviceInteractionKind> SupportedInteractions(Widget widget)
 	{
+		if (string.Equals(widget.Type, WidgetTypeIds.Slider, StringComparison.Ordinal))
+		{
+			return [DeviceInteractionKind.Press, DeviceInteractionKind.Release, DeviceInteractionKind.ShortPress];
+		}
+
 		var triggerTypes = WidgetFlowsJson.TriggerTypes(widget.Data);
 		var hasPressFlow = TimerWidgetConfig.IsTimerType(widget.Type)
 			|| _defaultShortPress.RunsOnDevices(widget.Type)
@@ -186,8 +191,7 @@ public sealed class DeviceSurfaceBuilder
 			];
 		}
 
-		return !string.Equals(widget.Type, WidgetTypeIds.Slider, StringComparison.Ordinal)
-			&& WidgetTypeIds.BuiltIn.Contains(widget.Type, StringComparer.Ordinal)
+		return WidgetTypeIds.BuiltIn.Contains(widget.Type, StringComparer.Ordinal)
 			&& WidgetFlowsJson.HasRunnableFlow(widget.Data, WidgetTriggerTypes.DoublePress)
 				? [DeviceInteractionKind.Press, DeviceInteractionKind.Release]
 				: [];

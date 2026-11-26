@@ -197,11 +197,10 @@ internal sealed class DeviceDoubleTapTests
 
 	[Test]
 	public async Task
-		A_widget_whose_only_press_flow_is_a_double_tap_offers_press_and_release_but_a_slider_or_plugin_widget_offers_nothing()
+		A_widget_whose_only_press_flow_is_a_double_tap_offers_press_and_release_but_a_plugin_widget_offers_nothing()
 	{
 		_fixture.Home.Widgets.AddRange([
 			WithFlows("double-only", 2, WidgetTypeIds.ActionButton, Flow("onDoublePress")),
-			WithFlows("slider", 3, WidgetTypeIds.Slider, Flow("onDoublePress")),
 			WithFlows("plugin", 4, "com.example.meter", Flow("onDoublePress"))
 		]);
 		await _fixture.MutateAsync(() =>
@@ -214,8 +213,31 @@ internal sealed class DeviceDoubleTapTests
 		{
 			Assert.That(widgets.Single(widget => widget.Id == "double-only").SupportedInteractions,
 				Is.EqualTo(new[] { DeviceInteractionKind.Press, DeviceInteractionKind.Release }));
-			Assert.That(widgets.Single(widget => widget.Id == "slider").SupportedInteractions, Is.Empty);
 			Assert.That(widgets.Single(widget => widget.Id == "plugin").SupportedInteractions, Is.Empty);
 		});
+	}
+
+	[Test]
+	public async Task A_slider_offers_press_release_and_short_press_whatever_flows_it_carries()
+	{
+		_fixture.Home.Widgets.AddRange([
+			WithFlows("plain-slider", 2, WidgetTypeIds.Slider),
+			WithFlows("double-tap-slider", 3, WidgetTypeIds.Slider, Flow("onDoublePress")),
+			WithFlows("press-flow-slider", 4, WidgetTypeIds.Slider, Flow("onShortPress"), Flow("onLongPress"))
+		]);
+		await _fixture.MutateAsync(() =>
+		{
+		});
+
+		var sliders = _fixture.Provider.Latest(_deviceId)
+			.Widgets.Where(widget => widget.Type == WidgetTypeIds.Slider)
+			.ToList();
+
+		Assert.That(sliders, Has.Count.EqualTo(3));
+		Assert.That(sliders.Select(widget => widget.SupportedInteractions),
+			Has.All.EqualTo(new[]
+			{
+				DeviceInteractionKind.Press, DeviceInteractionKind.Release, DeviceInteractionKind.ShortPress
+			}));
 	}
 }
