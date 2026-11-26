@@ -19,6 +19,10 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 {
 	private readonly Channel<byte[]> _toPlugin = Channel.CreateUnbounded<byte[]>();
 
+	// One at a time and in order, as the endpoint's queue handles them.
+	private readonly Channel<ProtocolEnvelope> _hostInvokes =
+		Channel.CreateUnbounded<ProtocolEnvelope>(new UnboundedChannelOptions { SingleReader = true });
+
 	private readonly Lock _gate = new();
 	private readonly List<ProtocolEnvelope> _sentByHost = [];
 	private readonly List<HostCallbackResult> _hostResults = [];
@@ -72,6 +76,7 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 	public InMemoryPluginLink(string sessionId)
 	{
 		_sessionId = sessionId;
+		_ = Task.Run(HandleHostInvokesAsync);
 	}
 
 	public event Action<ProtocolEnvelope>? CapabilityResultReceived;
@@ -130,6 +135,7 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 		CloseCode = closeCode;
 		CloseDescription = reason;
 		_toPlugin.Writer.TryComplete();
+		_hostInvokes.Writer.TryComplete();
 		return Task.CompletedTask;
 	}
 
@@ -182,7 +188,7 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 
 		if (string.Equals(envelope.Type, MessageTypes.HostInvoke, StringComparison.Ordinal))
 		{
-			await HandleHostInvokeAsync(envelope).ConfigureAwait(false);
+			_hostInvokes.Writer.TryWrite(envelope);
 			return;
 		}
 
@@ -245,13 +251,30 @@ internal sealed class InMemoryPluginLink : IPluginSocket, IPluginConnection
 	public Task AbortAsync()
 	{
 		_toPlugin.Writer.TryComplete();
+		_hostInvokes.Writer.TryComplete();
 		return Task.CompletedTask;
 	}
 
 	public ValueTask DisposeAsync()
 	{
 		_toPlugin.Writer.TryComplete();
+		_hostInvokes.Writer.TryComplete();
 		return ValueTask.CompletedTask;
+	}
+
+	private async Task HandleHostInvokesAsync()
+	{
+		await foreach (var envelope in _hostInvokes.Reader.ReadAllAsync().ConfigureAwait(false))
+		{
+			try
+			{
+				await HandleHostInvokeAsync(envelope).ConfigureAwait(false);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				TestContext.Progress.WriteLine($"A host.invoke failed in the harness: {exception}");
+			}
+		}
 	}
 
 	/// <summary>

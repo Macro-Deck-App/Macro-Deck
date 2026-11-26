@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Devices;
+using MacroDeckHost.Application.Devices.Surfaces.KeyImages;
 
 namespace MacroDeckHost.Application.Devices.Surfaces;
 
@@ -41,6 +42,8 @@ public sealed class DeviceSurfaceSession : IDisposable
 
 	public DeviceSurfacePressTracker? Presses { get; set; }
 
+	public DeviceKeyImageSession? KeyImages { get; set; }
+
 	public ITimer? RebuildTimer { get; set; }
 
 	/// <summary>The profile the device is currently rendering, which a cross-profile navigation moves.</summary>
@@ -57,6 +60,8 @@ public sealed class DeviceSurfaceSession : IDisposable
 	public string? FolderId { get; set; }
 
 	public bool Online { get; set; } = true;
+
+	public bool Opened { get; set; }
 
 	public long Revision { get; private set; }
 

@@ -1,3 +1,5 @@
+using MacroDeck.Sdk.Layouts;
+
 namespace MacroDeck.Sdk.Devices;
 
 /// <summary>
@@ -88,5 +90,49 @@ public interface IDeviceSession : IAsyncDisposable
 		CancellationToken cancellationToken = default)
 	{
 		return Task.FromResult<DeviceWidgetIconImage?>(null);
+	}
+
+	/// <summary>
+	/// The format in which the host delivers a finished picture for every key, as the layout's grid asked
+	/// for it through <see cref="LayoutGrid.KeyImages" />. Null when the host renders
+	/// no pictures for this session: the layout asks for none, the host cannot honour the format, or the
+	/// host predates key images. Fixed for the life of the session; a provider that sees null renders
+	/// <see cref="CurrentSurface" /> itself, exactly as before. Default-implemented, like
+	/// <see cref="GetWidgetIconAsync" />, so an implementer compiled before this member existed keeps
+	/// compiling.
+	/// </summary>
+	LayoutKeyImageFormat? KeyImageFormat => null;
+
+	/// <summary>
+	/// Raised with one cell's new picture while <see cref="KeyImageFormat" /> is set. Every cell of the
+	/// layout's hardware grid (its single grid region) has a picture: empty cells, and cells the current
+	/// surface does not cover, are drawn as background. Never raised for a picture that did not change. A
+	/// picture of a change the host rebuilds the surface for (an edit, a widget's state or label, a
+	/// navigation) is raised after that rebuild: after its <see cref="SurfaceChanged" />, or once the host
+	/// found the surface unchanged. A change only the picture shows (a clock tick, live widget content) is
+	/// raised on its own, with no surface. When the device comes back online every cell is raised again
+	/// with a newer revision than any the session already handed over. A provider drops a picture whose
+	/// <see cref="DeviceKeyImage.Revision" /> is not greater than the last one it applied for that cell;
+	/// the SDK's out-of-process session already drops those before raising. Interactions still name the
+	/// widget ids of <see cref="CurrentSurface" />.
+	/// </summary>
+	event EventHandler<DeviceKeyImageChangedEventArgs>? KeyImageChanged
+	{
+		add { }
+		remove { }
+	}
+
+	/// <summary>
+	/// The current picture of one cell of the hardware grid, so a device can paint every key as soon as the
+	/// session opens rather than waiting for the first <see cref="KeyImageChanged" />. Answers for every
+	/// cell right after the session opens. Default-implemented, like <see cref="GetWidgetIconAsync" />.
+	/// </summary>
+	/// <returns>
+	/// Null when <see cref="KeyImageFormat" /> is null, the cell is outside the grid, or the host does not
+	/// serve key images at all - an older host answers null, never an exception.
+	/// </returns>
+	Task<DeviceKeyImage?> GetKeyImageAsync(int row, int column, CancellationToken cancellationToken = default)
+	{
+		return Task.FromResult<DeviceKeyImage?>(null);
 	}
 }

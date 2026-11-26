@@ -16,6 +16,8 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 		_directory = paths.FontsDirectory;
 	}
 
+	public event EventHandler? Changed;
+
 	public void Dispose()
 	{
 		_gate.Dispose();
@@ -82,6 +84,7 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 				if (imported)
 				{
 					_catalog.Reload();
+					Changed?.Invoke(this, EventArgs.Empty);
 				}
 			}
 
@@ -122,6 +125,7 @@ public sealed class FileSystemUserFontLibrary : IUserFontLibrary, IDisposable
 			}
 
 			_catalog.Reload();
+			Changed?.Invoke(this, EventArgs.Empty);
 			return true;
 		}
 		finally

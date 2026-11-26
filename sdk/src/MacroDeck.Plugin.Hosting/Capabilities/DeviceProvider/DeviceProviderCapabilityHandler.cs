@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using MacroDeck.Plugin.Hosting.Capabilities.LayoutProvider;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
 using MacroDeck.Plugin.Hosting.Transport;
 using MacroDeck.Plugin.Protocol.Capabilities;
@@ -26,7 +27,7 @@ internal sealed class DeviceProviderCapabilityHandler(
 	IHostInvoker? invoker = null,
 	IPluginHostAssetReceiver? assets = null) : ICapabilityHandler
 {
-	private static readonly CapabilityVersionRange _version = new() { Minimum = 1, Maximum = 2 };
+	private static readonly CapabilityVersionRange _version = new() { Minimum = 1, Maximum = 3 };
 
 	private readonly IReadOnlyList<IDeviceProvider> _providers = [.. integrations.OfType<IDeviceProvider>()];
 
@@ -82,16 +83,27 @@ internal sealed class DeviceProviderCapabilityHandler(
 			case CapabilityOperations.DeviceProvider.SessionOpen:
 				return await OpenAsync(Arguments<DeviceSessionOpenArguments>(invocation), cancellationToken);
 
-			// Both session operations below are no-ops for a session this plugin no longer holds, rather
+			// The session operations below are no-ops for a session this plugin no longer holds, rather
 			// than failures. The host pushes only to sessions it opened, so an unknown id means the two
 			// ends have already diverged - closing what is closed is what the caller wanted, and a surface
-			// for a session that has ended is stale by definition.
+			// or picture for a session that has ended is stale by definition.
 			case CapabilityOperations.DeviceProvider.SessionSurface:
 			{
 				if (Arguments<DeviceSessionSurfaceArguments>(invocation) is { } arguments
 					&& _sessions.TryGetValue(arguments.SessionId, out var session))
 				{
 					session.Apply(arguments.Surface);
+				}
+
+				return CapabilityInvocationResult.Ok();
+			}
+
+			case CapabilityOperations.DeviceProvider.SessionKeyImages:
+			{
+				if (Arguments<DeviceSessionKeyImagesArguments>(invocation) is { } arguments
+					&& _sessions.TryGetValue(arguments.SessionId, out var session))
+				{
+					session.ApplyKeyImages(arguments.Images);
 				}
 
 				return CapabilityInvocationResult.Ok();
@@ -158,7 +170,8 @@ internal sealed class DeviceProviderCapabilityHandler(
 			arguments.DeviceId,
 			arguments.ProviderDeviceId,
 			invoker,
-			assets);
+			assets,
+			arguments.KeyImages is { } keyImages ? LayoutDescriptorMapper.ToSdk(keyImages) : null);
 		_sessions[arguments.SessionId] = session;
 
 		try

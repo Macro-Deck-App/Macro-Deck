@@ -22,6 +22,11 @@ internal sealed class PendingTreeUiSessionBroker : IUiSessionBroker
 		return await Tree.Task.WaitAsync(cancellationToken);
 	}
 
+	public IUiHostObservation? ObserveHost(string sessionId, IUiHostObserver observer)
+	{
+		return null;
+	}
+
 	public bool DispatchHostEvent(string sessionId, UiSessionEventCommand command)
 	{
 		return true;

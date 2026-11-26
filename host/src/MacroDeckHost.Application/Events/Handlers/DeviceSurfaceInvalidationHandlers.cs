@@ -88,30 +88,41 @@ public sealed class DeviceChangedDeviceSurfaceHandler : INotificationHandler<Dev
 {
 	private readonly IDeviceSurfaceService _surfaces;
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly DeviceSessionLane _lane;
 
-	public DeviceChangedDeviceSurfaceHandler(IDeviceSurfaceService surfaces, IServiceScopeFactory scopeFactory)
+	public DeviceChangedDeviceSurfaceHandler(
+		IDeviceSurfaceService surfaces,
+		IServiceScopeFactory scopeFactory,
+		DeviceSessionLane lane)
 	{
 		_surfaces = surfaces;
 		_scopeFactory = scopeFactory;
+		_lane = lane;
 	}
 
-	public async ValueTask Handle(DeviceChangedNotification notification, CancellationToken cancellationToken)
+	public ValueTask Handle(DeviceChangedNotification notification, CancellationToken cancellationToken)
 	{
-		if (_surfaces.IsOpen(notification.DeviceId))
+		_ = _lane.Enqueue(notification.DeviceId, "open", () => OpenOrRebuildAsync(notification.DeviceId));
+		return ValueTask.CompletedTask;
+	}
+
+	private async Task OpenOrRebuildAsync(Guid deviceId)
+	{
+		if (_surfaces.IsOpen(deviceId))
 		{
-			await _surfaces.InvalidateAsync(notification.DeviceId, cancellationToken);
+			await _surfaces.InvalidateAsync(deviceId);
 			return;
 		}
 
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var devices = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
-		if (await devices.GetById(notification.DeviceId) is not { } device || !IsProviderDevice(device))
+		if (await devices.GetById(deviceId) is not { } device || !IsProviderDevice(device))
 		{
 			return;
 		}
 
-		await _surfaces.OpenAsync(device.Id, device.ProviderId!, device.ProviderDeviceId!, cancellationToken);
+		await _surfaces.OpenAsync(device.Id, device.ProviderId!, device.ProviderDeviceId!);
 	}
 
 	private static bool IsProviderDevice(DeviceEntity device)
@@ -123,30 +134,40 @@ public sealed class DeviceChangedDeviceSurfaceHandler : INotificationHandler<Dev
 public sealed class DeviceUnregisteredDeviceSurfaceHandler : INotificationHandler<DeviceUnregisteredNotification>
 {
 	private readonly IDeviceSurfaceService _surfaces;
+	private readonly DeviceSessionLane _lane;
 
-	public DeviceUnregisteredDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
+	public DeviceUnregisteredDeviceSurfaceHandler(IDeviceSurfaceService surfaces, DeviceSessionLane lane)
 	{
 		_surfaces = surfaces;
+		_lane = lane;
 	}
 
 	public ValueTask Handle(DeviceUnregisteredNotification notification, CancellationToken cancellationToken)
 	{
-		return new ValueTask(_surfaces.CloseAsync(notification.DeviceId, "unregistered", cancellationToken));
+		_ = _lane.Enqueue(notification.DeviceId,
+			"close",
+			() => _surfaces.CloseAsync(notification.DeviceId, "unregistered"));
+		return ValueTask.CompletedTask;
 	}
 }
 
 public sealed class DeviceRemovedDeviceSurfaceHandler : INotificationHandler<DeviceRemovedNotification>
 {
 	private readonly IDeviceSurfaceService _surfaces;
+	private readonly DeviceSessionLane _lane;
 
-	public DeviceRemovedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
+	public DeviceRemovedDeviceSurfaceHandler(IDeviceSurfaceService surfaces, DeviceSessionLane lane)
 	{
 		_surfaces = surfaces;
+		_lane = lane;
 	}
 
 	public ValueTask Handle(DeviceRemovedNotification notification, CancellationToken cancellationToken)
 	{
-		return new ValueTask(_surfaces.CloseAsync(notification.DeviceId, "removed", cancellationToken));
+		_ = _lane.Enqueue(notification.DeviceId,
+			"close",
+			() => _surfaces.CloseAsync(notification.DeviceId, "removed"));
+		return ValueTask.CompletedTask;
 	}
 }
 
@@ -154,14 +175,19 @@ public sealed class DeviceRemovedDeviceSurfaceHandler : INotificationHandler<Dev
 public sealed class DevicePresenceChangedDeviceSurfaceHandler : INotificationHandler<DevicePresenceChangedNotification>
 {
 	private readonly IDeviceSurfaceService _surfaces;
+	private readonly DeviceSessionLane _lane;
 
-	public DevicePresenceChangedDeviceSurfaceHandler(IDeviceSurfaceService surfaces)
+	public DevicePresenceChangedDeviceSurfaceHandler(IDeviceSurfaceService surfaces, DeviceSessionLane lane)
 	{
 		_surfaces = surfaces;
+		_lane = lane;
 	}
 
 	public ValueTask Handle(DevicePresenceChangedNotification notification, CancellationToken cancellationToken)
 	{
-		return new ValueTask(_surfaces.SetPresenceAsync(notification.DeviceId, notification.Online, cancellationToken));
+		_ = _lane.Enqueue(notification.DeviceId,
+			"update the presence of",
+			() => _surfaces.SetPresenceAsync(notification.DeviceId, notification.Online));
+		return ValueTask.CompletedTask;
 	}
 }

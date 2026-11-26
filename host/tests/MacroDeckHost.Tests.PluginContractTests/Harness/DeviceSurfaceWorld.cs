@@ -3,6 +3,7 @@ using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Deck;
 using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
+using MacroDeckHost.Application.Devices.Surfaces.KeyImages;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
@@ -29,7 +30,8 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 	public DeviceSurfaceWorld(
 		IDeviceSurfaceProvider provider,
 		string providerId,
-		Action<IServiceCollection>? configure = null)
+		Action<IServiceCollection>? configure = null,
+		IDeviceKeyImageRenderer? keyImageRenderer = null)
 	{
 		Provider = provider;
 		ProviderId = providerId;
@@ -56,6 +58,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		_services = services.BuildServiceProvider();
 
 		var scopeFactory = _services.GetRequiredService<IServiceScopeFactory>();
+		Scopes = scopeFactory;
 		Service = new DeviceSurfaceService(scopeFactory,
 			new SingleProviderResolver(provider, providerId),
 			Profiles,
@@ -71,7 +74,8 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 			new LabelSubscriptionTracker(),
 			Time,
 			new DeckClientTracker(Serilog.Core.Logger.None),
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			keyImageRenderer);
 	}
 
 	public MacroDeck.Plugin.Testing.ManualTimeProvider Time { get; } = new();
@@ -91,6 +95,8 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 	public string ProviderId { get; }
 
 	public DeviceSurfaceService Service { get; }
+
+	public IServiceScopeFactory Scopes { get; }
 
 	public async Task<Guid> RegisterAndOpenAsync(string providerDeviceId)
 	{
@@ -152,7 +158,7 @@ internal sealed class DeviceSurfaceWorld : IDisposable
 		}
 	}
 
-	private sealed class NoEventBus : IEventBus
+	internal sealed class NoEventBus : IEventBus
 	{
 		private readonly System.Threading.Channels.Channel<EventOccurrence> _channel =
 			System.Threading.Channels.Channel.CreateUnbounded<EventOccurrence>();

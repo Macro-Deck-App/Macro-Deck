@@ -405,8 +405,9 @@ To register a resource, call `register-resource` first. On `uploadRequired`, sen
 | `interaction` | `sessionId`, `kind`, `widgetId`, `controlIndex`, `value`, `surfaceRevision`, `data` | Reports a hardware interaction; returns a `DeviceInteractionResult`. |
 | `icon` | `sessionId`, `iconId`, `size`, `knownETag` | Fetches icon bytes for the current surface; the bytes arrive over `host.asset.*`. |
 | `close` | `sessionId` | Closes an open device session at the provider's request. |
+| `key-image` | `sessionId`, `row`, `column` | Fetches the current picture of one cell of a session opened with key images: `row`, `column`, `revision`, `contentType` and either `content` (base64) or a `transferId` whose bytes arrive over `host.asset.*` with kind `key-image`. No value when the cell has no picture. |
 
-`register`, `update`, `presence`, `unregister` need no session, are keyed by provider-local `deviceId`, and are available to every `device-provider` plugin. `interaction`, `icon`, `close` are keyed by the `sessionId` from `session.open`, apply only to an opened session (capability version 2), and are the reverse of the capability's `session.open` / `session.surface` / `session.close` invokes. See [Device providers](/features/devices/).
+`register`, `update`, `presence`, `unregister` need no session, are keyed by provider-local `deviceId`, and are available to every `device-provider` plugin. `interaction`, `icon`, `close` are keyed by the `sessionId` from `session.open`, apply only to an opened session (capability version 2), and are the reverse of the capability's `session.open` / `session.surface` / `session.close` invokes. `key-image` needs capability version 3 and the reverse of it is `session.key-images`; a host that predates it answers `CAPABILITY_UNSUPPORTED`. See [Device providers](/features/devices/) and [Key images](/features/devices/#key-images).
 
 #### `variable-values`
 

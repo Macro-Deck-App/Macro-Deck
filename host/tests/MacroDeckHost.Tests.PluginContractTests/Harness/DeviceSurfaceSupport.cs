@@ -86,6 +86,12 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 
 	public DeviceWidgetIconImage? NextWidgetIcon { get; set; }
 
+	public List<(Guid DeviceId, int Row, int Column)> KeyImageRequests { get; } = [];
+
+	public DeviceKeyImage? NextKeyImage { get; set; }
+
+	public Func<Guid, int, int, DeviceKeyImage?>? KeyImageAnswer { get; set; }
+
 	public bool IsOpen(Guid deviceId)
 	{
 		return true;
@@ -142,6 +148,16 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 	{
 		WidgetIconRequests.Add((deviceId, widgetId, knownETag));
 		return Task.FromResult(NextWidgetIcon);
+	}
+
+	public Task<DeviceKeyImage?> GetKeyImageAsync(
+		Guid deviceId,
+		int row,
+		int column,
+		CancellationToken cancellationToken = default)
+	{
+		KeyImageRequests.Add((deviceId, row, column));
+		return Task.FromResult(KeyImageAnswer is { } answer ? answer(deviceId, row, column) : NextKeyImage);
 	}
 
 	public Task InvalidateAsync(CancellationToken cancellationToken = default)

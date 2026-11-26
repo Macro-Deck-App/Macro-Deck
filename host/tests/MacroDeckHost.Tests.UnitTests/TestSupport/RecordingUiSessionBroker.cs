@@ -64,6 +64,101 @@ internal sealed class RecordingUiSessionBroker : IUiSessionBroker
 		return null;
 	}
 
+	private readonly Lock _observerGate = new();
+
+	private readonly Dictionary<string, List<IUiHostObserver>> _hostObservers = new(StringComparer.Ordinal);
+
+	public List<string> HostResyncs { get; } = [];
+
+	public Dictionary<string, UiRawJson> HostTrees { get; } = new(StringComparer.Ordinal);
+
+	public IUiHostObservation? ObserveHost(string sessionId, IUiHostObserver observer)
+	{
+		lock (_observerGate)
+		{
+			if (!_hostObservers.TryGetValue(sessionId, out var observers))
+			{
+				observers = [];
+				_hostObservers[sessionId] = observers;
+			}
+
+			observers.Add(observer);
+		}
+
+		if (HostTrees.TryGetValue(sessionId, out var tree))
+		{
+			observer.OnSnapshot(tree, 1);
+		}
+
+		return new HostObservation(this, sessionId, observer);
+	}
+
+	public IReadOnlyList<string> ObservedSessions
+	{
+		get
+		{
+			lock (_observerGate)
+			{
+				return [.. _hostObservers.Where(pair => pair.Value.Count > 0).Select(pair => pair.Key)];
+			}
+		}
+	}
+
+	public void PublishHostSnapshot(string sessionId, UiRawJson tree, int revision)
+	{
+		foreach (var observer in ObserversOf(sessionId))
+		{
+			observer.OnSnapshot(tree, revision);
+		}
+	}
+
+	public void PublishHostPatch(string sessionId, UiRawJson patch, int fromRevision, int toRevision)
+	{
+		foreach (var observer in ObserversOf(sessionId))
+		{
+			observer.OnPatch(patch, fromRevision, toRevision);
+		}
+	}
+
+	public void EndHostSession(string sessionId, bool retryable)
+	{
+		foreach (var observer in ObserversOf(sessionId))
+		{
+			observer.OnEnded(UiSessionEndReason.Invalidated, UiSessionErrorCodes.WidgetReconfigured, retryable);
+		}
+	}
+
+	private IUiHostObserver[] ObserversOf(string sessionId)
+	{
+		lock (_observerGate)
+		{
+			return _hostObservers.TryGetValue(sessionId, out var observers) ? [.. observers] : [];
+		}
+	}
+
+	private sealed class HostObservation(RecordingUiSessionBroker broker, string sessionId, IUiHostObserver observer)
+		: IUiHostObservation
+	{
+		public void RequestResync()
+		{
+			lock (broker._observerGate)
+			{
+				broker.HostResyncs.Add(sessionId);
+			}
+		}
+
+		public void Dispose()
+		{
+			lock (broker._observerGate)
+			{
+				if (broker._hostObservers.TryGetValue(sessionId, out var observers))
+				{
+					observers.Remove(observer);
+				}
+			}
+		}
+	}
+
 	public bool DispatchHostEvent(string sessionId, UiSessionEventCommand command)
 	{
 		HostEvents.Add((sessionId, command));

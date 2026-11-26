@@ -86,9 +86,11 @@ internal sealed class FakeLocalizationPreferences : IAppPreferenceService
 		return Task.FromResult(new LocalizationSettings(Culture));
 	}
 
+	public AppearanceSettings? Appearance { get; set; }
+
 	public Task<AppearanceSettings> GetAppearance()
 	{
-		throw new NotSupportedException();
+		return Appearance is { } appearance ? Task.FromResult(appearance) : throw new NotSupportedException();
 	}
 
 	public Task<AppearanceSettings> SetAppearance(string? themeMode, string? accentColor, string? fontFamily)

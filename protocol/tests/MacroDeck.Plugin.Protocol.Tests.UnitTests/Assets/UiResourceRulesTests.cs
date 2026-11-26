@@ -8,7 +8,7 @@ public class UiResourceRulesTests
 	private static readonly string[] _publishedKinds =
 	[
 		"icon", "artwork", "action-icon", "ui-resource", "icon-pack", "android-screenshot", "companion-screenshot",
-		"ui-upload"
+		"ui-upload", "key-image"
 	];
 
 	[TestCase("photo")]

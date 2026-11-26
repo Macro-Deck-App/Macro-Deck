@@ -1,3 +1,5 @@
+using MacroDeck.Plugin.Protocol.Capabilities.LayoutProvider;
+
 namespace MacroDeck.Plugin.Protocol.Capabilities.DeviceProvider;
 
 /// <summary>Arguments for the <c>device-provider</c> capability's <c>session.open</c> operation.</summary>
@@ -12,6 +14,11 @@ public sealed record DeviceSessionOpenArguments
 
 	/// <summary>The provider-local id the device was registered under.</summary>
 	public required string ProviderDeviceId { get; init; }
+
+	/// <summary>Set only when the host renders key images for this session, in this format for the whole
+	/// session; <c>session.key-images</c> then delivers them. Absent from a host that renders none, an
+	/// older host included. See the SDK's <c>IDeviceSession.KeyImageFormat</c>.</summary>
+	public LayoutKeyImageFormatDto? KeyImages { get; init; }
 }
 
 /// <summary>Result of the <c>session.open</c> operation.</summary>
@@ -29,6 +36,42 @@ public sealed record DeviceSessionSurfaceArguments
 	public required string SessionId { get; init; }
 
 	public required DeviceSurfaceDto Surface { get; init; }
+}
+
+/// <summary>
+/// Arguments for the <c>device-provider</c> capability's <c>session.key-images</c> operation, sent from
+/// version 3 only and only to a session opened with <see cref="DeviceSessionOpenArguments.KeyImages" />.
+/// Several cells per invoke; the SDK raises one <c>KeyImageChanged</c> per cell.
+/// </summary>
+public sealed record DeviceSessionKeyImagesArguments
+{
+	public required string SessionId { get; init; }
+
+	public required IReadOnlyList<DeviceSessionKeyImageDto> Images { get; init; }
+}
+
+/// <summary>
+/// Mirrors the SDK's <c>DeviceKeyImage</c>. The picture travels either inline in <see cref="Content" />
+/// or, when it is too large for one message, over the host-to-plugin <c>host.asset.*</c> pipeline under
+/// <see cref="TransferId" />; exactly one of the two is set.
+/// </summary>
+public sealed record DeviceSessionKeyImageDto
+{
+	public required int Row { get; init; }
+
+	public required int Column { get; init; }
+
+	/// <summary>Per cell, from 1, increasing with every change. A receiver drops a picture whose revision
+	/// is not greater than the last one it applied for that cell.</summary>
+	public required long Revision { get; init; }
+
+	public required string ContentType { get; init; }
+
+	/// <summary>The picture inline, base64 on the wire.</summary>
+	public byte[]? Content { get; init; }
+
+	/// <summary>Correlates the picture with the <c>host.asset.*</c> transfer that carries it.</summary>
+	public string? TransferId { get; init; }
 }
 
 /// <summary>Arguments for the <c>device-provider</c> capability's <c>session.close</c> operation.</summary>

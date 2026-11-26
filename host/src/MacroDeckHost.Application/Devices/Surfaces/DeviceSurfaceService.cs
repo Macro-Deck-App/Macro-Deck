@@ -1,8 +1,11 @@
 using System.Collections.Concurrent;
 using MacroDeck.Plugin.Protocol.Limits;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Layouts;
 using MacroDeckHost.Application.Deck;
+using MacroDeckHost.Application.Devices.Surfaces.KeyImages;
 using MacroDeckHost.Application.Icons;
+using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
@@ -35,6 +38,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 	private readonly LabelSubscriptionTracker _labelSubscriptions;
 	private readonly TimeProvider _timeProvider;
 	private readonly DeckClientTracker _deckClients;
+	private readonly IDeviceKeyImageRenderer? _keyImageRenderer;
 	private readonly ILogger _logger;
 
 	public DeviceSurfaceService(
@@ -49,7 +53,8 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		LabelSubscriptionTracker labelSubscriptions,
 		TimeProvider timeProvider,
 		DeckClientTracker deckClients,
-		ILogger logger)
+		ILogger logger,
+		IDeviceKeyImageRenderer? keyImageRenderer = null)
 	{
 		_scopeFactory = scopeFactory;
 		_providers = providers;
@@ -62,7 +67,12 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		_labelSubscriptions = labelSubscriptions;
 		_timeProvider = timeProvider;
 		_deckClients = deckClients;
+		_keyImageRenderer = keyImageRenderer;
 		_logger = logger.ForContext<DeviceSurfaceService>();
+		if (_keyImageRenderer is not null)
+		{
+			_keyImageRenderer.FontsChanged += OnFontsChanged;
+		}
 	}
 
 	public bool IsOpen(Guid deviceId)
@@ -103,10 +113,17 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			return;
 		}
 
+		session.KeyImages = await KeyImagesFor(deviceId, provider, session.Online);
+		if (session.KeyImages is { } keyImages)
+		{
+			await PrimeAsync(session, keyImages, cancellationToken);
+		}
+
 		try
 		{
 			var accepted = await provider.OpenAsync(new DeviceSurfaceSessionDescriptor(deviceId.ToString(),
-					providerDeviceId),
+					providerDeviceId,
+					session.KeyImages?.Layout.Format),
 				cancellationToken);
 			if (!accepted)
 			{
@@ -124,9 +141,12 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			return;
 		}
 
+		session.Opened = true;
+
 		// The first surface is always delivered, complete and at revision 1, even when it is the empty
 		// one: a session that never pushed would leave the provider with nothing to render.
 		await RebuildAsync(session, true, cancellationToken);
+		session.KeyImages?.Start();
 	}
 
 	public async Task CloseAsync(Guid deviceId, string? reason, CancellationToken cancellationToken = default)
@@ -305,6 +325,27 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		};
 	}
 
+	public async Task<DeviceKeyImage?> GetKeyImageAsync(
+		Guid deviceId,
+		int row,
+		int column,
+		CancellationToken cancellationToken = default)
+	{
+		return _sessions.TryGetValue(deviceId, out var session) && session.KeyImages is { } keyImages
+			? await keyImages.GetAsync(row, column, cancellationToken)
+			: null;
+	}
+
+	public Task RefreshKeyImagesAsync(CancellationToken cancellationToken = default)
+	{
+		foreach (var session in _sessions.Values)
+		{
+			session.KeyImages?.Refresh();
+		}
+
+		return Task.CompletedTask;
+	}
+
 	public Task InvalidateAsync(CancellationToken cancellationToken = default)
 	{
 		foreach (var session in _sessions.Values)
@@ -335,6 +376,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		session.Online = online;
 		if (!online)
 		{
+			session.KeyImages?.SetOnline(false);
 			DeckClientChange? clientChange;
 			await session.Gate.WaitAsync(cancellationToken);
 			try
@@ -360,7 +402,14 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 		// Forced: a device that was powered off renders nothing, so the surface it missed has to be sent
 		// again even when nothing changed while it was away.
-		await RebuildAsync(session, true, cancellationToken);
+		try
+		{
+			await RebuildAsync(session, true, cancellationToken);
+		}
+		finally
+		{
+			session.KeyImages?.SetOnline(true);
+		}
 	}
 
 	public Task OnWidgetStateChanged(Guid widgetId, CancellationToken cancellationToken = default)
@@ -380,13 +429,97 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 
 	public void Dispose()
 	{
+		if (_keyImageRenderer is not null)
+		{
+			_keyImageRenderer.FontsChanged -= OnFontsChanged;
+		}
+
 		foreach (var deviceId in _sessions.Keys)
 		{
 			if (_sessions.TryRemove(deviceId, out var session))
 			{
 				Unsubscribe(session);
+				_ = session.KeyImages?.DisposeAsync().AsTask();
 				session.Dispose();
 			}
+		}
+	}
+
+	private void OnFontsChanged(object? sender, EventArgs e)
+	{
+		_ = RefreshKeyImagesAsync();
+	}
+
+	private async Task<DeviceKeyImageSession?> KeyImagesFor(Guid deviceId, IDeviceSurfaceProvider provider, bool online)
+	{
+		if (_keyImageRenderer is null || !provider.SupportsKeyImages)
+		{
+			return null;
+		}
+
+		LayoutDescriptor layout;
+		try
+		{
+			await using var scope = _scopeFactory.CreateAsyncScope();
+			var device = await scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetById(deviceId);
+			if (!LayoutSnapshotSerializer.TryDeserialize(device?.LayoutSnapshot, out layout))
+			{
+				return null;
+			}
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			_logger.Error(exception, "Failed to read the layout of device {DeviceId}; it gets no key images", deviceId);
+			return null;
+		}
+
+		if (DeviceKeyImageLayout.Of(layout, out var problem) is not { } keyImages)
+		{
+			if (problem is not null)
+			{
+				_logger.Warning("Device {DeviceId} gets no key images: layout {LayoutId} is invalid, {Problem}",
+					deviceId,
+					layout.Id,
+					problem);
+			}
+
+			return null;
+		}
+
+		return new DeviceKeyImageSession(deviceId,
+			keyImages,
+			provider,
+			_keyImageRenderer,
+			_scopeFactory,
+			_timeProvider,
+			online,
+			_logger);
+	}
+
+	// Drawn before the provider opens the session, whose open handler may already ask for any key's picture.
+	private async Task PrimeAsync(
+		DeviceSurfaceSession session,
+		DeviceKeyImageSession keyImages,
+		CancellationToken cancellationToken)
+	{
+		try
+		{
+			DeviceSurfaceProjection projection;
+			await session.Gate.WaitAsync(cancellationToken);
+			try
+			{
+				projection = await ProjectAsync(session, cancellationToken);
+			}
+			finally
+			{
+				session.Gate.Release();
+			}
+
+			keyImages.Update(projection);
+		}
+		catch (Exception exception) when (exception is not (OutOfMemoryException or OperationCanceledException))
+		{
+			_logger.Error(exception, "Failed to draw the first keys of device {DeviceId}", session.DeviceId);
 		}
 	}
 
@@ -410,6 +543,7 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			return;
 		}
 
+		session.KeyImages?.HoldForSurface();
 		session.RebuildTimer ??= _timeProvider.CreateTimer(_ => _ = RunScheduledRebuild(session),
 			null,
 			Timeout.InfiniteTimeSpan,
@@ -428,6 +562,10 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
 			_logger.Error(exception, "Failed to rebuild the surface for device {DeviceId}", session.DeviceId);
+		}
+		finally
+		{
+			session.KeyImages?.ReleaseForSurface();
 		}
 	}
 
@@ -513,7 +651,21 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			return;
 		}
 
-		if (!session.Online)
+		await PushSurfaceAsync(session, projection, force, cancellationToken);
+
+		// After the surface push, never before it: a key picture must not reach a device ahead of the surface
+		// it was drawn from. Every rebuild reaches it, a rebuild that pushed nothing included.
+		session.KeyImages?.Update(projection);
+	}
+
+	private async Task PushSurfaceAsync(
+		DeviceSurfaceSession session,
+		DeviceSurfaceProjection projection,
+		bool force,
+		CancellationToken cancellationToken)
+	{
+		// Nothing reaches a provider before its open returned; the open's own rebuild delivers revision 1.
+		if (!session.Online || !session.Opened)
 		{
 			return;
 		}
@@ -717,6 +869,11 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 		if (session.Presses is { } presses)
 		{
 			await presses.CancelAllAsync();
+		}
+
+		if (session.KeyImages is { } keyImages)
+		{
+			await keyImages.DisposeAsync();
 		}
 
 		if (notifyProvider)

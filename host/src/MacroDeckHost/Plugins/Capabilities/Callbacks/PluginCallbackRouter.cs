@@ -1742,6 +1742,29 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return icon is null ? HostCallbackResult.Ok() : WidgetIconResult(pluginId, icon);
 			}
 
+			case HostOperations.Devices.KeyImage:
+			{
+				var arguments = Deserialize<DevicesKeyImageArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				if (ResolveSession(pluginId, arguments.SessionId) is not { } deviceId)
+				{
+					return UnknownSession();
+				}
+
+				var image = await _deviceSurfaces!.GetKeyImageAsync(deviceId,
+					arguments.Row,
+					arguments.Column,
+					cancellationToken);
+
+				// No picture for the cell is answered with no value, as for a widget icon: the session has no
+				// key images, or the cell is outside its grid.
+				return image is null ? HostCallbackResult.Ok() : KeyImageResult(pluginId, image);
+			}
+
 			case HostOperations.Devices.Close:
 			{
 				var arguments = Deserialize<DevicesCloseArguments>(payload.Arguments);
@@ -2541,6 +2564,63 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			ByteLength = content.Length,
 			ContentHash = contentHash,
 			NotModified = false,
+			TransferId = transferId
+		});
+	}
+
+	private HostCallbackResult KeyImageResult(string pluginId, DeviceKeyImage image)
+	{
+		if (image.Content.Length <= RemoteDeviceSurfaceProvider.MaxInlineKeyImageBytes)
+		{
+			return HostCallbackResult.Ok(new DevicesKeyImageResult
+			{
+				Row = image.Row,
+				Column = image.Column,
+				Revision = image.Revision,
+				ContentType = image.ContentType,
+				Content = image.Content.ToArray()
+			});
+		}
+
+		if (_assets is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+				"This host cannot transfer key image bytes to a plugin.");
+		}
+
+		var content = image.Content;
+		var transferId = Guid.CreateVersion7().ToString();
+		var contentHash = AssetContentHash.Compute(content.Span);
+
+		// Started and not awaited for the same reason as IconResult, and bounded by the same per-plugin cap.
+		var sender = _assets;
+		var transfers = _iconTransfers.GetOrAdd(pluginId, _ => new SemaphoreSlim(MaxConcurrentIconTransfers));
+		_ = Task.Run(async () =>
+			{
+				await transfers.WaitAsync(CancellationToken.None);
+				try
+				{
+					await sender.SendAsync(pluginId,
+						transferId,
+						AssetKinds.KeyImage,
+						image.ContentType,
+						content,
+						contentHash,
+						CancellationToken.None);
+				}
+				finally
+				{
+					transfers.Release();
+				}
+			},
+			CancellationToken.None);
+
+		return HostCallbackResult.Ok(new DevicesKeyImageResult
+		{
+			Row = image.Row,
+			Column = image.Column,
+			Revision = image.Revision,
+			ContentType = image.ContentType,
 			TransferId = transferId
 		});
 	}

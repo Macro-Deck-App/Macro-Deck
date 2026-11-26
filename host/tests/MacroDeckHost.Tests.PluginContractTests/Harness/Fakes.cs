@@ -185,21 +185,18 @@ internal sealed class RecordingMediator : IMediator
 {
 	public List<object> Published { get; } = [];
 
+	public Func<object, CancellationToken, ValueTask>? OnPublish { get; init; }
+
 	public ValueTask Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)
 		where TNotification : INotification
 	{
-		if (notification is not null)
-		{
-			Published.Add(notification);
-		}
-
-		return default;
+		return notification is null ? default : Publish((object)notification, cancellationToken);
 	}
 
 	public ValueTask Publish(object notification, CancellationToken cancellationToken = default)
 	{
 		Published.Add(notification);
-		return default;
+		return OnPublish?.Invoke(notification, cancellationToken) ?? default;
 	}
 
 	public ValueTask<TResponse> Send<TResponse>(

@@ -153,7 +153,8 @@ private void Render(string serial, DeviceSurface surface)
 ```
 
 The host calls `OnSessionOpenedAsync` once per registered device. Leave it at its default no-op and the
-device stays registration-only forever.
+device stays registration-only forever. The host never waits for it while handling one of your own calls,
+so the handler can call back into the host (icons, key images) before it returns.
 
 - **Every surface is a complete snapshot** - profile, folder, effective layout, every widget - never a diff.
   `CurrentSurface` is the first one; there is no separate "initial" event.
@@ -357,6 +358,108 @@ channel). It returns null rather than throwing when the provider went inactive, 
 widget is not on the current surface. It is default-implemented to return null, and a provider built
 before `HasProviderIcon` existed simply renders label and colour, as for an icon-less widget.
 
+## Key images
+
+A deck of display keys does not have to draw the surface itself. Declare `KeyImages` on the layout's grid
+and Macro Deck renders every key - widget, label, icon, border, background - into a finished picture
+in the size and encoding the hardware takes, and sends you one picture per key.
+
+```csharp
+new LayoutGrid
+{
+	Rows = 3,
+	Columns = 5,
+	KeySize = new LayoutKeySize(72, 72),
+	KeyImages = new LayoutKeyImageFormat { Encoding = KeyImageEncodings.Jpeg, Rotation = 180 }
+}
+```
+
+```csharp
+public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
+{
+	if (session.KeyImageFormat is null)
+	{
+		session.SurfaceChanged += (_, e) => Render(session.ProviderDeviceId, e.Surface);
+		return;
+	}
+
+	var pad = _watcher.Pad(session.ProviderDeviceId);
+	session.KeyImageChanged += (_, e) => pad.WriteKey(e.Image.Row, e.Image.Column, e.Image.Content);
+
+	for (var row = 0; row < pad.Rows; row++)
+	{
+		for (var column = 0; column < pad.Columns; column++)
+		{
+			if (await session.GetKeyImageAsync(row, column, cancellationToken) is { } image)
+			{
+				pad.WriteKey(row, column, image.Content);
+			}
+		}
+	}
+}
+```
+
+- **Opt-in, per layout.** `LayoutGrid.KeyImages` is null by default, and the device then gets surfaces
+  only, as before. It needs `KeySize`, which is the size of every delivered picture. A format Macro Deck
+  cannot honour - no `KeySize`, a rotation other than 0, 90, 180 or 270, an unknown encoding - means no key
+  images for that layout and a warning in the host log, never a failed registration.
+- **`IDeviceSession.KeyImageFormat` is the signal.** It is the format the host renders this session in,
+  fixed for the life of the session (a layout change takes effect when the session reopens). It is null
+  when the layout asks for no pictures, the format cannot be honoured, or the host predates key images,
+  so a provider built for both checks it and falls back to rendering `CurrentSurface`.
+- **Encodings** are `KeyImageEncodings` values, and each picture's `ContentType` is the matching
+  `KeyImageContentTypes` value:
+
+  | Encoding | Content type | Bytes |
+  | --- | --- | --- |
+  | `rgba` | `application/x-macrodeck-rgba` | 8-bit RGBA, top row first, `width * 4` bytes per row with no padding, always opaque |
+  | `png` | `image/png` | PNG |
+  | `jpeg` | `image/jpeg` | baseline JPEG, quality 90 |
+  | `bmp` | `image/bmp` | 24-bit BMP, rows bottom-up |
+
+- **Orientation:** the key is mirrored left to right first when `MirrorHorizontal` is set, then rotated
+  clockwise by `Rotation`. For 90 and 270 it is rendered at the swapped size, so the delivered picture is
+  always `KeySize`.
+- **Cells are the hardware grid**: `Row` and `Column` count from 0 at the top left over the layout's
+  single grid region, rows x columns. Every cell has a picture, an empty key included, and a key the
+  current folder does not reach (a smaller folder, no profile assigned) is drawn as background. A widget
+  outside the hardware grid is not rendered. A layout with no grid region, or several, gets no key images.
+- **First paint:** `GetKeyImageAsync` answers for every cell from the moment the session exists, inside
+  `OnSessionOpenedAsync` included, so a device can paint all keys on connect instead of waiting for changes. It returns null for a session without key
+  images, for a cell outside the grid, and on a host that does not serve key images - never an exception.
+- **Changes:** `KeyImageChanged` carries one cell's new picture, never for a picture that did not change.
+  A change Macro Deck rebuilds the surface for (an edit, a widget's state or label, a navigation) has its
+  pictures raised after that rebuild: after its `SurfaceChanged`, or right after the host found the surface
+  unchanged. A change only the picture shows (a clock tick, live widget content) is raised on its own,
+  with no surface; a clock on one key updates that key only.
+  `Revision` is per cell, starts at 1 and increases with every change; drop a picture whose revision is not
+  greater than the last one you applied for that cell. A session already drops those before it raises the
+  event, counting the pictures `GetKeyImageAsync` handed you.
+- **Rate:** Macro Deck caps updates at the layout's `Visuals.MaxUpdatesPerSecond`, or 30 per second when
+  that is unset.
+- **What the visual capabilities change:** with `AnimatedIcons` false a key shows the icon's first frame;
+  with `Borders` false no border ring is drawn; corners are rounded only when `CornerRadius` is true and
+  keys of a widget spanning several cells are separated by the profile's spacing only when `WidgetSpacing`
+  is true.
+- **What a key is drawn in:** the host's theme (light draws light, dark and system draw dark, since a
+  device has no colour scheme of its own), accent colour, app font and language. Changing any of them, or
+  importing or removing a font, draws every key again; only the keys that look different are sent. An
+  empty cell takes the folder's empty-cell style, so a transparent one is drawn as background.
+- **Widget content:** Macro Deck follows each widget's view the way a client does, one view session per
+  widget on the keys, so a widget's provider sees one more viewer. A key waits up to one second for its
+  widget's first view; past that it is drawn without the content and updated when the view arrives.
+- **Offline devices:** while a device is offline nothing is sent to it, and `GetKeyImageAsync` still
+  answers with the last picture drawn for each key; a clock is not redrawn while the device is away.
+  When it comes back, every key is drawn again and sent with a new revision, after the surface.
+- **Only the widget grid is rendered.** A folder view cannot be drawn onto keys, so declare
+  `CustomFolderViews = false` on a key-image layout; the editor then does not offer one for it.
+- **Interactions do not change.** Keep reporting presses with the widget ids of `CurrentSurface`, which
+  still arrives as before; the picture of a key and the widget at that position come from the same
+  surface.
+
+A plugin receives the pictures over `session.key-images` (inline, or over `host.asset.*` when one is too
+large for a message) and fetches a cell with the `devices` host API's `key-image`; the session hides both.
+
 ## Ending a session
 
 ```csharp
@@ -377,6 +480,11 @@ or withdraw a device in another plugin's name.
 Sessions need `device-provider` **capability version 2**. The host opens a session only when the negotiated
 version is 2 or higher; a plugin that negotiates version 1 keeps registering, updating and unregistering
 as before and is never sent a session operation - it degrades to registration only.
+
+[Key images](#key-images) need **capability version 3**, which `MacroDeck.Plugin.Hosting` declares from the
+SDK version that added them. A plugin that negotiated version 2 is never sent `session.key-images` and
+never gets a key-image format on `session.open`: it keeps rendering surfaces. A plugin built against a
+newer SDK on an older host sees `KeyImageFormat` null and `GetKeyImageAsync` return null.
 
 ## Testing
 
@@ -421,22 +529,32 @@ unregistering retains it and only takes it offline. Assert on `Devices`, `IsOnli
 `PushSurface` and `Close`, script the verdict with `NextResult`, and seed `Icons` / `WidgetIcons`; read back
 `Interactions`, `IconRequests` and `WidgetIconRequests`.
 
+For [key images](#key-images), set `FakeDeviceProviderContext.KeyImageFormat` before `OpenSession` (or
+`FakeDeviceSession.KeyImageFormat` before the provider reads it), push pictures with `PushKeyImage`, which
+raises `KeyImageChanged`, and seed `KeyImages` for the answers `GetKeyImageAsync` gives; read back
+`KeyImageRequests`. The fake drops nothing, so a test can push a stale revision and check that your
+provider ignores it.
+
 Against a real plugin process, the harness's `DeviceProvider` client (`PluginTestHarness`,
-`PluginSessionView`) invokes `describe`, `devices`, `session.open`, `session.surface` and `session.close`.
+`PluginSessionView`) invokes `describe`, `devices`, `session.open`, `session.surface`, `session.key-images`
+(`PushKeyImagesAsync`) and `session.close`. Pass a `DeviceSessionOpenArguments` with `KeyImages` set to
+`OpenSessionAsync` to open a session the way a host that renders key images does.
 See [Testing](/features/testing/).
 
 ## Over the plugin protocol
 
 The host-to-provider direction of the `device-provider` capability describes the provider, re-reads its
-catalogue after a reconnect and, from capability version 2, drives rendering sessions:
+catalogue after a reconnect, from capability version 2 drives rendering sessions and from version 3
+delivers key images:
 
 | Operation | Purpose |
 | --- | --- |
 | `describe` | The provider's declared name and capability version. |
 | `devices` | The provider's current device catalogue, re-read after a reconnect. |
-| `session.open` | Opens a device's session and hands over the first surface to render. Version 2 only. |
+| `session.open` | Opens a device's session and hands over the first surface to render; carries the key-image format when the host renders pictures for the session. Version 2 only. |
 | `session.surface` | Pushes a new, complete surface to an already-open session. Version 2 only. |
 | `session.close` | Closes an open session. Version 2 only. |
+| `session.key-images` | Pushes changed key pictures, several cells per message, each inline or over `host.asset.*`. Version 3 only, and only to a session opened with a key-image format. |
 
 Registration, interactions and icon fetches travel the other way as the `devices` host API:
 
@@ -450,6 +568,7 @@ Registration, interactions and icon fetches travel the other way as the `devices
 | `icon` | Fetches icon bytes referenced by a device's current surface, over the `host.asset.*` pipeline. |
 | `widget-icon` | Fetches the bytes behind a widget's currently rendered action-icon-provider icon, over the `host.asset.*` pipeline. |
 | `close` | Closes an open device session at the provider's own request. |
+| `key-image` | Fetches the current picture of one cell of a session with key images, inline or over the `host.asset.*` pipeline; no value when there is none. |
 
 ## See also
 

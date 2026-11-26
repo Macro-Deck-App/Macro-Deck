@@ -44,6 +44,8 @@ namespace MacroDeck.Plugin.Testing.Internal;
 /// </summary>
 internal static class HostInvokeDispatcher
 {
+	private const int MaxInlineKeyImageBytes = 128 * 1024;
+
 	/// <summary>Runs one <c>host.invoke</c> against <paramref name="context" />/<paramref name="interactions" />.
 	/// <paramref name="negotiatedVersion" /> is this session's negotiated protocol version - the same
 	/// version the plugin under test used to decide which wire shape to send for an operation whose
@@ -506,6 +508,37 @@ internal static class HostInvokeDispatcher
 						"This test host cannot transfer icon bytes to a plugin.");
 			}
 
+			case HostOperations.Devices.KeyImage:
+			{
+				var arguments = Require<DevicesKeyImageArguments>(payload);
+				if (context.Devices.ResolveSession(arguments.SessionId) is not { } session)
+				{
+					return UnknownSession();
+				}
+
+				var image = await session.GetKeyImageAsync(arguments.Row, arguments.Column, cancellationToken)
+					.ConfigureAwait(false);
+
+				if (image is null)
+				{
+					return HostInvokeOutcome.Ok((JsonElement?)null);
+				}
+
+				// Inline only, as a real host sends a picture this small; this test host has no host.asset.*
+				// channel for a larger one, which is reported the way a host without an asset sender reports it.
+				return image.Content.Length <= MaxInlineKeyImageBytes
+					? HostInvokeOutcome.Ok(new DevicesKeyImageResult
+					{
+						Row = image.Row,
+						Column = image.Column,
+						Revision = image.Revision,
+						ContentType = image.ContentType,
+						Content = image.Content.ToArray()
+					})
+					: HostInvokeOutcome.Failed(ProtocolErrorCodes.CapabilityUnavailable,
+						"This test host cannot transfer a key image this large to a plugin.");
+			}
+
 			case HostOperations.Devices.Close:
 			{
 				var arguments = Require<DevicesCloseArguments>(payload);
@@ -768,7 +801,15 @@ internal static class HostInvokeDispatcher
 			MinColumns = dto.MinColumns,
 			MaxColumns = dto.MaxColumns,
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
-			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null
+			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null,
+			KeyImages = dto.KeyImages is { } keyImages
+				? new LayoutKeyImageFormat
+				{
+					Encoding = keyImages.Encoding,
+					Rotation = keyImages.Rotation,
+					MirrorHorizontal = keyImages.MirrorHorizontal
+				}
+				: null
 		};
 	}
 

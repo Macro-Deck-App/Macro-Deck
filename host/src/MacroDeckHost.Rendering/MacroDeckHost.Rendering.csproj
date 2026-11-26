@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- An internal host layer, never a published package. -->
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="MacroDeckHost.Tests.Rendering" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="HarfBuzzSharp" />
+        <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
+        <PackageReference Include="SkiaSharp.NativeAssets.macOS" />
+        <PackageReference Include="Svg.Skia" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- The web runtime's own stylesheets and the glyphs ui.icon masks, linked so both readers draw from the same files. -->
+        <EmbeddedResource Include="..\..\..\ui\runtime\styles\icons\*.svg"
+                          Link="Icons\%(Filename)%(Extension)"
+                          LogicalName="MacroDeckHost.Rendering.Icons.%(Filename)%(Extension)" />
+        <EmbeddedResource Include="..\..\..\ui\runtime\styles\tokens.css;..\..\..\ui\runtime\styles\reset.css;..\..\..\ui\runtime\styles\renderer.css;..\..\..\ui\runtime\styles\widget-border.css"
+                          Link="Styles\%(Filename)%(Extension)"
+                          LogicalName="MacroDeckHost.Rendering.Styles.%(Filename)%(Extension)" />
+    </ItemGroup>
+
+</Project>

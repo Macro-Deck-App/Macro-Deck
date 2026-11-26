@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using MacroDeck.Localization;
 using MacroDeck.Sdk.Devices;
@@ -53,7 +54,20 @@ public sealed record DeviceSurfaceProjection
 	public required IReadOnlyDictionary<string, string> WidgetFolderIds { get; init; }
 
 	public string? FolderName { get; init; }
+
+	public IReadOnlyList<DeviceSurfaceRenderWidget> RenderWidgets { get; init; } = [];
+
+	public bool EmptyCellsTransparent { get; init; }
 }
+
+public sealed record DeviceSurfaceRenderWidget(
+	string Id,
+	string Type,
+	int Column,
+	int Row,
+	int Columns,
+	int Rows,
+	JsonElement Data);
 
 /// <summary>One widget the session watches, keyed the way each publisher keys its subscribers.</summary>
 public sealed record DeviceSurfaceSubscription(Guid WidgetId, string StateId);
@@ -65,6 +79,10 @@ public sealed record DeviceSurfaceSubscription(Guid WidgetId, string StateId);
 /// </summary>
 public sealed class DeviceSurfaceBuilder
 {
+	private const string TransparentEmptyCellStyle = "transparent";
+
+	private static readonly JsonElement _emptyData = JsonDocument.Parse("{}").RootElement;
+
 	private readonly IProfileRegistry _profiles;
 	private readonly IWidgetStateService _widgetStates;
 	private readonly IWidgetIconService _widgetIcons;
@@ -126,10 +144,12 @@ public sealed class DeviceSurfaceBuilder
 		var widgets = new List<DeviceSurfaceWidget>();
 		var subscriptions = new List<DeviceSurfaceSubscription>();
 		var widgetFolderIds = new Dictionary<string, string>(StringComparer.Ordinal);
+		var renderWidgets = new List<DeviceSurfaceRenderWidget>();
 		foreach (var (widget, ownerFolderId) in SurfaceFolderChain.DisplayedWidgets(folder, folders))
 		{
 			widgets.Add(await BuildWidget(widget, culture, iconContext, subscriptions, cancellationToken));
 			widgetFolderIds[widget.Id] = ownerFolderId;
+			renderWidgets.Add(RenderWidgetOf(widget));
 		}
 
 		var surface = new DeviceSurface
@@ -162,8 +182,45 @@ public sealed class DeviceSurfaceBuilder
 			FolderId = folder.Id,
 			FolderName = folder.Name,
 			Subscriptions = subscriptions,
-			WidgetFolderIds = widgetFolderIds
+			WidgetFolderIds = widgetFolderIds,
+			RenderWidgets = renderWidgets,
+			EmptyCellsTransparent = string.Equals(folder.EmptyCellStyle ?? profile.DefaultEmptyCellStyle,
+				TransparentEmptyCellStyle,
+				StringComparison.Ordinal)
 		};
+	}
+
+	private DeviceSurfaceRenderWidget RenderWidgetOf(Widget widget)
+	{
+		var data = _colors.ResolveData(widget.Data, Guid.TryParse(widget.Id, out var id) ? id : null);
+		return new DeviceSurfaceRenderWidget(widget.Id,
+			widget.Type,
+			widget.PositionX,
+			widget.PositionY,
+			widget.Width,
+			widget.Height,
+			ParseData(data));
+	}
+
+	private static JsonElement ParseData(string? json)
+	{
+		if (!string.IsNullOrWhiteSpace(json))
+		{
+			try
+			{
+				using var document = JsonDocument.Parse(json);
+				if (document.RootElement.ValueKind == JsonValueKind.Object)
+				{
+					return document.RootElement.Clone();
+				}
+			}
+			catch (JsonException)
+			{
+				// Unreadable stored data is drawn as no data, as a client draws it.
+			}
+		}
+
+		return _emptyData;
 	}
 
 	private IReadOnlyList<DeviceInteractionKind> SupportedInteractions(Widget widget)

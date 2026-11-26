@@ -49,8 +49,25 @@ public static class AssetKinds
 	/// </summary>
 	public const string UiUpload = "ui-upload";
 
+	/// <summary>
+	/// A key picture the host rendered for a device session, too large to travel inline in
+	/// <c>session.key-images</c> or a <c>devices</c>/<c>key-image</c> result. Host to plugin only, bounded by
+	/// <see cref="Limits.ProtocolLimits.MaxAssetBytes" />.
+	/// </summary>
+	public const string KeyImage = "key-image";
+
 	public static readonly IReadOnlyList<string> All =
-		[Icon, Artwork, ActionIcon, UiResource, IconPack, AndroidScreenshot, CompanionScreenshot, UiUpload];
+	[
+		Icon,
+		Artwork,
+		ActionIcon,
+		UiResource,
+		IconPack,
+		AndroidScreenshot,
+		CompanionScreenshot,
+		UiUpload,
+		KeyImage
+	];
 
 	private static readonly HashSet<string> _known = new(All, StringComparer.Ordinal);
 

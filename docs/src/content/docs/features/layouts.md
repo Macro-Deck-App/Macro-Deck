@@ -139,6 +139,7 @@ Only `grid` carries geometry, in `LayoutRegion.Grid`. Every other kind is a `Cou
 | `MinRows`, `MaxRows`, `MinColumns`, `MaxColumns` | Per-axis bounds for a configurable grid. Default 1. |
 | `SupportsRuntimeResize` | A resize applies live. When `false`, you may apply it when the device next connects. |
 | `KeySize` | Pixel size of one key, where the hardware has a fixed one. |
+| `KeyImages` | Asks Macro Deck to render a finished picture for every key of this grid, in this `LayoutKeyImageFormat` (encoding, rotation, mirroring), at `KeySize`. Null (default) sends surfaces only. See [Key images](/features/devices/#key-images). |
 | `RowsLocked`, `ColumnsLocked` | Derived: fixed, or configurable with min >= max on that axis. |
 
 `LayoutDescriptor.PrimaryGrid` is the one grid Macro Deck renders a deck onto, computed for you. It is null
@@ -160,8 +161,8 @@ Capabilities: new LayoutCapabilities
 | --- | --- |
 | `StaticIcons`, `AnimatedIcons`, `Borders`, `BackgroundColors`, `TextLabels`, `Transparency` | What the surface can draw. |
 | `WidgetSpacing`, `CornerRadius` | Whether the folder's spacing and corner radius mean anything here. `false` disables those editor controls with a note that they have no effect on this device. |
-| `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display. |
-| `MaxUpdatesPerSecond` | Advisory update rate. |
+| `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display, and leave it `false` on a grid with `KeyImages`. |
+| `MaxUpdatesPerSecond` | Advisory update rate. Macro Deck caps [key images](/features/devices/#key-images) at it, 30 per second when unset. |
 
 `LayoutVisualCapabilities.Full` sets every flag. A `Visuals` block that sets nothing reads as "renders
 nothing". **No `Visuals` block at all** keeps the spacing controls and the folder-view option - saying

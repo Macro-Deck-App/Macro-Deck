@@ -57,6 +57,8 @@ public interface IUiSessionBroker : IUiSessionSink
 	// For a host-side reader no client attaches to. Null when the session ended before its first tree.
 	Task<UiRawJson?> FirstTreeAsync(string sessionId, CancellationToken cancellationToken);
 
+	IUiHostObservation? ObserveHost(string sessionId, IUiHostObserver observer);
+
 	// Raised by the host itself, so unlike SendEvent it needs no attached connection.
 	bool DispatchHostEvent(string sessionId, UiSessionEventCommand command);
 
@@ -111,4 +113,19 @@ public interface IUiSessionBroker : IUiSessionSink
 	FlushUiSessionResponse FlushSession(FlushUiSessionRequest request, string connectionId);
 
 	void SweepDraining();
+}
+
+// Called on the thread that relays the payload, in relay order, so an observer must not block.
+public interface IUiHostObserver
+{
+	void OnSnapshot(UiRawJson tree, int revision);
+
+	void OnPatch(UiRawJson patch, int fromRevision, int toRevision);
+
+	void OnEnded(UiSessionEndReason reason, string? code, bool retryable);
+}
+
+public interface IUiHostObservation : IDisposable
+{
+	void RequestResync();
 }

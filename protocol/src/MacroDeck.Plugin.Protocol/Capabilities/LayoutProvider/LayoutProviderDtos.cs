@@ -8,6 +8,18 @@ public sealed record LayoutKeySizeDto
 	public required int Height { get; init; }
 }
 
+/// <summary>Mirrors the SDK's <c>LayoutKeyImageFormat</c>. Optional and additive: a peer that predates
+/// it skips the member and renders no key images.</summary>
+public sealed record LayoutKeyImageFormatDto
+{
+	/// <summary>One of the SDK's <c>KeyImageEncodings</c> values, or one this version does not know.</summary>
+	public required string Encoding { get; init; }
+
+	public int Rotation { get; init; }
+
+	public bool MirrorHorizontal { get; init; }
+}
+
 /// <summary>Mirrors the SDK's <c>LayoutVisualCapabilities</c>.</summary>
 public sealed record LayoutVisualCapabilitiesDto
 {
@@ -54,6 +66,9 @@ public sealed record LayoutGridDto
 	public bool SupportsRuntimeResize { get; init; }
 
 	public LayoutKeySizeDto? KeySize { get; init; }
+
+	/// <summary>See the SDK's <c>LayoutGrid.KeyImages</c>.</summary>
+	public LayoutKeyImageFormatDto? KeyImages { get; init; }
 }
 
 /// <summary>

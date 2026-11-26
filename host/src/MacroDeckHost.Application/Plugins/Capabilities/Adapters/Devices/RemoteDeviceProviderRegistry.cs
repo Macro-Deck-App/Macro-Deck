@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeckHost.Application.Devices.Surfaces;
+using MacroDeckHost.Application.Plugins.Assets;
 
 namespace MacroDeckHost.Application.Plugins.Capabilities.Adapters.Devices;
 
@@ -17,6 +18,7 @@ public sealed class RemoteDeviceProviderRegistry : IDisposable
 	private readonly IPluginSessionRegistry _sessions;
 	private readonly IPluginCapabilityInvoker _invoker;
 	private readonly RemoteDeviceSessionRegistry _deviceSessions;
+	private readonly IPluginHostAssetSender? _assets;
 
 	private readonly ConcurrentDictionary<string, RemoteDeviceSurfaceProvider> _adapters =
 		new(StringComparer.Ordinal);
@@ -24,11 +26,13 @@ public sealed class RemoteDeviceProviderRegistry : IDisposable
 	public RemoteDeviceProviderRegistry(
 		IPluginSessionRegistry sessions,
 		IPluginCapabilityInvoker invoker,
-		RemoteDeviceSessionRegistry deviceSessions)
+		RemoteDeviceSessionRegistry deviceSessions,
+		IPluginHostAssetSender? assets = null)
 	{
 		_sessions = sessions;
 		_invoker = invoker;
 		_deviceSessions = deviceSessions;
+		_assets = assets;
 		_sessions.SessionEnded += OnSessionEnded;
 	}
 
@@ -37,14 +41,18 @@ public sealed class RemoteDeviceProviderRegistry : IDisposable
 		if (_sessions.GetCapabilities(providerId) is not { } capabilities
 			|| !capabilities.Capabilities.TryGetValue(CapabilityKinds.DeviceProvider, out var negotiated)
 			|| !negotiated.Accepted
-			|| negotiated.NegotiatedVersion is not >= SessionsMinimumVersion)
+			|| negotiated.NegotiatedVersion is not (>= SessionsMinimumVersion and var version))
 		{
 			return null;
 		}
 
 		return _adapters.GetOrAdd(providerId,
-			static (id, state) => new RemoteDeviceSurfaceProvider(id, state.Invoker, state.Sessions),
-			(Invoker: _invoker, Sessions: _deviceSessions));
+			static (id, state) => new RemoteDeviceSurfaceProvider(id,
+				state.Invoker,
+				state.Sessions,
+				state.Version,
+				state.Assets),
+			(Invoker: _invoker, Sessions: _deviceSessions, Version: version, Assets: _assets));
 	}
 
 	public void Dispose()
