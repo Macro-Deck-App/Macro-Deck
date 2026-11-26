@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Ui.Handlers;
 using MacroDeckHost.Application.Ui.Transport.Messages.Folders;
 using MacroDeckHost.Application.Ui.Transport.Messages.Widgets;
@@ -299,7 +300,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 		}
 
 		_logger.Warning("Skipping virtual widget '{LocalId}' of integration '{IntegrationId}': not a usable id",
-			localWidgetId,
+			LogText.Neutralize(localWidgetId),
 			integrationId);
 		return false;
 	}
@@ -315,7 +316,7 @@ public sealed class ProfileRegistry : IProfileRegistry
 		_logger.Warning("Skipping virtual {Kind} of integration '{IntegrationId}': '{LocalId}' is not a usable id",
 			kind,
 			integrationId,
-			localId);
+			LogText.Neutralize(localId));
 		qualified = string.Empty;
 		return false;
 	}
