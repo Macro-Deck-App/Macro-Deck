@@ -96,7 +96,9 @@ public sealed class DeviceInteractionRouter
 		var widget = session.LastPushed?.Widgets
 			.FirstOrDefault(candidate => string.Equals(candidate.Id, widgetId, StringComparison.Ordinal));
 		var type = widget?.Type;
-		if (type is null || WidgetTypeIds.BuiltIn.Contains(type, StringComparer.Ordinal))
+		if (type is null
+			|| !string.Equals(type, WidgetTypeIds.Slider, StringComparison.Ordinal)
+			&& WidgetTypeIds.BuiltIn.Contains(type, StringComparer.Ordinal))
 		{
 			return DevicePressClaim.None;
 		}

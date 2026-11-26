@@ -217,7 +217,7 @@ stays open, the next press works:
 
 | Result | Meaning |
 | --- | --- |
-| `Accepted` | The host took it. For a `ShortPress` or `LongPress` on a tile a plugin or integration serves, it can mean *queued*: see below. |
+| `Accepted` | The host took it. For a `ShortPress` or `LongPress` on a tile a plugin or integration serves, or on a Slider, it can mean *queued*: see below. On a Slider it does not mean a value was written. |
 | `Rejected` + `WidgetNotOnSurface` | The press raced a surface push. Re-render the newest surface. |
 | `Rejected` + `HostLocked` | The host is locked and runs nothing until unlocked. |
 | `Rejected` + `TriggerFailed` | The widget was edited or deleted between push and press. |
@@ -264,11 +264,49 @@ press and waits at most a second for it; a tree that does not answer in time abs
 tree may arrive over the same connection your report came in on, the host never holds your report for it:
 `Press` and `Release` return at once as always, and a `ShortPress` or `LongPress` whose tree has not answered
 yet is answered `Accepted` and runs afterwards, so a failure of that flow no longer comes back as
-`Rejected` + `TriggerFailed`. Built-in tiles keep the full verdict.
+`Rejected` + `TriggerFailed`. Built-in tiles other than the [Slider](#stepping-a-slider) keep the full verdict.
+
+When the control that claims the press is a `ui.slider` declaring `change`, the press steps it exactly as it
+[steps a Slider](#stepping-a-slider). Such a tile advertises only the kinds its flows give it, so a provider
+that sends advertised kinds only never steps it.
 
 Press state is tracked **per widget**: releasing one widget never ends another's press, and a second
 `Press` for a widget already held is ignored (no timer restart, no second `onTouchStart`). If your hardware
 already tells short from long, send `ShortPress`/`LongPress` instead of a `Press`/`Release` pair.
+
+### Stepping a Slider
+
+A key has no analog input, so a short press on the built-in Slider moves it one step further, and a press at
+the top wraps it back to the start. The host does the stepping: send an ordinary `ShortPress`, or a
+`Press`/`Release` pair, and the Slider writes its variable as if the user had dragged it there. A Slider
+always advertises `Press`, `Release` and `ShortPress`, whatever flows it carries. A host that predates this
+advertises nothing for a Slider and a press there changes nothing, so a provider that follows
+`SupportedInteractions` works against both.
+
+The step is measured on the Slider's track, from `0` at its minimum to `1` at its maximum, using the level
+and step the Slider's own [`ui.slider`](/ui/components/slider/) node carries:
+
+- **Press step:** the node's step when it is at least `0.1`. A smaller step is multiplied by the smallest
+  whole number that makes it at least `0.1`, so a `0..100` Slider with step `1` moves in tens and stays on
+  its own grid. Without a usable step the press step is `0.1`.
+- **Next level:** the current level plus the press step, capped at `1`, then snapped to the node's step and
+  clamped to `0..1`. A `0..100` Slider with step `1` at `95` goes to `100`, not back to `0`.
+- **Wrap:** at the top the next press goes to `0`. The top is `1`, or the last level the step grid reaches
+  below it, such as `0.9` for a step of `0.3`, so a press never skips a top the Slider can show.
+
+A few consequences for a provider:
+
+- **Short presses only.** A `Press` held past the long-press threshold is a long press and moves nothing;
+  `LongPress` is not advertised. Double taps are not recognised: each tap steps, and a Slider's Double Tap
+  action and any press flows it carries do not run from a hardware deck.
+- **The verdict.** The press is answered like one on a plugin tile (see above): `Accepted` can mean
+  *queued*, and it does not mean the value was written: a variable that cannot be written or a range that is
+  not usable refuses the change inside the Slider without a `Rejected`. A locked host still answers
+  `Rejected` + `HostLocked`.
+- **Each press reads the value the variable has.** Two presses in quick succession can land on the same
+  level when the variable has not reported the first write yet. A variable that is unavailable reads as
+  its minimum, so a press then steps from there.
+- **The key does not show the level.** The surface carries the Slider's label and colours, not its value.
 
 ## Fetching icons
 
