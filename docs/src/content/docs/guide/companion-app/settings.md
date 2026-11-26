@@ -116,6 +116,8 @@ slow a deck down. Turn Low Power Mode off in Control Center or under **Battery**
 
 ## Feedback, About and Legal
 
+- **Rate the app**: opens the app's page in the App Store or on Google Play, where you can leave a rating. The
+  Android version without Google Play does not have it.
 - **Discord** and **GitHub Issues**: ask the community and report bugs.
 - **Share diagnostics**: shares recent connection events and the addresses of your computers, for a bug report.
   If the app closed because of an error, it also contains the last crash: when it happened, the app version and
