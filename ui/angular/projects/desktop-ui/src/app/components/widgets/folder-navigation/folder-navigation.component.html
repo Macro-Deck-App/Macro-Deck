@@ -1,6 +1,16 @@
-<div class="folder-nav" (click)="onContainerClick()">
+<div class="folder-nav" [class.collapsed]="collapsed()" (click)="onContainerClick()">
   <div class="folder-nav-header">
     <h2 class="folder-nav-title">{{ 'macrodeck.app:Widgets.Folder.Title' | translate }}</h2>
+    <shared-button
+      class="folder-nav-toggle"
+      iconOnly
+      size="icon-compact"
+      variant="ghost"
+      [title]="collapseToggleLabel() | translate"
+      [ariaLabel]="collapseToggleLabel() | translate"
+      (click)="toggleCollapsed()">
+      <span class="icon icon-chevron-right icon-sm rtl-mirror"></span>
+    </shared-button>
   </div>
 
   <div

@@ -28,6 +28,9 @@ the first one, and the Companion app's two-finger swipe follows this order once 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,
 listed on the right. A button with **Change Folder to** opens a subfolder, **Go Back** returns.
 
+The arrow beside **Folders** collapses that list to a narrow strip and gives the deck the space; the arrow
+on the strip brings it back. Macro Deck remembers which way you left it and opens the same way next time.
+
 **Change Folder to**, **Change Profile to**, **Go to Parent Folder** and **Go Back** have an optional
 **Device** setting. A button pressed on a device only moves that device. An automation has no device
 behind it, so with **Device** empty it moves every connected device. Pick a device there to move only

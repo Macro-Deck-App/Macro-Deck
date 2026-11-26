@@ -21979,6 +21979,9 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Ubah tampilan</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Ciutkan panel folder</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Yakin ingin menghapus folder ini beserta seluruh isinya? Tindakan ini tidak dapat dibatalkan.</value>
   </data>
@@ -21999,6 +22002,9 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplikat</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Bentangkan panel folder</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Ekspor folder ini - widget dan ikonnya - ke file .macroDeckFolder.</value>

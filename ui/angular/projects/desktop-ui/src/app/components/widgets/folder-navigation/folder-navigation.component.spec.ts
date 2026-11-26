@@ -6,7 +6,7 @@ import { FolderViewService, ProfileService, ToastService } from '@shared';
 import { FolderFocusRuleService } from '../../../services/folder-focus-rule.service';
 import { PortabilityService } from '../../../services/portability.service';
 import { FileOpenService, FolderService } from '../../../services';
-import { FolderNavigationComponent } from './folder-navigation.component';
+import { FOLDER_NAV_COLLAPSED_KEY, FolderNavigationComponent } from './folder-navigation.component';
 import type { FolderContextMenuAction } from './folder-context-menu/folder-context-menu.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
 
@@ -502,5 +502,129 @@ describe('FolderNavigationComponent change-view availability', () => {
 
   it("is withheld when the profile's device cannot render a folder view", () => {
     expect(canChangeView(createComponent([grid, dashboard], false))).toBeFalse();
+  });
+});
+
+describe('FolderNavigationComponent collapse', () => {
+  let portability: jasmine.SpyObj<PortabilityService>;
+
+  function createFixture(): ComponentFixture<FolderNavigationComponent> {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        ...provideLocalizationTesting(),
+        {
+          provide: FolderService,
+          useValue: {
+            rootFolders: () => [],
+            contextMenu: () => ({ isOpen: false, folderId: null, x: 0, y: 0 }),
+            selectedFolderId: () => null,
+            getChildFolders: () => [],
+            closeContextMenu: () => undefined,
+          },
+        },
+        { provide: ProfileService, useValue: { isCurrentProfileLocked: () => false, selectedProfileId: () => 'pid' } },
+        { provide: PortabilityService, useValue: portability },
+        { provide: ToastService, useValue: jasmine.createSpyObj<ToastService>('ToastService', ['show']) },
+        { provide: FileOpenService, useValue: { pending: signal([]), claim: () => null } },
+        { provide: FolderFocusRuleService, useValue: { rulesForFolder: () => [] } },
+      ],
+    });
+    const fixture = TestBed.createComponent(FolderNavigationComponent);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function toggleButton(fixture: ComponentFixture<FolderNavigationComponent>): HTMLButtonElement {
+    return fixture.nativeElement.querySelector('.folder-nav-header button');
+  }
+
+  function isShown(fixture: ComponentFixture<FolderNavigationComponent>, selector: string): boolean {
+    const element: HTMLElement | null = fixture.nativeElement.querySelector(selector);
+    if (!element) {
+      return false;
+    }
+    const style = getComputedStyle(element);
+    return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  }
+
+  async function click(fixture: ComponentFixture<FolderNavigationComponent>): Promise<void> {
+    toggleButton(fixture).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  let noTransitions: HTMLStyleElement;
+
+  beforeEach(() => {
+    noTransitions = document.createElement('style');
+    noTransitions.textContent = '.folder-nav, .folder-nav * { transition: none !important; }';
+    document.head.appendChild(noTransitions);
+    localStorage.removeItem(FOLDER_NAV_COLLAPSED_KEY);
+    portability = jasmine.createSpyObj<PortabilityService>('PortabilityService',
+      ['exportFolder', 'importFolder', 'inspectArchive']);
+    portability.inspectArchive.and.resolveTo({ status: 'success', archive: archiveSummary });
+  });
+
+  afterEach(() => {
+    noTransitions.remove();
+    localStorage.removeItem(FOLDER_NAV_COLLAPSED_KEY);
+  });
+
+  it('starts expanded with the folder list and a collapse button beside the heading', () => {
+    const fixture = createFixture();
+
+    expect(isShown(fixture, '.folder-nav-list')).toBeTrue();
+    expect(isShown(fixture, '.folder-nav-footer')).toBeTrue();
+    expect(toggleButton(fixture).getAttribute('aria-label')).toBe('Collapse folder panel');
+  });
+
+  it('collapses to a narrow rail and expands again, remembering each choice', async () => {
+    const fixture = createFixture();
+    const panel: HTMLElement = fixture.nativeElement.querySelector('.folder-nav');
+    const expandedWidth = panel.getBoundingClientRect().width;
+    const toggleInset = panel.getBoundingClientRect().right - toggleButton(fixture).getBoundingClientRect().right;
+
+    await click(fixture);
+
+    expect(panel.getBoundingClientRect().width).toBeLessThan(expandedWidth);
+    expect(isShown(fixture, '.folder-nav-list')).toBeFalse();
+    expect(isShown(fixture, '.folder-nav-title')).toBeFalse();
+    expect(isShown(fixture, '.folder-nav-footer')).toBeFalse();
+    expect(toggleButton(fixture).getAttribute('aria-label')).toBe('Expand folder panel');
+    expect(panel.getBoundingClientRect().right - toggleButton(fixture).getBoundingClientRect().right).toBe(toggleInset);
+    expect(localStorage.getItem(FOLDER_NAV_COLLAPSED_KEY)).toBe('1');
+
+    await click(fixture);
+
+    expect(panel.getBoundingClientRect().width).toBe(expandedWidth);
+    expect(isShown(fixture, '.folder-nav-list')).toBeTrue();
+    expect(toggleButton(fixture).getAttribute('aria-label')).toBe('Collapse folder panel');
+    expect(localStorage.getItem(FOLDER_NAV_COLLAPSED_KEY)).toBe('0');
+  });
+
+  it('opens collapsed when it was collapsed last time', () => {
+    localStorage.setItem(FOLDER_NAV_COLLAPSED_KEY, '1');
+
+    const fixture = createFixture();
+
+    expect(isShown(fixture, '.folder-nav-list')).toBeFalse();
+    expect(toggleButton(fixture).getAttribute('aria-label')).toBe('Expand folder panel');
+  });
+
+  it('expands to show an import error without forgetting the collapsed preference', async () => {
+    localStorage.setItem(FOLDER_NAV_COLLAPSED_KEY, '1');
+    portability.importFolder.and.resolveTo({ status: 'error', message: 'not a valid archive' });
+    const fixture = createFixture();
+    const component = fixture.componentInstance;
+
+    await component['archiveImport'].beginFile(new File(['zip'], 'tree.macroDeckFolder'));
+    await component['archiveImport'].confirm();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(isShown(fixture, '.folder-portable-error')).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.folder-portable-error').textContent).toContain('not a valid archive');
+    expect(localStorage.getItem(FOLDER_NAV_COLLAPSED_KEY)).toBe('1');
   });
 });

@@ -1,34 +1,95 @@
 @use '../../../../styles/index' as ds;
 
 .folder-nav {
+  --folder-nav-width: 13rem;
+  --folder-nav-collapsed-width: 2.75rem;
   height: 100%;
-  width: 13rem;
+  width: var(--folder-nav-width);
   flex-shrink: 0;
   background-color: var(--color-bg-secondary);
   border-inline-start: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  transition: width var(--transition-slow);
 
   @include ds.breakpoint-down('md') {
-    width: 9.75rem;
+    --folder-nav-width: 9.75rem;
   }
 
   @include ds.breakpoint-down('sm') {
-    width: 8.125rem;
+    --folder-nav-width: 8.125rem;
+  }
+
+  &.collapsed {
+    width: var(--folder-nav-collapsed-width);
+
+    .folder-nav-title {
+      opacity: 0;
+    }
+
+    .folder-nav-list,
+    .folder-portable-error,
+    .folder-nav-footer {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .folder-nav-toggle .icon {
+      transform: rotate(180deg);
+    }
   }
 }
 
+.folder-nav-list,
+.folder-portable-error,
+.folder-nav-footer {
+  // Wider than the narrowing panel on purpose: no reflow during the width transition.
+  min-width: calc(var(--folder-nav-width) - 1px);
+  transition: opacity var(--transition-slow), visibility var(--transition-slow);
+}
+
 .folder-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
   padding: var(--space-4);
+  padding-inline-end: calc((var(--folder-nav-collapsed-width) - 1px - var(--control-height-compact)) / 2);
   border-bottom: 1px solid var(--color-border);
 }
 
+.folder-nav-toggle {
+  flex-shrink: 0;
+  margin-block: calc(var(--space-1) * -1);
+
+  .icon {
+    transition: transform var(--transition-slow);
+  }
+}
+
 .folder-nav-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
   font-size: var(--text-sm);
   font-weight: var(--font-bold);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  transition: opacity var(--transition-slow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folder-nav,
+  .folder-nav-title,
+  .folder-nav-list,
+  .folder-portable-error,
+  .folder-nav-footer,
+  .folder-nav-toggle .icon {
+    transition: none;
+  }
 }
 
 .folder-nav-list {

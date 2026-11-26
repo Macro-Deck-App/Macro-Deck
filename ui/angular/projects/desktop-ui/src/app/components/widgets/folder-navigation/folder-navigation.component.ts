@@ -27,6 +27,23 @@ import { ActionConfigSessionFlusher } from '../../action-builder/services/action
 
 type FolderNavigateDirection = 'up' | 'down' | 'left' | 'right' | 'home' | 'end';
 
+export const FOLDER_NAV_COLLAPSED_KEY = 'md.folderNav.collapsed';
+
+function readPersistedCollapsed(): boolean {
+  try {
+    return localStorage.getItem(FOLDER_NAV_COLLAPSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writePersistedCollapsed(collapsed: boolean): void {
+  try {
+    localStorage.setItem(FOLDER_NAV_COLLAPSED_KEY, collapsed ? '1' : '0');
+  } catch {
+  }
+}
+
 @Component({
   selector: 'app-folder-navigation',
   standalone: true,
@@ -117,6 +134,18 @@ export class FolderNavigationComponent implements AfterViewInit, OnDestroy {
 
   protected readonly portableError = computed(() => this.exportError() ?? this.archiveImport.error());
 
+  protected readonly collapsed = signal(readPersistedCollapsed());
+
+  protected readonly collapseToggleLabel = computed(() => this.collapsed()
+    ? AppStrings.Widgets.Folder.ExpandPanel
+    : AppStrings.Widgets.Folder.CollapsePanel);
+
+  private readonly revealPortableError = effect(() => {
+    if (this.portableError()) {
+      this.collapsed.set(false);
+    }
+  });
+
   private importParentId: string | null = null;
 
   @ViewChild(ModalComponent) private modal?: ModalComponent;
@@ -142,6 +171,12 @@ export class FolderNavigationComponent implements AfterViewInit, OnDestroy {
 
   onContainerClick(): void {
     this.folderService.closeContextMenu();
+  }
+
+  toggleCollapsed(): void {
+    const collapsed = !this.collapsed();
+    this.collapsed.set(collapsed);
+    writePersistedCollapsed(collapsed);
   }
 
   canDeleteSelectedFolder(): boolean {

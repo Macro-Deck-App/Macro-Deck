@@ -21979,6 +21979,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>दृश्य बदलें</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>फ़ोल्डर पैनल संक्षिप्त करें</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>क्या आप सच में इस फ़ोल्डर और इसकी सारी सामग्री हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।</value>
   </data>
@@ -21999,6 +22002,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>डुप्लिकेट बनाएं</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>फ़ोल्डर पैनल विस्तृत करें</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>इस फ़ोल्डर को - इसके विजेट और उनके आइकन सहित - .macroDeckFolder फ़ाइल में निर्यात करें।</value>

@@ -21986,6 +21986,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Change view</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Collapse folder panel</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Are you sure you want to delete this folder and all its contents? This action cannot be undone.</value>
   </data>
@@ -22006,6 +22009,9 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplicate</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Expand folder panel</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Export this folder - its widgets and their icons - to a .macroDeckFolder file.</value>
