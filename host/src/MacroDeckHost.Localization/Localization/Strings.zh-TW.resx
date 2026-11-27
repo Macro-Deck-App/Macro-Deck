@@ -14880,6 +14880,24 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>音量</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>用來解鎖已儲存機密的金鑰存放在這台電腦的機密儲存區，例如 KDE Wallet、GNOME Keyring 或系統鑰匙圈。機密儲存區沒有回應，通常是因為已鎖定或尚未執行。請先解鎖，然後再試一次。</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>再試一次</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>仍然無法連線到機密儲存區。如果持續如此，請改用復原金鑰。</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck 無法連線到機密儲存區</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>改用復原金鑰</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>正在等待機密儲存區。如果它要求輸入密碼，請輸入。</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck 無法取得解除鎖定已儲存機密所需的金鑰。請輸入備份復原金鑰以還原它。</value>
   </data>

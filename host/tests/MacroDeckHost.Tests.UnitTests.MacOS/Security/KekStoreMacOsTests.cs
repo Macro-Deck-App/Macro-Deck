@@ -46,7 +46,7 @@ public class KekStoreMacOsTests
 
 		var kek = RandomNumberGenerator.GetBytes(32);
 
-		Assert.That(_store.Write(_identity, kek), Is.EqualTo(KekStoreStatus.Found));
+		Assert.That(_store.Write(_identity, kek).Stored, Is.True);
 
 		var read = _store.Read(_identity);
 
@@ -73,7 +73,7 @@ public class KekStoreMacOsTests
 
 		_store.Write(_identity, first);
 
-		Assert.That(_store.Write(_identity, second), Is.EqualTo(KekStoreStatus.Found));
+		Assert.That(_store.Write(_identity, second).Stored, Is.True);
 		Assert.That(_store.Read(_identity).Kek, Is.EqualTo(second));
 	}
 

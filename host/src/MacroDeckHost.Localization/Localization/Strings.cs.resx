@@ -14879,6 +14879,24 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Hlasitost</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>Klíč, který odemyká uložené tajné údaje, je uložen v úložišti tajných údajů tohoto počítače, například v KDE Wallet, GNOME Keyring nebo systémové klíčence. Úložiště neodpovědělo, obvykle proto, že je zamčené nebo neběží. Odemkněte je a zkuste to znovu.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Zkusit znovu</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Úložiště tajných údajů se stále nedaří kontaktovat. Pokud to tak zůstane, použijte místo toho obnovovací klíč.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Úložiště tajných údajů se nepodařilo kontaktovat</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Použít místo toho obnovovací klíč</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Čeká se na úložiště tajných údajů. Pokud vyžaduje heslo, zadejte je.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck se nemůže dostat ke klíči, který odemyká uložené tajné údaje. Zadejte záložní obnovovací klíč pro jeho obnovení.</value>
   </data>

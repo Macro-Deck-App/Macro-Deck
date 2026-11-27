@@ -36,6 +36,19 @@ public sealed class UnlockKeyRingResponse
 	public string? RestartUnsupportedReason { get; set; }
 }
 
+public sealed class RetryKeyRingKeystoreRequest;
+
+public sealed class RetryKeyRingKeystoreResponse
+{
+	public string Outcome { get; set; } = string.Empty;
+
+	public bool RestartRequested { get; set; }
+
+	public bool RestartSupported { get; set; }
+
+	public string? RestartUnsupportedReason { get; set; }
+}
+
 public sealed class GetKeyRingProtectionRequest;
 
 public sealed class GetKeyRingProtectionResponse

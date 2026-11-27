@@ -14880,6 +14880,24 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>वॉल्यूम</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>सहेजे गए सीक्रेट को अनलॉक करने वाली कुंजी इस कंप्यूटर के सीक्रेट स्टोरेज में रखी जाती है, जैसे KDE Wallet, GNOME Keyring या सिस्टम कीचेन। इसने जवाब नहीं दिया, आम तौर पर इसलिए कि यह लॉक है या चल नहीं रहा है। इसे अनलॉक करें, फिर दोबारा कोशिश करें।</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>दोबारा कोशिश करें</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>सीक्रेट स्टोरेज तक अब भी नहीं पहुँचा जा सका। अगर ऐसा ही रहे, तो इसके बजाय अपनी रिकवरी कुंजी का उपयोग करें।</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck सीक्रेट स्टोरेज तक नहीं पहुँच पा रहा है</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>इसके बजाय रिकवरी कुंजी का उपयोग करें</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>सीक्रेट स्टोरेज की प्रतीक्षा की जा रही है। अगर यह अपना पासवर्ड माँगे, तो उसे दर्ज करें।</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck उस कुंजी तक नहीं पहुँच सकता जो आपके सहेजे गए सीक्रेट को अनलॉक करती है। उसे पुनर्स्थापित करने के लिए अपनी बैकअप रिकवरी कुंजी दर्ज करें।</value>
   </data>

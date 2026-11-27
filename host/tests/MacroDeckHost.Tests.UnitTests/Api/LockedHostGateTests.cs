@@ -117,6 +117,14 @@ public class LockedHostGateTests
 		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), path);
 	}
 
+	[Test]
+	public async Task The_keystore_retry_is_hidden_from_a_caller_that_is_not_the_desktop_app()
+	{
+		var response = await _client.PostAsync(new Uri("/api/key-ring/retry-keystore", UriKind.Relative), null);
+
+		Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+	}
+
 	// The bootstrapper waits on these and gives up with a blocking error dialog if the host never
 	// answers. Whether they then require a session is the usual authorization question and is not the
 	// gate's business - what matters is that locking does not silence them.

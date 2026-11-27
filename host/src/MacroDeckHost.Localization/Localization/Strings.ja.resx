@@ -14880,6 +14880,24 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>音量</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>保存済みのシークレットのロックを解除するキーは、このコンピューターのシークレットストレージ (KDE Wallet、GNOME Keyring、システムのキーチェーンなど) に保管されています。シークレットストレージから応答がありませんでした。多くの場合、ロックされているか、実行されていないことが原因です。ロックを解除してから、もう一度お試しください。</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>再試行</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>シークレットストレージにまだアクセスできません。この状態が続く場合は、代わりに回復キーを使用してください。</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck はシークレットストレージにアクセスできません</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>代わりに回復キーを使用</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>シークレットストレージを待っています。パスワードを求められたら入力してください。</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck は、保存されたシークレットを解除するキーにアクセスできません。復元するには、バックアップの回復キーを入力してください。</value>
   </data>

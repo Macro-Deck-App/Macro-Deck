@@ -14880,6 +14880,24 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>Kunci yang membuka rahasia tersimpan berada di penyimpanan rahasia komputer ini, misalnya KDE Wallet, GNOME Keyring, atau rantai kunci sistem. Penyimpanan itu tidak merespons, biasanya karena terkunci atau tidak berjalan. Buka kuncinya, lalu coba lagi.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Coba lagi</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Penyimpanan rahasia masih tidak dapat diakses. Jika tetap demikian, gunakan kunci pemulihan saja.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck tidak dapat mengakses penyimpanan rahasia</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Gunakan kunci pemulihan saja</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Menunggu penyimpanan rahasia. Jika kata sandinya diminta, masukkan.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck tidak dapat mengakses kunci yang membuka rahasia tersimpan Anda. Masukkan kunci pemulihan cadangan untuk memulihkannya.</value>
   </data>

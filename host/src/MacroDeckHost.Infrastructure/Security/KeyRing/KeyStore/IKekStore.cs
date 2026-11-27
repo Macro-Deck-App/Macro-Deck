@@ -35,6 +35,19 @@ public readonly record struct KekStoreReadResult(KekStoreStatus Status, byte[]? 
 	}
 }
 
+public readonly record struct KekStoreWriteResult(bool Stored, string? Reason)
+{
+	public static KekStoreWriteResult Ok()
+	{
+		return new KekStoreWriteResult(true, null);
+	}
+
+	public static KekStoreWriteResult Failed(string reason)
+	{
+		return new KekStoreWriteResult(false, reason);
+	}
+}
+
 /// <summary>
 /// Identifies the keystore entry. The account carries the installation id so that two checkouts, or a
 /// portable install beside a packaged one, can never write over each other's entry.
@@ -61,8 +74,7 @@ public interface IKekStore
 
 	KekStoreReadResult Read(KekStoreIdentity identity);
 
-	/// <summary>Returns <see cref="KekStoreStatus.Found"/> when the key was stored.</summary>
-	KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek);
+	KekStoreWriteResult Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek);
 
 	KekStoreStatus Delete(KekStoreIdentity identity);
 }

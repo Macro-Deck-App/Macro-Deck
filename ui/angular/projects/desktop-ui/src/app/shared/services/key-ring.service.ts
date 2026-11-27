@@ -1,7 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '../transport/api.service';
 import { ConnectionDiagnosticsService } from './connection-diagnostics.service';
-import { GetKeyRingStatusResponse, TransportError, UnlockKeyRingResponse } from '@macro-deck/runtime';
+import {
+  GetKeyRingStatusResponse,
+  RetryKeyRingKeystoreResponse,
+  TransportError,
+  UnlockKeyRingResponse,
+} from '@macro-deck/runtime';
 
 @Injectable({ providedIn: 'root' })
 export class KeyRingService {
@@ -44,5 +49,9 @@ export class KeyRingService {
 
   unlock(recoveryKey: string): Promise<UnlockKeyRingResponse> {
     return this.api.unlockKeyRing({ recoveryKey });
+  }
+
+  retryKeystore(): Promise<RetryKeyRingKeystoreResponse> {
+    return this.api.retryKeyRingKeystore();
   }
 }

@@ -66,16 +66,16 @@ public sealed class WindowsCredentialManagerKekStore : IKekStore
 		}
 	}
 
-	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
+	public KekStoreWriteResult Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
 	{
 		byte[] protectedKek;
 		try
 		{
 			protectedKek = ProtectedData.Protect(kek.ToArray(), _entropy, DataProtectionScope.CurrentUser);
 		}
-		catch (CryptographicException)
+		catch (CryptographicException e)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed(e.Message);
 		}
 
 		var target = Marshal.StringToCoTaskMemUni(TargetName(identity));
@@ -96,8 +96,8 @@ public sealed class WindowsCredentialManagerKekStore : IKekStore
 			};
 
 			return WindowsCredentialManagerInterop.CredWrite(ref credential, 0)
-				? KekStoreStatus.Found
-				: KekStoreStatus.Unavailable;
+				? KekStoreWriteResult.Ok()
+				: KekStoreWriteResult.Failed(new Win32Exception(Marshal.GetLastWin32Error()).Message);
 		}
 		finally
 		{

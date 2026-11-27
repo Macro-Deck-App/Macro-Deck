@@ -10,6 +10,7 @@ namespace MacroDeckHost.Tests.UnitTests.Security.KeyRing;
 internal sealed class FakeKekStore : IKekStore
 {
 	private byte[]? _kek;
+	private int _reads;
 
 	public KeyRingBackend Backend { get; init; } = KeyRingBackend.MacOsKeychain;
 
@@ -17,11 +18,15 @@ internal sealed class FakeKekStore : IKekStore
 
 	public KekStoreStatus? ReadOverride { get; set; }
 
+	public string? ReadFailure { get; set; }
+
 	public bool WriteFails { get; set; }
 
 	public ManualResetEventSlim? ReadGate { get; set; }
 
 	public int Writes { get; private set; }
+
+	public int Reads => Volatile.Read(ref _reads);
 
 	public byte[]? Stored => _kek?.ToArray();
 
@@ -37,11 +42,12 @@ internal sealed class FakeKekStore : IKekStore
 
 	public KekStoreReadResult Read(KekStoreIdentity identity)
 	{
+		Interlocked.Increment(ref _reads);
 		ReadGate?.Wait();
 
 		if (ReadOverride == KekStoreStatus.Unavailable)
 		{
-			return KekStoreReadResult.Unavailable(Availability.Reason ?? "unavailable");
+			return KekStoreReadResult.Unavailable(ReadFailure ?? Availability.Reason ?? "unavailable");
 		}
 
 		if (ReadOverride == KekStoreStatus.NotFound || _kek is null)
@@ -52,17 +58,17 @@ internal sealed class FakeKekStore : IKekStore
 		return KekStoreReadResult.Found(_kek.ToArray());
 	}
 
-	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
+	public KekStoreWriteResult Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
 	{
 		if (WriteFails)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed("write failed");
 		}
 
 		Writes++;
 		_kek = kek.ToArray();
 
-		return KekStoreStatus.Found;
+		return KekStoreWriteResult.Ok();
 	}
 
 	public KekStoreStatus Delete(KekStoreIdentity identity)

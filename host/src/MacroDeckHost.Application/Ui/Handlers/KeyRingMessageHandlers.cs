@@ -104,6 +104,40 @@ public sealed class UnlockKeyRingRequestMessageHandler
 	}
 }
 
+public sealed class RetryKeyRingKeystoreRequestMessageHandler
+	: IUiTransportMessageHandler<RetryKeyRingKeystoreRequest, RetryKeyRingKeystoreResponse>
+{
+	private readonly IKeyRingProtectionService _keyRing;
+	private readonly IApplicationRestartService _restart;
+
+	public RetryKeyRingKeystoreRequestMessageHandler(
+		IKeyRingProtectionService keyRing,
+		IApplicationRestartService restart)
+	{
+		_keyRing = keyRing;
+		_restart = restart;
+	}
+
+	public async ValueTask<RetryKeyRingKeystoreResponse> Handle(
+		RetryKeyRingKeystoreRequest request,
+		CancellationToken cancellationToken)
+	{
+		var outcome = await _keyRing.RetryKeystore(cancellationToken);
+		var restart = _restart.Availability;
+		var requested = outcome == KeyRingKeystoreRetryOutcome.Recovered
+			&& restart.Supported
+			&& _restart.Request("key-ring-keystore-retry").Success;
+
+		return new RetryKeyRingKeystoreResponse
+		{
+			Outcome = outcome.ToString(),
+			RestartRequested = requested,
+			RestartSupported = restart.Supported,
+			RestartUnsupportedReason = restart.Reason
+		};
+	}
+}
+
 public sealed class GetKeyRingProtectionRequestMessageHandler
 	: IUiTransportMessageHandler<GetKeyRingProtectionRequest, GetKeyRingProtectionResponse>
 {

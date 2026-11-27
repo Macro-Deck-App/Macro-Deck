@@ -20,6 +20,9 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 	private readonly KeyRingMigrator _migrator;
 	private readonly ILogger _logger;
 	private readonly bool _portable;
+	private readonly TimeProvider _timeProvider;
+	private readonly TimeSpan _keystoreRetryWait;
+	private readonly object _retryLock = new();
 
 	// The one gate for every escrow and keystore write. BackupRecoveryKeyService cannot serve this
 	// purpose: it is registered scoped, so its own semaphore is per-scope and serialises nothing.
@@ -27,6 +30,8 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 
 	private KeyRingProtectionPlan _plan;
 	private bool _recoveryKeyExported;
+	private Task<KeyRingKeystoreReadOutcome>? _retryRead;
+	private bool _retryReadObserved;
 
 	public KeyRingProtectionService(
 		IMacroDeckPaths paths,
@@ -36,7 +41,9 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		KeyRingProtectionPlan plan,
 		bool portable,
 		TimeProvider timeProvider,
-		ILogger logger)
+		ILogger logger,
+		Task<KeyRingKeystoreReadOutcome>? pendingKeystoreRead = null,
+		TimeSpan? keystoreRetryWait = null)
 	{
 		_paths = paths;
 		_store = store;
@@ -44,6 +51,9 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		_holder = holder;
 		_plan = plan;
 		_portable = portable;
+		_timeProvider = timeProvider;
+		_keystoreRetryWait = keystoreRetryWait ?? TimeSpan.FromSeconds(10);
+		_retryRead = pendingKeystoreRead;
 		_logger = logger.ForContext<KeyRingProtectionService>();
 		_escrow = new KekEscrowStore(logger, timeProvider);
 		_migrator = new KeyRingMigrator(logger);
@@ -119,12 +129,14 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 					return Result.Fail(KeyRingProtectionError.EscrowUnreadable);
 				}
 
-				if (_store.Write(_identity, kek) != KekStoreStatus.Found)
+				var stored = _store.Write(_identity, kek);
+				if (!stored.Stored)
 				{
 					// Availability only says the backend loaded, not that it can answer - libsecret
 					// installed with no session bus reaches exactly here. The escrow written a moment
 					// ago protects nothing now, so it does not stay on disk.
-					_logger.Error("Could not store the key encryption key; leaving the key ring as it is");
+					_logger.Error("Could not store the key encryption key ({Reason}); leaving the key ring as it is",
+						stored.Reason);
 					TryDeleteEscrow();
 					_plan = _plan with { UnprotectedReason = KeyRingUnprotectedReason.NoKeystore };
 
@@ -272,8 +284,13 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 					return Result.Fail(KeyRingProtectionError.RecoveryKeyInvalid);
 				}
 
-				if (_store.Write(_identity, kek) != KekStoreStatus.Found)
+				var stored = _store.Write(_identity, kek);
+				if (!stored.Stored)
 				{
+					_logger.Error("Could not store the recovered key in the {Backend} keystore: {Reason}",
+						_store.Backend,
+						stored.Reason);
+
 					return Result.Fail(KeyRingProtectionError.KeystoreUnavailable);
 				}
 
@@ -332,9 +349,70 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 
 	public Result<KeyRingProtectionError> AdoptKek(ReadOnlyMemory<byte> kek)
 	{
-		return _store.Write(_identity, kek.Span) == KekStoreStatus.Found
-			? Result.Ok<KeyRingProtectionError>()
-			: Result.Fail(KeyRingProtectionError.KeystoreUnavailable);
+		var stored = _store.Write(_identity, kek.Span);
+		if (stored.Stored)
+		{
+			return Result.Ok<KeyRingProtectionError>();
+		}
+
+		_logger.Error("Could not store the restored key encryption key in the {Backend} keystore: {Reason}",
+			_store.Backend,
+			stored.Reason);
+
+		return Result.Fail(KeyRingProtectionError.KeystoreUnavailable);
+	}
+
+	public async Task<KeyRingKeystoreRetryOutcome> RetryKeystore(CancellationToken cancellationToken = default)
+	{
+		if (_plan.Mode != KeyRingProtectionMode.Locked || _plan.LockReason != KeyRingLockReason.KeystoreUnavailable)
+		{
+			return KeyRingKeystoreRetryOutcome.NotApplicable;
+		}
+
+		Task<KeyRingKeystoreReadOutcome> read;
+		lock (_retryLock)
+		{
+			// A read that finished before anyone asked says nothing about the keystore now. A pending one
+			// is reused, because a second lookup would raise a second password prompt.
+			if (_retryRead is null || _retryRead.IsCompleted && !_retryReadObserved)
+			{
+				var ringKekId = _plan.RingKekId;
+				_retryRead = KeyRingKeystoreRead.Evaluate(Task.Run(() => _store.Read(_identity)), ringKekId);
+			}
+
+			_retryReadObserved = true;
+			read = _retryRead;
+		}
+
+		KeyRingKeystoreReadOutcome outcome;
+		try
+		{
+			outcome = await read.WaitAsync(_keystoreRetryWait, _timeProvider, cancellationToken);
+		}
+		catch (TimeoutException)
+		{
+			return KeyRingKeystoreRetryOutcome.Pending;
+		}
+
+		lock (_retryLock)
+		{
+			if (ReferenceEquals(_retryRead, read))
+			{
+				_retryRead = null;
+				_retryReadObserved = false;
+			}
+		}
+
+		if (outcome.Outcome == KeyRingKeystoreRetryOutcome.Unavailable)
+		{
+			_logger.Warning("The {Backend} keystore still cannot answer: {Reason}", _store.Backend, outcome.Reason);
+		}
+		else
+		{
+			_logger.Information("The {Backend} keystore answered a retry: {Outcome}", _store.Backend, outcome.Outcome);
+		}
+
+		return outcome.Outcome;
 	}
 
 	public void Dispose()
@@ -373,6 +451,12 @@ public sealed class KeyRingProtectionService : IKeyRingProtectionService, IDispo
 		}
 
 		var read = _store.Read(_identity);
+		if (read.Status == KekStoreStatus.Unavailable)
+		{
+			_logger.Warning("The {Backend} keystore could not be read before protecting the key ring: {Reason}",
+				_store.Backend,
+				read.Reason);
+		}
 
 		return read.Status == KekStoreStatus.Found ? read.Kek! : KeyRingKeyDerivation.CreateKek();
 	}

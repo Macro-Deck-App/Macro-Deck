@@ -1,6 +1,7 @@
 using MacroDeckHost.Application.Lifecycle;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Enums;
+using MacroDeckHost.Infrastructure.Security.KeyRing;
 using MacroDeckHost.Infrastructure.Security.KeyRing.Crypto;
 using MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
 using Serilog;
@@ -132,7 +133,12 @@ public sealed class KeyRingLateKeystoreAnswerServiceTests
 		string? ringKekId,
 		bool alreadyRestarted = false)
 	{
-		return new KeyRingLateKeystoreAnswerService(lateRead, ringKekId, _marker, alreadyRestarted, _restart, _logger);
+		return new KeyRingLateKeystoreAnswerService(
+			lateRead is null ? null : KeyRingKeystoreRead.Evaluate(lateRead, ringKekId),
+			_marker,
+			alreadyRestarted,
+			_restart,
+			_logger);
 	}
 
 	private sealed class RecordingRestartService : IApplicationRestartService

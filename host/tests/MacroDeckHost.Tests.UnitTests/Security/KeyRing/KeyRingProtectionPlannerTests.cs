@@ -177,6 +177,43 @@ public class KeyRingProtectionPlannerTests
 	}
 
 	[Test]
+	public void A_lock_caused_by_an_unreachable_backend_carries_what_the_backend_said()
+	{
+		var kek = KeyRingKeyDerivation.CreateKek();
+		WrapRing(kek);
+		WriteEscrow(kek);
+		var store = new FakeKekStore
+		{
+			ReadOverride = KekStoreStatus.Unavailable,
+			ReadFailure = "Cannot autolaunch D-Bus without X11 $DISPLAY"
+		};
+
+		var plan = Resolve(store, true);
+
+		Assert.That(plan.BackendUnavailableReason, Is.EqualTo("Cannot autolaunch D-Bus without X11 $DISPLAY"));
+	}
+
+	[Test]
+	public void A_lock_caused_by_a_keystore_that_never_answered_says_so()
+	{
+		var kek = KeyRingKeyDerivation.CreateKek();
+		WrapRing(kek);
+		WriteEscrow(kek);
+		var store = new FakeKekStore { ReadGate = _readGate };
+		store.Seed(kek);
+
+		var plan = KeyRingProtectionPlanner.Resolve(_keysDirectory,
+			store,
+			_identity,
+			true,
+			false,
+			TimeSpan.FromMilliseconds(100),
+			out _);
+
+		Assert.That(plan.BackendUnavailableReason, Does.Contain("did not answer"));
+	}
+
+	[Test]
 	public async Task A_keystore_that_does_not_answer_in_time_locks_the_ring_and_keeps_the_read_going()
 	{
 		var kek = KeyRingKeyDerivation.CreateKek();

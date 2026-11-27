@@ -14880,6 +14880,24 @@ Macro Deck встановлено з репозиторію APT, тож післ
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Гучність</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>Ключ, який розблоковує збережені секрети, зберігається у сховищі секретів цього комп'ютера, наприклад у KDE Wallet, GNOME Keyring або системній в'язці ключів. Сховище не відповіло, зазвичай тому, що воно заблоковане або не запущене. Розблокуйте його та повторіть спробу.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Повторити спробу</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>До сховища секретів досі не вдається звернутися. Якщо нічого не зміниться, використайте ключ відновлення.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck не може звернутися до сховища секретів</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Використати ключ відновлення</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Очікування сховища секретів. Якщо воно запитає пароль, введіть його.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck не може отримати ключ, який відкриває ваші збережені секрети. Введіть резервний ключ відновлення, щоб його відновити.</value>
   </data>

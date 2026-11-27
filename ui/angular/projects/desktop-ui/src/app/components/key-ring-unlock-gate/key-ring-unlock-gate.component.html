@@ -11,12 +11,35 @@
 } @else if (result(); as unlocked) {
   <shared-modal [showHeader]="false" [closeOnOverlay]="false" [showFooter]="false" size="small">
     <div class="gate">
-      <h2 class="gate__heading">{{ appStrings.KeyRing.Unlock.Title | translate }}</h2>
+      @if (unlocked.byRecoveryKey) {
+        <h2 class="gate__heading">{{ appStrings.KeyRing.Unlock.Title | translate }}</h2>
+      }
       <p class="gate__desc">
         {{ (unlocked.restartRequested
               ? appStrings.KeyRing.Unlock.RestartRequired
               : appStrings.KeyRing.Unlock.RestartUnsupported) | translate }}
       </p>
+    </div>
+  </shared-modal>
+} @else if (keystoreGuidance()) {
+  <shared-modal [showHeader]="false" [closeOnOverlay]="false" size="small">
+    <div class="gate">
+      <h2 class="gate__heading">{{ appStrings.KeyRing.KeystoreRetry.Title | translate }}</h2>
+      <p class="gate__desc">{{ appStrings.KeyRing.KeystoreRetry.Description | translate }}</p>
+      @if (waiting()) {
+        <p class="gate__desc" role="status">{{ appStrings.KeyRing.KeystoreRetry.Waiting | translate }}</p>
+      }
+      @if (keystoreMessage(); as message) {
+        <shared-error-banner [message]="message" (dismiss)="dismissKeystoreMessage()" />
+      }
+    </div>
+    <div modal-footer>
+      <shared-button variant="secondary" (click)="useRecoveryKey()">
+        {{ appStrings.KeyRing.KeystoreRetry.UseRecoveryKey | translate }}
+      </shared-button>
+      <shared-button variant="primary" [disabled]="retrying()" [loading]="retrying()" (click)="retryKeystore()">
+        {{ appStrings.KeyRing.KeystoreRetry.Retry | translate }}
+      </shared-button>
     </div>
   </shared-modal>
 } @else {
@@ -28,8 +51,9 @@
     [invalid]="invalid()"
     [submitting]="submitting()"
     [bannerMessage]="bannerMessage()"
-    [showCancel]="false"
+    [showCancel]="canReturnToKeystore()"
     [closeOnOverlay]="false"
+    (cancelled)="returnToKeystore()"
     (bannerDismissed)="dismissBanner()"
     (submitted)="submit($event)" />
 }

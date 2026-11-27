@@ -14880,6 +14880,24 @@
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>مستوى الصوت</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>المفتاح الذي يفتح الأسرار المحفوظة موجود في مخزن الأسرار على هذا الكمبيوتر، مثل KDE Wallet أو GNOME Keyring أو سلسلة مفاتيح النظام. لم يستجب المخزن، وغالبًا يكون السبب أنه مقفل أو لا يعمل. افتح قفله ثم أعد المحاولة.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>أعد المحاولة</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>ما زال الوصول إلى مخزن الأسرار متعذّرًا. إذا استمر ذلك، استخدم مفتاح الاستعادة بدلًا من ذلك.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>يتعذّر على Macro Deck الوصول إلى مخزن الأسرار</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>استخدم مفتاح الاستعادة بدلًا من ذلك</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>في انتظار مخزن الأسرار. إذا طلب كلمة المرور، أدخلها.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>لا يستطيع Macro Deck الوصول إلى المفتاح الذي يفتح أسرارك المخزّنة. أدخل مفتاح الاستعادة الاحتياطي لاستعادته.</value>
   </data>

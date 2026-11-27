@@ -14879,6 +14879,24 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>La clé qui déverrouille tes secrets enregistrés se trouve dans le stockage des secrets de cet ordinateur, par exemple KDE Wallet, GNOME Keyring ou le trousseau du système. Il n'a pas répondu, le plus souvent parce qu'il est verrouillé ou n'est pas lancé. Déverrouille-le, puis réessaie.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Réessayer</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Le stockage des secrets reste inaccessible. Si cela ne change pas, utilise ta clé de récupération à la place.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck ne peut pas atteindre ton stockage des secrets</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Utiliser la clé de récupération à la place</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>En attente du stockage des secrets. S'il demande son mot de passe, saisis-le.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck n'arrive pas à atteindre la clé qui déverrouille tes secrets enregistrés. Saisis ta clé de récupération de sauvegarde pour la restaurer.</value>
   </data>

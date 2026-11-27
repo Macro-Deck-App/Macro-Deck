@@ -14880,6 +14880,24 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>音量</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>用于解锁已存储机密的密钥保存在此电脑的机密存储中，例如 KDE Wallet、GNOME Keyring 或系统钥匙串。机密存储没有响应，通常是因为它已锁定或未运行。请先将其解锁，然后重试。</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>重试</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>仍然无法访问机密存储。如果一直如此，请改用恢复密钥。</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck 无法访问机密存储</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>改用恢复密钥</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>正在等待机密存储。如果它要求输入密码，请输入。</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck 无法获取用于解锁你已存储机密的密钥。请输入你的备份恢复密钥以恢复它。</value>
   </data>

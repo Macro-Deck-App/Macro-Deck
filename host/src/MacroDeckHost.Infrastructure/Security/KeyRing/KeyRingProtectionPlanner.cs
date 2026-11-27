@@ -64,7 +64,11 @@ public static class KeyRingProtectionPlanner
 		{
 			lateRead = pending;
 
-			return Locked(store, availability, KeyRingLockReason.KeystoreUnavailable, ringKekId);
+			return Locked(store,
+				availability,
+				KeyRingLockReason.KeystoreUnavailable,
+				ringKekId,
+				$"The keystore did not answer within {readDeadline.TotalSeconds:0} s");
 		}
 
 		var read = pending.GetAwaiter().GetResult();
@@ -100,7 +104,7 @@ public static class KeyRingProtectionPlanner
 			default:
 				// The backend could not answer. Carrying on as if the entry were absent would let Data
 				// Protection mint a fresh ring over a perfectly good one.
-				return Locked(store, availability, KeyRingLockReason.KeystoreUnavailable, ringKekId);
+				return Locked(store, availability, KeyRingLockReason.KeystoreUnavailable, ringKekId, read.Reason);
 		}
 	}
 
@@ -143,14 +147,15 @@ public static class KeyRingProtectionPlanner
 		IKekStore store,
 		KekStoreAvailability availability,
 		KeyRingLockReason reason,
-		string? ringKekId)
+		string? ringKekId,
+		string? keystoreReason = null)
 	{
 		return new KeyRingProtectionPlan(KeyRingProtectionMode.Locked,
 			reason,
 			KeyRingUnprotectedReason.None,
 			store.Backend,
 			availability.Supported,
-			availability.Reason,
+			keystoreReason ?? availability.Reason,
 			null,
 			ringKekId,
 			false);

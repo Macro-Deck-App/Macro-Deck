@@ -406,8 +406,9 @@ public static class Program
 			// the real ring.
 			scratchKeys = Directory.CreateTempSubdirectory("macro-deck-locked-keys-").FullName;
 
-			Log.Error("The key ring is locked ({Reason}). Stored secrets stay untouched until it is unlocked",
-				plan.LockReason);
+			Log.Error("The key ring is locked ({Reason}: {Detail}). Stored secrets stay untouched until it is unlocked",
+				plan.LockReason,
+				plan.BackendUnavailableReason ?? "no detail");
 		}
 		else if (plan.Mode == KeyRingProtectionMode.Unprotected
 			&& plan.UnprotectedReason != KeyRingUnprotectedReason.None)

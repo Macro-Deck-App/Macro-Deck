@@ -1,30 +1,26 @@
-using System.Security.Cryptography;
 using MacroDeckHost.Application.Lifecycle;
-using MacroDeckHost.Infrastructure.Security.KeyRing.Crypto;
-using MacroDeckHost.Infrastructure.Security.KeyRing.KeyStore;
+using MacroDeckHost.Application.Security.KeyRing;
+using MacroDeckHost.Infrastructure.Security.KeyRing;
 using ILogger = Serilog.ILogger;
 
 namespace MacroDeckHost;
 
 public sealed class KeyRingLateKeystoreAnswerService : BackgroundService
 {
-	private readonly Task<KekStoreReadResult>? _lateRead;
-	private readonly string? _ringKekId;
+	private readonly Task<KeyRingKeystoreReadOutcome>? _lateRead;
 	private readonly string _markerPath;
 	private readonly bool _alreadyRestarted;
 	private readonly IApplicationRestartService _restart;
 	private readonly ILogger _logger;
 
 	public KeyRingLateKeystoreAnswerService(
-		Task<KekStoreReadResult>? lateRead,
-		string? ringKekId,
+		Task<KeyRingKeystoreReadOutcome>? lateRead,
 		string markerPath,
 		bool alreadyRestarted,
 		IApplicationRestartService restart,
 		ILogger logger)
 	{
 		_lateRead = lateRead;
-		_ringKekId = ringKekId;
 		_markerPath = markerPath;
 		_alreadyRestarted = alreadyRestarted;
 		_restart = restart;
@@ -63,7 +59,7 @@ public sealed class KeyRingLateKeystoreAnswerService : BackgroundService
 			return;
 		}
 
-		KekStoreReadResult read;
+		KeyRingKeystoreReadOutcome read;
 		try
 		{
 			read = await _lateRead.WaitAsync(stoppingToken);
@@ -72,51 +68,36 @@ public sealed class KeyRingLateKeystoreAnswerService : BackgroundService
 		{
 			return;
 		}
-		catch (Exception e)
+
+		if (read.Outcome != KeyRingKeystoreRetryOutcome.Recovered)
 		{
-			_logger.Warning(e, "The keystore read that startup stopped waiting for failed");
+			_logger.Information("The keystore answered late ({Outcome}: {Reason}) without the key ring's key; "
+				+ "staying locked",
+				read.Outcome,
+				read.Reason ?? "no detail");
 			return;
 		}
 
-		try
+		if (_alreadyRestarted)
 		{
-			if (read.Status != KekStoreStatus.Found
-				|| _ringKekId is null
-				|| !string.Equals(KeyRingKeyDerivation.DeriveKekId(read.Kek!), _ringKekId, StringComparison.Ordinal))
-			{
-				_logger.Information("The keystore answered late ({Status}) without the key ring's key; staying locked",
-					read.Status);
-				return;
-			}
-
-			if (_alreadyRestarted)
-			{
-				_logger.Warning("The keystore answered late again after the longer wait; restart Macro Deck to "
-					+ "unlock the key ring");
-				return;
-			}
-
-			// A keystore that is merely slow, not waiting on a prompt, would miss the deadline again on every
-			// start; the marker gives the next start a longer wait so this restart cannot repeat forever.
-			WriteMarker();
-			var restart = _restart.Request("key-ring-keystore-answered");
-			if (restart.Success)
-			{
-				_logger.Information("The keystore answered after startup stopped waiting; restarting to unlock");
-			}
-			else
-			{
-				_logger.Warning("The keystore answered after startup stopped waiting, but Macro Deck cannot restart "
-					+ "itself ({Error}); restart it to unlock the key ring",
-					restart.Error);
-			}
+			_logger.Warning("The keystore answered late again after the longer wait; restart Macro Deck to "
+				+ "unlock the key ring");
+			return;
 		}
-		finally
+
+		// A keystore that is merely slow, not waiting on a prompt, would miss the deadline again on every
+		// start; the marker gives the next start a longer wait so this restart cannot repeat forever.
+		WriteMarker();
+		var restart = _restart.Request("key-ring-keystore-answered");
+		if (restart.Success)
 		{
-			if (read.Kek is not null)
-			{
-				CryptographicOperations.ZeroMemory(read.Kek);
-			}
+			_logger.Information("The keystore answered after startup stopped waiting; restarting to unlock");
+		}
+		else
+		{
+			_logger.Warning("The keystore answered after startup stopped waiting, but Macro Deck cannot restart "
+				+ "itself ({Error}); restart it to unlock the key ring",
+				restart.Error);
 		}
 	}
 

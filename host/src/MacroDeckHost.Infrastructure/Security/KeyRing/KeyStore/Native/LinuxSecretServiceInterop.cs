@@ -15,9 +15,11 @@ internal static class LinuxSecretServiceInterop
 {
 	private const string Secret = "libsecret-1.so.0";
 	private const string Glib = "libglib-2.0.so.0";
+	private const string Gobject = "libgobject-2.0.so.0";
 
 	private const int SecretSchemaDontMatchName = 2;
 	private const int SecretSchemaAttributeString = 0;
+	private const int SecretSearchAll = 2;
 
 	// SecretSchema is { const gchar *name; SecretSchemaFlags flags; struct { const gchar *name; int
 	// type; } attributes[32]; gint reserved; gpointer reserved1..7 }. Only the first attribute is
@@ -29,6 +31,8 @@ internal static class LinuxSecretServiceInterop
 	private const int SchemaFirstAttributeTypeOffset = 24;
 
 	private const int GErrorMessageOffset = 8;
+
+	private static readonly Lazy<bool> _canSearch = new(BindSearch);
 
 	private static readonly Lazy<LinuxSecretServiceBinding?> _binding = new(Bind);
 
@@ -76,6 +80,76 @@ internal static class LinuxSecretServiceInterop
 		finally
 		{
 			ErrorFree(error);
+		}
+	}
+
+	// A search without the unlock flag lists locked items and never prompts, unlike a lookup, which
+	// answers a dismissed unlock prompt exactly as it answers an entry that does not exist.
+	public static bool? HasLockedItem(IntPtr attributes, out string? failure)
+	{
+		failure = null;
+		if (!_canSearch.Value)
+		{
+			return null;
+		}
+
+		var items = SearchSync(IntPtr.Zero, Schema, attributes, SecretSearchAll, IntPtr.Zero, out var error);
+		failure = TakeError(error);
+		if (failure is not null)
+		{
+			return null;
+		}
+
+		try
+		{
+			for (var node = items; node != IntPtr.Zero; node = Marshal.ReadIntPtr(node, IntPtr.Size))
+			{
+				if (ItemGetLocked(Marshal.ReadIntPtr(node)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+		finally
+		{
+			for (var node = items; node != IntPtr.Zero; node = Marshal.ReadIntPtr(node, IntPtr.Size))
+			{
+				ObjectUnref(Marshal.ReadIntPtr(node));
+			}
+
+			ListFree(items);
+		}
+	}
+
+	// libsecret keeps its service proxy for the life of the process. Dropping it after a failure lets
+	// the next call reach a daemon that was started or replaced in the meantime.
+	public static void ForgetService()
+	{
+		if (_canSearch.Value)
+		{
+			ServiceDisconnect();
+		}
+	}
+
+	private static bool BindSearch()
+	{
+		try
+		{
+			return IsLoadable
+				&& NativeLibrary.TryLoad(Secret, out var secret)
+				&& NativeLibrary.TryLoad(Glib, out var glib)
+				&& NativeLibrary.TryLoad(Gobject, out var gobject)
+				&& NativeLibrary.TryGetExport(secret, "secret_service_search_sync", out _)
+				&& NativeLibrary.TryGetExport(secret, "secret_item_get_locked", out _)
+				&& NativeLibrary.TryGetExport(secret, "secret_service_disconnect", out _)
+				&& NativeLibrary.TryGetExport(glib, "g_list_free", out _)
+				&& NativeLibrary.TryGetExport(gobject, "g_object_unref", out _);
+		}
+		catch (Exception)
+		{
+			return false;
 		}
 	}
 
@@ -150,6 +224,28 @@ internal static class LinuxSecretServiceInterop
 
 	[DllImport(Secret, EntryPoint = "secret_password_free")]
 	public static extern void PasswordFree(IntPtr password);
+
+	[DllImport(Secret, EntryPoint = "secret_service_search_sync")]
+	private static extern IntPtr SearchSync(
+		IntPtr service,
+		IntPtr schema,
+		IntPtr attributes,
+		int flags,
+		IntPtr cancellable,
+		out IntPtr error);
+
+	[DllImport(Secret, EntryPoint = "secret_item_get_locked")]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static extern bool ItemGetLocked(IntPtr item);
+
+	[DllImport(Secret, EntryPoint = "secret_service_disconnect")]
+	private static extern void ServiceDisconnect();
+
+	[DllImport(Glib, EntryPoint = "g_list_free")]
+	private static extern void ListFree(IntPtr list);
+
+	[DllImport(Gobject, EntryPoint = "g_object_unref")]
+	private static extern void ObjectUnref(IntPtr instance);
 
 	[DllImport(Glib, EntryPoint = "g_hash_table_new")]
 	private static extern IntPtr HashTableNew(IntPtr hashFunc, IntPtr equalFunc);

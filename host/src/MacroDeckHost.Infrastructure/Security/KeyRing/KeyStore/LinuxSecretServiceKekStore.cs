@@ -46,9 +46,14 @@ public sealed class LinuxSecretServiceKekStore : IKekStore
 			var message = LinuxSecretServiceInterop.TakeError(error);
 			if (password == IntPtr.Zero)
 			{
-				return message is null
-					? KekStoreReadResult.NotFound()
-					: KekStoreReadResult.Unavailable(message);
+				if (message is null)
+				{
+					return MissingOrLocked(attributes.Table);
+				}
+
+				LinuxSecretServiceInterop.ForgetService();
+
+				return KekStoreReadResult.Unavailable(message);
 			}
 
 			try
@@ -78,17 +83,32 @@ public sealed class LinuxSecretServiceKekStore : IKekStore
 		}
 	}
 
-	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
+	private static KekStoreReadResult MissingOrLocked(IntPtr attributes)
+	{
+		var locked = LinuxSecretServiceInterop.HasLockedItem(attributes, out var failure);
+		if (failure is not null)
+		{
+			LinuxSecretServiceInterop.ForgetService();
+
+			return KekStoreReadResult.Unavailable(failure);
+		}
+
+		return locked == true
+			? KekStoreReadResult.Unavailable("The Secret Service holds the key in a collection that is still locked")
+			: KekStoreReadResult.NotFound();
+	}
+
+	public KekStoreWriteResult Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
 	{
 		if (!LinuxSecretServiceInterop.IsLoadable)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed(Availability.Reason!);
 		}
 
 		using var attributes = LinuxSecretServiceInterop.CreateAttributes(Account(identity));
 		if (!attributes.IsValid)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed("The libsecret attribute table could not be created");
 		}
 
 		var encoded = Convert.ToBase64String(kek);
@@ -104,17 +124,23 @@ public sealed class LinuxSecretServiceKekStore : IKekStore
 				IntPtr.Zero,
 				out var error);
 
-			LinuxSecretServiceInterop.TakeError(error);
+			var message = LinuxSecretServiceInterop.TakeError(error);
+			if (stored)
+			{
+				return KekStoreWriteResult.Ok();
+			}
 
-			return stored ? KekStoreStatus.Found : KekStoreStatus.Unavailable;
+			LinuxSecretServiceInterop.ForgetService();
+
+			return KekStoreWriteResult.Failed(message ?? "libsecret did not store the secret and gave no reason");
 		}
-		catch (DllNotFoundException)
+		catch (DllNotFoundException e)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed(e.Message);
 		}
-		catch (EntryPointNotFoundException)
+		catch (EntryPointNotFoundException e)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed(e.Message);
 		}
 		finally
 		{

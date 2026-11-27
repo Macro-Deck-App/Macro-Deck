@@ -14879,6 +14879,24 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Głośność</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>Klucz odblokowujący zapisane sekrety jest przechowywany w magazynie sekretów tego komputera, na przykład w KDE Wallet, GNOME Keyring lub systemowym pęku kluczy. Magazyn nie odpowiedział, zwykle dlatego, że jest zablokowany albo nie jest uruchomiony. Odblokuj go i spróbuj ponownie.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Spróbuj ponownie</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Nadal nie udało się połączyć z magazynem sekretów. Jeśli to się nie zmieni, użyj zamiast tego klucza odzyskiwania.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Nie udało się połączyć z magazynem sekretów</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Użyj zamiast tego klucza odzyskiwania</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Oczekiwanie na magazyn sekretów. Jeśli pojawi się prośba o hasło, wprowadź je.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck nie może uzyskać dostępu do klucza, który odblokowuje zapisane sekrety. Wprowadź zapasowy klucz odzyskiwania, aby go przywrócić.</value>
   </data>

@@ -6865,6 +6865,14 @@ export const AppStrings = {
 		},
 	},
 	KeyRing: {
+		KeystoreRetry: {
+			Description: 'macrodeck.app:KeyRing.KeystoreRetry.Description',
+			Retry: 'macrodeck.app:KeyRing.KeystoreRetry.Retry',
+			StillUnavailable: 'macrodeck.app:KeyRing.KeystoreRetry.StillUnavailable',
+			Title: 'macrodeck.app:KeyRing.KeystoreRetry.Title',
+			UseRecoveryKey: 'macrodeck.app:KeyRing.KeystoreRetry.UseRecoveryKey',
+			Waiting: 'macrodeck.app:KeyRing.KeystoreRetry.Waiting',
+		},
 		Unlock: {
 			Description: 'macrodeck.app:KeyRing.Unlock.Description',
 			RestartRequired: 'macrodeck.app:KeyRing.Unlock.RestartRequired',
@@ -16049,6 +16057,12 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.YtmDesktop.Variables.TrackDuration': 'Duration',
 	'macrodeck.app:Integrations.YtmDesktop.Variables.VideoId': 'Video id',
 	'macrodeck.app:Integrations.YtmDesktop.Variables.Volume': 'Volume',
+	'macrodeck.app:KeyRing.KeystoreRetry.Description': 'The key that unlocks your stored secrets is kept in this computer\'s secret storage, for example KDE Wallet, GNOME Keyring or the system keychain. It did not answer, usually because it is locked or not running. Unlock it, then try again.',
+	'macrodeck.app:KeyRing.KeystoreRetry.Retry': 'Try again',
+	'macrodeck.app:KeyRing.KeystoreRetry.StillUnavailable': 'The secret storage still cannot be reached. If it stays that way, use your recovery key instead.',
+	'macrodeck.app:KeyRing.KeystoreRetry.Title': 'Macro Deck cannot reach your secret storage',
+	'macrodeck.app:KeyRing.KeystoreRetry.UseRecoveryKey': 'Use recovery key instead',
+	'macrodeck.app:KeyRing.KeystoreRetry.Waiting': 'Waiting for the secret storage. If it asks for its password, enter it.',
 	'macrodeck.app:KeyRing.Unlock.Description': 'Macro Deck cannot reach the key that unlocks your stored secrets. Enter your backup recovery key to restore it.',
 	'macrodeck.app:KeyRing.Unlock.Reason.EscrowMissing': 'The recovery file that would restore the key is missing, so the stored secrets cannot be recovered.',
 	'macrodeck.app:KeyRing.Unlock.Reason.KeystoreEntryMissing': 'The key is no longer in this computer\'s secret storage.',
