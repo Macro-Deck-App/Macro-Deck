@@ -107,7 +107,8 @@ internal sealed class LinuxClipboardCommandsTests
 				Is.EqualTo("wl-paste --no-newline --type text"));
 			Assert.That(Describe(LinuxClipboardCommands.Copy(true, "image/png")),
 				Is.EqualTo("wl-copy --type image/png"));
-			Assert.That(Describe(LinuxClipboardCommands.Clear(true)), Is.EqualTo("wl-copy --clear"));
+			Assert.That(Describe(LinuxClipboardCommands.Clear(true)),
+				Is.EqualTo("wl-copy --type text/plain;charset=utf-8"));
 			Assert.That(Describe(LinuxClipboardCommands.Watch()), Is.EqualTo("wl-paste --watch echo"));
 
 			Assert.That(Describe(LinuxClipboardCommands.ListTypes(false)),

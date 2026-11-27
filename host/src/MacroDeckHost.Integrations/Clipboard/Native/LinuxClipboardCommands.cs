@@ -80,9 +80,11 @@ internal static class LinuxClipboardCommands
 			: new ClipboardCommand(Xclip, [.. _xclipSelection, "-t", type, "-i"]);
 	}
 
+	// wl-copy --clear succeeds without clearing on compositors without data-control, so both tools
+	// clear by copying an empty text instead.
 	public static ClipboardCommand Clear(bool wayland)
 	{
-		return wayland ? new ClipboardCommand(WlCopy, ["--clear"]) : Copy(false, null);
+		return Copy(wayland, null);
 	}
 
 	public static ClipboardCommand Watch()
@@ -123,7 +125,7 @@ internal static class LinuxClipboardCommands
 		return kinds == ClipboardContentKinds.None && other ? ClipboardContentKinds.Other : kinds;
 	}
 
-	// Clearing with xclip leaves an empty selection that still offers text targets, which is no content.
+	// Clearing copies an empty text, whose selection still offers text targets, which is no content.
 	public static ClipboardContentKinds KindsAfterTextProbe(ClipboardContentKinds kinds, ClipboardProcessResult probe)
 	{
 		if (kinds != ClipboardContentKinds.Text || probe.IsTruncated)
