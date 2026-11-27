@@ -127,6 +127,7 @@ private readonly ConcurrentDictionary<string, long> _lastRevisions = new(StringC
 
 public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
 {
+	_lastRevisions.TryRemove(session.ProviderDeviceId, out _);
 	session.SurfaceChanged += (_, e) => Render(session.ProviderDeviceId, e.Surface);
 	session.Closed += (_, e) => StopRendering(session.ProviderDeviceId);
 
@@ -157,10 +158,16 @@ device stays registration-only forever. The host never waits for it while handli
 so the handler can call back into the host (icons, key images) before it returns.
 
 - **Every surface is a complete snapshot** - profile, folder, effective layout, every widget - never a diff.
-  `CurrentSurface` is the first one; there is no separate "initial" event.
-- **`Revision` starts at 1 and increases within this session only.** A reconnect opens a fresh session with
-  a new sequence and a full snapshot. Drop any surface whose revision is not strictly greater than the last
-  one you applied - it is your only out-of-order signal. Never persist a revision.
+  There is no separate "initial" event: the host's first push arrives through `SurfaceChanged` after
+  `OnSessionOpenedAsync` returns, and only while the device is online. Until then `CurrentSurface` is the
+  placeholder `DeviceSurface.Empty`, with no widgets and revision 0.
+- **`Revision` starts at 1 with the first push and increases within this session only.** The placeholder's 0
+  is below every pushed surface, so rendering `CurrentSurface` at open never makes you drop the first real
+  one. A reconnect opens a fresh session with a new sequence and a full snapshot, so start your last applied
+  revision over for each session, as the example does. Drop any surface whose revision is not strictly
+  greater than the last one you applied - it is your only out-of-order signal. Never persist a revision.
+  SDK packages up to 3.1.0-beta.3 give the placeholder revision 1, the same as the first push: on those,
+  start the drop rule at 0 instead of at the surface you read in `OnSessionOpenedAsync`.
 - **`Layout` is already resolved:** rows, columns, spacing and border radius come from the folder, then its
   ancestors, then the profile defaults; the background is the folder's own or the profile default.
 - **No reflow, clipping or validation.** A 3x2 device given a 5x3 profile gets the full 5x3 grid, positions

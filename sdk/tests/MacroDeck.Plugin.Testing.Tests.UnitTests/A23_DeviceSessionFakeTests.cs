@@ -14,6 +14,8 @@ public class A23DeviceSessionFakeTests
 
 	private static readonly (long, string)[] _expectedRendered = [(1L, "home"), (2L, "lights")];
 
+	private static readonly (long, string?)[] _expectedFirstPushOnly = [(1L, "home")];
+
 	private static readonly DeviceInteractionKind[] _expectedKinds =
 		[DeviceInteractionKind.Press, DeviceInteractionKind.Release];
 
@@ -88,6 +90,20 @@ public class A23DeviceSessionFakeTests
 					.Select(call => call.Interaction!.Target.WidgetId),
 				Is.EqualTo(_expectedWidgetIds));
 		});
+	}
+
+	[Test]
+	public async Task A_provider_that_renders_its_open_time_surface_still_renders_the_first_push()
+	{
+		var context = new FakeDeviceProviderContext();
+		var provider = new OpenTimeRenderingProvider();
+		await context.RegisterDeviceAsync(new DeviceDescriptor(DeviceId, "Deck"));
+		var session = await context.OpenSession(provider, DeviceId);
+
+		session.PushSurface(Surface(1, "home", "Idle"));
+
+		Assert.That(provider.Drawn.Select(surface => (surface.Revision, surface.Folder?.Id)),
+			Is.EqualTo(_expectedFirstPushOnly));
 	}
 
 	[Test]
@@ -233,6 +249,41 @@ public class A23DeviceSessionFakeTests
 				Target = new DeviceInteractionTarget { WidgetId = widgetId },
 				SurfaceRevision = _session.CurrentSurface.Revision
 			});
+		}
+	}
+
+	private sealed class OpenTimeRenderingProvider : IDeviceProvider
+	{
+		private long _lastDrawn;
+
+		public List<DeviceSurface> Drawn { get; } = [];
+
+		public Task InitializeAsync(IDeviceProviderContext context, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task ShutdownAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
+		{
+			session.SurfaceChanged += (_, args) => Draw(args.Surface);
+			Draw(session.CurrentSurface);
+			return Task.CompletedTask;
+		}
+
+		private void Draw(DeviceSurface surface)
+		{
+			if (surface.Revision <= _lastDrawn)
+			{
+				return;
+			}
+
+			_lastDrawn = surface.Revision;
+			Drawn.Add(surface);
 		}
 	}
 }
