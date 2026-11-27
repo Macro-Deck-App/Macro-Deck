@@ -16,8 +16,12 @@ public interface IDeviceSession : IAsyncDisposable
 	/// <summary>The provider-local id the device registered under.</summary>
 	string ProviderDeviceId { get; }
 
-	/// <summary>The surface most recently pushed by the host. A provider should render this, and only
-	/// this, as of the moment it reads it.</summary>
+	/// <summary>
+	/// The surface most recently pushed by the host. A provider should render this, and only this, as of
+	/// the moment it reads it. Until the host's first push, which comes after
+	/// <see cref="IDeviceProvider.OnSessionOpenedAsync" /> returns and only while the device is online,
+	/// it is <see cref="DeviceSurface.Empty" /> at revision 0.
+	/// </summary>
 	DeviceSurface CurrentSurface { get; }
 
 	/// <summary>

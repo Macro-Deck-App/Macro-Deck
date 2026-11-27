@@ -251,6 +251,55 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		});
 	}
 
+	[Test]
+	public async Task An_in_process_provider_that_renders_its_open_time_surface_still_renders_the_first_push()
+	{
+		var provider = new WalkthroughProvider();
+		var adapter = new InProcessDeviceSurfaceProvider("integration.walkthrough",
+			provider,
+			() => _world!.Service,
+			Serilog.Core.Logger.None);
+
+		using var world = new DeviceSurfaceWorld(adapter, "integration.walkthrough");
+		_world = world;
+
+		await world.RegisterAndOpenAsync(ProviderDeviceId);
+		await WaitForAsync(() => provider.Surfaces.Count == 1, "the provider never received its first surface");
+
+		Assert.That(provider.Rendered.Select(Describe), Is.EqualTo(new[] { _expectedObservations[0] }));
+	}
+
+	[Test]
+	public async Task A_plugin_that_renders_its_open_time_surface_still_renders_the_first_push_across_the_wire()
+	{
+		var provider = new WalkthroughProvider();
+		var sessionOwners = new RemoteDeviceSessionRegistry();
+
+		PluginCallbackRouter? router = null;
+		HostInvokeHandler = (_, payload, cancellationToken)
+			=> router!.RouteAsync(PluginId, Guid.NewGuid().ToString(), payload, cancellationToken);
+
+		await ConnectAsync([
+				new DeviceProviderCapabilityHandler([provider],
+					TestMetadata.Default,
+					CreatePluginHostInvoker(),
+					PluginHostAssets)
+			],
+			[Provider()],
+			[CapabilityKinds.DeviceProvider],
+			negotiatedCapabilityVersion: 2);
+
+		using var providers = new RemoteDeviceProviderRegistry(SessionRegistry, Invoker, sessionOwners);
+		using var world = new DeviceSurfaceWorld(providers.Resolve(PluginId)!, PluginId);
+		_world = world;
+		router = CreateRouter(world, sessionOwners);
+
+		await world.RegisterAndOpenAsync(ProviderDeviceId);
+		await WaitForAsync(() => provider.Surfaces.Count == 1, "the provider never received its first surface");
+
+		Assert.That(provider.Rendered.Select(Describe), Is.EqualTo(new[] { _expectedObservations[0] }));
+	}
+
 	private PluginCallbackRouter CreateRouter(DeviceSurfaceWorld world, RemoteDeviceSessionRegistry sessionOwners)
 	{
 		var services = new ServiceCollection().BuildServiceProvider();
@@ -287,9 +336,13 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 	{
 		private IDeviceSession? _session;
 
+		private long _lastRendered;
+
 		public IReadOnlyList<IActionDefinition> Actions { get; } = [];
 
 		public List<DeviceSurface> Surfaces { get; } = [];
+
+		public List<DeviceSurface> Rendered { get; } = [];
 
 		public Task InitializeAsync(IIntegrationContext context)
 		{
@@ -329,8 +382,25 @@ internal sealed class DeviceSessionParityContractTests : CapabilityContractFixtu
 		public Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken cancellationToken = default)
 		{
 			_session = session;
-			session.SurfaceChanged += (_, args) => Surfaces.Add(args.Surface);
+			session.SurfaceChanged += (_, args) =>
+			{
+				Surfaces.Add(args.Surface);
+				Render(args.Surface);
+			};
+
+			Render(session.CurrentSurface);
 			return Task.CompletedTask;
+		}
+
+		private void Render(DeviceSurface surface)
+		{
+			if (surface.Revision <= _lastRendered)
+			{
+				return;
+			}
+
+			_lastRendered = surface.Revision;
+			Rendered.Add(surface);
 		}
 
 		public Task<DeviceInteractionResult> SendAsync(DeviceInteractionKind kind, string widgetId)
