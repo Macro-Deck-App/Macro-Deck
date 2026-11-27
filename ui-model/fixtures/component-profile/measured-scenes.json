@@ -66,6 +66,109 @@
         { "tile": { "width": 252, "height": 120 }, "basis": 120 },
         { "tile": { "width": 120, "height": 252 }, "basis": 120 }
       ]
+    },
+    {
+      "tree": "conformance-action-button-labels-preset-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-preset-boxed-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-preset-layered-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-state-one-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-state-two-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-four-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-wrap-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-boxed-wrap-tree.json",
+      "cases": [
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-outline-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-empty-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-overflow-plain-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-overflow-start-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
+    },
+    {
+      "tree": "conformance-action-button-labels-overflow-end-tree.json",
+      "cases": [
+        { "tile": { "width": 120, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 252, "height": 120 }, "basis": 120 },
+        { "tile": { "width": 120, "height": 252 }, "basis": 120 }
+      ]
     }
   ]
 }

@@ -3,7 +3,8 @@ title: Text
 description: A single run of text, sized as a fraction of the view basis.
 ---
 
-A single run of text, laid out with a line height of exactly one, so its box is exactly its font size.
+A single run of text, laid out with a line height of exactly one, so its box is exactly its font size, or
+nothing when it has no text.
 
 `ui.text`
 
@@ -187,8 +188,9 @@ None. `ui.text` is a leaf.
 ## Layout
 
 The cross-axis extent is always the line height - exactly the resolved `size` - whatever the parent
-offers. Along the main axis a text takes `mainSize` or `fill` if declared, otherwise the reader's own
-measurement.
+offers, except for a text with no `spans` whose `text` is absent or empty: it lays out no line at all, so
+nothing is reserved for it. Along the main axis a text takes `mainSize` or `fill` if declared, otherwise
+the reader's own measurement.
 
 Measured without a font, a text with neither `mainSize` nor `fill` takes **nothing** along the main axis.
 So when a sibling fills a row, give every text in that row its own `mainSize`, or the filling sibling

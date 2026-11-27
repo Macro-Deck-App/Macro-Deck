@@ -85,7 +85,7 @@ public sealed class TileRenderer
 		var padding = LayoutEngine.Padding(style, null);
 		var border = LayoutEngine.Border(style);
 		var content = (text.Box.Width - padding.Horizontal - border.Horizontal).ClampNegativeToZero();
-		var lines = pipeline.Engine.Inline.BuildLines(text, content).Count;
+		var lines = InlineLayout.HasInlineContent(text) ? pipeline.Engine.Inline.BuildLines(text, content).Count : 0;
 		var (ascent, descent) = pipeline.Engine.LineMetrics(text);
 		var height = (ascent + descent) * lines + padding.Vertical + border.Vertical;
 		return height.Value;
