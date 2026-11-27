@@ -36,18 +36,6 @@ public sealed partial class LayoutTableTests
 		"note", "alignNote", "bandNote", "description", "appliesTo", "rule"
 	};
 
-	// The documented corner of a content-sized button, which this renderer and the runtime do not draw yet;
-	// see "The measured files" in ui-model/fixtures/component-profile/README.md.
-	private static readonly Dictionary<string, Dictionary<string, string[]>> _measuredOverTable =
-		new(StringComparer.Ordinal)
-		{
-			["conformance-action-button-layout.json"] = new Dictionary<string, string[]>(StringComparer.Ordinal)
-			{
-				["conformance.full"] = ["cornerRadius"],
-				["conformance.boundary"] = ["cornerRadius"]
-			}
-		};
-
 	private static readonly Dictionary<string, string[]> _proseTableKeys = new(StringComparer.Ordinal)
 	{
 		["conformance-action-button-layout.json"] = ["artwork", "ring", "press", "label"],
@@ -105,31 +93,9 @@ public sealed partial class LayoutTableTests
 		var later = progress ? new Scene(tree, width, height, basis, _progressAnchor.AddSeconds(30), null) : null;
 		var at = $"{file} case {index} ({width}x{height}@{basis})";
 		var checks = new Checks(at);
-		var measuredOverTable = _measuredOverTable.GetValueOrDefault(file) ?? [];
-		var disagreements = new Checks(at);
 		foreach (var node in testCase.GetProperty("nodes").EnumerateObject())
 		{
-			var listed = measuredOverTable.GetValueOrDefault(node.Name) ?? [];
-			var nodeChecks = checks.For(node.Name).Except(listed, disagreements.For(node.Name));
-			CheckNode(scene, later, node.Name, node.Value, nodeChecks);
-			foreach (var key in listed)
-			{
-				if (!node.Value.TryGetProperty(key, out _))
-				{
-					checks.For(node.Name).Fail(key, "listed as measured over table, but the table states no such key");
-				}
-				else if (!disagreements.Differences.Any(difference =>
-					difference.StartsWith($"{at} {node.Name} {key}:", StringComparison.Ordinal)))
-				{
-					checks.For(node.Name).Fail(key, "listed as measured over table, but table and renderer agree now");
-				}
-			}
-		}
-
-		foreach (var node in measuredOverTable.Keys.Where(node
-			=> !testCase.GetProperty("nodes").TryGetProperty(node, out _)))
-		{
-			checks.For(node).Fail("node", "listed as measured over table, but the table has no such node");
+			CheckNode(scene, later, node.Name, node.Value, checks.For(node.Name));
 		}
 
 		Assert.That(checks.Differences, Is.Empty, string.Join("\n  ", checks.Differences.Prepend("")));
@@ -1457,39 +1423,23 @@ public sealed partial class LayoutTableTests
 
 		private readonly List<string> _differences;
 
-		private readonly IReadOnlyCollection<string> _excludedKeys;
-
-		private readonly Checks? _excludedTo;
-
 		public Checks(string at)
-			: this(at, "", [], [], null)
+			: this(at, "", [])
 		{
 		}
 
-		private Checks(
-			string at,
-			string node,
-			List<string> differences,
-			IReadOnlyCollection<string> excludedKeys,
-			Checks? excludedTo)
+		private Checks(string at, string node, List<string> differences)
 		{
 			_at = at;
 			_node = node;
 			_differences = differences;
-			_excludedKeys = excludedKeys;
-			_excludedTo = excludedTo;
 		}
 
 		public IReadOnlyList<string> Differences => _differences;
 
 		public Checks For(string node)
 		{
-			return new Checks(_at, node, _differences, [], null);
-		}
-
-		public Checks Except(IReadOnlyCollection<string> keys, Checks to)
-		{
-			return new Checks(_at, _node, _differences, keys, to);
+			return new Checks(_at, node, _differences);
 		}
 
 		public void Number(string key, JsonElement expected, double? actual)
@@ -1531,12 +1481,6 @@ public sealed partial class LayoutTableTests
 
 		public void Fail(string key, string message)
 		{
-			if (_excludedTo is not null && _excludedKeys.Contains(key))
-			{
-				_excludedTo.Fail(key, message);
-				return;
-			}
-
 			_differences.Add($"{_at} {_node} {key}: {message}");
 		}
 

@@ -1,3 +1,4 @@
+using MacroDeckHost.Rendering.Dom;
 using MacroDeckHost.Rendering.Tree;
 
 namespace MacroDeckHost.Rendering.Nodes;
@@ -35,6 +36,12 @@ internal static class StackComponents
 		return inner + 2 * padding;
 	}
 
+	public static void RoundToLaidOutHeight(Element button)
+	{
+		var height = button.Box.Height.Value;
+		button.SetStyle("border-radius", height > 0 ? NodeScope.Px(height * ButtonCornerRatio) : null);
+	}
+
 	private static void PaintButton(UiNode node, NodeScope scope)
 	{
 		PaintStack(node, scope, true);
@@ -60,10 +67,14 @@ internal static class StackComponents
 
 		if (!Modifiers.Owns(node, scope, "border-radius"))
 		{
+			var rounds = isButton && !scope.IsTreeRoot && !tileCorner;
+			if (rounds && scope.Box.Height is null && !scope.Host.ContentSizedButtons.Contains(element))
+			{
+				scope.Host.ContentSizedButtons.Add(element);
+			}
+
 			element.SetStyle("border-radius",
-				isButton && !scope.IsTreeRoot && !tileCorner && scope.Box.Height is > 0
-					? NodeScope.Px(scope.Box.Height * ButtonCornerRatio)
-					: null);
+				rounds && scope.Box.Height is > 0 ? NodeScope.Px(scope.Box.Height * ButtonCornerRatio) : null);
 		}
 
 		element.SetStyle("flex-direction", horizontal ? "row" : "column");

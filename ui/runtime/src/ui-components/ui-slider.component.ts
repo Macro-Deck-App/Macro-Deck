@@ -80,7 +80,7 @@ function paintSliderLevel(node: UiNode, ctx: UiComponentContext<UiSliderState>):
 
   const vertical = sliderIsVertical(node);
   const thickness = nodeThicknessPx(node, ctx);
-  const extent = (vertical ? ctx.box.height : ctx.box.width) ?? 0;
+  const extent = (vertical ? ctx.box.height ?? thickness : ctx.box.width) ?? 0;
   const level = sliderDisplayLevel(node, state);
   const dragging = state.interactionLevel !== null;
 
@@ -355,8 +355,8 @@ export const uiSliderComponent: UiComponentDefinition<UiSliderState> = {
     ctx.setClass(element, 'widget-slider-vertical', vertical);
     ctx.setClass(element, 'widget-pressable', nodeClaimsValue(node) && !ctx.isDisabled());
     ctx.sizeTo(element, ctx.box);
-
     const thickness = nodeThicknessPx(node, ctx);
+    ctx.setStyle(element, 'min-height', ctx.box.height === null ? px(thickness) : null);
 
     const track = ctx.part('sliderTrack', 'div');
     ctx.setClassName(track, 'widget-slider-track');

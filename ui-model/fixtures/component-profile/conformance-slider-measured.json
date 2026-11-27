@@ -5,7 +5,7 @@
     "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
   },
   "timeZone": "UTC",
-  "chrome": "HeadlessChrome/153.0.8010.12",
+  "chrome": "HeadlessChrome/156.0.8078.4",
   "cases": [
     {
       "tile": {
@@ -96,16 +96,16 @@
             "x": 14.39,
             "y": 398.36,
             "width": 211.19,
-            "height": 0
+            "height": 28.8
           }
         },
         "conformance.empty": {
           "type": "ui.slider",
           "box": {
             "x": 14.39,
-            "y": 407.95,
+            "y": 436.75,
             "width": 211.19,
-            "height": 0
+            "height": 28.8
           }
         }
       }
@@ -199,16 +199,16 @@
             "x": 7.19,
             "y": 199.17,
             "width": 105.59,
-            "height": 0
+            "height": 14.39
           }
         },
         "conformance.empty": {
           "type": "ui.slider",
           "box": {
             "x": 7.19,
-            "y": 203.97,
+            "y": 218.36,
             "width": 105.59,
-            "height": 0
+            "height": 14.39
           }
         }
       }

@@ -29,7 +29,7 @@ export const uiStackComponent: UiComponentDefinition<UiStackState> = {
   },
 
   paint(node, ctx) {
-    paintStackLayout(node, ctx, false);
+    paintStackLayout(node, ctx, null);
   },
 
   release(ctx) {

@@ -45,6 +45,7 @@ import {
   withTintFilter,
 } from './artwork-tint';
 import { nodeModifierOwns } from '../render/node-modifiers';
+import { setStyle as writeStyle } from '../render/dom-writes';
 
 const BUTTON_CORNER_RATIO = 0.12;
 
@@ -56,22 +57,88 @@ interface ButtonArtworkLook {
   tint: string | null;
 }
 
+interface ButtonCornerState {
+  observer: ResizeObserver | null;
+  stopSettled: (() => void) | null;
+  height: number | null;
+  padding: number;
+}
+
 export interface StackButtonState {
   artwork: ArtworkCrossfadeState<ButtonArtworkLook>;
   border: WidgetBorderHandle | null;
   tintFilter: TintFilterHold;
+  corner: ButtonCornerState;
 }
 
 export function createStackButtonState(): StackButtonState {
-  return { artwork: createArtworkCrossfadeState(), border: null, tintFilter: createTintFilterHold() };
+  return {
+    artwork: createArtworkCrossfadeState(),
+    border: null,
+    tintFilter: createTintFilterHold(),
+    corner: { observer: null, stopSettled: null, height: null, padding: 0 },
+  };
 }
 
-function buttonCornerPx(element: HTMLElement, boxHeight: number | null): number | undefined {
-  const height = boxHeight ?? element.clientHeight;
-  return height > 0 ? height * BUTTON_CORNER_RATIO : undefined;
+function buttonCornerPx(height: number | null): string | null {
+  return height !== null && height > 0 ? px(height * BUTTON_CORNER_RATIO) : null;
 }
 
-export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<TState>, isButton: boolean): void {
+// Written straight to the element, not through ctx, so a resize never marks the text-fit scope dirty.
+function takeLaidOutHeight<TState>(ctx: UiComponentContext<TState>, corner: ButtonCornerState, height: number): void {
+  if (!(height > 0)) return;
+  corner.height = height;
+  if (ctx.box.height === null) writeStyle(ctx.element, 'border-radius', buttonCornerPx(height));
+}
+
+function watchLaidOutHeight<TState>(ctx: UiComponentContext<TState>, corner: ButtonCornerState): void {
+  if (corner.observer !== null || corner.stopSettled !== null) return;
+  const element = ctx.element as HTMLElement;
+  if (typeof ResizeObserver !== 'undefined') {
+    corner.observer = new ResizeObserver(entries => {
+      const entry = entries[entries.length - 1];
+      const border = (entry.borderBoxSize as readonly ResizeObserverSize[] | undefined)?.[0];
+      takeLaidOutHeight(ctx, corner, border !== undefined
+        ? border.blockSize
+        : entry.contentRect.height + 2 * corner.padding);
+    });
+    corner.observer.observe(element);
+  } else {
+    corner.stopSettled = ctx.onSettled(() =>
+      takeLaidOutHeight(ctx, corner, parseFloat(getComputedStyle(element).height)));
+  }
+}
+
+function stopWatchingLaidOutHeight(corner: ButtonCornerState): void {
+  if (corner.observer !== null) corner.observer.disconnect();
+  if (corner.stopSettled !== null) corner.stopSettled();
+  corner.observer = null;
+  corner.stopSettled = null;
+  corner.height = null;
+}
+
+function paintButtonCorner<TState>(
+  node: UiNode,
+  ctx: UiComponentContext<TState>,
+  corner: ButtonCornerState,
+  padding: number,
+): void {
+  const rounds = !ctx.isTreeRoot && !buttonTakesTileCorner(node);
+  if (rounds && ctx.box.height === null) {
+    corner.padding = padding;
+    watchLaidOutHeight(ctx, corner);
+  } else {
+    stopWatchingLaidOutHeight(corner);
+  }
+  ctx.setStyle(ctx.element, 'border-radius', rounds ? buttonCornerPx(ctx.box.height ?? corner.height) : null);
+}
+
+export function paintStackLayout<TState>(
+  node: UiNode,
+  ctx: UiComponentContext<TState>,
+  button: StackButtonState | null,
+): void {
+  const isButton = button !== null;
   const element = ctx.element as HTMLElement;
   const horizontal = nodeIsHorizontal(node);
   const padding = nodePaddingPx(node, ctx);
@@ -85,14 +152,8 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
   const tileCorner = isButton && !ctx.isTreeRoot && buttonTakesTileCorner(node);
   ctx.setClass(element, 'widget-node-root', isButton && ctx.isTreeRoot);
   ctx.setClass(element, 'widget-tile-corner', tileCorner);
-  // Before the corner: a nested button measures its own height, and that read flushes style. With the
-  // colour still unset the flush settles on transparent and the button eases in from it on every mount.
   if (!nodeModifierOwns(node, ctx, 'background')) {
     ctx.setStyle(element, 'background', isButton ? buttonBackground(node) : stackBackground(node) ?? null);
-  }
-  if (!nodeModifierOwns(node, ctx, 'border-radius')) {
-    ctx.setStyle(element, 'border-radius',
-      isButton && !ctx.isTreeRoot && !tileCorner ? px(buttonCornerPx(element, ctx.box.height)) : null);
   }
   ctx.setStyle(element, 'flex-direction', horizontal ? 'row' : 'column');
   const clipStart = !isButton && stackClipsStart(node);
@@ -105,6 +166,13 @@ export function paintStackLayout<TState>(node: UiNode, ctx: UiComponentContext<T
 
   const entries = layoutStackChildren(node, ctx.box, ctx.basis, padding, gap, horizontal, ctx.registry, clipStart);
   ctx.syncChildren(element, entries);
+  if (nodeModifierOwns(node, ctx, 'border-radius')) {
+    if (button !== null) stopWatchingLaidOutHeight(button.corner);
+  } else if (button !== null) {
+    paintButtonCorner(node, ctx, button.corner, padding);
+  } else {
+    ctx.setStyle(element, 'border-radius', null);
+  }
   ctx.pressTint(node);
 }
 
@@ -241,6 +309,7 @@ export function paintButtonArtwork<TState>(
 }
 
 export function releaseStackButtonState(state: StackButtonState): void {
+  stopWatchingLaidOutHeight(state.corner);
   releaseArtworkCrossfade(state.artwork);
   releaseTintFilter(state.tintFilter);
   if (state.border !== null) {

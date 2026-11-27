@@ -36,6 +36,8 @@ internal sealed class RenderHost
 
 	public List<Element> Lists { get; } = [];
 
+	public List<Element> ContentSizedButtons { get; } = [];
+
 	public HashSet<string> MissingResources { get; } = new(StringComparer.Ordinal);
 
 	public List<long> TickPeriodsMs { get; } = [];
@@ -51,6 +53,7 @@ internal sealed class RenderHost
 		FirstFits.RemoveAll(removed.Contains);
 		AnchoredLists.RemoveAll(removed.Contains);
 		Lists.RemoveAll(removed.Contains);
+		ContentSizedButtons.RemoveAll(removed.Contains);
 	}
 
 	public string Translate(string scope, string key, IReadOnlyDictionary<string, string>? arguments)

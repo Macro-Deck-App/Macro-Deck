@@ -273,6 +273,7 @@ export const DOM_API_EXCEPTIONS = {
   'web-client/src/modal.ts:ResizeObserver': 'As the renderer above.',
   'web-client/src/notification-dialogs.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/ui-components/ui-list.component.ts:ResizeObserver': 'As the renderer above.',
+  'runtime/src/ui-components/stack-paint.ts:ResizeObserver': 'As the renderer above.',
   'runtime/src/video-streams/video-stream-view.ts:IntersectionObserver':
     'Read off the window and checked with `typeof` before it is constructed.',
   'web-client/src/folder-view.ts:ResizeObserver': 'As the renderer above.',

@@ -1891,6 +1891,103 @@ describe('widget button corner', () => {
     expect(num(button.style.borderRadius)).toBeCloseTo(7.2, 2);
   });
 
+  describe('on a button whose height the browser decides', () => {
+    let realObserver: unknown;
+    let observers: Array<{ callback: (entries: unknown[]) => void; targets: Element[] }>;
+
+    const buttonNode = (properties: Record<string, unknown> = {}): UiNode =>
+      ({ id: 'content-sized', type: 'ui.button', properties } as UiNode);
+    const tree = (button: UiNode): UiNode => ({ id: 'root', type: 'ui.stack', properties: {}, children: [button] } as UiNode);
+    const watched = () => observers.reduce((count, observer) => count + observer.targets.length, 0);
+    const layOut = (height: number) => {
+      for (const observer of observers) {
+        const entries = observer.targets.map(target => ({ target, borderBoxSize: [{ blockSize: height }], contentRect: { height } }));
+        if (entries.length > 0) observer.callback(entries);
+      }
+    };
+    const button = () => container.querySelector('.widget-button') as HTMLElement;
+
+    beforeEach(() => {
+      observers = [];
+      realObserver = (globalThis as Record<string, unknown>)['ResizeObserver'];
+      (globalThis as Record<string, unknown>)['ResizeObserver'] = function (callback: (entries: unknown[]) => void) {
+        const observer = { callback, targets: [] as Element[] };
+        observers.push(observer);
+        return {
+          observe: (target: Element) => observer.targets.push(target),
+          unobserve: (target: Element) => observer.targets.splice(observer.targets.indexOf(target), 1),
+          disconnect: () => observer.targets.splice(0),
+        };
+      };
+    });
+
+    afterEach(() => {
+      (globalThis as Record<string, unknown>)['ResizeObserver'] = realObserver;
+    });
+
+    it('rounds it by the share of the height it is laid out at, and follows that height', () => {
+      renderUiNode(container, tree(buttonNode()), { width: 200, height: 240 }, null, 240, testHost());
+      expect(button().style.borderRadius).toBe('');
+
+      layOut(50);
+      expect(num(button().style.borderRadius)).toBeCloseTo(6, 2);
+
+      layOut(25);
+      expect(num(button().style.borderRadius)).toBeCloseTo(3, 2);
+    });
+
+    it('keeps that corner when the button is painted again', () => {
+      const handle = renderUiNode(container, tree(buttonNode()), { width: 200, height: 240 }, null, 240, testHost());
+      layOut(50);
+
+      handle.update(tree(buttonNode({ background: '#112233' })), { width: 200, height: 240 }, null);
+
+      expect(num(button().style.borderRadius)).toBeCloseTo(6, 2);
+    });
+
+    it('leaves a corner its modifiers own alone', () => {
+      renderUiNode(container, tree(buttonNode({ modifiers: { radius: { basis: 0.05 } } })),
+        { width: 200, height: 240 }, null, 240, testHost());
+      layOut(50);
+
+      expect(num(button().style.borderRadius)).toBeCloseTo(12, 2);
+      expect(watched()).toBe(0);
+    });
+
+    it('stops following the laid-out height once the button resolves its own', () => {
+      const handle = renderUiNode(container, tree(buttonNode()), { width: 200, height: 240 }, null, 240, testHost());
+      layOut(50);
+
+      handle.update(tree(buttonNode({ mainSize: { basis: 0.25 } })), { width: 200, height: 240 }, null);
+
+      expect(watched()).toBe(0);
+      expect(num(button().style.borderRadius)).toBeCloseTo(7.2, 2);
+    });
+
+    it('stops following it once the button asks for the tile corner', () => {
+      const handle = renderUiNode(container, tree(buttonNode()), { width: 200, height: 240 }, null, 240, testHost());
+      layOut(50);
+
+      handle.update(tree(buttonNode({ corner: 'tile' })), { width: 200, height: 240 }, null);
+
+      expect(watched()).toBe(0);
+      expect(button().style.borderRadius).toBe('');
+    });
+
+    it('reads the laid-out height once the tree has settled where there is no ResizeObserver', () => {
+      (globalThis as Record<string, unknown>)['ResizeObserver'] = undefined;
+      const realComputed = window.getComputedStyle;
+      spyOn(window, 'getComputedStyle').and.callFake((element: Element) =>
+        element.classList.contains('widget-button')
+          ? { height: '40px' } as CSSStyleDeclaration
+          : realComputed.call(window, element));
+
+      renderUiNode(container, tree(buttonNode()), { width: 200, height: 240 }, null, 240, testHost());
+
+      expect(num(button().style.borderRadius)).toBeCloseTo(4.8, 2);
+    });
+  });
+
   // Issue #895: a ring painted inside the tile's transform-scaled content is resampled with it and
   // comes out visibly thinner than one the tile draws beside that content. A surface that draws the
   // root's ring itself says so, and the button then paints none - but only for the root, and only

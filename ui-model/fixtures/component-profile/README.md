@@ -109,8 +109,6 @@ file's height instead:
 - the action-button tree's `full`, `press`, `boundary` and `silent` buttons: the root holds more than its
   height, so the browser shrinks these content-sized buttons (and grows `full`); their `height`,
   `pressSurfaceHeight`, `contentHeight`, `backdropHeight` and `backdropOffsetY` follow from that height;
-- the slider tree's `plain` and `empty` sliders: they have no content to size from, so the browser draws
-  them with no height at all, and `height` and `interactiveHeight` are `0.0`;
 - the slider tree's `header`, whose height its text gives it.
 
 These are Chrome's layout under the conditions above (the named face, CI's Chrome), not lengths a renderer
@@ -118,20 +116,18 @@ can resolve, so another renderer reproduces them only under the same conditions,
 0.1 px. When a measured file is regenerated, re-derive them from its boxes: `height` and
 `pressSurfaceHeight` are the box height, `contentHeight` is it less twice the padding, `backdropHeight` is
 it times `zoom` and `backdropOffsetY` it times `offsetY`, all rounded to 0.1; `cornerRadius` is 0.12 of
-the box height, rounded to 0.01. The jsdom spec checks these keys against the measured file and that the
-runtime leaves the height to the browser; what the browser draws from the runtime is
-`measure-conformance --check`'s job.
+the box height, rounded to 0.1 like the height it comes from. A renderer draws that corner from the
+height the button is laid out at, so it follows the browser's height too. The jsdom spec checks these keys
+against the measured file and that the runtime leaves the height to the browser; what the browser draws
+from the runtime is `measure-conformance --check`'s job.
 
-Two disagreements remain:
+The slider tree's `plain` and `empty` sliders declare neither key either, but they have no content to
+size from, so a renderer holds them at a `min-height` of their `trackThickness`, the extent their stack
+already reserves for them. Their `height` and `interactiveHeight` are that resolved length.
 
-- the `cornerRadius` of `full` and `boundary` is the documented corner, 0.12 of the button's own height,
-  which no renderer draws yet: the runtime reads the height before the button has any content, so the
-  browser draws no corner on a button's first paint and 0.12 of its rounded `clientHeight` once it is
-  painted again (`ui/runtime/src/ui-components/stack-paint.ts`), and the host renderer draws none
-  (`MacroDeckHost.Rendering/Nodes/StackComponents.cs`). Both suites leave this key unchecked for buttons;
-- the modifier tree's `card`, `press`, `wrapper` and `circle` declare a `mainSize` or a `frame`, so a
-  renderer does resolve their height and sets it inline, and the table states that height; the root holds
-  more than it, so the browser shrinks them below it.
+One disagreement remains: the modifier tree's `card`, `press`, `wrapper` and `circle` declare a
+`mainSize` or a `frame`, so a renderer does resolve their height and sets it inline, and the table states
+that height; the root holds more than it, so the browser shrinks them below it.
 
 So a table states the resolved length where a renderer resolves one, and the browser's height where it
 does not. A renderer matches the measured file, because that is what the web client shows.
