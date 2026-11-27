@@ -5,9 +5,12 @@ using MacroDeckHost.Domain.Common;
 namespace MacroDeckHost.Application.Devices.Surfaces;
 
 // The host's reading of activationClaim and activationFor in ui/runtime/src/ui-framework/node-gestures.ts.
-// A tile must answer a hardware press exactly as it answers a pointer or a key, so the two must agree.
+// The two must agree, except that only a hardware press steps a ui.slider: client keys leave it alone.
 public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Absorbed)
 {
+	private const double MinimumSliderPressStep = 0.1;
+	private const double SliderTolerance = 1e-9;
+
 	public static UiActivationClaim Of(JsonElement tree, double? widthCells = null, double? heightCells = null)
 	{
 		var absorbed = false;
@@ -20,6 +23,13 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 
 	public static (string Name, object? Payload)? EventFor(JsonElement node, string triggerType)
 	{
+		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.Ordinal)
+			&& IsType(node, UiComponents.Slider)
+			&& Declares(node, UiComponentEvents.Change))
+		{
+			return (UiComponentEvents.Change, NextSliderLevel(node));
+		}
+
 		if (string.Equals(triggerType, WidgetTriggerTypes.ShortPress, StringComparison.Ordinal)
 			&& ChangeFor(node) is { } change)
 		{
@@ -151,6 +161,35 @@ public readonly record struct UiActivationClaim(JsonElement? Claimant, bool Abso
 				: -1;
 
 		return (current + 1) % count;
+	}
+
+	private static double NextSliderLevel(JsonElement node)
+	{
+		var level = Property(node, UiComponentProperties.Level) is { ValueKind: JsonValueKind.Number } declared
+			? Math.Clamp(declared.GetDouble(), 0, 1)
+			: 0;
+		if (level >= 1 - SliderTolerance)
+		{
+			return 0;
+		}
+
+		double? grid = Property(node, UiComponentProperties.Step) is { ValueKind: JsonValueKind.Number } step
+			&& step.GetDouble() is var value and > 0 and <= 1
+				? value
+				: null;
+		var pressStep = grid is { } size
+			? Math.Ceiling(MinimumSliderPressStep / size - SliderTolerance) * size
+			: MinimumSliderPressStep;
+
+		var next = Math.Min(level + pressStep, 1);
+		if (grid is { } snap)
+		{
+			next = Math.Round(next / snap, MidpointRounding.AwayFromZero) * snap;
+		}
+
+		next = Math.Clamp(next, 0, 1);
+
+		return next <= level + SliderTolerance ? 0 : next;
 	}
 
 	private static bool IsDisabledRegion(JsonElement node)

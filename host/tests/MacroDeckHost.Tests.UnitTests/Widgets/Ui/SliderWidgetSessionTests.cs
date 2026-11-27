@@ -13,6 +13,7 @@ using MacroDeck.Ui.Runtime;
 using MacroDeck.Ui.Testing;
 using MacroDeck.Ui.Components;
 using MacroDeckHost.Application.Actions;
+using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.MusicPlayer;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Persistence;
@@ -134,6 +135,34 @@ public class SliderWidgetSessionTests
 		await slider.Host.SettleAsync();
 
 		Assert.That(slider.Provider.Writes.Single(), Is.EqualTo(0.7));
+
+		await slider.DisposeAsync();
+	}
+
+	[TestCase(50, 1, 60)]
+	[TestCase(95, 1, 100)]
+	[TestCase(100, 1, 0)]
+	[TestCase(90, 30, 0)]
+	[TestCase(30, 0, 40)]
+	public async Task A_hardware_press_answered_from_the_tree_writes_the_sliders_next_level(
+		double value,
+		double step,
+		double expectedWrite)
+	{
+		var slider = Writable(0, 100, step, value);
+
+		var claim = UiActivationClaim.Of(JsonDocument.Parse(slider.Host.ToCanonicalJson()).RootElement);
+		var answer = UiActivationClaim.EventFor(claim.Claimant!.Value, WidgetTriggerTypes.ShortPress);
+		var result = slider.Host.ById(claim.Claimant.Value.GetProperty("id").GetString()!)
+			.Raise(answer!.Value.Name, answer.Value.Payload);
+		await slider.Host.SettleAsync();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(answer.Value.Name, Is.EqualTo(UiComponentEvents.Change));
+			Assert.That(result.IsAccepted, Is.True);
+			Assert.That(slider.Provider.Writes, Is.EqualTo(new[] { expectedWrite }));
+		});
 
 		await slider.DisposeAsync();
 	}

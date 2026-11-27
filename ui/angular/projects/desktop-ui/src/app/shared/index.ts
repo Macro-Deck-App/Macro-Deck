@@ -16,7 +16,7 @@ export { CLIENT_TYPE, DeviceIdentityService } from './services/device-identity.s
 export { DismissibleHintService } from './services/dismissible-hint.service';
 export { FolderViewService } from './services/folder-view.service';
 export { ScreenSaverService } from './services/screensaver.service';
-export { FolderService } from './services/folder.service';
+export { FolderService, WIDGET_SPAN_LIMITED_CODE } from './services/folder.service';
 export { IconAppearanceContextService } from './services/icon-appearance-context.service';
 export { IconImageService } from './services/icon-image.service';
 export { IconPrefetchService } from './services/icon-prefetch.service';

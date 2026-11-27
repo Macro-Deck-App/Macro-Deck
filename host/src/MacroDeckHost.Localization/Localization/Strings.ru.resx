@@ -1629,6 +1629,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Виджет экспортирован</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>Устройство {device} не может показать виджет такого размера.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} действие</value>
     <comment>[plural] [count:int]</comment>

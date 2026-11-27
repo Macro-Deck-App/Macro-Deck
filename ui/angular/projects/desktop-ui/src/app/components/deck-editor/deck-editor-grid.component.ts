@@ -47,6 +47,15 @@ function isSelectionModifier(event: MouseEvent | PointerEvent): boolean {
   return isSelectionModifierEvent(event, isApplePlatform());
 }
 
+interface SpanLimits {
+  cols: number | null;
+  rows: number | null;
+  colsDevice: string | null;
+  rowsDevice: string | null;
+}
+
+const NO_SPAN_LIMITS: SpanLimits = { cols: null, rows: null, colsDevice: null, rowsDevice: null };
+
 @Component({
   selector: 'app-deck-editor-grid',
   standalone: true,
@@ -76,6 +85,10 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
   @Input() busyCell: { x: number; y: number } | null = null;
   @Input() selectedWidgetIds: ReadonlySet<string> = new Set();
   @Input() focusedWidgetId: string | null = null;
+  @Input() maxWidgetCols: number | null = null;
+  @Input() maxWidgetRows: number | null = null;
+  @Input() maxWidgetColsDevice: string | null = null;
+  @Input() maxWidgetRowsDevice: string | null = null;
 
   @Output() widgetDelete = new EventEmitter<string>();
   @Output() widgetEdit = new EventEmitter<GridWidget>();
@@ -128,6 +141,7 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
 
   private readonly cutIds = signal<ReadonlySet<string>>(new Set());
   private readonly widgetList = signal<readonly GridWidget[]>([]);
+  private readonly spanLimits = signal<SpanLimits>(NO_SPAN_LIMITS);
 
   readonly renderStates = computed<ReadonlyMap<string, WidgetRenderState>>(() => {
     const displacements = this.drag.displacements();
@@ -161,6 +175,12 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
   ngOnChanges(): void {
     this.cutIds.set(this.cutWidgetIds);
     this.widgetList.set(this.widgets);
+    this.spanLimits.set({
+      cols: this.maxWidgetCols,
+      rows: this.maxWidgetRows,
+      colsDevice: this.maxWidgetColsDevice,
+      rowsDevice: this.maxWidgetRowsDevice,
+    });
   }
 
   ngOnDestroy(): void {
@@ -215,6 +235,27 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
     );
   }
 
+  resizeLocked(widget: GridWidget): boolean {
+    const limits = this.spanLimits();
+    return limits.cols === 1 && limits.rows === 1 && widget.w <= 1 && widget.h <= 1;
+  }
+
+  resizeNote(): string {
+    const limits = this.spanLimits();
+    const devices = [...new Set([limits.colsDevice, limits.rowsDevice].filter((name): name is string => !!name))];
+    return this.localization.translateKey(AppStrings.Widgets.GridSettings.FixedByDevice, { device: devices.join(', ') });
+  }
+
+  spanWarning(widget: GridWidget): string | null {
+    const limits = this.spanLimits();
+    const device = limits.cols !== null && widget.w > limits.cols
+      ? limits.colsDevice
+      : limits.rows !== null && widget.h > limits.rows ? limits.rowsDevice : null;
+    return device
+      ? this.localization.translateKey(AppStrings.Deck.WidgetTooLargeForDevice, { device })
+      : null;
+  }
+
   onTilePointerDown(widget: GridWidget, event: PointerEvent): void {
     if (event.button !== 0) {
       if (event.button === 1) {
@@ -253,6 +294,8 @@ export class DeckEditorGridComponent implements OnChanges, OnDestroy {
       cell: grid.cellDimensions,
       gridEl,
       sourceEl,
+      maxWidgetCols: this.maxWidgetCols,
+      maxWidgetRows: this.maxWidgetRows,
     };
 
     // A multi-selection (2+) drags as a rigid set (issue #213); a lone selected widget - or one

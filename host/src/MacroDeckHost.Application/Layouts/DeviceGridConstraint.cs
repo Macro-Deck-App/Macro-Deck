@@ -34,4 +34,9 @@ public sealed record DeviceGridConstraint(
 	IReadOnlyList<string> ConflictingDeviceNames,
 	bool WidgetSpacingHonoured = true,
 	bool CornerRadiusHonoured = true,
-	bool CustomFolderViewsSupported = true);
+	bool CustomFolderViewsSupported = true,
+	int? MaxWidgetColumns = null,
+	int? MaxWidgetRows = null,
+	string? MaxWidgetColumnsDeviceName = null,
+	string? MaxWidgetRowsDeviceName = null,
+	bool ConstrainsGrid = true);

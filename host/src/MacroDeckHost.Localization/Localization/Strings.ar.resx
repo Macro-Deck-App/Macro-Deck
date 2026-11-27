@@ -1629,6 +1629,9 @@
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>تم تصدير الأداة</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>لا يمكن لـ {device} عرض أداة بهذا الحجم.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} إجراء</value>
     <comment>[plural] [count:int]</comment>

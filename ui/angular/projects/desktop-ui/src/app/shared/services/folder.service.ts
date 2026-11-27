@@ -2,6 +2,7 @@ import { Injectable, signal, computed, effect, inject, untracked } from '@angula
 import {
   ActionButtonTriggerType,
   ActionFlow,
+  type ApiError,
   AppStrings,
   canPlaceGroup,
   collectDisplayedWidgets,
@@ -61,6 +62,8 @@ import { WidgetRegistryService } from './widget-registry.service';
 import { ProfileService } from './profile.service';
 import { ActionExecutionService, formatRunDuration } from './action-execution.service';
 import { ToastService } from './toast.service';
+
+export const WIDGET_SPAN_LIMITED_CODE = 'SpanLimitedByDevice';
 
 interface FolderLoad {
   profileId: string | null;
@@ -589,6 +592,51 @@ export class FolderService {
 
   readonly customFolderViewsSupported = computed(() =>
     this.gridConstraint()?.customFolderViewsSupported ?? true);
+
+  readonly maxWidgetCols = computed(() => this.gridConstraint()?.maxWidgetColumns ?? null);
+
+  readonly maxWidgetRows = computed(() => this.gridConstraint()?.maxWidgetRows ?? null);
+
+  readonly maxWidgetColsDevice = computed(() => this.gridConstraint()?.maxWidgetColumnsDeviceName ?? null);
+
+  readonly maxWidgetRowsDevice = computed(() => this.gridConstraint()?.maxWidgetRowsDeviceName ?? null);
+
+  widgetSpanError(sizes: readonly { w: number; h: number }[]): ApiError | null {
+    for (const size of sizes) {
+      const device = this.spanDeviceFor(size);
+      if (device !== null) {
+        return {
+          code: WIDGET_SPAN_LIMITED_CODE,
+          message: this.localization.translateKey(AppStrings.Deck.WidgetTooLargeForDevice, { device })
+        };
+      }
+    }
+    return null;
+  }
+
+  private spanDeviceFor(size: { w: number; h: number }): string | null {
+    const constraint = this.gridConstraint();
+    const maxCols = constraint?.maxWidgetColumns;
+    const maxRows = constraint?.maxWidgetRows;
+    if (maxCols != null && size.w > maxCols) {
+      return constraint?.maxWidgetColumnsDeviceName ?? '';
+    }
+    if (maxRows != null && size.h > maxRows) {
+      return constraint?.maxWidgetRowsDeviceName ?? '';
+    }
+    return null;
+  }
+
+  private withSpanMessage(error: ApiError | undefined, sizes: readonly { w: number; h: number }[]): ApiError | undefined {
+    if (error?.code !== WIDGET_SPAN_LIMITED_CODE) {
+      return error;
+    }
+    const device = this.maxWidgetColsDevice() ?? this.maxWidgetRowsDevice();
+    return this.widgetSpanError(sizes) ?? {
+      code: error.code,
+      message: device ? this.localization.translateKey(AppStrings.Deck.WidgetTooLargeForDevice, { device }) : ''
+    };
+  }
 
   readonly contextMenu = signal<FolderContextMenu>({
     isOpen: false,
@@ -1190,7 +1238,7 @@ export class FolderService {
       if (!response.success || !response.widgets?.length) {
         rollback();
         console.error('Failed to paste widgets:', response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Folder.NoWidgetsReturned));
-        return { success: false, error: response.error };
+        return { success: false, error: this.withSpanMessage(response.error, entries) };
       }
 
       const createdWidgets = response.widgets.map(w => this.mapIpcWidget(w, folderId));
@@ -1459,7 +1507,13 @@ export class FolderService {
       if (!response.success) {
         applyRects(previousRects);
         console.error('Failed to commit widget layout:', response.error?.message ?? this.localization.translateKey(AppStrings.Errors.Folder.UnknownError));
-        return { success: false, error: response.error };
+        const grown = [...changes.entries()]
+          .filter(([id, rect]) => {
+            const before = previousRects.get(id);
+            return !before || rect.w > before.w || rect.h > before.h;
+          })
+          .map(([, rect]) => rect);
+        return { success: false, error: this.withSpanMessage(response.error, grown) };
       }
       return { success: true };
     } catch (error) {

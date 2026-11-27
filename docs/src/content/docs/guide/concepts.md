@@ -73,6 +73,11 @@ The tiles in a folder:
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |
 
+On a hardware deck, each short press on a Slider moves it one step further, and the press after the top
+takes it back to the start. A fine step moves in bigger jumps there, such as tens for a 0 to 100 slider with
+step 1. Holding the key moves nothing, a double tap does not run the slider's Double Tap action, and the key
+does not show the value.
+
 Labels and text use the fonts installed on your computer, plus any you import under
 [Library > Fonts](/guide/fonts/).
 

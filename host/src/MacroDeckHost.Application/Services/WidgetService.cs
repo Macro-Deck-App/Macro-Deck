@@ -1,5 +1,7 @@
 using MacroDeckHost.Application.Caching;
 using MacroDeckHost.Application.Events;
+using MacroDeckHost.Application.Layouts;
+using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Secrets;
 using MacroDeckHost.Application.Secrets.Approvals;
 using MacroDeckHost.Application.Variables;
@@ -23,6 +25,7 @@ public class WidgetService : IWidgetService
 	private readonly IWidgetVariableCloner _widgetVariableCloner;
 	private readonly SecretWriteAuthority? _writeAuthority;
 	private readonly WidgetLayoutGate _layoutGate;
+	private readonly IDeviceRepository? _deviceRepository;
 
 	public WidgetService(
 		IFolderCache folderCache,
@@ -32,7 +35,8 @@ public class WidgetService : IWidgetService
 		IWidgetSecretCloner widgetSecretCloner,
 		IWidgetVariableCloner widgetVariableCloner,
 		SecretWriteAuthority? writeAuthority = null,
-		WidgetLayoutGate? layoutGate = null)
+		WidgetLayoutGate? layoutGate = null,
+		IDeviceRepository? deviceRepository = null)
 	{
 		_folderCache = folderCache;
 		_profileCache = profileCache;
@@ -42,6 +46,7 @@ public class WidgetService : IWidgetService
 		_widgetVariableCloner = widgetVariableCloner;
 		_writeAuthority = writeAuthority;
 		_layoutGate = layoutGate ?? new WidgetLayoutGate();
+		_deviceRepository = deviceRepository;
 	}
 
 	private SecretApprovalWrite Approval => _writeAuthority?.Write ?? SecretApprovalWrite.Preserve;
@@ -76,6 +81,11 @@ public class WidgetService : IWidgetService
 		{
 			return Result.Fail<WidgetEntity, WidgetError>(WidgetError.ValidationError,
 				"Placement outside the folder grid");
+		}
+
+		if (await FindSpanViolation(folder, [(widget.Width, widget.Height, null)]) is { } createViolation)
+		{
+			return Result.Fail<WidgetEntity, WidgetError>(WidgetError.SpanLimitedByDevice, createViolation);
 		}
 
 		var foreignPinned = PinnedWidgetLayout
@@ -151,6 +161,11 @@ public class WidgetService : IWidgetService
 						"Placement outside the folder grid");
 				}
 
+				if (await FindSpanViolation(folder, [(widget.Width, widget.Height, existing)]) is { } updateViolation)
+				{
+					return Result.Fail<WidgetEntity, WidgetError>(WidgetError.SpanLimitedByDevice, updateViolation);
+				}
+
 				var foreignPinned = PinnedWidgetLayout
 					.PinnedWidgetsOutside(folder, profileFolders)
 					.ToList();
@@ -221,6 +236,13 @@ public class WidgetService : IWidgetService
 				return Result.Fail<List<WidgetEntity>, WidgetError>(WidgetError.ValidationError,
 					"Placement outside the folder grid");
 			}
+		}
+
+		var spanViolation = await FindSpanViolation(folder,
+			[.. placements.Select(p => (p.Width, p.Height, (WidgetEntity?)widgetsById[p.WidgetId]))]);
+		if (spanViolation is not null)
+		{
+			return Result.Fail<List<WidgetEntity>, WidgetError>(WidgetError.SpanLimitedByDevice, spanViolation);
 		}
 
 		var foreignPinned = PinnedWidgetLayout
@@ -386,6 +408,13 @@ public class WidgetService : IWidgetService
 				return Result.Fail<List<WidgetEntity>, WidgetError>(WidgetError.ValidationError,
 					"Placement outside the folder grid");
 			}
+		}
+
+		var createManyViolation = await FindSpanViolation(folder,
+			[.. widgets.Select(w => (w.Width, w.Height, (WidgetEntity?)null))]);
+		if (createManyViolation is not null)
+		{
+			return Result.Fail<List<WidgetEntity>, WidgetError>(WidgetError.SpanLimitedByDevice, createManyViolation);
 		}
 
 		var sourceWidgetIdsByTargetId = new Dictionary<Guid, Guid>();
@@ -620,6 +649,35 @@ public class WidgetService : IWidgetService
 		return (
 			GridInheritance.ResolveColumns(folder, profileFolders, profile?.DefaultColumns ?? GridDefaults.Columns),
 			GridInheritance.ResolveRows(folder, profileFolders, profile?.DefaultRows ?? GridDefaults.Rows));
+	}
+
+	private async Task<string?> FindSpanViolation(
+		FolderEntity folder,
+		IReadOnlyList<(int Width, int Height, WidgetEntity? Current)> candidates)
+	{
+		if (_deviceRepository is null || candidates.All(c => c.Width <= 1 && c.Height <= 1))
+		{
+			return null;
+		}
+
+		var claimingDevices = await _deviceRepository.GetByStartupProfileId(folder.ProfileId.ToString());
+		if (DeviceLayoutConstraintResolver.Resolve(claimingDevices) is not { } constraint)
+		{
+			return null;
+		}
+
+		foreach (var (width, height, current) in candidates)
+		{
+			if (!constraint.AllowsWidgetSpan(width, height, current?.Width, current?.Height))
+			{
+				var deviceName = width > constraint.MaxWidgetColumns && width > (current?.Width ?? 0)
+					? constraint.MaxWidgetColumnsDeviceName
+					: constraint.MaxWidgetRowsDeviceName;
+				return $"{deviceName} cannot show a widget of {width} x {height}";
+			}
+		}
+
+		return null;
 	}
 
 	private static bool SameRect(WidgetEntity a, WidgetEntity b)

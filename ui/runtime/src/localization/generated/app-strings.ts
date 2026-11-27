@@ -669,6 +669,7 @@ export const AppStrings = {
 		Unlock: 'macrodeck.app:Deck.Unlock',
 		UnpinWidgetsFailed: 'macrodeck.app:Deck.UnpinWidgetsFailed',
 		WidgetExported: 'macrodeck.app:Deck.WidgetExported',
+		WidgetTooLargeForDevice: 'macrodeck.app:Deck.WidgetTooLargeForDevice',
 		FolderView: {
 			ChangeView: 'macrodeck.app:Deck.FolderView.ChangeView',
 			Configuration: 'macrodeck.app:Deck.FolderView.Configuration',
@@ -10975,6 +10976,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Deck.VideoStream.Connecting': 'Connecting to the video stream…',
 	'macrodeck.app:Deck.VideoStream.NoStream': 'No video stream selected',
 	'macrodeck.app:Deck.WidgetExported': 'Widget exported',
+	'macrodeck.app:Deck.WidgetTooLargeForDevice': '{device} can\'t show a widget this large.',
 	'macrodeck.app:Developer.ActionCount.One': '{count} action',
 	'macrodeck.app:Developer.ActionCount.Other': '{count} actions',
 	'macrodeck.app:Developer.ActionSourcesAriaLabel': 'Action sources',

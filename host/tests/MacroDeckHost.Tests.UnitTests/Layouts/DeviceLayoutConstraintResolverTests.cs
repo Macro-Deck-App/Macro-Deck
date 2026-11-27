@@ -291,6 +291,120 @@ public class DeviceLayoutConstraintResolverTests
 		});
 	}
 
+	[Test]
+	public void ADeviceThatKeepsWidgetsToOneKey_LimitsBothAxes_AndNamesItself()
+	{
+		var constraint
+			= DeviceLayoutConstraintResolver.Resolve([Device("Stream Deck", WithSpans(FixedGrid(3, 5), 1, 1))])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.MaxWidgetColumns, Is.EqualTo(1));
+			Assert.That(constraint.MaxWidgetRows, Is.EqualTo(1));
+			Assert.That(constraint.MaxWidgetColumnsDeviceName, Is.EqualTo("Stream Deck"));
+			Assert.That(constraint.MaxWidgetRowsDeviceName, Is.EqualTo("Stream Deck"));
+		});
+	}
+
+	[Test]
+	public void ALayoutWithoutSpanLimits_LeavesWidgetsUnconstrained()
+	{
+		var constraint = DeviceLayoutConstraintResolver.Resolve([Device("Deck A", FixedGrid(3, 5))])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.MaxWidgetColumns, Is.Null);
+			Assert.That(constraint.MaxWidgetRows, Is.Null);
+			Assert.That(constraint.AllowsWidgetSpan(5, 3, null, null), Is.True);
+		});
+	}
+
+	[Test]
+	public void TheStrictestLimitPerAxisWins_NamingTheDeviceEachOneComesFrom()
+	{
+		var columnsLimited = Device("Narrow Pad", WithSpans(FixedGrid(3, 5), 1, null));
+		var rowsLimited = Device("Short Pad", WithSpans(FixedGrid(3, 5), 4, 2));
+		var unlimited = Device("Open Pad", FixedGrid(3, 5));
+
+		var constraint = DeviceLayoutConstraintResolver.Resolve([unlimited, rowsLimited, columnsLimited])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.MaxWidgetColumns, Is.EqualTo(1));
+			Assert.That(constraint.MaxWidgetColumnsDeviceName, Is.EqualTo("Narrow Pad"));
+			Assert.That(constraint.MaxWidgetRows, Is.EqualTo(2));
+			Assert.That(constraint.MaxWidgetRowsDeviceName, Is.EqualTo("Short Pad"));
+		});
+	}
+
+	[Test]
+	public void DevicesWhoseGridsConflict_StillKeepTheirSpanLimit()
+	{
+		var small = Device("Stream Deck Mini", WithSpans(FixedGrid(2, 3), 1, 1));
+		var large = Device("Stream Deck XL", WithSpans(FixedGrid(4, 8), 1, 1));
+
+		var constraint = DeviceLayoutConstraintResolver.Resolve([small, large])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.HasConflict, Is.True);
+			Assert.That(constraint.MaxWidgetColumns, Is.EqualTo(1));
+			Assert.That(constraint.MaxWidgetRows, Is.EqualTo(1));
+			Assert.That(constraint.AllowsWidgetSpan(2, 1, null, null), Is.False);
+		});
+	}
+
+	[Test]
+	public void ConfigurableDevicesThatDisagree_StillKeepTheirSpanLimit_WithoutCappingTheGrid()
+	{
+		var narrow = Device("Client A", WithSpans(ConfigurableGrid(3, 5, 1, 4, 1, 6), 1, 1));
+		var wide = Device("Client B", ConfigurableGrid(3, 5, 1, 8, 1, 12));
+
+		var constraint = DeviceLayoutConstraintResolver.Resolve([narrow, wide])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.MaxWidgetColumns, Is.EqualTo(1));
+			Assert.That(constraint.MaxWidgetColumnsDeviceName, Is.EqualTo("Client A"));
+			Assert.That(constraint.RowsLocked || constraint.ColumnsLocked, Is.False);
+			Assert.That(constraint.HasConflict, Is.False);
+			Assert.That(constraint.ConstrainsGrid, Is.False);
+			Assert.That((constraint.MaxRows, constraint.MaxColumns), Is.EqualTo((16, 16)));
+			Assert.That(constraint.AllowsEdit(20, 20), Is.True);
+			Assert.That(constraint.ExceedsLockedLayout(20, 20), Is.False);
+		});
+	}
+
+	[Test]
+	public void ALimitBelowOne_ReadsAsOne()
+	{
+		var constraint = DeviceLayoutConstraintResolver.Resolve([Device("Deck A", WithSpans(FixedGrid(3, 5), 0, -2))])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.MaxWidgetColumns, Is.EqualTo(1));
+			Assert.That(constraint.MaxWidgetRows, Is.EqualTo(1));
+		});
+	}
+
+	[Test]
+	public void AllowsWidgetSpan_RefusesANewOrGrowingWidgetPastTheLimit_ButKeepsAStoredLargerOneUsable()
+	{
+		var constraint
+			= DeviceLayoutConstraintResolver.Resolve([Device("Stream Deck", WithSpans(FixedGrid(3, 5), 1, 1))])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.AllowsWidgetSpan(1, 1, null, null), Is.True);
+			Assert.That(constraint.AllowsWidgetSpan(2, 1, null, null), Is.False);
+			Assert.That(constraint.AllowsWidgetSpan(2, 1, 1, 1), Is.False);
+			Assert.That(constraint.AllowsWidgetSpan(1, 2, 1, 1), Is.False);
+			Assert.That(constraint.AllowsWidgetSpan(3, 2, 3, 2), Is.True);
+			Assert.That(constraint.AllowsWidgetSpan(2, 1, 3, 2), Is.True);
+			Assert.That(constraint.AllowsWidgetSpan(4, 2, 3, 2), Is.False);
+		});
+	}
+
 	private static DeviceEntity Device(string name, LayoutDescriptor layout)
 	{
 		return Device(name, LayoutSnapshotSerializer.Serialize(layout));
@@ -322,6 +436,23 @@ public class DeviceLayoutConstraintResolverTests
 					Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = new LayoutGrid { Rows = rows, Columns = columns }
 				}
 			]);
+	}
+
+	private static LayoutDescriptor WithSpans(LayoutDescriptor layout, int? maxWidgetColumns, int? maxWidgetRows)
+	{
+		return layout with
+		{
+			Regions =
+			[
+				layout.Regions[0] with
+				{
+					Grid = layout.Regions[0].Grid! with
+					{
+						MaxWidgetColumns = maxWidgetColumns, MaxWidgetRows = maxWidgetRows
+					}
+				}
+			]
+		};
 	}
 
 	private static LayoutDescriptor ConfigurableGrid(
