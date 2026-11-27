@@ -52,6 +52,17 @@ export function parseReleaseNotes(notes) {
   return entries;
 }
 
+// Repeated until stable: removing one comment can join the halves of another marker.
+function withoutHtmlComments(text) {
+  let previous;
+  let current = text;
+  do {
+    previous = current;
+    current = current.replace(/<!--[\s\S]*?-->/g, '');
+  } while (current !== previous);
+  return current;
+}
+
 async function pullRequestDescriptions(entries, repository, githubToken, fetchImpl) {
   const candidates = entries
     .filter((entry) => entry.number !== null && entry.repository === repository)
@@ -70,7 +81,7 @@ async function pullRequestDescriptions(entries, repository, githubToken, fetchIm
         return null;
       }
       const pull = await response.json();
-      const body = String(pull.body ?? '').replace(/<!--[\s\S]*?-->/g, '').trim();
+      const body = withoutHtmlComments(String(pull.body ?? '')).trim();
       return body === '' ? null : `### Pull request ${number}: ${pull.title}\n${body.slice(0, MaxPullRequestBodyLength)}`;
     } catch {
       return null;
