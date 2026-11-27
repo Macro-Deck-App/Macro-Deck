@@ -46,6 +46,7 @@ lays out from it:
 | `conformance-text-fit-tree.json` | the wire form of the text a browser has to squeeze, cut off or clamp - see below; it has no layout table, only a measured file |
 | `conformance-todo-header-tree.json` | the Todo List header before its fix: a count with no `mainSize` beside a `fill` title, where the browser shrinks the count and "128" is cut off |
 | `conformance-clock-widget-tree.json` | the default Clock widget exactly as the host builds it - a fitted time with seconds and a date in the widget's own padding; it has no layout table, only a measured file |
+| `conformance-action-button-labels-<case>-tree.json` | thirteen Action Buttons with freely placed or several labels exactly as the host sent them - see below; they have no layout table, only measured files |
 | `measured-scenes.json` | which trees are measured, at which tiles and bases, with which face |
 | `<scene>-measured.json` | what headless Chrome **lays out** from each tree: every node's box, and each text's natural width, given width and whether it is cut off - generated, never hand-edited |
 | this README | what the fixtures deliberately contain, so they are not trimmed by accident |
@@ -278,6 +279,29 @@ what refuses that now.
   fits too large and cuts the time off with an ellipsis;
 - measured in a 1x1 tile, where the fit settles a fraction of a unit inside the box, and in a 2x1 and
   a 1x2 tile, where the time has room or the same width as in 1x1.
+
+## What the action-button label trees deliberately contain
+
+Not authored for the fixture either: each `conformance-action-button-labels-<case>-tree.json` is one Action
+Button with freely placed or several labels (ADR 0114) as a host at c42bb6a48 sent it over the UI socket,
+first captured for the Companion App and re-serialized here in canonical form without changing a value.
+`state-two` and `preset-layered` are `state-one` and `preset` with the host's own patch applied, so their
+`surface.attributes.data` still describes the tree before the patch. Nothing regenerates them when
+`ActionButtonWidgetView` changes; recapture them from a host when it does.
+
+- `preset`, `preset-boxed`, `preset-layered`: one label in the single-row form a former preset place
+  builds, the same with a label box and a wrapping text, and a second label that turns it into the
+  layered form;
+- `state-one`, `state-two`: a state switch that moves and retexts every label;
+- `four`: four labels at different places, sizes and alignments;
+- `wrap`, `boxed-wrap`: long labels that wrap inside their slot, bare and in a label box;
+- `outline`: labels with a glyph outline beside a label whose text is a single space;
+- `empty`: a label with no `text` at all beside a centred one. The browser lays out no line for it, so
+  its row is 0 tall; a reader that reserves one line for it draws the same picture but fails these boxes;
+- `overflow-plain`, `overflow-start`, `overflow-end`: in a 1x1 tile, a label taller than the button's
+  content box, with the content at the centre, start and end; it reaches past the box instead of being
+  squeezed;
+- measured in a 1x1, a 2x1 and a 1x2 tile at basis 120, except `boxed-wrap`, which has no 1x2 case.
 
 ## What the slider tree deliberately contains
 

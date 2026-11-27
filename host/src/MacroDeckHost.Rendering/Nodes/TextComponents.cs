@@ -112,7 +112,7 @@ internal static class TextComponents
 		{
 			PaintSpans(element, spans, scope);
 		}
-		else
+		else if (text.Length > 0)
 		{
 			element.Append(new Element(Element.TextTag, wraps && text.EndsWith('\n') ? text + "\n" : text));
 		}

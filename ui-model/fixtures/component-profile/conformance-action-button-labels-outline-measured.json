@@ -1,0 +1,677 @@
+{
+  "tree": "conformance-action-button-labels-outline-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 31.2,
+            "y": 50.4,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 31.2,
+            "y": 50.4,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 31.2,
+            "y": 50.4,
+            "width": 96,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 21.35,
+            "y": 38.88,
+            "width": 49.23,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 21.35,
+            "y": 38.88,
+            "width": 49.23,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 18.96,
+            "y": 31.69,
+            "width": 54.02,
+            "height": 43.17
+          },
+          "texts": [
+            {
+              "text": "Ring",
+              "naturalWidth": 54.02,
+              "givenWidth": 54.02,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 108,
+            "y": 108,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 108,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 108,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 103.08,
+            "y": 87.84,
+            "width": 4.92,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 103.08,
+            "y": 87.84,
+            "width": 4.92,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 103.08,
+            "y": 84.48,
+            "width": 4.92,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": " ",
+              "naturalWidth": 4.92,
+              "givenWidth": 4.92,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 88.8,
+            "y": 98.4,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 88.8,
+            "y": 98.4,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 88.8,
+            "y": 98.4,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 66.13,
+            "y": 80.26,
+            "width": 28.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 66.13,
+            "y": 80.26,
+            "width": 28.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1.label1": {
+          "type": "ui.text",
+          "box": {
+            "x": 64.94,
+            "y": 75.71,
+            "width": 30.72,
+            "height": 29.25
+          },
+          "texts": [
+            {
+              "text": "Out",
+              "naturalWidth": 30.72,
+              "givenWidth": 30.72,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 57.6,
+            "y": 50.4,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 57.6,
+            "y": 50.4,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 57.6,
+            "y": 50.4,
+            "width": 228,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 47.75,
+            "y": 38.88,
+            "width": 49.23,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 47.75,
+            "y": 38.88,
+            "width": 49.23,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 45.36,
+            "y": 31.69,
+            "width": 54.02,
+            "height": 43.17
+          },
+          "texts": [
+            {
+              "text": "Ring",
+              "naturalWidth": 54.02,
+              "givenWidth": 54.02,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 240,
+            "y": 108,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 240,
+            "y": 108,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 240,
+            "y": 108,
+            "width": 228,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 235.08,
+            "y": 87.84,
+            "width": 4.92,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 235.08,
+            "y": 87.84,
+            "width": 4.92,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 235.08,
+            "y": 84.48,
+            "width": 4.92,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": " ",
+              "naturalWidth": 4.92,
+              "givenWidth": 4.92,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 194.4,
+            "y": 98.4,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 194.4,
+            "y": 98.4,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 194.4,
+            "y": 98.4,
+            "width": 228,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 171.72,
+            "y": 80.26,
+            "width": 28.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 171.72,
+            "y": 80.26,
+            "width": 28.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1.label1": {
+          "type": "ui.text",
+          "box": {
+            "x": 170.54,
+            "y": 75.71,
+            "width": 30.72,
+            "height": 29.25
+          },
+          "texts": [
+            {
+              "text": "Out",
+              "naturalWidth": 30.72,
+              "givenWidth": 30.72,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 31.2,
+            "y": 103.2,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 31.2,
+            "y": 103.2,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 31.2,
+            "y": 103.2,
+            "width": 96,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 21.35,
+            "y": 91.68,
+            "width": 49.23,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 21.35,
+            "y": 91.68,
+            "width": 49.23,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 18.96,
+            "y": 84.49,
+            "width": 54.02,
+            "height": 43.17
+          },
+          "texts": [
+            {
+              "text": "Ring",
+              "naturalWidth": 54.02,
+              "givenWidth": 54.02,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 108,
+            "y": 240,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 240,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 240,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 103.08,
+            "y": 219.84,
+            "width": 4.92,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 103.08,
+            "y": 219.84,
+            "width": 4.92,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 103.08,
+            "y": 216.48,
+            "width": 4.92,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": " ",
+              "naturalWidth": 4.92,
+              "givenWidth": 4.92,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 88.8,
+            "y": 217.2,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 88.8,
+            "y": 217.2,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 88.8,
+            "y": 217.2,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 66.13,
+            "y": 199.06,
+            "width": 28.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 66.13,
+            "y": 199.06,
+            "width": 28.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1.label1": {
+          "type": "ui.text",
+          "box": {
+            "x": 64.94,
+            "y": 194.51,
+            "width": 30.72,
+            "height": 29.25
+          },
+          "texts": [
+            {
+              "text": "Out",
+              "naturalWidth": 30.72,
+              "givenWidth": 30.72,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

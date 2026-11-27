@@ -60,6 +60,19 @@ public class ComponentProfileConformanceFixtureTests
 		yield return "conformance-text-fit-tree.json";
 		yield return "conformance-todo-header-tree.json";
 		yield return "conformance-segmented-vertical-tree.json";
+		yield return "conformance-action-button-labels-preset-tree.json";
+		yield return "conformance-action-button-labels-preset-boxed-tree.json";
+		yield return "conformance-action-button-labels-preset-layered-tree.json";
+		yield return "conformance-action-button-labels-state-one-tree.json";
+		yield return "conformance-action-button-labels-state-two-tree.json";
+		yield return "conformance-action-button-labels-four-tree.json";
+		yield return "conformance-action-button-labels-wrap-tree.json";
+		yield return "conformance-action-button-labels-boxed-wrap-tree.json";
+		yield return "conformance-action-button-labels-outline-tree.json";
+		yield return "conformance-action-button-labels-empty-tree.json";
+		yield return "conformance-action-button-labels-overflow-plain-tree.json";
+		yield return "conformance-action-button-labels-overflow-start-tree.json";
+		yield return "conformance-action-button-labels-overflow-end-tree.json";
 	}
 
 	private static readonly string[] _firstFitLayouts = ["conformance.group.inline", "conformance.group.stacked"];
