@@ -100,18 +100,40 @@ To regenerate, run `npm --prefix ui run measure:conformance` (Chrome from `CHROM
 Playwright's headless shell). When a local Chrome lays out differently from CI's, take the files from the
 failed run's `measured-conformance` artifact instead.
 
-Where a layout table and a measured file disagree, they answer different questions: the table states what
-a renderer resolves, the measured file what the browser then draws. Today they disagree only on the height
-of nodes that declare neither `mainSize` nor `fill`, which the jsdom spec deliberately leaves unchecked:
+A layout table states what a renderer resolves, and the measured file what the browser then draws. For a
+node that declares neither `mainSize` nor `fill` inside a vertical stack, a renderer resolves no height at
+all and leaves it to the browser's content-based flex sizing, so there the table states the measured
+file's height instead:
 
-- the action-button tree's `full`, `press`, `boundary` and `silent` buttons, and the modifier tree's
-  `card`, `press`, `wrapper` and `circle`: the root holds more than its height, so the browser shrinks
-  these content-sized nodes below the table's height (and grows `full` past it);
+- the action-button tree's `full`, `press`, `boundary` and `silent` buttons: the root holds more than its
+  height, so the browser shrinks these content-sized buttons (and grows `full`); their `height`,
+  `pressSurfaceHeight`, `contentHeight`, `backdropHeight` and `backdropOffsetY` follow from that height;
 - the slider tree's `plain` and `empty` sliders: they have no content to size from, so the browser draws
-  them with no height at all.
+  them with no height at all, and `height` and `interactiveHeight` are `0.0`;
+- the slider tree's `header`, whose height its text gives it.
 
-A renderer matches the measured file, because that is what the web client shows. Whether these nodes
-should draw as the tables say is a question for the runtime and the tables, not for these files.
+These are Chrome's layout under the conditions above (the named face, CI's Chrome), not lengths a renderer
+can resolve, so another renderer reproduces them only under the same conditions, and they are stated to
+0.1 px. When a measured file is regenerated, re-derive them from its boxes: `height` and
+`pressSurfaceHeight` are the box height, `contentHeight` is it less twice the padding, `backdropHeight` is
+it times `zoom` and `backdropOffsetY` it times `offsetY`, all rounded to 0.1; `cornerRadius` is 0.12 of
+the box height, rounded to 0.01. The jsdom spec checks these keys against the measured file and that the
+runtime leaves the height to the browser; what the browser draws from the runtime is
+`measure-conformance --check`'s job.
+
+Two disagreements remain:
+
+- the `cornerRadius` of `full` and `boundary` is the documented corner, 0.12 of the button's own height,
+  which no renderer draws yet: the runtime reads the height before the button has any content, so the
+  browser draws no corner on a button's first paint and 0.12 of its rounded `clientHeight` once it is
+  painted again (`ui/runtime/src/ui-components/stack-paint.ts`), and the host renderer draws none
+  (`MacroDeckHost.Rendering/Nodes/StackComponents.cs`). Both suites leave this key unchecked for buttons;
+- the modifier tree's `card`, `press`, `wrapper` and `circle` declare a `mainSize` or a `frame`, so a
+  renderer does resolve their height and sets it inline, and the table states that height; the root holds
+  more than it, so the browser shrinks them below it.
+
+So a table states the resolved length where a renderer resolves one, and the browser's height where it
+does not. A renderer matches the measured file, because that is what the web client shows.
 
 A change to a measured file is a change to what every renderer has to draw: the Companion App checks its
 Compose renderer against these files, and the host's key-image renderer (`MacroDeckHost.Rendering`) is
@@ -366,9 +388,10 @@ resolution for all of them.
 
 `conformance-action-button-layout.json` resolves the content box, the artwork rect and the ring at both
 bases, and states the press feedback's constants once rather than per node, since they are durations and
-an alpha, not lengths. `ringWidth` is the one length in this table that does **not** halve between the two
-bases - `2.0` at both - which is the profile's deliberate exception to the halving rule everything else in
-this file follows.
+an alpha, not lengths. `ringWidth` is the one resolved length in this table that does **not** halve between the
+two bases - `2.0` at both - which is the profile's deliberate exception to the halving rule. The buttons'
+own heights and what derives from them are the browser's, see "The measured files", and do not halve
+exactly either.
 
 ## The layout table
 
@@ -376,8 +399,9 @@ this file follows.
 `conformance-slider-layout.json`,
 `conformance-action-button-layout.json` and `conformance-music-player-layout.json` give the resolved
 geometry in device-independent units for two tile
-sizes, 240 and 120. Every value at 120 is exactly half its counterpart at 240 - `ringWidth` in the button
-table stated as the one deliberate exception - which is the fixture's second job: it demonstrates that a
+sizes, 240 and 120. Every resolved value at 120 is exactly half its counterpart at 240 - `ringWidth` in the
+button table stated as the one deliberate exception, and the browser's heights of content-sized nodes (see
+"The measured files") not being resolved values - which is the fixture's second job: it demonstrates that a
 widget tree is resolution-independent, so a resize is a client-side relayout and never a host round-trip.
 
 `conformance-clock-layout.json` additionally resolves the dial's normative geometry - face, tick and hand
