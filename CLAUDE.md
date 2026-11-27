@@ -8,6 +8,37 @@ web client (REST + JSON WebSocket), Tauri bootstrapper (owns the native window a
 Branch before working. Prefix `feature/`, `fix/`, `refactor/`, `chore/`, `docs/`, `ci/` plus a short
 kebab-case description and the issue number when one exists.
 
+## Pull request labels
+
+Labels on a pull request decide its line in the release notes, nothing else. A pull request is listed
+under the first category in [`.github/release.yml`](.github/release.yml) whose label it carries, and an
+excluded label removes it from the notes whatever else it carries. So a pull request gets **one**
+label, the one that names its changelog category:
+
+- A change users see: `new-integration`, `new-widget`, `feature`, `improvement`, `bug`, `performance`,
+  `accessibility` or `security`. The most specific one wins and stands alone: a new built-in
+  integration is `new-integration`, not `new-integration` plus `feature`.
+- A change only plugin authors see: `area:sdk`, `area:protocol`, `area:ui-model`, `area:cli` or
+  `area:packaging`. A translation-only change: `area:localization`. A dependency update: `dependencies`.
+- A change nobody outside the repository sees (CI, tests, refactoring, tooling, merges between
+  branches): `internal`. Documentation only: `documentation`. A flaky test fix: `flaky-test`.
+
+Add a second label only when it says something the first cannot: `breaking-change`,
+`compat:plugin-api`, `compat:protocol` or `compat:deprecation` when a public plugin-facing contract is
+touched, `regression` on a `bug` that used to work, and one `platform:*` when the change concerns a
+single platform.
+
+Everything else stays off a pull request:
+
+- No `area:*` label for the folders a change touched. The diff already shows them, and a feature that
+  also edits a workflow or an E2E test must not carry `area:ci` or `area:e2e`: both are excluded from
+  the release notes and silently drop the whole change from them.
+- No `internal`, `documentation` or `flaky-test` on a change users see, for the same reason.
+- No triage labels (`status:*`, `stale`, `duplicate`, `invalid`, `wontfix`, `question`,
+  `good first issue`, `help wanted`): they belong to issues, as do the `area:*` labels.
+
+Use only labels that exist (`gh label list`), and never create one without asking.
+
 ## Public SDK and plugin compatibility
 
 A plugin may stay compiled against an old SDK indefinitely. Every non-obsolete public plugin-facing
