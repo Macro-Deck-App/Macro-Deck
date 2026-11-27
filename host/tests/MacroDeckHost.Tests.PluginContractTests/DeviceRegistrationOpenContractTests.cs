@@ -417,6 +417,8 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 			remove { }
 		}
 
+		public TimeSpan PressMinVisible => TimeSpan.FromMilliseconds(60);
+
 		public DeviceKeyImageRenderResult Render(DeviceKeyImageRenderRequest request)
 		{
 			var keys = Enumerable.Range(0, request.Rows)

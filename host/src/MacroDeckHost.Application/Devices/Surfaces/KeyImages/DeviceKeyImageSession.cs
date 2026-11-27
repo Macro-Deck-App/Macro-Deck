@@ -33,6 +33,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 	private readonly ILogger _logger;
 	private readonly TimeSpan _minInterval;
 	private readonly DeviceKeyImageResources _resources;
+	private readonly DeviceKeyImagePresses _presses;
 	private readonly string _principal;
 
 	private readonly Lock _gate = new();
@@ -87,6 +88,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 			new IconAppearanceContext(null,
 				layout.AnimatedIcons ? IconAppearanceTraits.Animated : IconAppearanceTraits.Static),
 			logger);
+		_presses = new DeviceKeyImagePresses(renderer.PressMinVisible);
 	}
 
 	public DeviceKeyImageLayout Layout => _layout;
@@ -123,6 +125,8 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 				view.Removed = true;
 				_widgets.Remove(view.WidgetId);
 			}
+
+			_presses.Retain(visible.Keys.ToHashSet(StringComparer.Ordinal));
 
 			foreach (var widget in visible.Values)
 			{
@@ -176,6 +180,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 			_online = online;
 			if (!online)
 			{
+				_presses.Clear();
 				return;
 			}
 
@@ -209,6 +214,40 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		}
 
 		Request();
+	}
+
+	public void Press(string widgetId)
+	{
+		lock (_gate)
+		{
+			_presses.Press(widgetId, _timeProvider.GetUtcNow());
+		}
+
+		RequestAside();
+	}
+
+	public void Release(string widgetId)
+	{
+		lock (_gate)
+		{
+			if (!_presses.Release(widgetId))
+			{
+				return;
+			}
+		}
+
+		RequestAside();
+	}
+
+	public void Flash(string widgetId)
+	{
+		lock (_gate)
+		{
+			_presses.Press(widgetId, _timeProvider.GetUtcNow());
+			_presses.Release(widgetId);
+		}
+
+		RequestAside();
 	}
 
 	public void Refresh()
@@ -445,6 +484,12 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		_ = RunAsync();
 	}
 
+	// A pass with nothing to wait for renders on the calling thread, and a press must not wait for it.
+	private void RequestAside()
+	{
+		_ = Task.Run(Request);
+	}
+
 	private async Task RunAsync()
 	{
 		var token = _stopping.Token;
@@ -537,6 +582,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		var environment = await EnvironmentAsync(cancellationToken);
 		List<RenderUnit> units;
 		bool forceRender;
+		var pressed = new Dictionary<string, string>(StringComparer.Ordinal);
 		lock (_gate)
 		{
 			if (_projection is not { } projection)
@@ -544,7 +590,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 				return;
 			}
 
-			units = UnitsOf(projection, environment.Version);
+			units = UnitsOf(projection, environment.Version, pressed);
 			forceRender = _forceRender;
 			_forceRender = false;
 		}
@@ -559,6 +605,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		}
 
 		var rendered = new Dictionary<string, RenderedUnit>(StringComparer.Ordinal);
+		var shown = new List<string>();
 		var missing = new List<DeviceKeyImageResourceRequest>();
 		var pictures = new (ReadOnlyMemory<byte> Content, string ContentType)?[_layout.Rows, _layout.Columns];
 		foreach (var unit in units)
@@ -569,6 +616,11 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 			}
 
 			rendered[unit.Id] = result;
+			if (result.Key == unit.Key && pressed.TryGetValue(unit.Id, out var pressedWidgetId))
+			{
+				shown.Add(pressedWidgetId);
+			}
+
 			foreach (var picture in result.Keys)
 			{
 				var row = unit.Row + picture.RowOffset;
@@ -584,9 +636,16 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		_resources.Retain(rendered.Values.SelectMany(unit => unit.Resources));
 		var changed = new List<DeviceKeyImage>();
 		bool pushing;
+		DateTimeOffset? pressExpiry;
 		lock (_gate)
 		{
 			pushing = _online && _started && _surfaceHolds == 0;
+			if (pushing)
+			{
+				_presses.Shown(shown, now);
+			}
+
+			pressExpiry = _presses.NextExpiry;
 			var forcePush = pushing && _forcePush;
 			if (pushing)
 			{
@@ -646,7 +705,12 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 			_ = FetchAsync(missing);
 		}
 
-		Schedule(pushing ? rendered.Values.Select(unit => unit.NextChangeAt).Where(at => at is not null).Min() : null,
+		Schedule(pushing
+				? rendered.Values.Select(unit => unit.NextChangeAt)
+					.Append(pressExpiry)
+					.Where(at => at is not null)
+					.Min()
+				: null,
 			now);
 	}
 
@@ -684,8 +748,12 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		}
 	}
 
-	private List<RenderUnit> UnitsOf(DeviceSurfaceProjection projection, int environmentVersion)
+	private List<RenderUnit> UnitsOf(
+		DeviceSurfaceProjection projection,
+		int environmentVersion,
+		Dictionary<string, string> pressed)
 	{
+		var now = _timeProvider.GetUtcNow();
 		var layout = projection.Surface.Layout;
 		var hasSurface = projection.ProfileId is not null;
 		var radius = _layout.CornerRadius && hasSurface ? layout.WidgetBorderRadius : 0;
@@ -720,7 +788,14 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		foreach (var widget in VisibleWidgets(projection))
 		{
 			var view = _widgets.GetValueOrDefault(widget.Id);
-			units.Add(new RenderUnit($"w:{widget.Id}",
+			var unitId = $"w:{widget.Id}";
+			var isPressed = _presses.IsPressed(widget.Id, now);
+			if (isPressed)
+			{
+				pressed[unitId] = widget.Id;
+			}
+
+			units.Add(new RenderUnit(unitId,
 				string.Join('|',
 					"widget",
 					widget.Type,
@@ -728,6 +803,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 					widget.Rows.ToString(CultureInfo.InvariantCulture),
 					widget.Data.GetRawText(),
 					(view?.TreeVersion ?? 0).ToString(CultureInfo.InvariantCulture),
+					isPressed ? "pressed" : "resting",
 					shared),
 				widget.Row,
 				widget.Column,
@@ -738,7 +814,8 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 					Rows = Math.Max(1, widget.Rows),
 					WidgetType = widget.Type,
 					WidgetData = widget.Data,
-					Tree = view?.Current
+					Tree = view?.Current,
+					Pressed = isPressed
 				}));
 			for (var row = Math.Max(0, widget.Row); row < Math.Min(_layout.Rows, widget.Row + widget.Rows); row++)
 			{

@@ -1,5 +1,10 @@
+using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using MacroDeckHost.Rendering;
+using MacroDeckHost.Rendering.Animation;
+using MacroDeckHost.Rendering.Dom;
+using MacroDeckHost.Rendering.Paint;
 
 namespace MacroDeckHost.Tests.Rendering;
 
@@ -213,5 +218,105 @@ public sealed class KeyCellComposerTests
 			Assert.That((encoded.Width, encoded.Height), Is.EqualTo((80, 60)));
 			await Task.CompletedTask;
 		});
+	}
+
+	[Test]
+	public async Task A_pressed_tile_is_tinted_and_drawn_smaller_so_the_deck_shows_at_its_edge()
+	{
+		var input = Input(KeyCellKind.Tile) with
+		{
+			WidgetType = "Clock",
+			Tree = Tree("""{"id":"r","type":"ui.stack"}""")
+		};
+
+		var resting = KeyCellComposer.Compose(input).Keys.Single();
+		var pressed = KeyCellComposer.Compose(input with { Pressed = true }).Keys.Single();
+
+		var tinted = (byte)Math.Round(0x1a + (255 - 0x1a) * Motion.PressTintAlpha);
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(Pixel(resting, 36, 36), Is.EqualTo(_bgSecondary));
+			Assert.That(Pixel(pressed, 36, 36).R, Is.EqualTo(tinted).Within(1));
+			Assert.That(Pixel(resting, 0, 36), Is.EqualTo(_bgSecondary));
+			Assert.That(Pixel(pressed, 0, 36), Is.EqualTo(_bgPrimary), "the face moved in from the key edge");
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_pressed_tile_spanning_two_keys_shrinks_as_one_widget()
+	{
+		var output = KeyCellComposer.Compose(Input(KeyCellKind.Tile) with
+		{
+			Columns = 2,
+			Pressed = true,
+			WidgetType = "Clock",
+			Tree = Tree("""{"id":"r","type":"ui.stack"}""")
+		});
+
+		var left = output.Keys.Single(key => key is { Row: 0, Column: 0 });
+		var right = output.Keys.Single(key => key is { Row: 0, Column: 1 });
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(Pixel(left, 0, 36), Is.EqualTo(_bgPrimary));
+			Assert.That(Pixel(left, Key - 1, 36), Is.Not.EqualTo(_bgPrimary), "no gap at the inner edge");
+			Assert.That(Pixel(right, 0, 36), Is.Not.EqualTo(_bgPrimary));
+			Assert.That(Pixel(right, Key - 1, 36), Is.EqualTo(_bgPrimary));
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_pressed_tile_is_resampled_smoothly_rather_than_by_dropping_pixels()
+	{
+		var tree = Tree("""
+						{"id":"r","type":"ui.stack","properties":{"direction":"horizontal"},"children":[
+							{"id":"a","type":"ui.stack","properties":{"fill":true,"background":"#ff0000"}},
+							{"id":"b","type":"ui.stack","properties":{"fill":true,"background":"#0000ff"}},
+							{"id":"c","type":"ui.stack","properties":{"fill":true,"background":"#0000ff"}}]}
+						""");
+
+		var pressed = KeyCellComposer.Compose(Input(KeyCellKind.Tile) with
+			{
+				Pressed = true,
+				WidgetType = "Clock",
+				Tree = tree
+			})
+			.Keys.Single();
+
+		var (red, _, blue) = Pixel(pressed, 24, 36);
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(red, Is.InRange(0x60, 0xf0), "the scaled edge falls inside this pixel and blends");
+			Assert.That(blue, Is.InRange(0x60, 0xf0));
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task The_press_tint_is_the_shared_stylesheet_s_active_tint()
+	{
+		var button = new Element("div");
+		button.SetClassName("widget-button");
+		var tint = new Element("div");
+		tint.SetClassName("widget-press-tint widget-press-tint-active");
+		button.Append(tint);
+		var rule = StyleSheet.Shared.Rules.Last(item => item.Selector.Matches(tint)
+			&& item.Declarations.Any(declaration => declaration.Name == "background-color"));
+		var colour = CssColor.Parse(rule.Declarations.Last(declaration => declaration.Name == "background-color")
+			.Value);
+
+		Assert.That(colour!.Value.Alpha / 255.0, Is.EqualTo(Motion.PressTintAlpha).Within(0.5 / 255));
+		await Task.CompletedTask;
+	}
+
+	[Test]
+	public async Task The_press_scale_is_the_web_tile_s_pressed_scale()
+	{
+		var css = await File.ReadAllTextAsync(Path.Combine(Fixtures.RepoRoot, "ui", "runtime", "styles", "grid.css"));
+		var match = Regex.Match(css, @"\.deck-grid-tile-pressed\s*\{\s*transform:\s*scale\(([0-9.]+)\)");
+
+		Assert.That(match.Success, Is.True);
+		Assert.That(double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture), Is.EqualTo(Motion.PressScale));
 	}
 }
