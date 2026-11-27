@@ -163,12 +163,27 @@ Capabilities: new LayoutCapabilities
 | `StaticIcons`, `AnimatedIcons`, `Borders`, `BackgroundColors`, `TextLabels`, `Transparency` | What the surface can draw. |
 | `WidgetSpacing`, `CornerRadius` | Whether the folder's spacing and corner radius mean anything here. `false` disables those editor controls with a note that they have no effect on this device. |
 | `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display, and leave it `false` on a grid with `KeyImages`. |
+| `ScreenSavers` | Whether the device takes part in [screensavers](/ui/views/screensavers/#devices-that-show-no-screensaver). Nullable: `false` says it cannot, `null` (the default) and `true` keep Macro Deck's default. Set it to `false` for hardware made of separate key displays. |
 | `MaxUpdatesPerSecond` | Advisory update rate. Macro Deck caps [key images](/features/devices/#key-images) at it, 30 per second when unset. |
 
-`LayoutVisualCapabilities.Full` sets every flag. A `Visuals` block that sets nothing reads as "renders
-nothing". **No `Visuals` block at all** keeps the spacing controls and the folder-view option - saying
+`LayoutVisualCapabilities.Full` sets every flag, `ScreenSavers = true` included. A `Visuals` block that
+sets nothing reads as "renders nothing", except for `ScreenSavers`, which stays `null` and so keeps the
+default. **No `Visuals` block at all** keeps the spacing controls and the folder-view option - saying
 nothing is not saying no. A region can override with its own `LayoutRegion.Visuals`; null inherits the
-layout's.
+layout's. `ScreenSavers` is read flag by flag: the primary grid region's value, and where that is `null`
+the layout-wide one. A layout with several grid regions has no primary grid, so declare it on
+`LayoutCapabilities.Visuals` there.
+
+```csharp
+// A Stream Deck: a grid of separate key displays that cannot show a screensaver.
+Capabilities: new LayoutCapabilities
+{
+	Visuals = new LayoutVisualCapabilities
+	{
+		StaticIcons = true, AnimatedIcons = true, Borders = true, ScreenSavers = false
+	}
+}
+```
 
 ## Associating a layout with a device provider
 

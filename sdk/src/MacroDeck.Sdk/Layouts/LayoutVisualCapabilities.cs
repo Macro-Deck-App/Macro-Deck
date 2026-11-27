@@ -4,6 +4,8 @@ namespace MacroDeck.Sdk.Layouts;
 /// What a surface can actually render, so the host and editor can avoid offering something the hardware
 /// will drop. Every flag defaults to <c>false</c>: a provider that declares nothing is treated as able to
 /// do nothing, which fails safe rather than promising capabilities the device does not have.
+/// <see cref="ScreenSavers" /> is the exception: it is nullable, and leaving it unset keeps the host's
+/// default.
 /// </summary>
 public sealed record LayoutVisualCapabilities
 {
@@ -18,7 +20,8 @@ public sealed record LayoutVisualCapabilities
 		Transparency = true,
 		WidgetSpacing = true,
 		CornerRadius = true,
-		CustomFolderViews = true
+		CustomFolderViews = true,
+		ScreenSavers = true
 	};
 
 	public bool StaticIcons { get; init; }
@@ -58,6 +61,18 @@ public sealed record LayoutVisualCapabilities
 	/// the widget grid, so such a layout declares this false.
 	/// </summary>
 	public bool CustomFolderViews { get; init; }
+
+	/// <summary>
+	/// Whether the device can take part in screen savers. <c>false</c> says it cannot: Macro Deck refuses to
+	/// turn a screen saver on for the device or to show one on it, and keeps whatever screen saver settings
+	/// the device already has stored. <c>null</c>, the default, declares nothing and keeps the host's
+	/// behaviour, and so does <c>true</c>: it is not a promise that the device will show a screen saver.
+	/// A screen saver concerns the whole device. The host reads the value of the layout's primary grid region
+	/// (<see cref="LayoutDescriptor.PrimaryGrid" />) and, where that is <c>null</c>, the layout-wide value
+	/// in <see cref="LayoutCapabilities.Visuals" />. A layout with several grid regions has no primary grid,
+	/// so declare it layout-wide there.
+	/// </summary>
+	public bool? ScreenSavers { get; init; }
 
 	/// <summary>
 	/// The practical refresh ceiling in updates per second, where the hardware has one. Advisory: it lets

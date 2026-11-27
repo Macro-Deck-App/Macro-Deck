@@ -87,6 +87,7 @@ public static class LayoutDescriptorMapper
 				WidgetSpacing = dto.WidgetSpacing,
 				CornerRadius = dto.CornerRadius,
 				CustomFolderViews = dto.CustomFolderViews,
+				ScreenSavers = dto.ScreenSavers,
 				MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 			};
 	}
