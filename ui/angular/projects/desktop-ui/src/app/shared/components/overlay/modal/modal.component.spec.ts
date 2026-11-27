@@ -240,6 +240,48 @@ class DialogWithMenuHostComponent {
   readonly menuOpen = signal(false);
 }
 
+@Component({
+  standalone: true,
+  imports: [ModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <div style="display: flex; gap: 8px; width: 300px">
+      <span class="first" style="flex: 1 1 0">first</span>
+      <span class="last" style="flex: 0 0 auto">last</span>
+      @if (open()) {
+        <shared-modal heading="Row" />
+      }
+    </div>
+  `,
+})
+class ModalInFlexRowHostComponent {
+  readonly open = signal(false);
+}
+
+describe('ModalComponent opened inside a flex row', () => {
+  it('leaves the position of the row items unchanged', () => {
+    TestBed.configureTestingModule({
+      imports: [ModalInFlexRowHostComponent],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+    });
+    const fixture = TestBed.createComponent(ModalInFlexRowHostComponent);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const first = root.querySelector('.first') as HTMLElement;
+    const last = root.querySelector('.last') as HTMLElement;
+    const closedFirst = first.getBoundingClientRect().toJSON();
+    const closedLast = last.getBoundingClientRect().toJSON();
+
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+
+    expect(root.querySelector('.modal-overlay')).not.toBeNull();
+    expect(first.getBoundingClientRect().toJSON()).toEqual(closedFirst);
+    expect(last.getBoundingClientRect().toJSON()).toEqual(closedLast);
+    fixture.destroy();
+  });
+});
+
 describe('ModalComponent Escape with other overlays open', () => {
   let fixture: ComponentFixture<DialogWithMenuHostComponent>;
   let host: DialogWithMenuHostComponent;
