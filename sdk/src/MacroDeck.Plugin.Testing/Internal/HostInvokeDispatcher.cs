@@ -784,6 +784,7 @@ internal static class HostInvokeDispatcher
 			BackgroundColors = dto.BackgroundColors,
 			TextLabels = dto.TextLabels,
 			Transparency = dto.Transparency,
+			ScreenSavers = dto.ScreenSavers,
 			MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 		};
 	}

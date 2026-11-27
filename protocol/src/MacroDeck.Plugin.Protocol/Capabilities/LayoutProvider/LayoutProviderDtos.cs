@@ -31,6 +31,10 @@ public sealed record LayoutVisualCapabilitiesDto
 	/// <c>LayoutVisualCapabilities.CustomFolderViews</c>.</summary>
 	public bool CustomFolderViews { get; init; }
 
+	/// <summary>Whether the device can take part in screen savers, <c>null</c> when the layout does not say -
+	/// see the SDK's <c>LayoutVisualCapabilities.ScreenSavers</c>.</summary>
+	public bool? ScreenSavers { get; init; }
+
 	public int? MaxUpdatesPerSecond { get; init; }
 }
 
