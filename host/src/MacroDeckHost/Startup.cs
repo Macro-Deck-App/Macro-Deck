@@ -1165,7 +1165,8 @@ public class Startup
 			KeyRingStartupState.Plan,
 			KeyRingStartupState.Portable,
 			provider.GetRequiredService<TimeProvider>(),
-			provider.GetRequiredService<Serilog.ILogger>()));
+			provider.GetRequiredService<Serilog.ILogger>(),
+			KeyRingStartupState.LateKeystoreRead));
 
 		if (KeyRingStartupState.IsLocked)
 		{
@@ -1175,7 +1176,6 @@ public class Startup
 		// Added after the freeze on purpose: it is what lets a host that only started locked because the
 		// keystore prompt went unanswered recover once the prompt is answered.
 		services.AddHostedService(provider => new KeyRingLateKeystoreAnswerService(KeyRingStartupState.LateKeystoreRead,
-			KeyRingStartupState.Plan.RingKekId,
 			KeyRingStartupState.LateAnswerMarkerPath,
 			KeyRingStartupState.RestartedAfterLateAnswer,
 			provider.GetRequiredService<IApplicationRestartService>(),

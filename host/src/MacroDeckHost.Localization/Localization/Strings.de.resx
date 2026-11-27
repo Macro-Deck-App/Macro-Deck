@@ -14877,6 +14877,24 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Lautstärke</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>Der Schlüssel, der deine gespeicherten Geheimnisse entsperrt, liegt im Geheimnisspeicher dieses Computers, zum Beispiel in KDE Wallet, GNOME Keyring oder dem Schlüsselbund des Systems. Er hat nicht geantwortet, meist weil er gesperrt ist oder nicht läuft. Entsperre ihn und versuche es dann erneut.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Erneut versuchen</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Der Geheimnisspeicher ist weiterhin nicht erreichbar. Wenn das so bleibt, verwende stattdessen deinen Wiederherstellungsschlüssel.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck kann deinen Geheimnisspeicher nicht erreichen</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Stattdessen Wiederherstellungsschlüssel verwenden</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Warte auf den Geheimnisspeicher. Wenn er nach seinem Passwort fragt, gib es ein.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck kann den Schlüssel nicht erreichen, der deine gespeicherten Geheimnisse entsperrt. Gib deinen Backup-Wiederherstellungsschlüssel ein, um ihn wiederherzustellen.</value>
   </data>

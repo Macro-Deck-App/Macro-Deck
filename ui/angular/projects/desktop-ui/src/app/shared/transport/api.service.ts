@@ -359,6 +359,7 @@ import {
   UnbindCatalogVariableRequest,
   UnbindCatalogVariableResponse,
   UninstallStoreExtensionResponse,
+  RetryKeyRingKeystoreResponse,
   UnlockKeyRingRequest,
   UnlockKeyRingResponse,
   UpdateAdbSettingsRequest,
@@ -2650,6 +2651,10 @@ export class ApiService {
 
   unlockKeyRing(request: UnlockKeyRingRequest): Promise<UnlockKeyRingResponse> {
     return this.http('POST', '/api/key-ring/unlock', request);
+  }
+
+  retryKeyRingKeystore(): Promise<RetryKeyRingKeystoreResponse> {
+    return this.http('POST', '/api/key-ring/retry-keystore');
   }
 
   getKeyRingProtection(): Promise<GetKeyRingProtectionResponse> {

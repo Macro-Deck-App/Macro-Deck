@@ -145,6 +145,11 @@ internal sealed class MigrationTestHarness : IDisposable
 			return Task.FromResult(Result.Ok<KeyRingProtectionError>());
 		}
 
+		public Task<KeyRingKeystoreRetryOutcome> RetryKeystore(CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(KeyRingKeystoreRetryOutcome.NotApplicable);
+		}
+
 		public Task<Result<KeyRingProtectionError>> Unlock(
 			ReadOnlyMemory<byte> recoveryKey,
 			CancellationToken cancellationToken = default)

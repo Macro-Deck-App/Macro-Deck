@@ -25,9 +25,9 @@ public sealed class NullKekStore : IKekStore
 		return KekStoreReadResult.Unavailable(_reason);
 	}
 
-	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
+	public KekStoreWriteResult Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
 	{
-		return KekStoreStatus.Unavailable;
+		return KekStoreWriteResult.Failed(_reason);
 	}
 
 	public KekStoreStatus Delete(KekStoreIdentity identity)

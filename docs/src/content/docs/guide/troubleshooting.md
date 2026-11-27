@@ -103,13 +103,15 @@ or GNOME Keyring. If that storage is locked when Macro Deck starts, your desktop
 This is common when you sign in automatically, without typing a password.
 
 - Enter the wallet or keyring password when asked. Macro Deck then restarts by itself and opens normally.
-- If you closed that prompt, unlock the wallet in KDE Wallet Manager or Passwords and Keys, then quit
-  Macro Deck completely and start it again.
-- If you do not answer within about 15 seconds, Macro Deck opens anyway and asks for your backup recovery
-  key. Entering the recovery key does not help while the wallet stays locked: Macro Deck has to store the
-  key there again. Unlock the wallet first.
-- The recovery key helps when the password storage no longer holds Macro Deck's key, for example after
-  the wallet was reset.
+- If you do not answer within about 15 seconds, or you closed that prompt, Macro Deck opens anyway and
+  shows **Macro Deck cannot reach your secret storage**. Unlock the wallet in KDE Wallet Manager or
+  Passwords and Keys, or enter its password if your desktop asks again, then select **Try again**. Macro
+  Deck restarts by itself and opens normally.
+- The same message appears when no password storage is running at all, which happens on desktops that do
+  not start one for you. Start it, then select **Try again**.
+- **Use recovery key instead** helps when the password storage no longer holds Macro Deck's key, for
+  example after the wallet was reset. It does not help while the storage stays locked or is not running:
+  Macro Deck has to store the key there again, so it brings you back to the same message.
 
 ## A device says the deck needs an update
 
@@ -664,9 +666,10 @@ look different from an image editor:
 
 ## An AI client cannot connect
 
-First check that Macro Deck is running. If Macro Deck asks you to **Enter your recovery key**, its key
-ring is locked and AI clients cannot connect until you unlock it with your backup recovery key. Then look
-for the case that fits.
+First check that Macro Deck is running. If Macro Deck asks you to **Enter your recovery key** or says
+**Macro Deck cannot reach your secret storage**, its key ring is locked and AI clients cannot connect
+until you unlock it: see [a locked wallet or keyring](#on-linux-a-locked-wallet-or-keyring) or use your
+backup recovery key. Then look for the case that fits.
 
 - **It stopped connecting after you changed the port** in **Settings > Network**. Copy **Server
   address** from **Settings > AI clients** into your client's configuration again. The Claude Desktop

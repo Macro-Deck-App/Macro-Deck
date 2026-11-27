@@ -14879,6 +14879,24 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>La chiave che sblocca i tuoi segreti salvati si trova nell'archivio dei segreti di questo computer, ad esempio KDE Wallet, GNOME Keyring o il portachiavi di sistema. Non ha risposto, di solito perché è bloccato o non è in esecuzione. Sbloccalo, poi riprova.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Riprova</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>L'archivio dei segreti non è ancora raggiungibile. Se la situazione non cambia, usa invece la tua chiave di ripristino.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck non riesce a raggiungere il tuo archivio dei segreti</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Usa invece la chiave di ripristino</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>In attesa dell'archivio dei segreti. Se chiede la sua password, inseriscila.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck non riesce a raggiungere la chiave che sblocca i tuoi segreti salvati. Inserisci la tua chiave di ripristino di backup per ripristinarla.</value>
   </data>

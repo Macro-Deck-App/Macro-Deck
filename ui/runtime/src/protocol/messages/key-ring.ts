@@ -22,6 +22,21 @@ export interface UnlockKeyRingResponse {
   restartUnsupportedReason?: string | null;
 }
 
+export type KeyRingKeystoreRetryOutcome =
+  | 'NotApplicable'
+  | 'Recovered'
+  | 'Pending'
+  | 'Unavailable'
+  | 'EntryMissing'
+  | 'EntryStale';
+
+export interface RetryKeyRingKeystoreResponse {
+  outcome: KeyRingKeystoreRetryOutcome;
+  restartRequested: boolean;
+  restartSupported: boolean;
+  restartUnsupportedReason?: string | null;
+}
+
 export type KeyRingProtectionState = 'Unprotected' | 'Protected' | 'Locked';
 
 export type KeyRingBackend = 'None' | 'WindowsCredentialManager' | 'MacOsKeychain' | 'LinuxSecretService';

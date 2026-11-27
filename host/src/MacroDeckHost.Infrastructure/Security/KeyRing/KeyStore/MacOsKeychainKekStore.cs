@@ -70,11 +70,11 @@ public sealed class MacOsKeychainKekStore : IKekStore
 		}
 	}
 
-	public KekStoreStatus Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
+	public KekStoreWriteResult Write(KekStoreIdentity identity, ReadOnlySpan<byte> kek)
 	{
 		if (!MacOsKeychainInterop.IsLoadable)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed(Availability.Reason!);
 		}
 
 		var handles = new List<IntPtr>();
@@ -89,12 +89,12 @@ public sealed class MacOsKeychainKekStore : IKekStore
 			var status = MacOsKeychainInterop.SecItemAdd(attributes, IntPtr.Zero);
 			if (status == MacOsKeychainInterop.ErrSecSuccess)
 			{
-				return KekStoreStatus.Found;
+				return KekStoreWriteResult.Ok();
 			}
 
 			if (status != MacOsKeychainInterop.ErrSecDuplicateItem)
 			{
-				return KekStoreStatus.Unavailable;
+				return KekStoreWriteResult.Failed(Describe(status));
 			}
 
 			var query = BuildQuery(identity, handles, [], []);
@@ -103,13 +103,15 @@ public sealed class MacOsKeychainKekStore : IKekStore
 			var update = MacOsKeychainInterop.CreateDictionary([MacOsKeychainInterop.SecValueData], [value]);
 			handles.Add(update);
 
-			return MacOsKeychainInterop.SecItemUpdate(query, update) == MacOsKeychainInterop.ErrSecSuccess
-				? KekStoreStatus.Found
-				: KekStoreStatus.Unavailable;
+			var updated = MacOsKeychainInterop.SecItemUpdate(query, update);
+
+			return updated == MacOsKeychainInterop.ErrSecSuccess
+				? KekStoreWriteResult.Ok()
+				: KekStoreWriteResult.Failed(Describe(updated));
 		}
 		catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException)
 		{
-			return KekStoreStatus.Unavailable;
+			return KekStoreWriteResult.Failed(e.Message);
 		}
 		finally
 		{

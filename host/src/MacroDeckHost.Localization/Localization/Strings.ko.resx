@@ -14880,6 +14880,24 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>볼륨</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>저장된 비밀 값을 잠금 해제하는 키는 이 컴퓨터의 비밀 값 저장소(예: KDE Wallet, GNOME Keyring 또는 시스템 키체인)에 보관됩니다. 비밀 값 저장소가 응답하지 않았습니다. 대개 잠겨 있거나 실행 중이 아니기 때문입니다. 잠금을 해제한 다음 다시 시도하세요.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>다시 시도</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>비밀 값 저장소에 여전히 접근할 수 없습니다. 계속 이 상태라면 대신 복구 키를 사용하세요.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck이 비밀 값 저장소에 접근할 수 없습니다</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>대신 복구 키 사용</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>비밀 값 저장소를 기다리는 중입니다. 암호를 요청하면 입력하세요.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck이 저장된 비밀 값을 여는 키에 접근할 수 없습니다. 백업 복구 키를 입력해 복원하세요.</value>
   </data>

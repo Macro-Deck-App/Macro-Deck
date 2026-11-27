@@ -14880,6 +14880,24 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>A chave que desbloqueia os segredos salvos fica no armazenamento de segredos deste computador, por exemplo KDE Wallet, GNOME Keyring ou as chaves do sistema. Ele não respondeu, geralmente porque está bloqueado ou não está em execução. Desbloqueie-o e tente novamente.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Tentar novamente</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Ainda não foi possível acessar o armazenamento de segredos. Se continuar assim, use a chave de recuperação.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>O Macro Deck não consegue acessar o armazenamento de segredos</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Usar a chave de recuperação</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Aguardando o armazenamento de segredos. Se ele pedir a senha, digite-a.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>O Macro Deck não consegue acessar a chave que desbloqueia seus segredos armazenados. Digite sua chave de recuperação de backup para restaurá-la.</value>
   </data>

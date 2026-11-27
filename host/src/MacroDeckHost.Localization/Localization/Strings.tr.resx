@@ -14880,6 +14880,24 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Ses düzeyi</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>Kayıtlı gizli bilgilerinizin kilidini açan anahtar, bu bilgisayarın gizli bilgi depolamasında tutulur; örneğin KDE Wallet, GNOME Keyring veya sistem anahtar zinciri. Depolama yanıt vermedi; bunun nedeni genellikle kilitli olması veya çalışmamasıdır. Kilidini açın, ardından yeniden deneyin.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Yeniden deneyin</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>Gizli bilgi depolamasına hâlâ ulaşılamıyor. Durum değişmezse bunun yerine kurtarma anahtarınızı kullanın.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck gizli bilgi depolamasına ulaşamıyor</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>Bunun yerine kurtarma anahtarını kullanın</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Gizli bilgi depolaması bekleniyor. Parolasını isterse girin.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck, saklanan gizli bilgilerinizin kilidini açan anahtara ulaşamıyor. Geri yüklemek için yedek kurtarma anahtarınızı girin.</value>
   </data>

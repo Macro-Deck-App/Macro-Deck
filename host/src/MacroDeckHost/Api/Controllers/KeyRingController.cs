@@ -16,16 +16,21 @@ public class KeyRingController : ControllerBase
 	private readonly IUiTransportMessageHandler<GetKeyRingStatusRequest, GetKeyRingStatusResponse> _status;
 	private readonly IUiTransportMessageHandler<UnlockKeyRingRequest, UnlockKeyRingResponse> _unlock;
 
+	private readonly IUiTransportMessageHandler<RetryKeyRingKeystoreRequest, RetryKeyRingKeystoreResponse>
+		_retryKeystore;
+
 	private readonly IUiTransportMessageHandler<GetKeyRingProtectionRequest, GetKeyRingProtectionResponse>
 		_protection;
 
 	public KeyRingController(
 		IUiTransportMessageHandler<GetKeyRingStatusRequest, GetKeyRingStatusResponse> status,
 		IUiTransportMessageHandler<UnlockKeyRingRequest, UnlockKeyRingResponse> unlock,
+		IUiTransportMessageHandler<RetryKeyRingKeystoreRequest, RetryKeyRingKeystoreResponse> retryKeystore,
 		IUiTransportMessageHandler<GetKeyRingProtectionRequest, GetKeyRingProtectionResponse> protection)
 	{
 		_status = status;
 		_unlock = unlock;
+		_retryKeystore = retryKeystore;
 		_protection = protection;
 	}
 
@@ -55,6 +60,19 @@ public class KeyRingController : ControllerBase
 		}
 
 		return Ok(await _unlock.Handle(body, ct));
+	}
+
+	// Loopback-only like unlock: the read behind it can raise the operating system's password prompt.
+	[HttpPost("retry-keystore")]
+	[AllowAnonymous]
+	public async Task<IActionResult> RetryKeystore(CancellationToken ct)
+	{
+		if (!LoopbackConnection.IsTrusted(HttpContext))
+		{
+			return NotFound();
+		}
+
+		return Ok(await _retryKeystore.Handle(new RetryKeyRingKeystoreRequest(), ct));
 	}
 
 	/// <summary>

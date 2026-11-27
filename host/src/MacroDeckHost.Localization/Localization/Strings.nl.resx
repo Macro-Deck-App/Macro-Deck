@@ -14880,6 +14880,24 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Integrations.YtmDesktop.Variables.Volume" xml:space="preserve">
     <value>Volume</value>
   </data>
+  <data name="KeyRing.KeystoreRetry.Description" xml:space="preserve">
+    <value>De sleutel die je opgeslagen geheimen ontgrendelt, staat in de geheimenopslag van deze computer, bijvoorbeeld KDE Wallet, GNOME Keyring of de sleutelhanger van het systeem. Die gaf geen antwoord, meestal omdat hij vergrendeld is of niet draait. Ontgrendel hem en probeer het daarna opnieuw.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Retry" xml:space="preserve">
+    <value>Opnieuw proberen</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.StillUnavailable" xml:space="preserve">
+    <value>De geheimenopslag is nog steeds niet bereikbaar. Blijft dat zo, gebruik dan in plaats daarvan je herstelsleutel.</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Title" xml:space="preserve">
+    <value>Macro Deck kan je geheimenopslag niet bereiken</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.UseRecoveryKey" xml:space="preserve">
+    <value>In plaats daarvan herstelsleutel gebruiken</value>
+  </data>
+  <data name="KeyRing.KeystoreRetry.Waiting" xml:space="preserve">
+    <value>Wachten op de geheimenopslag. Vraagt die om het wachtwoord, voer het dan in.</value>
+  </data>
   <data name="KeyRing.Unlock.Description" xml:space="preserve">
     <value>Macro Deck kan de sleutel die je opgeslagen geheimen ontgrendelt niet bereiken. Voer je back-upherstelsleutel in om hem te herstellen.</value>
   </data>

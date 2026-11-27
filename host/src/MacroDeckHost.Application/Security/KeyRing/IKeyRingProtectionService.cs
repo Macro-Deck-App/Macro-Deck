@@ -46,6 +46,16 @@ public enum KeyRingProtectionError
 	MigrationFailed
 }
 
+public enum KeyRingKeystoreRetryOutcome
+{
+	NotApplicable,
+	Recovered,
+	Pending,
+	Unavailable,
+	EntryMissing,
+	EntryStale
+}
+
 public sealed record KeyRingProtectionStatus(
 	KeyRingProtectionState State,
 	KeyRingLockReason LockReason,
@@ -90,6 +100,8 @@ public interface IKeyRingProtectionService
 	Task<Result<KeyRingProtectionError>> Unlock(
 		ReadOnlyMemory<byte> recoveryKey,
 		CancellationToken cancellationToken = default);
+
+	Task<KeyRingKeystoreRetryOutcome> RetryKeystore(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Wraps any key file still readable on an already-protected ring. Needs no recovery key, because the

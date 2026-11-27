@@ -23,7 +23,7 @@ public static class KeyRingStartupState
 
 	public static bool Portable { get; private set; }
 
-	public static Task<KekStoreReadResult>? LateKeystoreRead { get; private set; }
+	public static Task<KeyRingKeystoreReadOutcome>? LateKeystoreRead { get; private set; }
 
 	public static string LateAnswerMarkerPath { get; private set; } =
 		KeyRingLateKeystoreAnswerService.MarkerPath(Guid.Empty);
@@ -55,7 +55,9 @@ public static class KeyRingStartupState
 		_identity = identity;
 		Portable = portable;
 		ScratchKeysDirectory = scratchKeysDirectory;
-		LateKeystoreRead = lateKeystoreRead;
+		LateKeystoreRead = lateKeystoreRead is null
+			? null
+			: KeyRingKeystoreRead.Evaluate(lateKeystoreRead, plan.RingKekId);
 		LateAnswerMarkerPath = lateAnswerMarkerPath ?? KeyRingLateKeystoreAnswerService.MarkerPath(Guid.Empty);
 		RestartedAfterLateAnswer = restartedAfterLateAnswer;
 	}
