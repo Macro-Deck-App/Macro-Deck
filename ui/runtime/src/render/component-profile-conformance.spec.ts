@@ -20,6 +20,14 @@ interface LayoutFixture {
   cases: LayoutCase[];
 }
 
+interface MeasuredFixture {
+  cases: { basis: number; tile: { width: number; height: number }; nodes: Record<string, { box: { height: number } }> }[];
+}
+
+// The table states these heights to 0.1 px; the measured file rounds its boxes to 0.01 px.
+const MEASURED_HEIGHT_TOLERANCE_PX = 0.05 + 1e-9;
+const OWN_HEIGHT_KEYS = ['height', 'interactiveHeight', 'pressSurfaceHeight'];
+
 declare const __loadWidgetProfileFixture: (name: string) => unknown;
 
 function loadJson<T>(name: string): T {
@@ -46,17 +54,8 @@ function testHost(overrides: Partial<UiRenderHost> = {}): UiRenderHost {
 
 const UNCHECKED_KEYS = new Set([
   'minFontSize', 'offsetY', 'pressTintAlpha', 'pressFadeInMs', 'pressFadeOutMs',
-  'pressSurfaceWidth', 'pressSurfaceHeight', 'lineOpacity', 'areaOpacity',
+  'lineOpacity', 'areaOpacity',
   'note', 'alignNote', 'bandNote', 'binds', 'paddingBinds', 'gapBinds', 'strokeWidthBinds', 'minWidth',
-  // A button's own main-axis extent (height, under the vertical root every fixture nests it in) is
-  // resolved to `null` by layoutStackChildren() whenever the node declares neither `mainSize` nor
-  // `fill` - "not determined by the parent" in that function's own doc comment, left to the browser's
-  // content-based flex sizing. None of the four action-button fixture's top-level buttons declares
-  // either, so their own `height`/`contentHeight` (and anything derived from them - a backdrop's
-  // height and vertical offset) are real in a browser but unset in jsdom, which lays nothing out.
-  // width/contentWidth/backdropWidth/backdropOffsetX (the cross axis) are resolved numbers regardless
-  // and are asserted normally.
-  'backdropHeight', 'backdropOffsetY',
 ]);
 
 const ASSERTED_KEYS = new Set([
@@ -66,7 +65,8 @@ const ASSERTED_KEYS = new Set([
   'interactive', 'interactiveWidth', 'interactiveHeight', 'thumbRadius', 'thumbRingWidth', 'thumbCentre',
   'fillPainted', 'fillFrom', 'fillLengthAtAnchor', 'fillLengthAt30s',
   'fillStart', 'fillEnd', 'marker',
-  'background', 'backdropFit', 'backdropWidth', 'backdropOffsetX',
+  'background', 'backdropFit', 'backdropWidth', 'backdropOffsetX', 'backdropHeight', 'backdropOffsetY',
+  'pressSurfaceWidth', 'pressSurfaceHeight',
   'backdropOpacity', 'ringStyle', 'ringColor', 'ringWidth', 'pressMinVisibleMs',
   'fontSize', 'lines', 'textAlign', 'blockAlign',
   'geometry', 'centre', 'secondHand',
@@ -138,6 +138,70 @@ function byId(id: string): HTMLElement {
 
 function has(id: string): boolean {
   return container.querySelector(`[data-node-id="${id}"]`) !== null;
+}
+
+function contentSizedIds(root: UiNode): Set<string> {
+  const ids = new Set<string>();
+  const visit = (node: UiNode): void => {
+    const stacksVertically = (node.type === 'ui.stack' || node.type === 'ui.button')
+      && node.properties?.['direction'] !== 'horizontal';
+    for (const child of node.children ?? []) {
+      if (stacksVertically && !('mainSize' in (child.properties ?? {})) && child.properties?.['fill'] !== true) {
+        ids.add(child.id);
+      }
+      visit(child);
+    }
+  };
+  visit(root);
+  return ids;
+}
+
+function measuredHeight(layoutFile: string, testCase: LayoutCase, id: string): number {
+  const measured = loadJson<MeasuredFixture>(layoutFile.replace(/-layout\.json$/, '-measured.json'));
+  const match = measured.cases.find(candidate => candidate.basis === testCase.basis
+    && candidate.tile.width === testCase.tile.width && candidate.tile.height === testCase.tile.height);
+  const node = match?.nodes[id];
+  if (node === undefined) throw new Error(`${layoutFile}: no measured box for ${id} at basis ${testCase.basis}`);
+  return node.box.height;
+}
+
+function withoutOwnHeight(spec: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(spec)
+    .filter(([key]) => key !== 'contentHeight' && !OWN_HEIGHT_KEYS.includes(key)));
+}
+
+function expectHeight(actual: number, expected: number, context: string, measured: boolean): void {
+  if (measured) {
+    expect(Math.abs(actual - expected)).withContext(`${context}: table ${expected}, measured ${actual}`)
+      .toBeLessThanOrEqual(MEASURED_HEIGHT_TOLERANCE_PX);
+  } else {
+    expect(actual).withContext(context).toBeCloseTo(expected, 2);
+  }
+}
+
+function ownHeight(layoutFile: string, testCase: LayoutCase, id: string, contentSized: Set<string>): number {
+  const el = byId(id);
+  if (!contentSized.has(id)) return num(el.style.height);
+  expect(el.style.height).withContext(`${id}.height (left to the browser)`).toBe('');
+  return measuredHeight(layoutFile, testCase, id);
+}
+
+function assertOwnHeight(
+  layoutFile: string,
+  testCase: LayoutCase,
+  id: string,
+  spec: Record<string, unknown>,
+  contentSized: Set<string>,
+): void {
+  const measured = contentSized.has(id);
+  const height = ownHeight(layoutFile, testCase, id, contentSized);
+  for (const key of OWN_HEIGHT_KEYS.filter(key => key in spec)) {
+    expectHeight(height, spec[key] as number, `${id}.${key}`, measured);
+  }
+  if ('contentHeight' in spec) {
+    const padding = num(byId(id).style.padding) || 0;
+    expectHeight(height - 2 * padding, spec.contentHeight as number, `${id}.contentHeight`, measured);
+  }
 }
 
 function assertCommon(id: string, spec: Record<string, unknown>): void {
@@ -391,11 +455,7 @@ describe('component-profile conformance fixtures: slider tree', () => {
   const SLIDER_IDS = new Set([
     'conformance.track', 'conformance.column', 'conformance.plain', 'conformance.empty',
   ]);
-  // These two declare neither `mainSize` nor `fill`, so - exactly like the action-button fixture's
-  // buttons - their own height (the root's main axis) is left to content-based flex sizing that jsdom
-  // never computes; `conformance.track` (fill) and `conformance.column` (mainSize) both resolve to a
-  // real number and are checked in full.
-  const INTRINSIC_HEIGHT_SLIDER_IDS = new Set(['conformance.plain', 'conformance.empty']);
+  const contentSized = contentSizedIds(tree);
 
   for (const testCase of layout.cases) {
     describe(`basis ${testCase.basis}`, () => {
@@ -405,28 +465,22 @@ describe('component-profile conformance fixtures: slider tree', () => {
         const spec = testCase.nodes[id];
 
         if (!SLIDER_IDS.has(id)) {
-          // conformance.header declares neither mainSize nor fill either, so its own height is the
-          // same kind of jsdom-unobservable content-based extent - see INTRINSIC_HEIGHT_SLIDER_IDS.
-          const { height: _height, ...rest } = spec;
-          it(`resolves ${id}`, () => assertCommon(id, id === 'conformance.header' ? rest : spec));
+          it(`resolves ${id}`, () => {
+            assertCommon(id, 'height' in spec ? withoutOwnHeight(spec) : spec);
+            if ('height' in spec) assertOwnHeight('conformance-slider-layout.json', testCase, id, spec, contentSized);
+          });
           continue;
         }
 
         it(`resolves the geometry of ${id}`, () => {
           const el = byId(id);
           const vertical = el.classList.contains('widget-slider-vertical');
-          const heightIsIntrinsic = INTRINSIC_HEIGHT_SLIDER_IDS.has(id);
           expect(vertical ? 'vertical' : 'horizontal').withContext(`${id}.direction`).toBe(spec.direction as string);
           expect(num(el.style.width)).withContext(`${id}.width/interactiveWidth`)
             .toBeCloseTo(spec.width as number, 2);
           expect(num(el.style.width)).withContext(`${id}.interactiveWidth`)
             .toBeCloseTo(spec.interactiveWidth as number, 2);
-          if (!heightIsIntrinsic) {
-            expect(num(el.style.height)).withContext(`${id}.height/interactiveHeight`)
-              .toBeCloseTo(spec.height as number, 2);
-            expect(num(el.style.height)).withContext(`${id}.interactiveHeight`)
-              .toBeCloseTo(spec.interactiveHeight as number, 2);
-          }
+          assertOwnHeight('conformance-slider-layout.json', testCase, id, spec, contentSized);
 
           const trackLength = vertical ? num(el.style.height) : num(el.style.width);
           expect(trackLength).withContext(`${id}.trackLength`).toBeCloseTo(spec.trackLength as number, 2);
@@ -495,6 +549,7 @@ describe('component-profile conformance fixtures: slider tree', () => {
 describe('component-profile conformance fixtures: action-button tree', () => {
   const tree = loadTree('conformance-action-button-tree.json');
   const layout = loadJson<LayoutFixture>('conformance-action-button-layout.json');
+  const contentSized = contentSizedIds(tree);
   const LABEL_ID: Record<string, string> = {
     'conformance.full': 'conformance.full.title',
     'conformance.press': 'conformance.press.label',
@@ -516,17 +571,15 @@ describe('component-profile conformance fixtures: action-button tree', () => {
         it(`resolves the box, background and label of ${id}`, () => {
           // fontSize on a button's own fixture entry describes its label's font, not the button's own
           // (buttons carry no font-size of their own) - assertCommon() below is for the button's box.
-          //
-          // height/contentHeight: none of the four buttons here declares `mainSize` or `fill`, so each
-          // one's own main-axis extent (height, since the root they sit in is a vertical stack) is left
-          // to the browser's own content-based flex sizing rather than resolved to a number by this
-          // renderer - layoutStackChildren() hands such a child `box.height: null` on purpose (see its
-          // own doc comment: "not determined by the parent"). jsdom never lays anything out, so that
-          // stays unset here; width/contentWidth (the cross axis) come from the root's own content
-          // width instead, which *is* a resolved number, and are asserted normally.
-          const { fontSize: _labelFontSize, height: _height, contentHeight: _contentHeight, ...boxSpec } = spec;
-          assertCommon(id, boxSpec);
+          const { fontSize: _labelFontSize, ...boxSpec } = spec;
+          assertCommon(id, withoutOwnHeight(boxSpec));
+          assertOwnHeight('conformance-action-button-layout.json', testCase, id, spec, contentSized);
           const el = byId(id);
+          if ('pressSurfaceWidth' in spec) {
+            expect(num(el.style.width)).withContext(`${id}.pressSurfaceWidth`)
+              .toBeCloseTo(spec.pressSurfaceWidth as number, 2);
+          }
+          // cornerRadius stays unasserted for buttons: no renderer draws the documented corner yet.
 
           if ('background' in spec) {
             if (spec.background === 'reader-accent') {
@@ -572,9 +625,10 @@ describe('component-profile conformance fixtures: action-button tree', () => {
             expect(ownWidth * zoom).withContext(`${id}.backdropWidth`).toBeCloseTo(spec.backdropWidth as number, 2);
             expect((offsetXPct / 100) * ownWidth).withContext(`${id}.backdropOffsetX`)
               .toBeCloseTo(spec.backdropOffsetX as number, 2);
-            // backdropHeight/backdropOffsetY need the button's own resolved height, which - like
-            // height/contentHeight above - is left to content-based flex sizing this renderer never
-            // computes as a number, so jsdom has nothing to read it back from. Not asserted here.
+            const height = ownHeight('conformance-action-button-layout.json', testCase, id, contentSized);
+            const measured = contentSized.has(id);
+            expectHeight(height * zoom, spec.backdropHeight as number, `${id}.backdropHeight`, measured);
+            expectHeight((offsetYPct / 100) * height, spec.backdropOffsetY as number, `${id}.backdropOffsetY`, measured);
           });
         }
 

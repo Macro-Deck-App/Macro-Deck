@@ -36,26 +36,15 @@ public sealed partial class LayoutTableTests
 		"note", "alignNote", "bandNote", "description", "appliesTo", "rule"
 	};
 
-	// See "The measured files" in ui-model/fixtures/component-profile/README.md; the runtime's twins are
-	// UNCHECKED_KEYS and INTRINSIC_HEIGHT_SLIDER_IDS in ui/runtime/src/render/component-profile-conformance.spec.ts.
+	// The documented corner of a content-sized button, which this renderer and the runtime do not draw yet;
+	// see "The measured files" in ui-model/fixtures/component-profile/README.md.
 	private static readonly Dictionary<string, Dictionary<string, string[]>> _measuredOverTable =
 		new(StringComparer.Ordinal)
 		{
 			["conformance-action-button-layout.json"] = new Dictionary<string, string[]>(StringComparer.Ordinal)
 			{
-				["conformance.full"] =
-				[
-					"height", "contentHeight", "pressSurfaceHeight", "backdropHeight", "backdropOffsetY",
-					"cornerRadius"
-				],
-				["conformance.press"] = ["height", "contentHeight", "pressSurfaceHeight", "backdropHeight"],
-				["conformance.boundary"] = ["height", "contentHeight", "pressSurfaceHeight", "cornerRadius"],
-				["conformance.silent"] = ["height", "contentHeight", "pressSurfaceHeight"]
-			},
-			["conformance-slider-layout.json"] = new Dictionary<string, string[]>(StringComparer.Ordinal)
-			{
-				["conformance.plain"] = ["height", "interactiveHeight"],
-				["conformance.empty"] = ["height", "interactiveHeight"]
+				["conformance.full"] = ["cornerRadius"],
+				["conformance.boundary"] = ["cornerRadius"]
 			}
 		};
 
