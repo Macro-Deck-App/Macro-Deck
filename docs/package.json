@@ -26,6 +26,7 @@
   "overrides": {
     "astro-mermaid": {
       "mermaid": "$mermaid"
-    }
+    },
+    "form-data": "4.0.6"
   }
 }

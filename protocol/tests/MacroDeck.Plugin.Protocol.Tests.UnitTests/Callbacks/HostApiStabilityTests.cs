@@ -64,7 +64,10 @@ public class HostApiStabilityTests
 				"report-parameter-values", "origin.read-upload"
 			],
 			[HostApis.Devices] =
-				["register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close"],
+			[
+				"register", "update", "presence", "unregister", "interaction", "icon", "widget-icon", "close",
+				"key-image"
+			],
 			[HostApis.VariableValues] = ["value", "invalidate"],
 			[HostApis.Layouts] = ["register", "unregister"],
 			[HostApis.FolderViews] = ["register", "unregister"],

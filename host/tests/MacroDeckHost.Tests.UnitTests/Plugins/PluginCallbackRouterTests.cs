@@ -43,6 +43,8 @@ using MacroDeckHost.Application.VideoStreams;
 using MacroDeck.Plugin.Protocol.Capabilities.VideoStreamProvider;
 using MacroDeck.Sdk.VideoStreams;
 using MacroDeckHost.Application.HostLocking;
+using MacroDeckHost.Application.Devices.Surfaces;
+using MacroDeck.Sdk.Devices;
 
 namespace MacroDeckHost.Tests.UnitTests.Plugins;
 
@@ -81,7 +83,9 @@ public class PluginCallbackRouterTests
 		INotificationManager? notificationManager = null,
 		PluginVariableHistoryWindows? variableHistory = null,
 		VariableHistoryReadThrottle? variableHistoryReadThrottle = null,
-		FakeUserVariableApi? userVariableApi = null)
+		FakeUserVariableApi? userVariableApi = null,
+		IDeviceSurfaceService? deviceSurfaces = null,
+		KeyImageFetchThrottle? keyImageFetchThrottle = null)
 	{
 		var services = new ServiceCollection();
 		services.AddSingleton<IVariableService>(variableService);
@@ -109,6 +113,7 @@ public class PluginCallbackRouterTests
 			throttle,
 			lockState ?? new FakeHostLockState(),
 			Serilog.Core.Logger.None,
+			deviceSurfaces,
 			uiResources: uiResources,
 			uiResourceThrottle: uiResourceThrottle,
 			iconPackSync: iconPackSync,
@@ -123,7 +128,8 @@ public class PluginCallbackRouterTests
 			musicPlayerArtworkTimeout: musicPlayerArtworkTimeout,
 			notificationManager: notificationManager,
 			variableHistory: variableHistory,
-			variableHistoryReadThrottle: variableHistoryReadThrottle);
+			variableHistoryReadThrottle: variableHistoryReadThrottle,
+			keyImageFetchThrottle: keyImageFetchThrottle);
 	}
 
 	[SetUp]
@@ -1140,6 +1146,190 @@ public class PluginCallbackRouterTests
 			Assert.That(looped.Count(result => result.Error is null),
 				Is.LessThanOrEqualTo(windowIds.Length * VariableHistoryReadThrottle.BurstPerWindow));
 		});
+	}
+
+	// ---- key image fetches ------------------------------------------------------------------------
+
+	private PluginCallbackRouter KeyImageRouter(KeyImageCells cells, int sharedCapacity = 20)
+	{
+		return Router(_variableService,
+			_actionInteractions,
+			_invoker,
+			new HostCallbackThrottle(_time, sharedCapacity, 0),
+			deviceSurfaces: cells,
+			keyImageFetchThrottle: new KeyImageFetchThrottle(_time));
+	}
+
+	private static HostCallbackResult?[] FetchKeyImages(PluginCallbackRouter router, int count)
+	{
+		return
+		[
+			.. Enumerable.Range(0, count)
+				.Select(_ => router.Admit("plugin.a",
+					new HostInvokePayload { Api = HostApis.Devices, Operation = HostOperations.Devices.KeyImage }))
+		];
+	}
+
+	private static HostCallbackResult? OtherCallback(PluginCallbackRouter router)
+	{
+		return router.Admit("plugin.a",
+			new HostInvokePayload { Api = HostApis.Variables, Operation = HostOperations.Variables.List });
+	}
+
+	[Test]
+	public void Fetching_every_cell_of_a_large_deck_at_once_passes_and_leaves_the_shared_budget_alone()
+	{
+		var router = KeyImageRouter(new KeyImageCells { Cells = 36 });
+
+		var fetches = FetchKeyImages(router, 36);
+		var others = Enumerable.Range(0, 20).Select(_ => OtherCallback(router)).ToList();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fetches, Is.All.Null);
+			Assert.That(others, Is.All.Null, "the shared bucket still holds its whole burst");
+			Assert.That(OtherCallback(router)?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+		});
+	}
+
+	[Test]
+	public void Key_image_fetches_beyond_two_repaints_are_refused_and_refill_one_repaint_per_second()
+	{
+		var router = KeyImageRouter(new KeyImageCells { Cells = 36 });
+
+		var burst = FetchKeyImages(router, 73);
+		_time.Advance(TimeSpan.FromSeconds(1));
+		var refilled = FetchKeyImages(router, 37);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(burst.Take(72), Is.All.Null);
+			Assert.That(burst[72]?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(burst[72]?.Error?.Retryable, Is.True);
+			Assert.That(refilled.Take(36), Is.All.Null);
+			Assert.That(refilled[36]?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+			Assert.That(OtherCallback(router), Is.Null);
+		});
+	}
+
+	[Test]
+	public void A_session_that_opens_adds_its_cells_to_the_key_image_budget_at_once()
+	{
+		var cells = new KeyImageCells { Cells = 36 };
+		var router = KeyImageRouter(cells);
+		var first = FetchKeyImages(router, 73);
+
+		cells.Cells = 72;
+		var second = FetchKeyImages(router, 73);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(first[72], Is.Not.Null);
+			Assert.That(second.Take(72), Is.All.Null);
+			Assert.That(second[72]?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+		});
+	}
+
+	[Test]
+	public void A_plugin_without_key_image_cells_gets_only_the_minimum_key_image_budget()
+	{
+		var router = KeyImageRouter(new KeyImageCells());
+
+		var fetches = FetchKeyImages(router, 3);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(fetches.Take(KeyImageFetchThrottle.BurstRepaints), Is.All.Null);
+			Assert.That(fetches[^1]?.Error?.Code, Is.EqualTo(ProtocolErrorCodes.RateLimited));
+		});
+	}
+
+	private sealed class KeyImageCells : IDeviceSurfaceService
+	{
+		public int Cells { get; set; }
+
+		public int KeyImageCellCount(string providerId)
+		{
+			return string.Equals(providerId, "plugin.a", StringComparison.Ordinal) ? Cells : 0;
+		}
+
+		public bool IsOpen(Guid deviceId)
+		{
+			return true;
+		}
+
+		public Task OpenAsync(
+			Guid deviceId,
+			string providerId,
+			string providerDeviceId,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task CloseAsync(Guid deviceId, string? reason, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task<bool> NavigateAsync(
+			Guid deviceId,
+			DeckNavigationCommand command,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(false);
+		}
+
+		public Task<DeviceInteractionOutcome> SubmitInteractionAsync(
+			Guid deviceId,
+			DeviceInteraction interaction,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult(DeviceInteractionOutcome.Accepted);
+		}
+
+		public Task<DeviceIconImage?> GetIconAsync(
+			Guid deviceId,
+			string iconId,
+			int? size = null,
+			string? knownETag = null,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceIconImage?>(null);
+		}
+
+		public Task<DeviceWidgetIconImage?> GetWidgetIconAsync(
+			Guid deviceId,
+			string widgetId,
+			string? knownETag = null,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceWidgetIconImage?>(null);
+		}
+
+		public Task<DeviceKeyImage?> GetKeyImageAsync(
+			Guid deviceId,
+			int row,
+			int column,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceKeyImage?>(null);
+		}
+
+		public Task InvalidateAsync(CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task InvalidateAsync(Guid deviceId, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+
+		public Task SetPresenceAsync(Guid deviceId, bool online, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
 	}
 
 	private static Task<HostCallbackResult> ReadHistoryAsync(PluginCallbackRouter router, string windowId)

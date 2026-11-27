@@ -45,7 +45,30 @@ public static class LayoutDescriptorMapper
 				MinColumns = dto.MinColumns,
 				MaxColumns = dto.MaxColumns,
 				SupportsRuntimeResize = dto.SupportsRuntimeResize,
-				KeySize = dto.KeySize is null ? null : new LayoutKeySize(dto.KeySize.Width, dto.KeySize.Height)
+				MaxWidgetColumns = dto.MaxWidgetColumns,
+				MaxWidgetRows = dto.MaxWidgetRows,
+				KeySize = dto.KeySize is null ? null : new LayoutKeySize(dto.KeySize.Width, dto.KeySize.Height),
+				KeyImages = ToKeyImageFormat(dto.KeyImages)
+			};
+	}
+
+	public static LayoutKeyImageFormat? ToKeyImageFormat(LayoutKeyImageFormatDto? dto)
+	{
+		return dto is null
+			? null
+			: new LayoutKeyImageFormat
+			{
+				Encoding = dto.Encoding, Rotation = dto.Rotation, MirrorHorizontal = dto.MirrorHorizontal
+			};
+	}
+
+	public static LayoutKeyImageFormatDto? ToDto(LayoutKeyImageFormat? format)
+	{
+		return format is null
+			? null
+			: new LayoutKeyImageFormatDto
+			{
+				Encoding = format.Encoding, Rotation = format.Rotation, MirrorHorizontal = format.MirrorHorizontal
 			};
 	}
 
@@ -64,6 +87,7 @@ public static class LayoutDescriptorMapper
 				WidgetSpacing = dto.WidgetSpacing,
 				CornerRadius = dto.CornerRadius,
 				CustomFolderViews = dto.CustomFolderViews,
+				ScreenSavers = dto.ScreenSavers,
 				MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 			};
 	}

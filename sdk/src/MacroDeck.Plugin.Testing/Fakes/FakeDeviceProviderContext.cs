@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Layouts;
 
 namespace MacroDeck.Plugin.Testing.Fakes;
 
@@ -86,6 +87,11 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 		return _deviceIds.GetValueOrDefault(deviceId);
 	}
 
+	/// <summary>The key-image format every session this context opens or tracks from now on starts with -
+	/// see <see cref="FakeDeviceSession.KeyImageFormat" />. Null, the default, opens sessions without key
+	/// images.</summary>
+	public LayoutKeyImageFormat? KeyImageFormat { get; set; }
+
 	/// <summary>The sessions opened through <see cref="OpenSession" />, keyed by provider-local device id.</summary>
 	public IReadOnlyDictionary<string, FakeDeviceSession> Sessions => _sessions;
 
@@ -120,7 +126,7 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 				$"No device '{deviceId}' is registered, so the host would never open a session for it.");
 		}
 
-		var session = new FakeDeviceSession(assigned, deviceId, this);
+		var session = new FakeDeviceSession(assigned, deviceId, this) { KeyImageFormat = KeyImageFormat };
 		_sessions[deviceId] = session;
 
 		await provider.OnSessionOpenedAsync(session, cancellationToken).ConfigureAwait(false);
@@ -136,7 +142,10 @@ public sealed class FakeDeviceProviderContext : IDeviceProviderContext
 	public FakeDeviceSession TrackSession(string sessionId, string deviceId)
 	{
 		var session = _sessions.GetOrAdd(deviceId,
-			static (id, state) => new FakeDeviceSession(state.AssignedId, id, state.Context),
+			static (id, state) => new FakeDeviceSession(state.AssignedId, id, state.Context)
+			{
+				KeyImageFormat = state.Context.KeyImageFormat
+			},
 			(AssignedId: _deviceIds.GetValueOrDefault(deviceId) ?? deviceId, Context: this));
 
 		_sessionsById[sessionId] = session;

@@ -438,6 +438,36 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		return await context.FirstTree.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
 	}
 
+	public IUiHostObservation? ObserveHost(string sessionId, IUiHostObserver observer)
+	{
+		ArgumentNullException.ThrowIfNull(observer);
+		if (!_contexts.TryGetValue(sessionId, out var context) || !_registry.HoldForHost(sessionId))
+		{
+			return null;
+		}
+
+		lock (context.Gate)
+		{
+			context.HostObservers.Add(observer);
+		}
+
+		// A session that ended between the lookup and the add has already told its observers.
+		if (!_contexts.ContainsKey(sessionId))
+		{
+			lock (context.Gate)
+			{
+				context.HostObservers.Remove(observer);
+			}
+
+			return null;
+		}
+
+		// The broker keeps no tree past the first, so an observer joining later is served the next snapshot,
+		// which is the one already on its way when there is one.
+		RequestSnapshotUnlessOneIsComing(context);
+		return new HostObservation(this, context, observer);
+	}
+
 	public bool DispatchHostEvent(string sessionId, UiSessionEventCommand command)
 	{
 		if (!_contexts.TryGetValue(sessionId, out var context))
@@ -660,6 +690,8 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 			}
 		}
 
+		NotifyHostObservers(context, observer => observer.OnSnapshot(tree, revision));
+
 		var group = UiSessionGroups.For(context.SessionId);
 		var message = new UiSessionTreeUpdatedEvent
 		{
@@ -699,7 +731,34 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 			context.GroupRevision = toRevision;
 		}
 
+		NotifyHostObservers(context, observer => observer.OnPatch(patch, fromRevision, toRevision));
 		context.Outbound.Enqueue(ct => _transport.SendToGroup(group, message, ct));
+	}
+
+	private void NotifyHostObservers(SessionContext context, Action<IUiHostObserver> notify)
+	{
+		IUiHostObserver[] observers;
+		lock (context.Gate)
+		{
+			if (context.HostObservers.Count == 0)
+			{
+				return;
+			}
+
+			observers = [.. context.HostObservers];
+		}
+
+		foreach (var observer in observers)
+		{
+			try
+			{
+				notify(observer);
+			}
+			catch (Exception exception) when (exception is not OutOfMemoryException)
+			{
+				UiSessionLog.ProviderCallFailed(_logger, context.SessionId, "host observer", exception);
+			}
+		}
 	}
 
 	private void RequestResync(SessionContext context)
@@ -1027,6 +1086,7 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 		context.Ready.TrySetResult(UiSessionOpenTicket.Rejected(e.Code ?? UiSessionErrorCodes.SessionClosed,
 			e.Message ?? "The session ended."));
 		context.FirstTree.TrySetResult(null);
+		NotifyHostObservers(context, observer => observer.OnEnded(e.Reason, e.Code, e.Retryable));
 
 		_ = TearDownAsync(context, e.Reason, e.Message ?? string.Empty);
 	}
@@ -1102,5 +1162,43 @@ public sealed class UiSessionBroker : IUiSessionBroker, IUiEventOriginTracker, I
 
 		public TaskCompletionSource<UiRawJson?> FirstTree { get; } =
 			new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		public List<IUiHostObserver> HostObservers { get; } = [];
+	}
+
+	private sealed class HostObservation : IUiHostObservation
+	{
+		private readonly UiSessionBroker _broker;
+		private readonly SessionContext _context;
+		private readonly IUiHostObserver _observer;
+		private int _disposed;
+
+		public HostObservation(UiSessionBroker broker, SessionContext context, IUiHostObserver observer)
+		{
+			_broker = broker;
+			_context = context;
+			_observer = observer;
+		}
+
+		public void RequestResync()
+		{
+			if (Volatile.Read(ref _disposed) == 0 && _broker._contexts.ContainsKey(_context.SessionId))
+			{
+				_broker.RequestResync(_context);
+			}
+		}
+
+		public void Dispose()
+		{
+			if (Interlocked.Exchange(ref _disposed, 1) != 0)
+			{
+				return;
+			}
+
+			lock (_context.Gate)
+			{
+				_context.HostObservers.Remove(_observer);
+			}
+		}
 	}
 }

@@ -25,6 +25,8 @@ export interface DeckDragConfig {
   cell: CellDimensions;
   gridEl: HTMLElement;
   sourceEl: HTMLElement;
+  maxWidgetCols?: number | null;
+  maxWidgetRows?: number | null;
 }
 
 interface DeckDragSession {
@@ -37,6 +39,8 @@ interface DeckDragSession {
   cell: CellDimensions;
   gridEl: HTMLElement;
   sourceEl: HTMLElement;
+  maxWidgetCols: number | null;
+  maxWidgetRows: number | null;
   pointerId: number;
   startX: number;
   startY: number;
@@ -125,6 +129,8 @@ export class DeckDragService implements OnDestroy {
       cell: config.cell,
       gridEl: config.gridEl,
       sourceEl: config.sourceEl,
+      maxWidgetCols: config.maxWidgetCols ?? null,
+      maxWidgetRows: config.maxWidgetRows ?? null,
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
@@ -162,6 +168,8 @@ export class DeckDragService implements OnDestroy {
       cell: config.cell,
       gridEl: config.gridEl,
       sourceEl: config.sourceEl,
+      maxWidgetCols: config.maxWidgetCols ?? null,
+      maxWidgetRows: config.maxWidgetRows ?? null,
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
@@ -297,7 +305,8 @@ export class DeckDragService implements OnDestroy {
 
     const candidate = session.mode === 'DRAG'
       ? snapDrag(session.initialRect, dxPx, dyPx, session.cell, session.cols, session.rows)
-      : snapResize(session.initialRect, dxPx, dyPx, session.cell, session.cols, session.rows);
+      : DeckDragService.clampToSpan(
+        snapResize(session.initialRect, dxPx, dyPx, session.cell, session.cols, session.rows), session);
 
     const key = DeckDragService.candidateKey(candidate);
     if (key === this.lastCandidateKey) return;
@@ -476,6 +485,12 @@ export class DeckDragService implements OnDestroy {
       this.zone.run(() => this.justDropped.set(new Set()));
       this.droppedTimer = null;
     }, DeckDragService._justDroppedMs);
+  }
+
+  private static clampToSpan(candidate: GridRect, session: DeckDragSession): GridRect {
+    const maxW = session.maxWidgetCols === null ? candidate.w : Math.max(session.maxWidgetCols, session.initialRect.w);
+    const maxH = session.maxWidgetRows === null ? candidate.h : Math.max(session.maxWidgetRows, session.initialRect.h);
+    return { ...candidate, w: Math.min(candidate.w, maxW), h: Math.min(candidate.h, maxH) };
   }
 
   private static candidateKey(rect: GridRect): string {

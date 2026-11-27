@@ -1629,6 +1629,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget geëxporteerd</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} kan geen widget van deze grootte tonen.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} actie</value>
     <comment>[plural] [count:int]</comment>
@@ -21979,6 +21982,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Weergave wijzigen</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Mappenpaneel inklappen</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Weet je zeker dat je deze map en alle inhoud wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.</value>
   </data>
@@ -21999,6 +22005,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Dupliceren</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Mappenpaneel uitklappen</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Exporteer deze map - de widgets en hun pictogrammen - naar een .macroDeckFolder-bestand.</value>

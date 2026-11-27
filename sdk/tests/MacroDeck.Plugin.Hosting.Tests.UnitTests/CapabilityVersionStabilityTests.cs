@@ -40,7 +40,7 @@ public class CapabilityVersionStabilityTests
 
 			// Version 2 introduced session.open - see RemoteDeviceProviderRegistry, which refuses to serve
 			// a provider that negotiated 1.
-			[CapabilityKinds.DeviceProvider] = (1, 2),
+			[CapabilityKinds.DeviceProvider] = (1, 3),
 
 			[CapabilityKinds.Events] = (1, 1),
 			[CapabilityKinds.Icons] = (1, 1),

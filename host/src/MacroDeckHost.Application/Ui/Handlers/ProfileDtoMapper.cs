@@ -71,7 +71,11 @@ public static class ProfileDtoMapper
 				DeviceName = constraint.DeviceName,
 				WidgetSpacingHonoured = constraint.WidgetSpacingHonoured,
 				CornerRadiusHonoured = constraint.CornerRadiusHonoured,
-				CustomFolderViewsSupported = constraint.CustomFolderViewsSupported
+				CustomFolderViewsSupported = constraint.CustomFolderViewsSupported,
+				MaxWidgetColumns = constraint.MaxWidgetColumns,
+				MaxWidgetRows = constraint.MaxWidgetRows,
+				MaxWidgetColumnsDeviceName = constraint.MaxWidgetColumnsDeviceName,
+				MaxWidgetRowsDeviceName = constraint.MaxWidgetRowsDeviceName
 			};
 	}
 
@@ -80,7 +84,7 @@ public static class ProfileDtoMapper
 		int currentRows,
 		int currentColumns)
 	{
-		if (constraint is null)
+		if (constraint is null || !constraint.ConstrainsGrid)
 		{
 			return null;
 		}

@@ -10,12 +10,14 @@
     <Project Path="host/src/MacroDeckHost.Integrations/MacroDeckHost.Integrations.csproj" />
     <Project Path="host/src/MacroDeckHost.Localization/MacroDeckHost.Localization.csproj" />
     <Project Path="host/src/MacroDeckHost.Platform/MacroDeckHost.Platform.csproj" />
+    <Project Path="host/src/MacroDeckHost.Rendering/MacroDeckHost.Rendering.csproj" />
     <Project Path="host/src/MacroDeckHost.Widgets/MacroDeckHost.Widgets.csproj" />
     <Project Path="host/src/MacroDeckHost/MacroDeckHost.csproj" />
   </Folder>
   <Folder Name="/host/tests/">
     <Project Path="host/tests/MacroDeckHost.Tests.PlatformInput/MacroDeckHost.Tests.PlatformInput.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.PluginContractTests/MacroDeckHost.Tests.PluginContractTests.csproj" />
+    <Project Path="host/tests/MacroDeckHost.Tests.Rendering/MacroDeckHost.Tests.Rendering.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.SystemTests/MacroDeckHost.Tests.SystemTests.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.UnitTests/MacroDeckHost.Tests.UnitTests.csproj" />
     <Project Path="host/tests/MacroDeckHost.Tests.UnitTests.Linux/MacroDeckHost.Tests.UnitTests.Linux.csproj" />

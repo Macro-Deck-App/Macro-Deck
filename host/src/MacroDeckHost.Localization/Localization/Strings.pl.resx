@@ -1630,6 +1630,9 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Wyeksportowano widget</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>Urządzenie {device} nie może wyświetlić tak dużego widgetu.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} akcja</value>
     <comment>[plural] [count:int]</comment>
@@ -21959,6 +21962,9 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Zmień widok</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Zwiń panel folderów</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Usunąć ten folder i całą jego zawartość? Tej czynności nie można cofnąć.</value>
   </data>
@@ -21979,6 +21985,9 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplikuj</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Rozwiń panel folderów</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Eksportuj ten folder - jego widżety i ich ikony - do pliku .macroDeckFolder.</value>

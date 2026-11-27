@@ -1629,6 +1629,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>小工具已匯出</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} 無法顯示這麼大的小工具。</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} 個動作</value>
     <comment>[plural] [count:int]</comment>
@@ -21979,6 +21982,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>變更檢視</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>摺疊資料夾面板</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>確定要刪除此資料夾及其所有內容嗎？此動作無法復原。</value>
   </data>
@@ -21999,6 +22005,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>複製</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>展開資料夾面板</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>將此資料夾（包括其小工具和圖示）匯出為 .macroDeckFolder 檔案。</value>

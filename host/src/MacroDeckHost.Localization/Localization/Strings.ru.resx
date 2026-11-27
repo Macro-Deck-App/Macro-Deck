@@ -1629,6 +1629,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Виджет экспортирован</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>Устройство {device} не может показать виджет такого размера.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} действие</value>
     <comment>[plural] [count:int]</comment>
@@ -21979,6 +21982,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Сменить вид</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Свернуть панель папок</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Удалить эту папку и всё её содержимое? Это действие нельзя отменить.</value>
   </data>
@@ -21999,6 +22005,9 @@ Macro Deck установлен из репозитория APT, поэтому 
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Дублировать</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Развернуть панель папок</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Экспортировать эту папку, её виджеты и их значки, в файл .macroDeckFolder.</value>

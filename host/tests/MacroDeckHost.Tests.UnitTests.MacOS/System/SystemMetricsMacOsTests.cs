@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Runtime.Versioning;
 using MacroDeckHost.Integrations.System.Metrics;
 
 namespace MacroDeckHost.Tests.UnitTests.MacOS.System;
@@ -25,6 +27,50 @@ public class SystemMetricsMacOsTests
 				Assert.That(memory.AvailableBytes, Is.InRange(0, memory.TotalBytes));
 			});
 		}
+	}
+
+	[Test]
+	[SupportedOSPlatform("macos")]
+	public async Task The_gpu_reading_matches_what_ioreg_reports()
+	{
+		var ioreg = await RunIoRegAsync();
+		var reportsModel = ioreg.Contains("\"model\"", StringComparison.Ordinal);
+		var reportsUtilization = ioreg.Contains("\"Device Utilization %\"", StringComparison.Ordinal);
+
+		var sample = MacOsGpuInterop.ReadAccelerator();
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(sample.Name is not null, Is.EqualTo(reportsModel));
+			if (sample.Name is not null)
+			{
+				Assert.That(ioreg, Does.Contain(sample.Name));
+			}
+
+			Assert.That(sample.UsagePercent is not null, Is.EqualTo(reportsUtilization));
+			if (sample.UsagePercent is { } usage)
+			{
+				Assert.That(usage, Is.InRange(0.0, 100.0));
+			}
+		});
+	}
+
+	private static async Task<string> RunIoRegAsync()
+	{
+		var startInfo = new ProcessStartInfo("ioreg")
+		{
+			RedirectStandardOutput = true,
+			UseShellExecute = false
+		};
+		foreach (var argument in new[] { "-r", "-d", "1", "-w", "0", "-c", "IOAccelerator" })
+		{
+			startInfo.ArgumentList.Add(argument);
+		}
+
+		using var process = Process.Start(startInfo)!;
+		var output = await process.StandardOutput.ReadToEndAsync();
+		await process.WaitForExitAsync();
+		return output;
 	}
 
 	[Test]

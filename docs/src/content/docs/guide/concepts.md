@@ -28,6 +28,9 @@ the first one, and the Companion app's two-finger swipe follows this order once 
 Inside **Streaming**: a start folder **Home** with **Scenes**, **Audio** and **Chat** subfolders,
 listed on the right. A button with **Change Folder to** opens a subfolder, **Go Back** returns.
 
+The arrow beside **Folders** collapses that list to a narrow strip and gives the deck the space; the arrow
+on the strip brings it back. Macro Deck remembers which way you left it and opens the same way next time.
+
 **Change Folder to**, **Change Profile to**, **Go to Parent Folder** and **Go Back** have an optional
 **Device** setting. A button pressed on a device only moves that device. An automation has no device
 behind it, so with **Device** empty it moves every connected device. Pick a device there to move only
@@ -69,6 +72,11 @@ The tiles in a folder:
 | YouTube Stream Stats | Whether you are live, your viewers, likes and subscribers, the stream title and uptime, and a small graph, in a style you choose, offered once a YouTube channel is connected |
 | Countdown | A pizza timer that counts down and alerts you when it runs out |
 | Stopwatch | How long the current segment of your stream has been running |
+
+On a hardware deck, each short press on a Slider moves it one step further, and the press after the top
+takes it back to the start. A fine step moves in bigger jumps there, such as tens for a 0 to 100 slider with
+step 1. Holding the key moves nothing, a double tap does not run the slider's Double Tap action, and the key
+does not show the value.
 
 Labels and text use the fonts installed on your computer, plus any you import under
 [Library > Fonts](/guide/fonts/).

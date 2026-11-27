@@ -137,6 +137,17 @@ with it off, so nothing changes for an existing setup. The idle timer runs on th
 host: the host stores the settings and serves the surface, so a network hiccup can neither delay waking
 up nor start a screensaver on its own. The web client keeps the display awake while a screensaver shows.
 
+## Devices that show no screensaver
+
+A device provider says its hardware cannot show a screensaver by declaring
+`LayoutVisualCapabilities.ScreenSavers = false` in the layout its device references (see
+[declaring what the surface renders](/features/layouts/#declaring-what-the-surface-renders)). For such a
+device Macro Deck refuses to turn a screensaver on and refuses to show one now; both the WebSocket request
+and the REST endpoint answer with `ValidationError`. Turning it off is still accepted. The settings the
+device already has stored are kept as they are, so they come back unchanged if the layout later stops saying
+no. A layout that leaves the flag unset, or a device with no layout, keeps today's behaviour. The device
+settings do not offer a screensaver for a provider-registered device in the first place.
+
 ## When your integration is not running
 
 A device keeps its screensaver id and configuration whether or not anything provides them. Macro Deck
@@ -177,6 +188,7 @@ The manifest permission for the host API is `host:screensavers`.
 | `UiConfigEntryPoints.ScreenSaverConfig` | UI model | The `screensaver-config` entry point of a `config` surface. |
 | `UiConfigSurfaceAttributes.ScreenSaverId`, `.ScreenSaverConfiguration`, `.DeviceId` | UI model | Which screensaver is being configured and its current values. `DeviceId` is informational: never authorize anything by it. |
 | `PluginPermissions.HostScreenSavers` | Packaging | The `host:screensavers` manifest permission. |
+| `LayoutVisualCapabilities.ScreenSavers` | SDK | `false` in a device's layout: the device shows no screensaver. See [above](#devices-that-show-no-screensaver). |
 | `FakeScreenSaverProviderContext`, `ScreenSaverProviderTestClient` | Plugin testing | See [Testing screensavers](/features/testing/#testing-screensavers). |
 
 ## See also

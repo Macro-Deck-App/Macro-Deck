@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Layouts;
 
 namespace MacroDeckHost.Application.Devices.Surfaces;
 
@@ -22,10 +23,17 @@ public interface IDeviceSurfaceProvider
 	Task PushAsync(string deviceId, DeviceSurface surface, CancellationToken cancellationToken);
 
 	Task CloseAsync(string deviceId, string? reason, CancellationToken cancellationToken);
+
+	bool SupportsKeyImages { get; }
+
+	Task PushKeyImagesAsync(string deviceId, IReadOnlyList<DeviceKeyImage> images, CancellationToken cancellationToken);
 }
 
 /// <summary>Identifies the device a session is being opened for, in the ids the provider knows it by.</summary>
-public sealed record DeviceSurfaceSessionDescriptor(string DeviceId, string ProviderDeviceId);
+public sealed record DeviceSurfaceSessionDescriptor(
+	string DeviceId,
+	string ProviderDeviceId,
+	LayoutKeyImageFormat? KeyImages = null);
 
 /// <summary>Resolves a provider id to whichever adapter serves it.</summary>
 public interface IDeviceSurfaceProviderResolver

@@ -4,6 +4,8 @@ namespace MacroDeck.Sdk.Layouts;
 /// What a surface can actually render, so the host and editor can avoid offering something the hardware
 /// will drop. Every flag defaults to <c>false</c>: a provider that declares nothing is treated as able to
 /// do nothing, which fails safe rather than promising capabilities the device does not have.
+/// <see cref="ScreenSavers" /> is the exception: it is nullable, and leaving it unset keeps the host's
+/// default.
 /// </summary>
 public sealed record LayoutVisualCapabilities
 {
@@ -18,14 +20,18 @@ public sealed record LayoutVisualCapabilities
 		Transparency = true,
 		WidgetSpacing = true,
 		CornerRadius = true,
-		CustomFolderViews = true
+		CustomFolderViews = true,
+		ScreenSavers = true
 	};
 
 	public bool StaticIcons { get; init; }
 
-	/// <summary>Whether an animated icon plays. A device without it is sent the first frame instead.</summary>
+	/// <summary>Whether an animated icon plays. A device without it is sent the first frame instead, and a
+	/// key image the host renders for it shows that first frame too.</summary>
 	public bool AnimatedIcons { get; init; }
 
+	/// <summary>Whether widget borders are shown. Without it the host draws no border ring on the key
+	/// images it renders.</summary>
 	public bool Borders { get; init; }
 
 	public bool BackgroundColors { get; init; }
@@ -51,13 +57,28 @@ public sealed record LayoutVisualCapabilities
 	/// grid. Unlike the flags above this is not about fidelity: a surface the host rasterises a key grid
 	/// for cannot show an arbitrary tree at all, so a folder whose view it cannot render would simply be
 	/// blank there. Macro Deck therefore does not offer a folder view for a profile whose claiming device
-	/// says no.
+	/// says no. The key images the host renders for a <see cref="LayoutGrid.KeyImages" /> grid show only
+	/// the widget grid, so such a layout declares this false.
 	/// </summary>
 	public bool CustomFolderViews { get; init; }
 
 	/// <summary>
+	/// Whether the device can take part in screen savers. <c>false</c> says it cannot: Macro Deck refuses to
+	/// turn a screen saver on for the device or to show one on it, and keeps whatever screen saver settings
+	/// the device already has stored. <c>null</c>, the default, declares nothing and keeps the host's
+	/// behaviour, and so does <c>true</c>: it is not a promise that the device will show a screen saver.
+	/// A screen saver concerns the whole device. The host reads the value of the layout's primary grid region
+	/// (<see cref="LayoutDescriptor.PrimaryGrid" />) and, where that is <c>null</c>, the layout-wide value
+	/// in <see cref="LayoutCapabilities.Visuals" />. A layout with several grid regions has no primary grid,
+	/// so declare it layout-wide there.
+	/// </summary>
+	public bool? ScreenSavers { get; init; }
+
+	/// <summary>
 	/// The practical refresh ceiling in updates per second, where the hardware has one. Advisory: it lets
-	/// the host avoid pushing faster than a device can absorb, and is not a rate limit the host enforces.
+	/// the host avoid pushing faster than a device can absorb, and is not a rate limit the host enforces
+	/// on surfaces. Key images the host renders for a <see cref="LayoutGrid.KeyImages" /> grid are capped
+	/// at it, and at 30 per second when it is unset.
 	/// </summary>
 	public int? MaxUpdatesPerSecond { get; init; }
 }

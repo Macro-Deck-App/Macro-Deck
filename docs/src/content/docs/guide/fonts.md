@@ -15,8 +15,10 @@ import it under **Library > Fonts**.
 Each imported font is listed with a sample in its own typeface. It then appears in the font pickers
 alongside the installed fonts, for example in a button's label settings, where you can type to search the
 list and every font is shown in its own typeface. It is drawn on every connected
-device: the Macro Deck app, the web client and the Companion app. Hardware decks added by plugins, such as
-Stream Deck devices, draw labels in the plugin's own font.
+device: the Macro Deck app, the web client and the Companion app. Hardware decks whose keys Macro Deck
+draws as pictures, such as Stream Deck devices that use key images, draw labels in the app font from
+**Settings > Appearance** instead. Other hardware decks added by plugins draw labels in the plugin's own
+font.
 
 Only TTF and OTF files of up to 32 MB are accepted, one font per file. WOFF and WOFF2 files and font
 collections (`.ttc`) are not supported; convert them to TTF or OTF first.

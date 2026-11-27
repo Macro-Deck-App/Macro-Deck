@@ -139,6 +139,8 @@ Only `grid` carries geometry, in `LayoutRegion.Grid`. Every other kind is a `Cou
 | `MinRows`, `MaxRows`, `MinColumns`, `MaxColumns` | Per-axis bounds for a configurable grid. Default 1. |
 | `SupportsRuntimeResize` | A resize applies live. When `false`, you may apply it when the device next connects. |
 | `KeySize` | Pixel size of one key, where the hardware has a fixed one. |
+| `KeyImages` | Asks Macro Deck to render a finished picture for every key of this grid, in this `LayoutKeyImageFormat` (encoding, rotation, mirroring), at `KeySize`. Null (default) sends surfaces only. See [Key images](/features/devices/#key-images). |
+| `MaxWidgetColumns`, `MaxWidgetRows` | The largest widget, per axis, on a profile this layout's device claims. `null` (default) leaves the axis unconstrained; a value below 1 reads as 1. See [widget size limits](#widget-size-limits). |
 | `RowsLocked`, `ColumnsLocked` | Derived: fixed, or configurable with min >= max on that axis. |
 
 `LayoutDescriptor.PrimaryGrid` is the one grid Macro Deck renders a deck onto, computed for you. It is null
@@ -160,13 +162,28 @@ Capabilities: new LayoutCapabilities
 | --- | --- |
 | `StaticIcons`, `AnimatedIcons`, `Borders`, `BackgroundColors`, `TextLabels`, `Transparency` | What the surface can draw. |
 | `WidgetSpacing`, `CornerRadius` | Whether the folder's spacing and corner radius mean anything here. `false` disables those editor controls with a note that they have no effect on this device. |
-| `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display. |
-| `MaxUpdatesPerSecond` | Advisory update rate. |
+| `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display, and leave it `false` on a grid with `KeyImages`. |
+| `ScreenSavers` | Whether the device takes part in [screensavers](/ui/views/screensavers/#devices-that-show-no-screensaver). Nullable: `false` says it cannot, `null` (the default) and `true` keep Macro Deck's default. Set it to `false` for hardware made of separate key displays. |
+| `MaxUpdatesPerSecond` | Advisory update rate. Macro Deck caps [key images](/features/devices/#key-images) at it, 30 per second when unset. |
 
-`LayoutVisualCapabilities.Full` sets every flag. A `Visuals` block that sets nothing reads as "renders
-nothing". **No `Visuals` block at all** keeps the spacing controls and the folder-view option - saying
+`LayoutVisualCapabilities.Full` sets every flag, `ScreenSavers = true` included. A `Visuals` block that
+sets nothing reads as "renders nothing", except for `ScreenSavers`, which stays `null` and so keeps the
+default. **No `Visuals` block at all** keeps the spacing controls and the folder-view option - saying
 nothing is not saying no. A region can override with its own `LayoutRegion.Visuals`; null inherits the
-layout's.
+layout's. `ScreenSavers` is read flag by flag: the primary grid region's value, and where that is `null`
+the layout-wide one. A layout with several grid regions has no primary grid, so declare it on
+`LayoutCapabilities.Visuals` there.
+
+```csharp
+// A Stream Deck: a grid of separate key displays that cannot show a screensaver.
+Capabilities: new LayoutCapabilities
+{
+	Visuals = new LayoutVisualCapabilities
+	{
+		StaticIcons = true, AnimatedIcons = true, Borders = true, ScreenSavers = false
+	}
+}
+```
 
 ## Associating a layout with a device provider
 
@@ -191,6 +208,36 @@ its profile stays unconstrained until that layout appears.
 Macro Deck constrains a profile; it never rewrites one. No reflow, pagination, resizing or dropped widgets:
 a profile bigger than the device simply shows partially, as a [device session](/features/devices/#receiving-and-rendering-a-session)
 does.
+
+### Widget size limits
+
+Hardware whose keys are separate displays, like a Stream Deck, cannot draw one widget across the gaps
+between keys. Keep every widget to one key:
+
+```csharp
+new LayoutGrid
+{
+	Rows = 3,
+	Columns = 5,
+	KeySize = new LayoutKeySize(72, 72),
+	MaxWidgetColumns = 1,
+	MaxWidgetRows = 1
+}
+```
+
+For a profile its device claims:
+
+- The editor stops a resize at the limit. At a 1 x 1 limit the resize handle of a single-key widget is
+  locked, with a note naming the device.
+- Macro Deck refuses an edit that creates a widget larger than the limit or grows one past it: a resize,
+  a new widget, a paste. Agents using [MCP](/reference/mcp/) get the same refusal.
+- With several claiming devices, the smallest limit per axis applies, whatever their grids. The note names
+  the device each limit comes from.
+- Existing content is never rewritten. A widget that is already larger stays as stored, is still delivered
+  to the device at its stored size, can be moved, edited or shrunk, and shows a warning naming the device.
+  Importing a widget or folder archive and duplicating a folder copy widgets as they are, without a check.
+
+A plugin built before these members, or a layout that leaves them `null`, behaves as before.
 
 The host persists the last resolved layout with the device, not just the reference. `UnregisterLayoutAsync`
 and a stopped provider behave the same: the reference is kept, the grid stays constrained, and it refreshes

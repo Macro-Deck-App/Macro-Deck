@@ -268,8 +268,12 @@ public static class HostOperations
 		/// serving a device is not left being pushed to.</summary>
 		public const string Close = "close";
 
+		/// <summary>Fetches the current key picture of one cell of a session that has key images, inline
+		/// or over the <c>host.asset.*</c> pipeline. A host that predates it fails it as unknown.</summary>
+		public const string KeyImage = "key-image";
+
 		public static readonly IReadOnlyList<string> All =
-			[Register, Update, Presence, Unregister, Interaction, Icon, WidgetIcon, Close];
+			[Register, Update, Presence, Unregister, Interaction, Icon, WidgetIcon, Close, KeyImage];
 	}
 
 	/// <summary>

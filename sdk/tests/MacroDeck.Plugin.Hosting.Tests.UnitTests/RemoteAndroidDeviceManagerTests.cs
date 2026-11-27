@@ -659,5 +659,9 @@ public class RemoteAndroidDeviceManagerTests
 		public void Reset()
 		{
 		}
+
+		public void Release(string transferId)
+		{
+		}
 	}
 }

@@ -1629,6 +1629,9 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget exportado</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} não consegue mostrar um widget deste tamanho.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} ação</value>
     <comment>[plural] [count:int]</comment>
@@ -21979,6 +21982,9 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Alterar visualização</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Recolher o painel de pastas</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Tem certeza de que deseja excluir esta pasta e todo o seu conteúdo? Esta ação não pode ser desfeita.</value>
   </data>
@@ -21999,6 +22005,9 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplicar</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Expandir o painel de pastas</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Exporte esta pasta - seus widgets e os ícones deles - para um arquivo .macroDeckFolder.</value>

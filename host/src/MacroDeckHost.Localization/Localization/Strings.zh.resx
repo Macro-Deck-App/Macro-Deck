@@ -1629,6 +1629,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>组件已导出</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device}无法显示这么大的组件。</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} 个动作</value>
     <comment>[plural] [count:int]</comment>
@@ -21961,6 +21964,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>更改视图</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>折叠文件夹面板</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>确定要删除此文件夹及其所有内容吗？此操作无法撤销。</value>
   </data>
@@ -21981,6 +21987,9 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>复制一份</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>展开文件夹面板</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>将此文件夹（包括其组件及其图标）导出为 .macroDeckFolder 文件。</value>

@@ -1630,6 +1630,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget exporté</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} ne peut pas afficher un widget aussi grand.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} action</value>
     <comment>[plural] [count:int]</comment>
@@ -21959,6 +21962,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Changer de vue</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Réduire le panneau des dossiers</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Veux-tu vraiment supprimer ce dossier et tout son contenu ? Cette action est irréversible.</value>
   </data>
@@ -21979,6 +21985,9 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Dupliquer</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Développer le panneau des dossiers</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Exporter ce dossier - ses widgets et leurs icônes - vers un fichier .macroDeckFolder.</value>

@@ -286,8 +286,12 @@ public static class CapabilityOperations
 		/// <summary>Closes an open device session.</summary>
 		public const string SessionClose = "session.close";
 
+		/// <summary>Pushes changed key pictures to a session opened with key images. Version 3 only: a
+		/// provider that negotiated less is never sent it.</summary>
+		public const string SessionKeyImages = "session.key-images";
+
 		public static readonly IReadOnlyList<string> All =
-			[Describe, Devices, SessionOpen, SessionSurface, SessionClose];
+			[Describe, Devices, SessionOpen, SessionSurface, SessionClose, SessionKeyImages];
 	}
 
 	/// <summary>

@@ -1629,6 +1629,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget exportiert</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} kann kein so großes Widget anzeigen.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} Aktion</value>
     <comment>[plural]</comment>
@@ -21957,6 +21960,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>Ansicht ändern</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>Ordnerbereich einklappen</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>Möchtest du diesen Ordner und seinen gesamten Inhalt wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.</value>
   </data>
@@ -21977,6 +21983,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>Duplizieren</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>Ordnerbereich ausklappen</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>Diesen Ordner - seine Widgets und deren Symbole - als .macroDeckFolder-Datei exportieren.</value>

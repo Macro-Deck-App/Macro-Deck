@@ -2,8 +2,8 @@ import { Component, HostListener, ViewChild, computed, effect, inject, signal, C
 import { Router } from '@angular/router';
 
 import { FileOpenService, FolderService } from '../../../services';
-import { ActionButtonTriggerType, AppStrings, type EmptyCellStyle, GridRect, GridWidget, PinScope, WidgetType, WidgetClipboardEntry, collectIconPrefetchTargets, rectsOverlap, canPlaceGroup, LocalizedText, resolveLocalizedText, WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
-import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, WidgetStyleClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService, WidgetTypeFavoritesService } from '@shared';
+import { ActionButtonTriggerType, type ApiError, AppStrings, type EmptyCellStyle, GridRect, GridWidget, PinScope, WidgetType, WidgetClipboardEntry, collectIconPrefetchTargets, rectsOverlap, canPlaceGroup, LocalizedText, resolveLocalizedText, WIDGET_GRID_VIEW_ID } from '@macro-deck/runtime';
+import { LocalizationService, ButtonComponent, ModalComponent, ProfileService, WidgetClipboardService, WidgetStyleClipboardService, IconPrefetchService, ErrorBannerComponent, ToastService, TranslatePipe, FolderViewHostComponent, FolderViewService, WidgetTypeFavoritesService, WIDGET_SPAN_LIMITED_CODE } from '@shared';
 import { DeckEditorGridComponent } from '../../deck-editor/deck-editor-grid.component';
 import { ConfirmationModalComponent } from '../../overlay/confirmation-modal/confirmation-modal.component';
 import { ArchivePreviewModalComponent } from '../../portable/archive-preview-modal/archive-preview-modal.component';
@@ -399,9 +399,13 @@ export class DeckPageComponent {
     }
 
     this.pageError.set(null);
+    if (this.refuseOversizedPaste(entries)) return;
     if (entries.length > 1) {
       const result = await this.folderService.pasteWidgets(entries, position.x, position.y);
-      if (!result.success) return;
+      if (!result.success) {
+        this.showSpanError(result.error);
+        return;
+      }
       await this.clearCutSources(entries, result.data?.replacedWidgetIds);
       return;
     }
@@ -589,10 +593,13 @@ export class DeckPageComponent {
     }
 
     this.pageError.set(null);
+    if (this.refuseOversizedPaste(entries)) return;
     if (entries.length > 1) {
       const result = await this.folderService.pasteWidgets(entries, anchor.x, anchor.y);
       if (result.success) {
         await this.clearCutSources(entries, result.data?.replacedWidgetIds);
+      } else {
+        this.showSpanError(result.error);
       }
       return;
     }
@@ -600,6 +607,20 @@ export class DeckPageComponent {
     const pasted = await this.folderService.pasteWidget(entries[0], anchor.x, anchor.y);
     if (pasted) {
       await this.clearCutSources(entries);
+    }
+  }
+
+  private refuseOversizedPaste(entries: readonly WidgetClipboardEntry[]): boolean {
+    const error = this.folderService.widgetSpanError(entries);
+    if (error) {
+      this.pageError.set(error.message);
+    }
+    return error !== null;
+  }
+
+  private showSpanError(error: ApiError | undefined): void {
+    if (error?.code === WIDGET_SPAN_LIMITED_CODE && error.message) {
+      this.pageError.set(error.message);
     }
   }
 

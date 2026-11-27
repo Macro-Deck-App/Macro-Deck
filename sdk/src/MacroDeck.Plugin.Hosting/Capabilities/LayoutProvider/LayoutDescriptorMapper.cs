@@ -69,9 +69,28 @@ internal static class LayoutDescriptorMapper
 			MinColumns = grid.MinColumns,
 			MaxColumns = grid.MaxColumns,
 			SupportsRuntimeResize = grid.SupportsRuntimeResize,
+			MaxWidgetColumns = grid.MaxWidgetColumns,
+			MaxWidgetRows = grid.MaxWidgetRows,
 			KeySize = grid.KeySize is { } keySize
 				? new LayoutKeySizeDto { Width = keySize.Width, Height = keySize.Height }
-				: null
+				: null,
+			KeyImages = grid.KeyImages is { } keyImages ? ToDto(keyImages) : null
+		};
+	}
+
+	public static LayoutKeyImageFormatDto ToDto(LayoutKeyImageFormat format)
+	{
+		return new LayoutKeyImageFormatDto
+		{
+			Encoding = format.Encoding, Rotation = format.Rotation, MirrorHorizontal = format.MirrorHorizontal
+		};
+	}
+
+	public static LayoutKeyImageFormat ToSdk(LayoutKeyImageFormatDto dto)
+	{
+		return new LayoutKeyImageFormat
+		{
+			Encoding = dto.Encoding, Rotation = dto.Rotation, MirrorHorizontal = dto.MirrorHorizontal
 		};
 	}
 
@@ -87,7 +106,10 @@ internal static class LayoutDescriptorMapper
 			MinColumns = dto.MinColumns,
 			MaxColumns = dto.MaxColumns,
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
-			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null
+			MaxWidgetColumns = dto.MaxWidgetColumns,
+			MaxWidgetRows = dto.MaxWidgetRows,
+			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null,
+			KeyImages = dto.KeyImages is { } keyImages ? ToSdk(keyImages) : null
 		};
 	}
 
@@ -104,6 +126,7 @@ internal static class LayoutDescriptorMapper
 			WidgetSpacing = visuals.WidgetSpacing,
 			CornerRadius = visuals.CornerRadius,
 			CustomFolderViews = visuals.CustomFolderViews,
+			ScreenSavers = visuals.ScreenSavers,
 			MaxUpdatesPerSecond = visuals.MaxUpdatesPerSecond
 		};
 	}
@@ -121,6 +144,7 @@ internal static class LayoutDescriptorMapper
 			WidgetSpacing = dto.WidgetSpacing,
 			CornerRadius = dto.CornerRadius,
 			CustomFolderViews = dto.CustomFolderViews,
+			ScreenSavers = dto.ScreenSavers,
 			MaxUpdatesPerSecond = dto.MaxUpdatesPerSecond
 		};
 	}

@@ -41,6 +41,7 @@ public class PluginAssetReceiverTests
 	[TestCase(AssetKinds.AndroidScreenshot)]
 	[TestCase(AssetKinds.CompanionScreenshot)]
 	[TestCase(AssetKinds.UiUpload)]
+	[TestCase(AssetKinds.KeyImage)]
 	public void A_kind_only_the_host_sends_is_refused_from_a_plugin(string kind)
 	{
 		var result = _receiver.Begin(PluginId, "a1", kind, "text/plain", 4, "sha256:whatever");

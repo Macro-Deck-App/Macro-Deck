@@ -123,6 +123,45 @@ public class LayoutProviderCapabilityHandlerTests
 	}
 
 	[Test]
+	public void Widget_span_limits_travel_as_optional_camel_case_fields()
+	{
+		var grid = new LayoutGrid { Rows = 3, Columns = 5, MaxWidgetColumns = 1, MaxWidgetRows = 1 };
+		var unconstrained = new LayoutGrid { Rows = 3, Columns = 5 };
+
+		var json = JsonSerializer.Serialize(LayoutDescriptorMapper.ToDto(Single(grid)).Regions[0].Grid,
+			PluginProtocolJson.Options);
+		var unconstrainedJson = JsonSerializer.Serialize(
+			LayoutDescriptorMapper.ToDto(Single(unconstrained)).Regions[0].Grid,
+			PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(json, Does.Contain("\"maxWidgetColumns\":1").And.Contain("\"maxWidgetRows\":1"));
+			Assert.That(unconstrainedJson, Does.Not.Contain("maxWidget"));
+		});
+	}
+
+	[Test]
+	public void A_grid_from_a_plugin_that_predates_widget_span_limits_reads_as_unconstrained()
+	{
+		var dto = JsonSerializer.Deserialize<LayoutGridDto>("{\"rows\":3,\"columns\":5}", PluginProtocolJson.Options)!;
+
+		var grid = LayoutDescriptorMapper.ToSdk(new LayoutDescriptorDto
+			{
+				Id = "old",
+				Name = "Old",
+				Regions = [new LayoutRegionDto { Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = dto }]
+			})
+			.PrimaryGrid!.Grid!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(grid.MaxWidgetColumns, Is.Null);
+			Assert.That(grid.MaxWidgetRows, Is.Null);
+		});
+	}
+
+	[Test]
 	public void A_grid_plus_encoder_and_pedal_regions_round_trip_with_the_grid_as_primary()
 	{
 		var original = new LayoutDescriptor("mixed",
@@ -202,6 +241,58 @@ public class LayoutProviderCapabilityHandlerTests
 		});
 	}
 
+	[Test]
+	public void A_declared_no_screen_savers_round_trips_through_the_wire_json()
+	{
+		var original = new LayoutDescriptor("plus",
+			"Stream Deck +",
+			[
+				new LayoutRegion
+				{
+					Id = "grid",
+					Kind = LayoutRegionKinds.Grid,
+					Grid = new LayoutGrid { Rows = 2, Columns = 4 },
+					Visuals = new LayoutVisualCapabilities { StaticIcons = true, ScreenSavers = false }
+				}
+			],
+			new LayoutCapabilities { Visuals = new LayoutVisualCapabilities { ScreenSavers = false } });
+
+		var json = JsonSerializer.Serialize(LayoutDescriptorMapper.ToDto(original), PluginProtocolJson.Options);
+		var restored = LayoutDescriptorMapper.ToSdk(
+			JsonSerializer.Deserialize<LayoutDescriptorDto>(json, PluginProtocolJson.Options)!);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(restored.Capabilities!.Visuals!.ScreenSavers, Is.False);
+			Assert.That(restored.Regions[0].Visuals!.ScreenSavers, Is.False);
+		});
+	}
+
+	[Test]
+	public void Screen_savers_left_unset_are_not_written_so_an_older_host_reads_todays_payload()
+	{
+		var visuals = LayoutDescriptorMapper.ToDto(new LayoutDescriptor("pad",
+				"Pad",
+				[],
+				new LayoutCapabilities { Visuals = new LayoutVisualCapabilities { StaticIcons = true } }))
+			.Capabilities!.Visuals!;
+
+		var json = JsonSerializer.SerializeToElement(visuals, PluginProtocolJson.Options);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(visuals.ScreenSavers, Is.Null);
+			Assert.That(json.TryGetProperty("screenSavers", out _), Is.False);
+		});
+	}
+
+	private static LayoutDescriptor Single(LayoutGrid grid)
+	{
+		return new LayoutDescriptor("single",
+			"Single",
+			[new LayoutRegion { Id = "grid", Kind = LayoutRegionKinds.Grid, Grid = grid }]);
+	}
+
 	private static LayoutDescriptor FullyPopulatedLayout()
 	{
 		return new LayoutDescriptor("xl",
@@ -222,6 +313,8 @@ public class LayoutProviderCapabilityHandlerTests
 						MinColumns = 4,
 						MaxColumns = 8,
 						SupportsRuntimeResize = true,
+						MaxWidgetColumns = 1,
+						MaxWidgetRows = 2,
 						KeySize = new LayoutKeySize(96, 96)
 					},
 					Visuals = LayoutVisualCapabilities.Full,

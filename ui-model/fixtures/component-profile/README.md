@@ -114,7 +114,8 @@ A renderer matches the measured file, because that is what the web client shows.
 should draw as the tables say is a question for the runtime and the tables, not for these files.
 
 A change to a measured file is a change to what every renderer has to draw: the Companion App checks its
-Compose renderer against these files, so it has to follow in the same release.
+Compose renderer against these files, and the host's key-image renderer (`MacroDeckHost.Rendering`) is
+held to them by `host/tests/MacroDeckHost.Tests.Rendering`, so both have to follow in the same release.
 
 ## What the text-fit tree deliberately contains
 
@@ -393,6 +394,7 @@ A renderer claims component-profile support by reproducing these tables within i
 | the wire form | `MacroDeck.Ui.Tests.UnitTests`' `ComponentProfileConformanceFixtureTests` - every tree is canonical, the set covers the whole vocabulary, and the trees still carry both length branches, both reference spellings, the slider's affordance shapes, the button's declaration shapes and the degradation paths |
 | the Angular renderer | `ui-widget-node.component.spec.ts` - resolves the same lengths this table lists, in both the cross-clamped and basis-bound branches, and asserts the 1.9 ratio; `widget-slider-interaction.spec.ts` covers the affordance and the drag; `widget-button-interaction.spec.ts` covers the press ordering and the artwork/ring painting; `widget-progress.spec.ts` covers the position carried forward, the three runs and the crossfade |
 | what the browser lays out | `ui/scripts/measure-conformance.mjs --check` in CI, against the pinned Chrome |
+| the host renderer | `host/tests/MacroDeckHost.Tests.Rendering` - the .NET renderer that draws device key images lays out every scene of `measured-scenes.json` against its measured file (boxes and text widths within 0.1 px, text and truncation exact) and resolves every layout table |
 | a future renderer | this table, reproduced in its own test suite |
 
 The Angular assertions restate the table's numbers rather than reading this file: the fixture lives outside

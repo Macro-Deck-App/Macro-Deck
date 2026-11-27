@@ -34,6 +34,17 @@ internal sealed class ProjectReferenceTests
 			Is.Empty);
 	}
 
+	[Test]
+	public void The_application_layer_reaches_the_key_image_renderer_only_through_its_port()
+	{
+		var references = ReferencesOf("MacroDeckHost.Application");
+
+		Assert.That(references.Where(name => name == "MacroDeckHost.Rendering"
+				|| name.StartsWith("SkiaSharp", StringComparison.Ordinal)
+				|| name.StartsWith("HarfBuzzSharp", StringComparison.Ordinal)),
+			Is.Empty);
+	}
+
 	private static bool IsMacroDeck(string name)
 	{
 		return name.StartsWith("MacroDeck", StringComparison.Ordinal);

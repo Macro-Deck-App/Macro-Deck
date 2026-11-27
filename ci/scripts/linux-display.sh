@@ -42,7 +42,8 @@ publish() {
 }
 
 start_x11() {
-  Xvfb "$x11_display" -screen 0 "${width}x${height}x24" -nolisten tcp >"$state_dir/xvfb.log" 2>&1 &
+  # Without -noreset Xvfb resets once the readiness probe disconnects and refuses the window manager.
+  Xvfb "$x11_display" -screen 0 "${width}x${height}x24" -nolisten tcp -noreset >"$state_dir/xvfb.log" 2>&1 &
   echo $! >"$state_dir/xvfb.pid"
   wait_for "Xvfb on $x11_display" xdpyinfo -display "$x11_display"
 

@@ -1,4 +1,5 @@
 using MacroDeckHost.Application.Lifecycle;
+using MacroDeckHost.Application.Logging;
 using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Transport;
 using MacroDeckHost.Application.Ui.Transport.Messages.Host;
@@ -100,7 +101,7 @@ public class HostController : ControllerBase
 			return NotFound();
 		}
 
-		_logger.Information("Shutdown requested via API, reason: {Reason}", reason ?? "none");
+		_logger.Information("Shutdown requested via API, reason: {Reason}", LogText.Neutralize(reason) ?? "none");
 		if (reason == UserSessionEnd.ShutdownReason)
 		{
 			_sessionEnd.Mark();

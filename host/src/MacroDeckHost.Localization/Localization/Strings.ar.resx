@@ -1629,6 +1629,9 @@
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>تم تصدير الأداة</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>لا يمكن لـ {device} عرض أداة بهذا الحجم.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} إجراء</value>
     <comment>[plural] [count:int]</comment>
@@ -21979,6 +21982,9 @@
   <data name="Widgets.Folder.ChangeView" xml:space="preserve">
     <value>تغيير العرض</value>
   </data>
+  <data name="Widgets.Folder.CollapsePanel" xml:space="preserve">
+    <value>طي لوحة المجلدات</value>
+  </data>
   <data name="Widgets.Folder.DeleteConfirmGeneric" xml:space="preserve">
     <value>هل أنت متأكد من حذف هذا المجلد وكل محتوياته؟ لا يمكن التراجع عن هذا الإجراء.</value>
   </data>
@@ -21999,6 +22005,9 @@
   </data>
   <data name="Widgets.Folder.Duplicate" xml:space="preserve">
     <value>تكرار</value>
+  </data>
+  <data name="Widgets.Folder.ExpandPanel" xml:space="preserve">
+    <value>توسيع لوحة المجلدات</value>
   </data>
   <data name="Widgets.Folder.ExportDescription" xml:space="preserve">
     <value>صدّر هذا المجلد، مع أدواته وأيقوناتها، إلى ملف .macroDeckFolder.</value>

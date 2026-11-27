@@ -90,6 +90,10 @@ that can render one. A surface the host rasterises a key grid for cannot draw a 
 would simply be blank on it. Like the other layout capability flags, absence reads as *yes*: saying
 nothing must not read as saying no.
 
+*Note (issue #1868, ADR 0115):* the host now draws the keys of a layout that asks for key images from the
+widgets' trees, but it draws the widget grid only, never a folder view; such a layout declares
+`CustomFolderViews = false`.
+
 ### Action modals
 
 **Opening a modal and answering it are two exchanges, not one.** Showing it answers with a modal id as

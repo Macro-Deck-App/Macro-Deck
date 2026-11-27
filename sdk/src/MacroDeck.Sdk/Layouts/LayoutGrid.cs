@@ -33,8 +33,29 @@ public sealed record LayoutGrid
 	/// </summary>
 	public bool SupportsRuntimeResize { get; init; }
 
+	/// <summary>
+	/// The widest a widget may be, in columns, on a profile a device with this layout claims. Null (the
+	/// default) leaves it unconstrained. A value below 1 reads as 1, so 1 keeps every widget to a single
+	/// column, as hardware whose keys are separate displays needs. Macro Deck refuses an edit that makes or
+	/// widens a widget past it, but never rewrites a widget that is already wider.
+	/// </summary>
+	public int? MaxWidgetColumns { get; init; }
+
+	/// <summary>The row-axis counterpart of <see cref="MaxWidgetColumns" />.</summary>
+	public int? MaxWidgetRows { get; init; }
+
 	/// <summary>Pixel size of one key, where the hardware has a fixed one.</summary>
 	public LayoutKeySize? KeySize { get; init; }
+
+	/// <summary>
+	/// Asks the host to render a finished picture for every key of this grid and deliver it to the device
+	/// session in this format - see <see cref="MacroDeck.Sdk.Devices.IDeviceSession.KeyImageFormat" />.
+	/// Opt-in: null, the default, keeps a device session to surfaces only. Requires <see cref="KeySize" />,
+	/// which is the delivered picture size; the cells are this grid's <see cref="Rows" /> x
+	/// <see cref="Columns" />. A format the host cannot honour means no key images, never a failed
+	/// registration.
+	/// </summary>
+	public LayoutKeyImageFormat? KeyImages { get; init; }
 
 	/// <summary>
 	/// Whether the row count is settled: a fixed grid, or a configurable one whose bounds leave no choice.
