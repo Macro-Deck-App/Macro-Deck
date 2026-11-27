@@ -1,5 +1,9 @@
 @use '../../../../styles/index' as ds;
 
+:host {
+  display: contents;
+}
+
 .copy-text-message {
   margin: 0 0 var(--space-3);
   color: var(--color-text-secondary);

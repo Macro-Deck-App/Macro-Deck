@@ -5,8 +5,11 @@
  * --modal-height on its own host) would otherwise be stretched to the outer dialog's height.
  * Re-declaring the default here scopes it per modal; an explicit inline value still wins.
  */
+// A modal renders inline where it is opened, so its host must not become a zero-size flex or grid
+// item there.
 :host {
   --modal-height: auto;
+  display: contents;
 }
 
 @keyframes fadeIn {
