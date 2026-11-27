@@ -10,7 +10,7 @@ import { parseReleaseVersion } from './release-version.mjs';
 const ReleaseColor = 0x3fb950;
 const PrereleaseColor = 0xd29922;
 const Model = 'claude-sonnet-5-5';
-const MaxHighlights = 5;
+const MaxHighlights = 15;
 const MaxHighlightLength = 200;
 const MaxPullRequests = 30;
 const MaxPullRequestBodyLength = 1500;
@@ -27,8 +27,10 @@ The user message contains the release version, the GitHub release notes (merged 
 Pick the changes a user would notice most and write them as highlights:
 
 - Highlights are new features and improvements only: new features, integrations, widgets, improvements, performance and accessibility. Never write a highlight for a bug fix, however important it looks. The announcement adds its own line about bug fixes after yours.
-- 3 to 5 highlights. If the release has fewer features and improvements worth telling a user about, write fewer. Never pad. If it has none, reply with the single word NONE.
-- New features, integrations and widgets come first, then improvements. Leave out changes a user never sees: CI, tests, measurements, refactorings and internal plumbing, even when they are listed as a feature. Mention plugin SDK or device provider changes only when little else is in the release, and say what they make possible rather than how they work.
+- Write one highlight for every feature and improvement a user can notice. Do not drop one to keep the list short: a change that is missing here is a change most readers never hear about. If the release has none, reply with the single word NONE.
+- Merge changes that belong to the same feature into one highlight instead of listing them separately. Never pad and never split one change into several lines.
+- Order by how much a user gains: new features, integrations and widgets first, then improvements.
+- Leave out only what a user never sees: CI, tests, measurements, refactorings and internal plumbing, even when they are listed as a feature. A plugin SDK or device provider change counts when it changes what a user's device or plugins can do; say what it makes possible rather than how it works.
 - Each highlight is one line: one emoji that fits the change, a space, then a plain statement of what is now possible or what now works, at most 110 characters. Pick a different emoji for each line. Rephrase the pull request title for a user; do not copy its wording when it is technical.
 - Use the pull request descriptions to get the meaning right and to name the benefit when they state one. Only state what the release notes and descriptions say. Do not guess at details, causes or benefits that are not in them, and leave out implementation detail.
 - No pull request numbers, links, author names, @mentions, headings, list markers, bold or other formatting.
