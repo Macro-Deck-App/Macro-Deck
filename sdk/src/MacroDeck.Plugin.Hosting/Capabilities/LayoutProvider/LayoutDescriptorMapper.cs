@@ -69,6 +69,8 @@ internal static class LayoutDescriptorMapper
 			MinColumns = grid.MinColumns,
 			MaxColumns = grid.MaxColumns,
 			SupportsRuntimeResize = grid.SupportsRuntimeResize,
+			MaxWidgetColumns = grid.MaxWidgetColumns,
+			MaxWidgetRows = grid.MaxWidgetRows,
 			KeySize = grid.KeySize is { } keySize
 				? new LayoutKeySizeDto { Width = keySize.Width, Height = keySize.Height }
 				: null
@@ -87,6 +89,8 @@ internal static class LayoutDescriptorMapper
 			MinColumns = dto.MinColumns,
 			MaxColumns = dto.MaxColumns,
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
+			MaxWidgetColumns = dto.MaxWidgetColumns,
+			MaxWidgetRows = dto.MaxWidgetRows,
 			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null
 		};
 	}

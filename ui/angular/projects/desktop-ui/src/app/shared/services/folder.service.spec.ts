@@ -158,6 +158,60 @@ describe('FolderService widget layout', () => {
     });
   });
 
+  describe('device widget span limits', () => {
+    function limitedProfile(): Profile {
+      return stubProfile({
+        layout: {
+          rows: 3, columns: 5, rowsLocked: true, columnsLocked: true,
+          constraint: {
+            rows: 3, columns: 5, minRows: 3, maxRows: 3, minColumns: 5, maxColumns: 5,
+            rowsLocked: true, columnsLocked: true, deviceName: 'Stream Deck',
+            maxWidgetColumns: 1, maxWidgetRows: 2, maxWidgetColumnsDeviceName: 'Stream Deck',
+            maxWidgetRowsDeviceName: 'Macro Pad',
+          },
+        },
+      });
+    }
+
+    it('reports a size over a limit with the device of that axis', () => {
+      currentProfile = limitedProfile();
+
+      expect(service.widgetSpanError([{ w: 2, h: 1 }])?.message).toBe('Stream Deck can\'t show a widget this large.');
+      expect(service.widgetSpanError([{ w: 1, h: 3 }])?.message).toBe('Macro Pad can\'t show a widget this large.');
+      expect(service.widgetSpanError([{ w: 1, h: 2 }])).toBeNull();
+    });
+
+    it('reports nothing when no device limits spans', () => {
+      currentProfile = stubProfile();
+
+      expect(service.widgetSpanError([{ w: 4, h: 3 }])).toBeNull();
+    });
+
+    it('turns the host refusal of a resize into the localized message', async () => {
+      currentProfile = limitedProfile();
+      apiSpy.updateWidgetPositions.and.resolveTo({
+        success: false,
+        error: { code: 'SpanLimitedByDevice', message: 'Stream Deck limits widgets to 1 x 2' },
+      });
+
+      const result = await service.commitWidgetLayout(new Map([[widgetAId, { x: 2, y: 0, w: 2, h: 1 }]]));
+
+      expect(result.error?.message).toBe('Stream Deck can\'t show a widget this large.');
+    });
+
+    it('passes other host refusals through unchanged', async () => {
+      currentProfile = limitedProfile();
+      apiSpy.updateWidgetPositions.and.resolveTo({
+        success: false,
+        error: { code: 'PositionOccupied', message: 'nope' },
+      });
+
+      const result = await service.commitWidgetLayout(new Map([[widgetAId, { x: 2, y: 0, w: 1, h: 1 }]]));
+
+      expect(result.error).toEqual({ code: 'PositionOccupied', message: 'nope' });
+    });
+  });
+
   describe('commitWidgetLayout', () => {
     it('applies the changed rects optimistically and sends one batch request', async () => {
       const changes = new Map<string, GridRect>([

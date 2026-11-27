@@ -27,4 +27,12 @@ public class ProfileLayoutConstraint
 	/// offer one for this profile. Unlike the two above this is not about fidelity - see the SDK's
 	/// <c>LayoutVisualCapabilities.CustomFolderViews</c>.</summary>
 	public bool CustomFolderViewsSupported { get; set; } = true;
+
+	public int? MaxWidgetColumns { get; set; }
+
+	public int? MaxWidgetRows { get; set; }
+
+	public string? MaxWidgetColumnsDeviceName { get; set; }
+
+	public string? MaxWidgetRowsDeviceName { get; set; }
 }

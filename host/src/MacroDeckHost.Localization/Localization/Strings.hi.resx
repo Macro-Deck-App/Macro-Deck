@@ -1629,6 +1629,9 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>विजेट निर्यात हो गया</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} इतना बड़ा विजेट नहीं दिखा सकता।</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} क्रिया</value>
     <comment>[plural] [count:int]</comment>

@@ -1629,6 +1629,9 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget geëxporteerd</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} kan geen widget van deze grootte tonen.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} actie</value>
     <comment>[plural] [count:int]</comment>

@@ -85,9 +85,25 @@
         [attr.aria-label]="pinnedTitle(widget)">
         <span class="icon icon-pin icon-xs"></span>
       </div>
+    } @else if (resizeLocked(widget)) {
+      <div
+        class="resize-handle is-locked"
+        role="img"
+        [title]="resizeNote()"
+        [attr.aria-label]="resizeNote()"
+        (pointerdown)="$event.stopPropagation()"
+        (click)="stopClick($event)">
+        <div class="resize-dot"></div>
+      </div>
     } @else {
       <div class="resize-handle" (pointerdown)="onResizePointerDown(widget, $event)" (click)="stopClick($event)">
         <div class="resize-dot"></div>
+      </div>
+    }
+
+    @if (spanWarning(widget); as warning) {
+      <div class="span-badge" role="img" [title]="warning" [attr.aria-label]="warning">
+        <span class="icon icon-alert-triangle icon-xs"></span>
       </div>
     }
   </div>

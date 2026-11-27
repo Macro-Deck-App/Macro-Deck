@@ -1629,6 +1629,9 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget exportiert</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} kann kein so großes Widget anzeigen.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} Aktion</value>
     <comment>[plural]</comment>

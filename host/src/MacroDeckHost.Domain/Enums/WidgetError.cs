@@ -7,5 +7,6 @@ public enum WidgetError
 	FolderNotFound,
 	PositionOccupied,
 	WidgetPinned,
-	InternalError
+	InternalError,
+	SpanLimitedByDevice
 }
