@@ -168,3 +168,36 @@ public sealed record DevicesWidgetIconResult
 	/// <see cref="NotModified" /> is true.</summary>
 	public string? TransferId { get; init; }
 }
+
+/// <summary>Arguments for the <c>key-image</c> operation, fetching the current picture of one cell of a
+/// session's hardware grid - see the SDK's <c>IDeviceSession.GetKeyImageAsync</c>.</summary>
+public sealed record DevicesKeyImageArguments
+{
+	public required string SessionId { get; init; }
+
+	public required int Row { get; init; }
+
+	public required int Column { get; init; }
+}
+
+/// <summary>
+/// Result of the <c>key-image</c> operation: the same picture fields <see cref="DeviceSessionKeyImageDto" />
+/// carries, inline or under a <c>host.asset.*</c> <see cref="TransferId" />. A host with no picture for
+/// the cell answers with no value at all, and a host that predates the operation fails it as unknown.
+/// </summary>
+public sealed record DevicesKeyImageResult
+{
+	public required int Row { get; init; }
+
+	public required int Column { get; init; }
+
+	public required long Revision { get; init; }
+
+	public required string ContentType { get; init; }
+
+	/// <summary>The picture inline, base64 on the wire.</summary>
+	public byte[]? Content { get; init; }
+
+	/// <summary>Correlates the picture with the <c>host.asset.*</c> transfer that follows this result.</summary>
+	public string? TransferId { get; init; }
+}

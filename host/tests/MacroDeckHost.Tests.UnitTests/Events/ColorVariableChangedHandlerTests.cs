@@ -333,6 +333,15 @@ public class ColorVariableChangedHandlerTests
 			return Task.FromResult<DeviceWidgetIconImage?>(null);
 		}
 
+		public Task<DeviceKeyImage?> GetKeyImageAsync(
+			Guid deviceId,
+			int row,
+			int column,
+			CancellationToken cancellationToken = default)
+		{
+			return Task.FromResult<DeviceKeyImage?>(null);
+		}
+
 		public Task InvalidateAsync(CancellationToken cancellationToken = default)
 		{
 			Invalidations++;

@@ -91,7 +91,7 @@ x-macrodeck-host-operations:
   action-interactions: [request-item-picker, request-device-picker, show-modal]
   ui: [snapshot, patch, fault, reload, register-resource, remove-resource, register-music-player-artwork, origin.report-failure, origin.show-modal, origin.open-url,
     report-parameter-values, origin.read-upload]
-  devices: [register, update, presence, unregister, interaction, icon, widget-icon, close]
+  devices: [register, update, presence, unregister, interaction, icon, widget-icon, close, key-image]
   variable-values: [value, invalidate]
   layouts: [register, unregister]
   folder-views: [register, unregister]
@@ -122,6 +122,7 @@ x-macrodeck-asset-kinds:
   - android-screenshot
   - companion-screenshot
   - ui-upload
+  - key-image
 
 defaultContentType: application/json
 

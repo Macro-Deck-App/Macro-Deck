@@ -29,6 +29,8 @@ internal interface IPluginHostAssetReceiver
 
 	/// <summary>Fails everything in flight - a transfer cannot outlive the connection it arrived on.</summary>
 	void Reset();
+
+	void Release(string transferId);
 }
 
 internal sealed class PluginHostAssetReceiver : IPluginHostAssetReceiver
@@ -96,6 +98,22 @@ internal sealed class PluginHostAssetReceiver : IPluginHostAssetReceiver
 			{
 				completion.TrySetResult(_failed);
 			}
+		}
+	}
+
+	public void Release(string transferId)
+	{
+		Transfer? transfer;
+		lock (_gate)
+		{
+			_transfers.Remove(transferId, out transfer);
+		}
+
+		transfer?.Buffer.Dispose();
+
+		if (_completions.TryRemove(transferId, out var completion))
+		{
+			completion.TrySetResult(_failed);
 		}
 	}
 

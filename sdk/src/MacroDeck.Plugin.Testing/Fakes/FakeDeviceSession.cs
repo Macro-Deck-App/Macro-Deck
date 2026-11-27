@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Layouts;
 
 namespace MacroDeck.Plugin.Testing.Fakes;
 
@@ -37,6 +38,27 @@ public sealed class FakeDeviceSession : IDeviceSession
 	/// <inheritdoc />
 	public event EventHandler<DeviceSessionClosedEventArgs>? Closed;
 
+	/// <inheritdoc />
+	public event EventHandler<DeviceKeyImageChangedEventArgs>? KeyImageChanged;
+
+	/// <summary>
+	/// The format the host renders key pictures in for this session; null, the default, is a session with
+	/// no key images. Set it before the provider reads it - a real session's format never changes once it
+	/// is open. <see cref="FakeDeviceProviderContext.KeyImageFormat" /> sets it for the sessions a context
+	/// opens.
+	/// </summary>
+	public LayoutKeyImageFormat? KeyImageFormat { get; set; }
+
+	/// <summary>The current picture of each cell, keyed by (row, column), which
+	/// <see cref="GetKeyImageAsync" /> answers from. Seed it for a provider that paints every key on open;
+	/// <see cref="PushKeyImage" /> keeps it current.</summary>
+	public Dictionary<(int Row, int Column), DeviceKeyImage> KeyImages { get; } = new();
+
+	/// <summary>Every key picture the provider asked for, as (row, column).</summary>
+	public IReadOnlyList<(int Row, int Column)> KeyImageRequests => _keyImageRequests;
+
+	private readonly List<(int Row, int Column)> _keyImageRequests = [];
+
 	/// <summary>Every interaction the provider reported, in order.</summary>
 	public IReadOnlyList<DeviceInteraction> Interactions => _interactions;
 
@@ -73,6 +95,19 @@ public sealed class FakeDeviceSession : IDeviceSession
 
 		CurrentSurface = surface;
 		SurfaceChanged?.Invoke(this, new DeviceSurfaceChangedEventArgs(surface));
+	}
+
+	/// <summary>
+	/// Pushes one cell's picture, exactly as the host does, raising <see cref="KeyImageChanged" /> and
+	/// making it the answer <see cref="GetKeyImageAsync" /> gives for that cell. Nothing is dropped here:
+	/// a test pushing a stale revision sees how the provider itself handles it.
+	/// </summary>
+	public void PushKeyImage(DeviceKeyImage image)
+	{
+		ArgumentNullException.ThrowIfNull(image);
+
+		KeyImages[(image.Row, image.Column)] = image;
+		KeyImageChanged?.Invoke(this, new DeviceKeyImageChangedEventArgs(image));
 	}
 
 	/// <summary>Ends the session. Raised once however the close was reached, matching a real session.</summary>
@@ -145,6 +180,20 @@ public sealed class FakeDeviceSession : IDeviceSession
 			knownETag is { Length: > 0 } && string.Equals(knownETag, icon.ETag, StringComparison.Ordinal)
 				? icon with { Content = ReadOnlyMemory<byte>.Empty, NotModified = true }
 				: icon);
+	}
+
+	/// <summary>Answers from <see cref="KeyImages" />, and null while <see cref="KeyImageFormat" /> is null,
+	/// as a host that renders no pictures for the session does.</summary>
+	public Task<DeviceKeyImage?> GetKeyImageAsync(int row, int column, CancellationToken cancellationToken = default)
+	{
+		lock (_keyImageRequests)
+		{
+			_keyImageRequests.Add((row, column));
+		}
+
+		return Task.FromResult<DeviceKeyImage?>(KeyImageFormat is null
+			? null
+			: KeyImages.GetValueOrDefault((row, column)));
 	}
 
 	/// <inheritdoc />

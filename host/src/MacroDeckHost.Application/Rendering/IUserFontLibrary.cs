@@ -31,6 +31,13 @@ public sealed record UserFontFile(string FontId, string Format, byte[] Bytes);
 
 public interface IUserFontLibrary
 {
+	// Raised after a font was imported or removed, once the font catalog already lists the change.
+	event EventHandler? Changed
+	{
+		add { }
+		remove { }
+	}
+
 	IReadOnlyList<UserFont> List();
 
 	Task<IReadOnlyList<UserFontImportResult>> Import(

@@ -222,6 +222,11 @@ are listed in the descriptor's `capabilityKinds`:
   more labels of an Action Button. `textAlign` and `labelPosition` keep naming the third of the box the
   label sits in, so a provider that predates the fields ignores them and draws the primary label there.
   See [Devices](/features/devices/).
+- `device-provider` capability version `3` added host-rendered key images, additively in major `3`: the
+  `layout-provider` grid's optional `keyImages`, the optional `keyImages` on `session.open`, the
+  `session.key-images` operation and the `devices` host API's `key-image`. The host sends the new operation
+  and member only to a plugin that negotiated version `3`, and a host that predates them never sends them
+  and answers `key-image` with `CAPABILITY_UNSUPPORTED`. See [Key images](/features/devices/#key-images).
 
 - The `layout-provider` grid (`LayoutGridDto`) gained the optional `maxWidgetColumns` and `maxWidgetRows`
   (`LayoutGrid.MaxWidgetColumns`, `MaxWidgetRows`), additively in major `3` and within capability version

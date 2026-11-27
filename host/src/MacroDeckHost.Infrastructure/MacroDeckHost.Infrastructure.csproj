@@ -31,6 +31,7 @@
       <ProjectReference Include="..\..\..\sdk\src\MacroDeck.Signing\MacroDeck.Signing.csproj" />
       <ProjectReference Include="..\MacroDeckHost.Integrations\MacroDeckHost.Integrations.csproj" />
       <ProjectReference Include="..\MacroDeckHost.Platform\MacroDeckHost.Platform.csproj" />
+      <ProjectReference Include="..\MacroDeckHost.Rendering\MacroDeckHost.Rendering.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -33,6 +33,8 @@ public sealed class InProcessDeviceSurfaceProvider : IDeviceSurfaceProvider
 
 	public string ProviderId { get; }
 
+	public bool SupportsKeyImages => true;
+
 	public async Task<bool> OpenAsync(DeviceSurfaceSessionDescriptor session, CancellationToken cancellationToken)
 	{
 		if (!Guid.TryParse(session.DeviceId, out var deviceId))
@@ -40,7 +42,7 @@ public sealed class InProcessDeviceSurfaceProvider : IDeviceSurfaceProvider
 			return false;
 		}
 
-		var opened = new InProcessDeviceSession(deviceId, session.ProviderDeviceId, _service);
+		var opened = new InProcessDeviceSession(deviceId, session.ProviderDeviceId, _service, session.KeyImages);
 		_sessions[session.DeviceId] = opened;
 
 		await _provider.OnSessionOpenedAsync(opened, cancellationToken);
@@ -52,6 +54,19 @@ public sealed class InProcessDeviceSurfaceProvider : IDeviceSurfaceProvider
 		if (_sessions.TryGetValue(deviceId, out var session))
 		{
 			session.Apply(surface);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	public Task PushKeyImagesAsync(
+		string deviceId,
+		IReadOnlyList<DeviceKeyImage> images,
+		CancellationToken cancellationToken)
+	{
+		if (_sessions.TryGetValue(deviceId, out var session))
+		{
+			session.ApplyKeyImages(images);
 		}
 
 		return Task.CompletedTask;

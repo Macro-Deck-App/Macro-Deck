@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Devices;
+using MacroDeck.Sdk.Layouts;
 
 namespace MacroDeckHost.Application.Devices.Surfaces.InProcess;
 
@@ -7,15 +8,22 @@ internal sealed class InProcessDeviceSession : IDeviceSession
 {
 	private readonly Guid _deviceId;
 	private readonly Func<IDeviceSurfaceService> _service;
+	private readonly Lock _keyImageGate = new();
+	private readonly Dictionary<(int Row, int Column), long> _keyImageRevisions = [];
 
 	private int _closed;
 
-	public InProcessDeviceSession(Guid deviceId, string providerDeviceId, Func<IDeviceSurfaceService> service)
+	public InProcessDeviceSession(
+		Guid deviceId,
+		string providerDeviceId,
+		Func<IDeviceSurfaceService> service,
+		LayoutKeyImageFormat? keyImageFormat = null)
 	{
 		_deviceId = deviceId;
 		_service = service;
 		DeviceId = deviceId.ToString();
 		ProviderDeviceId = providerDeviceId;
+		KeyImageFormat = keyImageFormat;
 	}
 
 	public string DeviceId { get; }
@@ -27,6 +35,10 @@ internal sealed class InProcessDeviceSession : IDeviceSession
 	public event EventHandler<DeviceSurfaceChangedEventArgs>? SurfaceChanged;
 
 	public event EventHandler<DeviceSessionClosedEventArgs>? Closed;
+
+	public event EventHandler<DeviceKeyImageChangedEventArgs>? KeyImageChanged;
+
+	public LayoutKeyImageFormat? KeyImageFormat { get; }
 
 	public async Task<DeviceInteractionResult> SendInteractionAsync(
 		DeviceInteraction interaction,
@@ -53,6 +65,32 @@ internal sealed class InProcessDeviceSession : IDeviceSession
 		return _service().GetWidgetIconAsync(_deviceId, widgetId, knownETag, cancellationToken);
 	}
 
+	public async Task<DeviceKeyImage?> GetKeyImageAsync(
+		int row,
+		int column,
+		CancellationToken cancellationToken = default)
+	{
+		if (KeyImageFormat is null)
+		{
+			return null;
+		}
+
+		var image = await _service().GetKeyImageAsync(_deviceId, row, column, cancellationToken);
+		if (image is not null)
+		{
+			lock (_keyImageGate)
+			{
+				var cell = (image.Row, image.Column);
+				if (image.Revision > _keyImageRevisions.GetValueOrDefault(cell))
+				{
+					_keyImageRevisions[cell] = image.Revision;
+				}
+			}
+		}
+
+		return image;
+	}
+
 	public ValueTask DisposeAsync()
 	{
 		return new ValueTask(_service().CloseAsync(_deviceId, null));
@@ -62,6 +100,24 @@ internal sealed class InProcessDeviceSession : IDeviceSession
 	{
 		CurrentSurface = surface;
 		SurfaceChanged?.Invoke(this, new DeviceSurfaceChangedEventArgs(surface));
+	}
+
+	public void ApplyKeyImages(IReadOnlyList<DeviceKeyImage> images)
+	{
+		lock (_keyImageGate)
+		{
+			foreach (var image in images)
+			{
+				var cell = (image.Row, image.Column);
+				if (Volatile.Read(ref _closed) != 0 || image.Revision <= _keyImageRevisions.GetValueOrDefault(cell))
+				{
+					continue;
+				}
+
+				_keyImageRevisions[cell] = image.Revision;
+				KeyImageChanged?.Invoke(this, new DeviceKeyImageChangedEventArgs(image));
+			}
+		}
 	}
 
 	/// <summary>Raised once per session however the close was reached - a provider disposing the session

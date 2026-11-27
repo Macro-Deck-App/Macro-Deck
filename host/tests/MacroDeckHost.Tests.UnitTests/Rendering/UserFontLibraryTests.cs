@@ -127,6 +127,19 @@ public class UserFontLibraryTests
 	}
 
 	[Test]
+	public async Task Importing_and_removing_a_font_each_report_a_change_once_the_catalog_lists_it()
+	{
+		var listedAtChange = new List<bool>();
+		_library.Changed += (_, _) => listedAtChange.Add(_catalog.GetFaces().Any(face => face.Family == FixtureFamily));
+
+		var font = (await Import(("Anta-Regular.ttf", Fixture))).Single().Font!;
+		await Import(("Anta-Regular.ttf", Fixture));
+		await _library.Remove(font.FontId, CancellationToken.None);
+
+		Assert.That(listedAtChange, Is.EqualTo(new[] { true, false }), "a repeated import changes nothing");
+	}
+
+	[Test]
 	public async Task Removing_a_served_font_deletes_it_and_takes_it_out_of_the_catalog()
 	{
 		var font = (await Import(("Anta-Regular.ttf", Fixture))).Single().Font!;

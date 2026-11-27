@@ -73,7 +73,24 @@ internal static class LayoutDescriptorMapper
 			MaxWidgetRows = grid.MaxWidgetRows,
 			KeySize = grid.KeySize is { } keySize
 				? new LayoutKeySizeDto { Width = keySize.Width, Height = keySize.Height }
-				: null
+				: null,
+			KeyImages = grid.KeyImages is { } keyImages ? ToDto(keyImages) : null
+		};
+	}
+
+	public static LayoutKeyImageFormatDto ToDto(LayoutKeyImageFormat format)
+	{
+		return new LayoutKeyImageFormatDto
+		{
+			Encoding = format.Encoding, Rotation = format.Rotation, MirrorHorizontal = format.MirrorHorizontal
+		};
+	}
+
+	public static LayoutKeyImageFormat ToSdk(LayoutKeyImageFormatDto dto)
+	{
+		return new LayoutKeyImageFormat
+		{
+			Encoding = dto.Encoding, Rotation = dto.Rotation, MirrorHorizontal = dto.MirrorHorizontal
 		};
 	}
 
@@ -91,7 +108,8 @@ internal static class LayoutDescriptorMapper
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
 			MaxWidgetColumns = dto.MaxWidgetColumns,
 			MaxWidgetRows = dto.MaxWidgetRows,
-			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null
+			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null,
+			KeyImages = dto.KeyImages is { } keyImages ? ToSdk(keyImages) : null
 		};
 	}
 

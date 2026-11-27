@@ -48,6 +48,12 @@ public interface IDeviceSurfaceService
 		string? knownETag = null,
 		CancellationToken cancellationToken = default);
 
+	Task<DeviceKeyImage?> GetKeyImageAsync(
+		Guid deviceId,
+		int row,
+		int column,
+		CancellationToken cancellationToken = default);
+
 	/// <summary>Rebuilds every session's surface. Only the sessions whose projection actually changed
 	/// are pushed to.</summary>
 	Task InvalidateAsync(CancellationToken cancellationToken = default);
@@ -56,4 +62,14 @@ public interface IDeviceSurfaceService
 
 	/// <summary>An offline device keeps its session and its place; it just stops being pushed to.</summary>
 	Task SetPresenceAsync(Guid deviceId, bool online, CancellationToken cancellationToken = default);
+
+	Task RefreshKeyImagesAsync(CancellationToken cancellationToken = default)
+	{
+		return Task.CompletedTask;
+	}
+
+	int KeyImageCellCount(string providerId)
+	{
+		return 0;
+	}
 }

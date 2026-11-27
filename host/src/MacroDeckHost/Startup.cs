@@ -39,6 +39,7 @@ using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.Devices.Surfaces.InProcess;
+using MacroDeckHost.Application.Devices.Surfaces.KeyImages;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Actions;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Devices;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Variables;
@@ -535,7 +536,9 @@ public class Startup
 		services.AddSingleton<RemoteDeviceProviderRegistry>();
 		services.AddSingleton<RemoteVariableSubscriptions>();
 		services.AddSingleton<IDeviceSurfaceProviderResolver, DeviceSurfaceProviderResolver>();
+		services.AddSingleton<IDeviceKeyImageRenderer, SkiaDeviceKeyImageRenderer>();
 		services.AddSingleton<DeviceSurfaceService>();
+		services.AddSingleton<DeviceSessionLane>();
 		services.AddSingleton<IDeviceSurfaceService>(sp => sp.GetRequiredService<DeviceSurfaceService>());
 		services.AddSingleton<IDeviceSurfaceRenderSink>(sp => sp.GetRequiredService<DeviceSurfaceService>());
 		services.AddSingleton<Func<IDeviceSurfaceService>>(sp => sp.GetRequiredService<IDeviceSurfaceService>);
@@ -641,6 +644,7 @@ public class Startup
 		services.AddSingleton<UiResourceCallbackThrottle>();
 		services.AddSingleton<MusicPlayerArtworkCallbackThrottle>();
 		services.AddSingleton<VariableHistoryReadThrottle>();
+		services.AddSingleton<KeyImageFetchThrottle>();
 		services.AddSingleton<IPluginCallbackRouter, PluginCallbackRouter>();
 		services.AddSingleton<IPluginAdbAccessPolicy, PluginAdbAccessPolicy>();
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();

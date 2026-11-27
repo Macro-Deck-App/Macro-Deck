@@ -59,6 +59,24 @@ public sealed class DeviceProviderTestClient
 			options);
 	}
 
+	/// <summary>
+	/// Offers the provider a device session with every field of <c>session.open</c> under the test's
+	/// control - set <see cref="DeviceSessionOpenArguments.KeyImages" /> to open it the way a host that
+	/// renders key images does. The result deserializes to <see cref="DeviceSessionOpenResult" />.
+	/// </summary>
+	public Task<CapabilityInvocationOutcome> OpenSessionAsync(
+		DeviceSessionOpenArguments arguments,
+		CapabilityInvokeOptions? options = null)
+	{
+		ArgumentNullException.ThrowIfNull(arguments);
+
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+			ProviderCapabilityId.LocalId,
+			CapabilityOperations.DeviceProvider.SessionOpen,
+			arguments,
+			options);
+	}
+
 	/// <summary>Pushes one surface to an open session. A surface for an unknown session is a no-op, not a
 	/// failure - the two ends have already diverged and the surface is stale by definition.</summary>
 	public Task<CapabilityInvocationOutcome> PushSurfaceAsync(
@@ -70,6 +88,24 @@ public sealed class DeviceProviderTestClient
 			ProviderCapabilityId.LocalId,
 			CapabilityOperations.DeviceProvider.SessionSurface,
 			new DeviceSessionSurfaceArguments { SessionId = sessionId, Surface = surface },
+			options);
+	}
+
+	/// <summary>
+	/// Pushes changed key pictures to a session opened with key images, the way a host that negotiated
+	/// <c>device-provider</c> version 3 does. Pictures for an unknown session are a no-op, like a surface;
+	/// the provider sees one <c>KeyImageChanged</c> per cell and none for a revision that is not newer than
+	/// the last one it saw for that cell.
+	/// </summary>
+	public Task<CapabilityInvocationOutcome> PushKeyImagesAsync(
+		string sessionId,
+		IReadOnlyList<DeviceSessionKeyImageDto> images,
+		CapabilityInvokeOptions? options = null)
+	{
+		return _invoker.InvokeAsync(CapabilityKinds.DeviceProvider,
+			ProviderCapabilityId.LocalId,
+			CapabilityOperations.DeviceProvider.SessionKeyImages,
+			new DeviceSessionKeyImagesArguments { SessionId = sessionId, Images = images },
 			options);
 	}
 

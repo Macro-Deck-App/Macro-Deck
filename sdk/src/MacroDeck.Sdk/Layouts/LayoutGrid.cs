@@ -48,6 +48,16 @@ public sealed record LayoutGrid
 	public LayoutKeySize? KeySize { get; init; }
 
 	/// <summary>
+	/// Asks the host to render a finished picture for every key of this grid and deliver it to the device
+	/// session in this format - see <see cref="MacroDeck.Sdk.Devices.IDeviceSession.KeyImageFormat" />.
+	/// Opt-in: null, the default, keeps a device session to surfaces only. Requires <see cref="KeySize" />,
+	/// which is the delivered picture size; the cells are this grid's <see cref="Rows" /> x
+	/// <see cref="Columns" />. A format the host cannot honour means no key images, never a failed
+	/// registration.
+	/// </summary>
+	public LayoutKeyImageFormat? KeyImages { get; init; }
+
+	/// <summary>
 	/// Whether the row count is settled: a fixed grid, or a configurable one whose bounds leave no choice.
 	/// Deriving it here rather than declaring it separately is what keeps the host and the editor from
 	/// disagreeing about a grid that is nominally configurable but pinned to a single value.

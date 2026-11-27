@@ -199,6 +199,10 @@ public class UiPagesAndUploadsTests
 		public void Reset()
 		{
 		}
+
+		public void Release(string transferId)
+		{
+		}
 	}
 
 	private sealed class ScriptedHost : IHostInvoker

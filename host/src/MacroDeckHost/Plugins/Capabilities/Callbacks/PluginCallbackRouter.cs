@@ -113,6 +113,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IWidgetDataReader? _widgetData;
 	private readonly PluginVariableHistoryWindows? _variableHistory;
 	private readonly VariableHistoryReadThrottle _variableHistoryReadThrottle;
+	private readonly KeyImageFetchThrottle _keyImageFetchThrottle;
 	private readonly IBatteryRegistry? _batteries;
 	private readonly IWeatherBroadcastTrigger? _weatherTrigger;
 	private readonly ILocaleApi? _locale;
@@ -179,9 +180,11 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		ILocaleApi? locale = null,
 		IMusicPlayerAlbumColor? albumColor = null,
 		PluginDesktopNotificationCallbacks? desktopNotifications = null,
-		IMcpVariableWriteGuard? mcpWriteGuard = null)
+		IMcpVariableWriteGuard? mcpWriteGuard = null,
+		KeyImageFetchThrottle? keyImageFetchThrottle = null)
 	{
 		_mcpWriteGuard = mcpWriteGuard;
+		_keyImageFetchThrottle = keyImageFetchThrottle ?? new KeyImageFetchThrottle(TimeProvider.System);
 		_desktopNotifications = desktopNotifications;
 		_weatherTrigger = weatherTrigger;
 		_albumColor = albumColor;
@@ -425,6 +428,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			&& payload.Operation == HostOperations.Variables.HistoryRead)
 		{
 			return _variableHistoryReadThrottle.TryConsume(pluginId, _variableHistory?.OpenCount(pluginId) ?? 0)
+				? null
+				: CallingTooQuickly();
+		}
+
+		// A provider paints every key of a session it was just handed, so key image fetches get a bucket
+		// sized by the plugin's open key image cells instead of draining the budget of its other callbacks.
+		if (string.Equals(payload.Api, HostApis.Devices, StringComparison.Ordinal)
+			&& payload.Operation == HostOperations.Devices.KeyImage)
+		{
+			return _keyImageFetchThrottle.TryConsume(pluginId, _deviceSurfaces?.KeyImageCellCount(pluginId) ?? 0)
 				? null
 				: CallingTooQuickly();
 		}
@@ -1742,6 +1755,29 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 				return icon is null ? HostCallbackResult.Ok() : WidgetIconResult(pluginId, icon);
 			}
 
+			case HostOperations.Devices.KeyImage:
+			{
+				var arguments = Deserialize<DevicesKeyImageArguments>(payload.Arguments);
+				if (arguments is null)
+				{
+					return MissingArguments();
+				}
+
+				if (ResolveSession(pluginId, arguments.SessionId) is not { } deviceId)
+				{
+					return UnknownSession();
+				}
+
+				var image = await _deviceSurfaces!.GetKeyImageAsync(deviceId,
+					arguments.Row,
+					arguments.Column,
+					cancellationToken);
+
+				// No picture for the cell is answered with no value, as for a widget icon: the session has no
+				// key images, or the cell is outside its grid.
+				return image is null ? HostCallbackResult.Ok() : KeyImageResult(pluginId, image);
+			}
+
 			case HostOperations.Devices.Close:
 			{
 				var arguments = Deserialize<DevicesCloseArguments>(payload.Arguments);
@@ -2541,6 +2577,63 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			ByteLength = content.Length,
 			ContentHash = contentHash,
 			NotModified = false,
+			TransferId = transferId
+		});
+	}
+
+	private HostCallbackResult KeyImageResult(string pluginId, DeviceKeyImage image)
+	{
+		if (image.Content.Length <= RemoteDeviceSurfaceProvider.MaxInlineKeyImageBytes)
+		{
+			return HostCallbackResult.Ok(new DevicesKeyImageResult
+			{
+				Row = image.Row,
+				Column = image.Column,
+				Revision = image.Revision,
+				ContentType = image.ContentType,
+				Content = image.Content.ToArray()
+			});
+		}
+
+		if (_assets is null)
+		{
+			return HostCallbackResult.Fail(ProtocolErrorCodes.CapabilityUnavailable,
+				"This host cannot transfer key image bytes to a plugin.");
+		}
+
+		var content = image.Content;
+		var transferId = Guid.CreateVersion7().ToString();
+		var contentHash = AssetContentHash.Compute(content.Span);
+
+		// Started and not awaited for the same reason as IconResult, and bounded by the same per-plugin cap.
+		var sender = _assets;
+		var transfers = _iconTransfers.GetOrAdd(pluginId, _ => new SemaphoreSlim(MaxConcurrentIconTransfers));
+		_ = Task.Run(async () =>
+			{
+				await transfers.WaitAsync(CancellationToken.None);
+				try
+				{
+					await sender.SendAsync(pluginId,
+						transferId,
+						AssetKinds.KeyImage,
+						image.ContentType,
+						content,
+						contentHash,
+						CancellationToken.None);
+				}
+				finally
+				{
+					transfers.Release();
+				}
+			},
+			CancellationToken.None);
+
+		return HostCallbackResult.Ok(new DevicesKeyImageResult
+		{
+			Row = image.Row,
+			Column = image.Column,
+			Revision = image.Revision,
+			ContentType = image.ContentType,
 			TransferId = transferId
 		});
 	}

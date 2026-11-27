@@ -36,7 +36,7 @@ public class CapabilityOperationStabilityTests
 			],
 			[CapabilityKinds.Localization] = ["describe", "catalog"],
 			[CapabilityKinds.DeviceProvider] =
-				["describe", "devices", "session.open", "session.surface", "session.close"],
+				["describe", "devices", "session.open", "session.surface", "session.close", "session.key-images"],
 			[CapabilityKinds.LayoutProvider] = ["describe", "layouts"],
 			[CapabilityKinds.FolderViewProvider] = ["describe", "folder-views"],
 			[CapabilityKinds.WidgetTypeProvider] = ["describe", "widget-types"],

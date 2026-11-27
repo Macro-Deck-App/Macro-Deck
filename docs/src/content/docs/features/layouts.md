@@ -139,6 +139,7 @@ Only `grid` carries geometry, in `LayoutRegion.Grid`. Every other kind is a `Cou
 | `MinRows`, `MaxRows`, `MinColumns`, `MaxColumns` | Per-axis bounds for a configurable grid. Default 1. |
 | `SupportsRuntimeResize` | A resize applies live. When `false`, you may apply it when the device next connects. |
 | `KeySize` | Pixel size of one key, where the hardware has a fixed one. |
+| `KeyImages` | Asks Macro Deck to render a finished picture for every key of this grid, in this `LayoutKeyImageFormat` (encoding, rotation, mirroring), at `KeySize`. Null (default) sends surfaces only. See [Key images](/features/devices/#key-images). |
 | `MaxWidgetColumns`, `MaxWidgetRows` | The largest widget, per axis, on a profile this layout's device claims. `null` (default) leaves the axis unconstrained; a value below 1 reads as 1. See [widget size limits](#widget-size-limits). |
 | `RowsLocked`, `ColumnsLocked` | Derived: fixed, or configurable with min >= max on that axis. |
 
@@ -161,9 +162,9 @@ Capabilities: new LayoutCapabilities
 | --- | --- |
 | `StaticIcons`, `AnimatedIcons`, `Borders`, `BackgroundColors`, `TextLabels`, `Transparency` | What the surface can draw. |
 | `WidgetSpacing`, `CornerRadius` | Whether the folder's spacing and corner radius mean anything here. `false` disables those editor controls with a note that they have no effect on this device. |
-| `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display. |
+| `CustomFolderViews` | Whether the surface can show a [folder view](/ui/views/folder-views/) at all. `false` means the choice is not offered for a profile its device claims. Set it on a software client or full display, and leave it `false` on a grid with `KeyImages`. |
 | `ScreenSavers` | Whether the device takes part in [screensavers](/ui/views/screensavers/#devices-that-show-no-screensaver). Nullable: `false` says it cannot, `null` (the default) and `true` keep Macro Deck's default. Set it to `false` for hardware made of separate key displays. |
-| `MaxUpdatesPerSecond` | Advisory update rate. |
+| `MaxUpdatesPerSecond` | Advisory update rate. Macro Deck caps [key images](/features/devices/#key-images) at it, 30 per second when unset. |
 
 `LayoutVisualCapabilities.Full` sets every flag, `ScreenSavers = true` included. A `Visuals` block that
 sets nothing reads as "renders nothing", except for `ScreenSavers`, which stays `null` and so keeps the

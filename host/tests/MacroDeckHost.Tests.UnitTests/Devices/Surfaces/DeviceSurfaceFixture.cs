@@ -8,6 +8,7 @@ using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Persistence.Repositories;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Resources;
 using MacroDeckHost.Application.Ui.Sessions;
 using MacroDeckHost.Application.Ui.Transport.Messages.UiSessions;
@@ -53,7 +54,10 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 
 	private readonly ServiceProvider _services;
 
-	public DeviceSurfaceFixture(IIconService? icons = null, ILabelTextService? labelText = null)
+	public DeviceSurfaceFixture(
+		IIconService? icons = null,
+		ILabelTextService? labelText = null,
+		Func<DeviceSurfaceFixture, IDeviceSurfaceProvider>? provider = null)
 	{
 		Time = new ManualTimeProvider();
 		Profiles = new FakeProfileRegistry();
@@ -79,7 +83,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		services.AddSingleton<IWidgetIconService>(WidgetIcons);
 		services.AddSingleton(labelText ?? Labels);
 		services.AddSingleton(TestLocalization.Resolver);
-		services.AddSingleton(TestLocalization.Preferences);
+		services.AddSingleton<IAppPreferenceService>(Preferences);
 		services.AddSingleton<IIconPackCache>(Icons);
 		services.AddSingleton<IUiResourceStore>(Resources);
 		services.AddSingleton<IWidgetDefaultShortPress>(DefaultShortPress);
@@ -100,7 +104,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 
 		var scopeFactory = _services.GetRequiredService<IServiceScopeFactory>();
 		Service = new DeviceSurfaceService(scopeFactory,
-			new SingleProviderResolver(Provider),
+			new SingleProviderResolver(provider?.Invoke(this) ?? Provider),
 			Profiles,
 			Presence,
 			new DeviceInteractionRouter(scopeFactory, LockState, Time, Serilog.Core.Logger.None, Profiles),
@@ -110,8 +114,16 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 			new LabelSubscriptionTracker(),
 			Time,
 			DeckClients,
-			Serilog.Core.Logger.None);
+			Serilog.Core.Logger.None,
+			KeyImageRenderer);
 	}
+
+	public FakeLocalizationPreferences Preferences { get; } = new()
+	{
+		Appearance = new AppearanceSettings("dark", "#0a84ff")
+	};
+
+	public FakeKeyImageRenderer KeyImageRenderer { get; } = new();
 
 	public MacroDeckHost.Application.Deck.DeckClientTracker DeckClients { get; } = new(Serilog.Core.Logger.None);
 
@@ -254,7 +266,11 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		};
 	}
 
-	public Guid AddDevice(string providerDeviceId, string? startupProfileId = StudioProfileId, int keyCount = 6)
+	public Guid AddDevice(
+		string providerDeviceId,
+		string? startupProfileId = StudioProfileId,
+		int keyCount = 6,
+		string? layoutSnapshot = null)
 	{
 		var device = new DeviceEntity
 		{
@@ -272,6 +288,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 				["keyCount"] = keyCount
 			}),
 			StartupProfileId = startupProfileId,
+			LayoutSnapshot = layoutSnapshot,
 			LastSeenAt = Time.GetUtcNow().UtcDateTime,
 			CreatedAt = Time.GetUtcNow().UtcDateTime
 		};
@@ -401,6 +418,7 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 {
 	private readonly List<(string DeviceId, DeviceSurface Surface)> _pushes = [];
+	private readonly List<string> _sequence = [];
 	private readonly Lock _sync = new();
 
 	public RecordingSurfaceProvider(string providerId)
@@ -413,6 +431,19 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 	public bool AcceptOpens { get; set; } = true;
 
 	public List<DeviceSurfaceSessionDescriptor> Opens { get; } = [];
+
+	public Func<DeviceSurfaceSessionDescriptor, Task>? OnOpen { get; set; }
+
+	public IReadOnlyList<string> Sequence
+	{
+		get
+		{
+			lock (_sync)
+			{
+				return [.. _sequence];
+			}
+		}
+	}
 
 	public List<(string DeviceId, string? Reason)> Closes { get; } = [];
 
@@ -446,10 +477,15 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 		return SurfacesFor(deviceId).Count;
 	}
 
-	public Task<bool> OpenAsync(DeviceSurfaceSessionDescriptor session, CancellationToken cancellationToken)
+	public async Task<bool> OpenAsync(DeviceSurfaceSessionDescriptor session, CancellationToken cancellationToken)
 	{
 		Opens.Add(session);
-		return Task.FromResult(AcceptOpens);
+		if (OnOpen is { } onOpen)
+		{
+			await onOpen(session);
+		}
+
+		return AcceptOpens;
 	}
 
 	public Task PushAsync(string deviceId, DeviceSurface surface, CancellationToken cancellationToken)
@@ -457,6 +493,7 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 		lock (_sync)
 		{
 			_pushes.Add((deviceId, surface));
+			_sequence.Add("surface");
 		}
 
 		return Task.CompletedTask;
@@ -467,6 +504,41 @@ internal sealed class RecordingSurfaceProvider : IDeviceSurfaceProvider
 		Closes.Add((deviceId, reason));
 		return Task.CompletedTask;
 	}
+
+	public bool SupportsKeyImages { get; set; } = true;
+
+	private readonly List<(string DeviceId, IReadOnlyList<DeviceKeyImage> Images)> _keyImagePushes = [];
+
+	public IReadOnlyList<(string DeviceId, IReadOnlyList<DeviceKeyImage> Images)> KeyImagePushes
+	{
+		get
+		{
+			lock (_sync)
+			{
+				return [.. _keyImagePushes];
+			}
+		}
+	}
+
+	public IReadOnlyList<IReadOnlyList<DeviceKeyImage>> KeyImageBatchesFor(Guid deviceId)
+	{
+		var id = deviceId.ToString();
+		return [.. KeyImagePushes.Where(push => push.DeviceId == id).Select(push => push.Images)];
+	}
+
+	public Task PushKeyImagesAsync(
+		string deviceId,
+		IReadOnlyList<DeviceKeyImage> images,
+		CancellationToken cancellationToken)
+	{
+		lock (_sync)
+		{
+			_keyImagePushes.Add((deviceId, images));
+			_sequence.Add("keys");
+		}
+
+		return Task.CompletedTask;
+	}
 }
 
 internal sealed class RecordingWidgetUiSessionOpener : IWidgetUiSessionOpener
@@ -475,12 +547,21 @@ internal sealed class RecordingWidgetUiSessionOpener : IWidgetUiSessionOpener
 
 	public string? RefusalCode { get; set; }
 
+	public List<string> Principals { get; } = [];
+
 	public UiSessionOpenTicket Open(OpenWidgetUiSessionRequest request, string ownerPrincipal, bool isAdmin)
 	{
-		OpenedWidgetIds.Add(request.WidgetId);
+		int count;
+		lock (OpenedWidgetIds)
+		{
+			OpenedWidgetIds.Add(request.WidgetId);
+			Principals.Add(ownerPrincipal);
+			count = OpenedWidgetIds.Count;
+		}
+
 		return RefusalCode is { } code
 			? UiSessionOpenTicket.Rejected(code, "refused by the test")
-			: UiSessionOpenTicket.Opened($"session-{OpenedWidgetIds.Count}");
+			: UiSessionOpenTicket.Opened($"session-{count}");
 	}
 }
 
