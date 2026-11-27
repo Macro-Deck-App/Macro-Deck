@@ -45,8 +45,8 @@ public sealed class MacroPadIntegration(IPadWatcher watcher) : IPluginIntegratio
 }
 ```
 
-Every connected pad now shows up in Macro Deck's device settings, where the user can name it and give it
-a startup profile. Unplugging it takes it offline; plugging it back in is the same device.
+Every connected pad now shows up in Macro Deck's device settings, where the user can name it and change
+its startup profile. Unplugging it takes it offline; plugging it back in is the same device.
 
 Things to know:
 
@@ -93,6 +93,22 @@ Host restarts     -> registers SERIAL-1 again  -> still the same device
 
 Macro Deck resolves `(your plugin id, Id)` to exactly one device. Re-registering keeps its global id, the
 user's name and its startup profile; the descriptor refreshes the rest.
+
+**A new device starts with a profile.** The first time a device is registered, the host gives it a
+startup profile, so the first surface a rendering provider receives is a deck rather than an empty one:
+
+- When its layout has exactly one grid region, the host creates a profile named after the device with
+  that grid's rows and columns, adds a few 1x1 built-in example widgets (a clock, a stopwatch and a
+  labelled button) and assigns it. The device's layout then locks that profile's grid.
+- When the device has no `LayoutReference`, or its layout has no single grid region, the host assigns the
+  user's first profile instead.
+- When `LayoutReference` names a layout that is not registered yet, the host waits and decides once that
+  layout is registered.
+
+This happens once per device. Re-registering, a restart or a reconnect never creates another profile, and
+a device whose profile the user later changes, unassigns or deletes keeps that choice. A device the user
+deletes in device settings is new when it registers again. Devices registered before this behaviour
+existed are left as they are. Nothing is needed from the provider for any of this.
 
 **Nothing you do deletes a device.** Unregistering takes it offline and stops offering it; the device stays
 so a reconnect is a reuse, not a new row. The same happens when your integration stops or your plugin's

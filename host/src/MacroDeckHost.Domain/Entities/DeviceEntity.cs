@@ -68,5 +68,9 @@ public class DeviceEntity : BaseEntity
 	/// </summary>
 	public string? LayoutSnapshot { get; set; }
 
+	// Set only when a provider device row is first created; cleared once, by a targeted update, when the
+	// host makes its one starter profile decision. A full-entity save never writes it back.
+	public bool StarterProfilePending { get; set; }
+
 	public bool IsProviderDevice => !string.IsNullOrEmpty(ProviderId);
 }

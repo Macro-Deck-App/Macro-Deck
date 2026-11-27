@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Events;
@@ -20,12 +19,13 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 	private static readonly JsonSerializerOptions _capabilitiesJson =
 		new(JsonSerializerDefaults.Web) { WriteIndented = false };
 
-	private readonly ConcurrentDictionary<string, SemaphoreSlim> _gates = new(StringComparer.Ordinal);
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ProviderDevicePresenceTracker _presence;
 	private readonly DeviceConnectionTracker _connectionTracker;
 	private readonly DeviceSessionGuard _sessionGuard;
 	private readonly ILayoutRegistry _layoutRegistry;
+	private readonly ProviderDeviceGates _gates;
+	private readonly ProviderDeviceStarterProfiles _starterProfiles;
 	private readonly TimeProvider _timeProvider;
 	private readonly IIntegrationRegistry? _integrations;
 
@@ -35,6 +35,8 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		DeviceConnectionTracker connectionTracker,
 		DeviceSessionGuard sessionGuard,
 		ILayoutRegistry layoutRegistry,
+		ProviderDeviceGates gates,
+		ProviderDeviceStarterProfiles starterProfiles,
 		TimeProvider timeProvider,
 		IIntegrationRegistry? integrations = null)
 	{
@@ -44,6 +46,8 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		_connectionTracker = connectionTracker;
 		_sessionGuard = sessionGuard;
 		_layoutRegistry = layoutRegistry;
+		_gates = gates;
+		_starterProfiles = starterProfiles;
 		_timeProvider = timeProvider;
 	}
 
@@ -83,7 +87,8 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 						LastSeenAt = now,
 						CreatedAt = now,
 						ProviderId = providerId,
-						ProviderDeviceId = localId
+						ProviderDeviceId = localId,
+						StarterProfilePending = true
 					};
 
 					Apply(existing, device, name, now);
@@ -103,6 +108,11 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 				return (existing, online, presenceChanged);
 			},
 			cancellationToken);
+
+		if (registered.StarterProfilePending)
+		{
+			await _starterProfiles.ProvideAsync(registered.Id);
+		}
 
 		await Publish(scope, registered.Id, cancellationToken);
 		await PublishPresence(scope, registered.Id, online, presenceChanged, cancellationToken);
@@ -148,6 +158,11 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		if (updated is null)
 		{
 			return;
+		}
+
+		if (updated.StarterProfilePending)
+		{
+			await _starterProfiles.ProvideAsync(updated.Id);
 		}
 
 		await Publish(scope, updated.Id, cancellationToken);
@@ -283,18 +298,9 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 
 	// Notifications are published after the gate is released: their handlers open device sessions, and a
 	// provider that registers or updates from that callback would otherwise wait on its own gate.
-	private async Task<T> Serialized<T>(string providerId, Func<Task<T>> operation, CancellationToken cancellationToken)
+	private Task<T> Serialized<T>(string providerId, Func<Task<T>> operation, CancellationToken cancellationToken)
 	{
-		var gate = _gates.GetOrAdd(providerId, static _ => new SemaphoreSlim(1, 1));
-		await gate.WaitAsync(cancellationToken);
-		try
-		{
-			return await operation();
-		}
-		finally
-		{
-			gate.Release();
-		}
+		return _gates.Serialized(providerId, operation, cancellationToken);
 	}
 
 	private bool IsDisabled(string providerId)
