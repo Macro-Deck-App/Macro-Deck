@@ -17,9 +17,9 @@ runs:
       env:
         MODE: ${{ inputs.mode }}
       run: |
-        packages=(xvfb openbox x11-utils x11-xkb-utils)
+        packages=(xvfb openbox x11-utils x11-xkb-utils xclip)
         if [ "$MODE" = "wayland" ]; then
-          packages+=(weston xwayland)
+          packages+=(weston xwayland wl-clipboard)
         fi
         sudo apt-get update -qq
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${packages[@]}"

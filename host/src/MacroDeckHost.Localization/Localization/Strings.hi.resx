@@ -26343,4 +26343,238 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
   <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
     <value>Macro Deck को --disable-plugins के साथ शुरू किया गया, इसलिए इंस्टॉल किए गए प्लगइन अपने-आप शुरू नहीं हुए। उन्हें यहाँ एक-एक करके शुरू करें। यहाँ शुरू या बंद करना केवल इस सत्र पर लागू होता है।</value>
   </data>
+  <data name="Integrations.Clipboard.Name" xml:space="preserve">
+    <value>क्लिपबोर्ड</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Title" xml:space="preserve">
+    <value>क्लिपबोर्ड सेटिंग्स</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Description" xml:space="preserve">
+    <value>क्लिपबोर्ड क्रियाएँ इन सेटिंग्स के बिना भी काम करती हैं। क्लिपबोर्ड इवेंट और वेरिएबल इस्तेमाल करने के लिए निगरानी चालू करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.UnknownStep" xml:space="preserve">
+    <value>यह सेटअप चरण ज्ञात नहीं है। फिर से शुरू करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.NamePlaceholder" xml:space="preserve">
+    <value>क्लिपबोर्ड</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.EnterName" xml:space="preserve">
+    <value>एक नाम दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchLabel" xml:space="preserve">
+    <value>क्लिपबोर्ड की निगरानी करें</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchDescription" xml:space="preserve">
+    <value>कुछ नया कॉपी होने पर इसका पता लगाता है, ताकि क्लिपबोर्ड इवेंट ट्रिगर हों और क्लिपबोर्ड वेरिएबल अद्यतन रहें। Macro Deck आपके द्वारा कॉपी की गई चीज़ों को कभी संग्रहीत या लॉग नहीं करता।</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextLabel" xml:space="preserve">
+    <value>क्लिपबोर्ड टेक्स्ट को वेरिएबल के रूप में दिखाएँ</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextDescription" xml:space="preserve">
+    <value>कॉपी किए गए टेक्स्ट को clipboard_text वेरिएबल में रखता है, जहाँ विजेट, ऑटोमेशन और जुड़े डिवाइस उसे पढ़ सकते हैं।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.OutputVariableLabel" xml:space="preserve">
+    <value>वेरिएबल</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Name" xml:space="preserve">
+    <value>क्लिपबोर्ड टेक्स्ट पढ़ें</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Description" xml:space="preserve">
+    <value>क्लिपबोर्ड के टेक्स्ट को एक वेरिएबल में संग्रहीत करता है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.OutputVariableDescription" xml:space="preserve">
+    <value>वह वेरिएबल जिसमें क्लिपबोर्ड टेक्स्ट आता है</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Name" xml:space="preserve">
+    <value>टेक्स्ट कॉपी करें</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Description" xml:space="preserve">
+    <value>क्लिपबोर्ड पर टेक्स्ट रखता है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextLabel" xml:space="preserve">
+    <value>टेक्स्ट</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextDescription" xml:space="preserve">
+    <value>कॉपी करने के लिए टेक्स्ट। वेरिएबल समर्थित हैं, उदाहरण के लिए {example}।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Name" xml:space="preserve">
+    <value>इमेज कॉपी करें</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Description" xml:space="preserve">
+    <value>क्लिपबोर्ड पर एक इमेज फ़ाइल रखता है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileLabel" xml:space="preserve">
+    <value>इमेज</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileDescription" xml:space="preserve">
+    <value>एक PNG, JPEG, GIF, BMP या TIFF फ़ाइल</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Name" xml:space="preserve">
+    <value>फ़ाइलें कॉपी करें</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Description" xml:space="preserve">
+    <value>फ़ाइलों और फ़ोल्डरों को क्लिपबोर्ड पर रखता है, ताकि उन्हें फ़ाइल मैनेजर में पेस्ट किया जा सके।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsLabel" xml:space="preserve">
+    <value>पथ</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathLabel" xml:space="preserve">
+    <value>पथ</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsDescription" xml:space="preserve">
+    <value>कॉपी की जाने वाली हर फ़ाइल या फ़ोल्डर का पूर्ण पथ</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Name" xml:space="preserve">
+    <value>क्लिपबोर्ड साफ़ करें</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Description" xml:space="preserve">
+    <value>क्लिपबोर्ड से सब कुछ हटा देता है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Name" xml:space="preserve">
+    <value>क्लिपबोर्ड सामग्री जाँचें</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Description" xml:space="preserve">
+    <value>जब क्लिपबोर्ड में चुनी गई तरह की सामग्री हो, तो वेरिएबल में true संग्रहीत करता है, अन्यथा false।</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.KindLabel" xml:space="preserve">
+    <value>सामग्री</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.AnyOption" xml:space="preserve">
+    <value>कोई भी सामग्री</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.OutputVariableDescription" xml:space="preserve">
+    <value>वह वेरिएबल जिसमें true या false आता है</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Empty" xml:space="preserve">
+    <value>खाली</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Text" xml:space="preserve">
+    <value>टेक्स्ट</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Image" xml:space="preserve">
+    <value>इमेज</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Files" xml:space="preserve">
+    <value>फ़ाइलें</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Other" xml:space="preserve">
+    <value>अन्य</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoVariable" xml:space="preserve">
+    <value>एक वेरिएबल चुनें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoText" xml:space="preserve">
+    <value>क्लिपबोर्ड में कोई टेक्स्ट नहीं है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.TextTooLarge" xml:space="preserve">
+    <value>क्लिपबोर्ड टेक्स्ट 1 MiB से बड़ा है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.EnterText" xml:space="preserve">
+    <value>कॉपी करने के लिए टेक्स्ट दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoImage" xml:space="preserve">
+    <value>एक इमेज फ़ाइल चुनें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnsupportedImage" xml:space="preserve">
+    <value>यह इमेज फ़ॉर्मैट समर्थित नहीं है। PNG, JPEG, GIF, BMP या TIFF फ़ाइल इस्तेमाल करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoPaths" xml:space="preserve">
+    <value>कम से कम एक फ़ाइल या फ़ोल्डर पथ दर्ज करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotAbsolute" xml:space="preserve">
+    <value>{path} पूर्ण पथ नहीं है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotFound" xml:space="preserve">
+    <value>{path} नहीं मिला।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.SourceNotFound" xml:space="preserve">
+    <value>कॉपी की जाने वाली फ़ाइल नहीं मिली।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnknownContentKind" xml:space="preserve">
+    <value>चुनें कि किस सामग्री की जाँच करनी है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.VariableNotWritten" xml:space="preserve">
+    <value>वेरिएबल {variable} में लिखा नहीं जा सका।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Locked" xml:space="preserve">
+    <value>कोई दूसरा ऐप क्लिपबोर्ड इस्तेमाल कर रहा है। फिर से कोशिश करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.ContentTooLarge" xml:space="preserve">
+    <value>सामग्री क्लिपबोर्ड के लिए बहुत बड़ी है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Refused" xml:space="preserve">
+    <value>सिस्टम ने Macro Deck को क्लिपबोर्ड पढ़ने की अनुमति नहीं दी।</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Failed" xml:space="preserve">
+    <value>क्लिपबोर्ड इस्तेमाल नहीं किया जा सका। फिर से कोशिश करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.UnsupportedOs" xml:space="preserve">
+    <value>इस ऑपरेटिंग सिस्टम पर क्लिपबोर्ड समर्थित नहीं है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.NoDesktopSession" xml:space="preserve">
+    <value>कोई डेस्कटॉप सत्र नहीं मिला, इसलिए Macro Deck क्लिपबोर्ड तक नहीं पहुँच सकता।</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.ToolMissing" xml:space="preserve">
+    <value>क्लिपबोर्ड के लिए {tool} आवश्यक है। उसे इंस्टॉल करें और Macro Deck फिर से शुरू करें।</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.Unavailable.Title" xml:space="preserve">
+    <value>क्लिपबोर्ड उपलब्ध नहीं है</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Title" xml:space="preserve">
+    <value>क्लिपबोर्ड की निगरानी समर्थित नहीं है</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Description" xml:space="preserve">
+    <value>यह डेस्कटॉप ऐप्स को क्लिपबोर्ड की निगरानी करने नहीं देता। क्लिपबोर्ड क्रियाएँ अब भी काम करती हैं, लेकिन क्लिपबोर्ड इवेंट ट्रिगर नहीं होते और क्लिपबोर्ड वेरिएबल अपडेट नहीं होते।</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeLabel" xml:space="preserve">
+    <value>सामग्री का प्रकार</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextLabel" xml:space="preserve">
+    <value>टेक्स्ट</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Name" xml:space="preserve">
+    <value>क्लिपबोर्ड बदला</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Description" xml:space="preserve">
+    <value>कुछ नया कॉपी होने पर ट्रिगर होता है। क्लिपबोर्ड सेटिंग्स में ‘क्लिपबोर्ड की निगरानी करें’ ज़रूरी है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Name" xml:space="preserve">
+    <value>कॉपी किया गया टेक्स्ट मेल खाता है</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Description" xml:space="preserve">
+    <value>कॉपी किया गया टेक्स्ट किसी रेगुलर एक्सप्रेशन से मेल खाने पर ट्रिगर होता है। केस को अनदेखा करने के लिए पैटर्न को (?i) से शुरू करें। क्लिपबोर्ड सेटिंग्स में ‘क्लिपबोर्ड की निगरानी करें’ ज़रूरी है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternLabel" xml:space="preserve">
+    <value>पैटर्न</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternDescription" xml:space="preserve">
+    <value>एक रेगुलर एक्सप्रेशन, जिससे कॉपी किए गए टेक्स्ट की तुलना की जाती है</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.MatchLabel" xml:space="preserve">
+    <value>मिलान</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Name" xml:space="preserve">
+    <value>क्लिपबोर्ड सामग्री का प्रकार बदला</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Description" xml:space="preserve">
+    <value>क्लिपबोर्ड के किसी दूसरी तरह की सामग्री पर जाने पर ट्रिगर होता है, उदाहरण के लिए टेक्स्ट से इमेज पर। क्लिपबोर्ड सेटिंग्स में ‘क्लिपबोर्ड की निगरानी करें’ ज़रूरी है।</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.PreviousContentTypeLabel" xml:space="preserve">
+    <value>पिछला सामग्री प्रकार</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.ContentType" xml:space="preserve">
+    <value>क्लिपबोर्ड सामग्री प्रकार</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasText" xml:space="preserve">
+    <value>क्लिपबोर्ड में टेक्स्ट है</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasImage" xml:space="preserve">
+    <value>क्लिपबोर्ड में इमेज है</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasFiles" xml:space="preserve">
+    <value>क्लिपबोर्ड में फ़ाइलें हैं</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.Text" xml:space="preserve">
+    <value>क्लिपबोर्ड टेक्स्ट</value>
+  </data>
 </root>

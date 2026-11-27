@@ -197,6 +197,7 @@ assets:
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/volume-2.svg
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/wifi.svg
       - host/src/MacroDeckHost.Infrastructure/IconPacks/Included/zap.svg
+      - host/src/MacroDeckHost.Integrations/Clipboard/Icons/clipboard-icon.svg
       - host/src/MacroDeckHost.Integrations/Feeds/Icons/widget/rss.svg
       - host/src/MacroDeckHost.Integrations/Http/Icons/http-icon.svg
       - host/src/MacroDeckHost.Integrations/Imap/Icons/imap-icon.svg
