@@ -173,6 +173,32 @@
   opacity: 1;
 }
 
+.resize-handle.is-locked {
+  cursor: not-allowed;
+}
+
+.resize-handle.is-locked .resize-dot {
+  opacity: 0.4;
+}
+
+.span-badge {
+  position: absolute;
+  top: max(0.375rem, calc(var(--corner-intrusion) - 0.09375rem));
+  right: max(0.375rem, calc(var(--corner-intrusion) - 0.09375rem));
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-warning);
+  color: var(--color-on-warning);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  cursor: inherit;
+  z-index: 10;
+}
+
 .resize-dot {
   width: 0.375rem;
   height: 0.375rem;

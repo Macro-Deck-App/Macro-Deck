@@ -1630,6 +1630,9 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>Widget byl exportován</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>Zařízení {device} nedokáže zobrazit tak velký widget.</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} akce</value>
     <comment>[plural] [count:int]</comment>

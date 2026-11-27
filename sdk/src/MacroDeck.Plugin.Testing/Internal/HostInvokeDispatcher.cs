@@ -801,6 +801,8 @@ internal static class HostInvokeDispatcher
 			MinColumns = dto.MinColumns,
 			MaxColumns = dto.MaxColumns,
 			SupportsRuntimeResize = dto.SupportsRuntimeResize,
+			MaxWidgetColumns = dto.MaxWidgetColumns,
+			MaxWidgetRows = dto.MaxWidgetRows,
 			KeySize = dto.KeySize is { } keySize ? new LayoutKeySize(keySize.Width, keySize.Height) : null,
 			KeyImages = dto.KeyImages is { } keyImages
 				? new LayoutKeyImageFormat

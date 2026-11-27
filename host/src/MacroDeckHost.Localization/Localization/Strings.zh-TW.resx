@@ -1629,6 +1629,9 @@ Macro Deck 是從其 APT 套件庫安裝的，因此新版本發佈至該套件�
   <data name="Deck.WidgetExported" xml:space="preserve">
     <value>小工具已匯出</value>
   </data>
+  <data name="Deck.WidgetTooLargeForDevice" xml:space="preserve">
+    <value>{device} 無法顯示這麼大的小工具。</value>
+  </data>
   <data name="Developer.ActionCount.One" xml:space="preserve">
     <value>{count} 個動作</value>
     <comment>[plural] [count:int]</comment>

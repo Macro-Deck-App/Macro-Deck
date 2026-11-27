@@ -15,6 +15,10 @@ export interface IpcProfileLayoutConstraint {
   widgetSpacingHonoured?: boolean;
   cornerRadiusHonoured?: boolean;
   customFolderViewsSupported?: boolean;
+  maxWidgetColumns?: number | null;
+  maxWidgetRows?: number | null;
+  maxWidgetColumnsDeviceName?: string | null;
+  maxWidgetRowsDeviceName?: string | null;
 }
 
 export type IpcProfileLayoutCompatibilityStatus = 'ok' | 'conflictingDevices' | 'exceedsLayout';

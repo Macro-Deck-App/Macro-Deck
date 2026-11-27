@@ -65,6 +65,12 @@ public sealed record LayoutGridDto
 
 	public bool SupportsRuntimeResize { get; init; }
 
+	/// <summary>Absent means unconstrained, which is what a plugin built before this member sends.</summary>
+	public int? MaxWidgetColumns { get; init; }
+
+	/// <summary>Absent means unconstrained, which is what a plugin built before this member sends.</summary>
+	public int? MaxWidgetRows { get; init; }
+
 	public LayoutKeySizeDto? KeySize { get; init; }
 
 	/// <summary>See the SDK's <c>LayoutGrid.KeyImages</c>.</summary>

@@ -228,6 +228,11 @@ are listed in the descriptor's `capabilityKinds`:
   and member only to a plugin that negotiated version `3`, and a host that predates them never sends them
   and answers `key-image` with `CAPABILITY_UNSUPPORTED`. See [Key images](/features/devices/#key-images).
 
+- The `layout-provider` grid (`LayoutGridDto`) gained the optional `maxWidgetColumns` and `maxWidgetRows`
+  (`LayoutGrid.MaxWidgetColumns`, `MaxWidgetRows`), additively in major `3` and within capability version
+  `1`: the largest widget per axis on a profile the layout's device claims. An absent value means
+  unconstrained, which is what a plugin built before them sends; a host that predates them ignores them and
+  leaves spans unconstrained. See [widget size limits](/features/layouts/#widget-size-limits).
 - `ui` `describe` gained the optional `pages`, additively in major `3` and within capability version `1`:
   the [integration pages](/ui/views/page/) the plugin declares, each with `id`, `title` and an optional
   `iconName`. The host keeps them only when `surfaces` also declares the `page` kind, and drops a page whose

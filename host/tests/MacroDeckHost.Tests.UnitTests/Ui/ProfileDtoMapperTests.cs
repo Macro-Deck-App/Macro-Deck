@@ -106,6 +106,48 @@ public class ProfileDtoMapperTests
 		});
 	}
 
+	[Test]
+	public void WidgetSpanLimits_ReachTheWire_WithTheDeviceOfEachAxis()
+	{
+		var constraint = FixedConstraint(3, 5, "Stream Deck") with
+		{
+			MaxWidgetColumns = 1,
+			MaxWidgetRows = 2,
+			MaxWidgetColumnsDeviceName = "Stream Deck",
+			MaxWidgetRowsDeviceName = "Macro Pad"
+		};
+
+		var wire = ProfileDtoMapper.MapJsonProfile(Profile(3, 5), constraint).Layout.Constraint!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(wire.MaxWidgetColumns, Is.EqualTo(1));
+			Assert.That(wire.MaxWidgetRows, Is.EqualTo(2));
+			Assert.That(wire.MaxWidgetColumnsDeviceName, Is.EqualTo("Stream Deck"));
+			Assert.That(wire.MaxWidgetRowsDeviceName, Is.EqualTo("Macro Pad"));
+		});
+	}
+
+	[Test]
+	public void AConstraintThatOnlyLimitsWidgetSpans_ReportsNoGridCompatibility()
+	{
+		var constraint = FixedConstraint(0, 0, "Client") with
+		{
+			RowsLocked = false,
+			ColumnsLocked = false,
+			MaxWidgetColumns = 1,
+			ConstrainsGrid = false
+		};
+
+		var dto = ProfileDtoMapper.MapJsonProfile(Profile(20, 20), constraint);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(dto.Layout.Compatibility, Is.Null);
+			Assert.That(dto.Layout.Constraint!.MaxWidgetColumns, Is.EqualTo(1));
+		});
+	}
+
 	private static ProfileEntity Profile(int rows, int columns)
 	{
 		return new ProfileEntity
