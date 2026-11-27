@@ -32,7 +32,7 @@ export const uiButtonComponent: UiComponentDefinition<UiButtonState> = {
   },
 
   paint(node, ctx) {
-    paintStackLayout(node, ctx, true);
+    paintStackLayout(node, ctx, ctx.state.artwork);
     paintButtonArtwork(node, ctx, ctx.state.artwork);
   },
 

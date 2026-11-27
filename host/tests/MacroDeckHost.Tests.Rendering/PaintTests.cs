@@ -113,6 +113,32 @@ public sealed class PaintTests
 	}
 
 	[Test]
+	public async Task A_content_sized_button_rounds_its_corners_by_its_own_height()
+	{
+		var tree = Tree("""
+						{"id":"r","type":"ui.stack","properties":{"background":"#000000"},"children":[
+						{"id":"b","type":"ui.button","properties":{"background":"#ff0000","padding":{"basis":0.2}},
+						"children":[{"id":"t","type":"ui.text","properties":{"text":"Go","size":{"basis":0.1}}}]}]}
+						""");
+		var input = Fixtures.Input(tree, 120, 120, 120);
+		var renderer = new TileRenderer(Fixtures.Fonts);
+
+		var height = renderer.Layout(input).Nodes["b"].Box.Height;
+		var output = renderer.Render(input);
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(height, Is.GreaterThan(48), "the padding and the label give the button its height");
+			Assert.That(Pixel(output, 0, 0), Is.EqualTo(((byte)0, (byte)0, (byte)0, (byte)255)), "outside the arc");
+			Assert.That(Pixel(output, 1, 1), Is.EqualTo(((byte)0, (byte)0, (byte)0, (byte)255)), "outside the arc");
+			Assert.That(Pixel(output, 60, (int)(height / 2)),
+				Is.EqualTo(((byte)255, (byte)0, (byte)0, (byte)255)),
+				"inside the button");
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
 	public void A_cjk_label_is_set_without_missing_glyphs()
 	{
 		const string label = "音量調整";

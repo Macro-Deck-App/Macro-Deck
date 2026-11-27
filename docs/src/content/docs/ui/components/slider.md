@@ -123,9 +123,11 @@ None. `ui.slider` is a leaf.
 
 ## Layout
 
-The element's whole box is the interactive surface; the drawn track is smaller. `Thickness` sizes only the
-drawn track, not the element. On its parent's main axis the slider follows the ordinary rule - `MainSize`
-or `Fill` if declared, otherwise its content extent. See [Sizing](/ui/concepts/sizing/).
+The element's whole box is the interactive surface; the drawn track is smaller. `Thickness` sizes the
+drawn track. On its parent's main axis the slider follows the ordinary rule - `MainSize` or `Fill` if
+declared, otherwise its content extent: its `Thickness` along a vertical stack and nothing along a row.
+A slider with neither in a vertical stack is therefore exactly as tall as its track, and its thumb
+overlaps the space around it. See [Sizing](/ui/concepts/sizing/).
 
 ## Reader behaviour
 

@@ -134,8 +134,9 @@ new UiTextRun { Key = "temp", Text = "21°", Size = 0.14, MainSize = 0.3, Align 
 `MainSize` is a child's extent along its parent's main axis; `Fill` takes whatever the siblings leave,
 split evenly between filling children, and a child with a `MainSize` ignores `Fill`. A child with neither
 is measured without a font: an image is its `Size`, a text is its line height across the stack and
-**nothing along it**. So give every text in a row its own `MainSize` whenever a sibling fills - top
-picture without it, bottom with it.
+**nothing along it**, a slider is its `Thickness` along a vertical stack and nothing along a row. So give
+every text in a row its own `MainSize` whenever a sibling fills - top picture without it, bottom with
+it.
 
 `Size` (the font) and `MainSize` (the slot) are different properties; set both on a text in a row.
 

@@ -102,6 +102,7 @@ internal sealed class TilePipeline
 		}
 
 		Relayout();
+		RoundContentSizedButtons();
 	}
 
 	private void Measure()
@@ -109,6 +110,22 @@ internal sealed class TilePipeline
 		RelayoutLists();
 		SettleFits();
 		ScrollAnchoredLists();
+		RoundContentSizedButtons();
+	}
+
+	private void RoundContentSizedButtons()
+	{
+		if (Host.ContentSizedButtons.Count == 0)
+		{
+			return;
+		}
+
+		foreach (var button in Host.ContentSizedButtons)
+		{
+			StackComponents.RoundToLaidOutHeight(button);
+		}
+
+		_styles.ResolveTree(Document);
 	}
 
 	public void Relayout()

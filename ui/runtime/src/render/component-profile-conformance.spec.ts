@@ -481,6 +481,10 @@ describe('component-profile conformance fixtures: slider tree', () => {
           expect(num(el.style.width)).withContext(`${id}.interactiveWidth`)
             .toBeCloseTo(spec.interactiveWidth as number, 2);
           assertOwnHeight('conformance-slider-layout.json', testCase, id, spec, contentSized);
+          if (contentSized.has(id)) {
+            expect(num(el.style.minHeight)).withContext(`${id}.height (held at the track)`)
+              .toBeCloseTo(spec.trackThickness as number, 2);
+          }
 
           const trackLength = vertical ? num(el.style.height) : num(el.style.width);
           expect(trackLength).withContext(`${id}.trackLength`).toBeCloseTo(spec.trackLength as number, 2);
@@ -550,6 +554,41 @@ describe('component-profile conformance fixtures: action-button tree', () => {
   const tree = loadTree('conformance-action-button-tree.json');
   const layout = loadJson<LayoutFixture>('conformance-action-button-layout.json');
   const contentSized = contentSizedIds(tree);
+  let realObserver: unknown;
+  let observers: Array<{ callback: (entries: unknown[]) => void; targets: Element[] }>;
+
+  beforeEach(() => {
+    observers = [];
+    realObserver = (globalThis as Record<string, unknown>)['ResizeObserver'];
+    (globalThis as Record<string, unknown>)['ResizeObserver'] = function (callback: (entries: unknown[]) => void) {
+      const observer = { callback, targets: [] as Element[] };
+      observers.push(observer);
+      return {
+        observe: (target: Element) => observer.targets.push(target),
+        unobserve: (target: Element) => observer.targets.splice(observer.targets.indexOf(target), 1),
+        disconnect: () => observer.targets.splice(0),
+      };
+    };
+  });
+
+  afterEach(() => {
+    (globalThis as Record<string, unknown>)['ResizeObserver'] = realObserver;
+  });
+
+  // jsdom lays nothing out, so each observed button is handed the border box the browser measured.
+  function layOutButtons(testCase: LayoutCase): void {
+    for (const observer of observers) {
+      const entries = observer.targets
+        .filter(target => target.classList.contains('widget-button'))
+        .map(target => {
+          const height = measuredHeight('conformance-action-button-layout.json', testCase,
+            target.getAttribute('data-node-id')!);
+          return { target, borderBoxSize: [{ blockSize: height, inlineSize: 0 }], contentRect: { height } };
+        });
+      if (entries.length > 0) observer.callback(entries);
+    }
+  }
+
   const LABEL_ID: Record<string, string> = {
     'conformance.full': 'conformance.full.title',
     'conformance.press': 'conformance.press.label',
@@ -579,7 +618,11 @@ describe('component-profile conformance fixtures: action-button tree', () => {
             expect(num(el.style.width)).withContext(`${id}.pressSurfaceWidth`)
               .toBeCloseTo(spec.pressSurfaceWidth as number, 2);
           }
-          // cornerRadius stays unasserted for buttons: no renderer draws the documented corner yet.
+          if ('cornerRadius' in spec) {
+            layOutButtons(testCase);
+            expect(num(el.style.borderRadius)).withContext(`${id}.cornerRadius`)
+              .toBeCloseTo(spec.cornerRadius as number, 1);
+          }
 
           if ('background' in spec) {
             if (spec.background === 'reader-accent') {

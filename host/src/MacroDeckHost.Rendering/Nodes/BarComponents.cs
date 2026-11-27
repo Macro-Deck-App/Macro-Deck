@@ -98,6 +98,7 @@ internal static class BarComponents
 		element.SetClass("widget-pressable", Modifiers.ClaimsValue(node) && !scope.IsDisabled);
 		NodeScope.SizeTo(element, scope.Box);
 		var thickness = Layouts.Length(node, "thickness", scope.Scope);
+		element.SetStyle("min-height", scope.Box.Height is null ? NodeScope.Px(thickness) : null);
 		var track = scope.Part("sliderTrack", "div");
 		track.SetClassName("widget-slider-track");
 		track.SetStyle(vertical ? "width" : "height", NodeScope.Px(thickness));
@@ -116,7 +117,7 @@ internal static class BarComponents
 		thumb.SetStyle("width", NodeScope.Px(diameter));
 		thumb.SetStyle("height", NodeScope.Px(diameter));
 		thumb.SetStyle("border", $"{NodeScope.Num(stroke)}px solid var(--color-bg-secondary)");
-		var extent = (vertical ? scope.Box.Height : scope.Box.Width) ?? 0;
+		var extent = (vertical ? scope.Box.Height ?? thickness : scope.Box.Width) ?? 0;
 		var level = Layouts.Level(node);
 		fill.SetStyle(vertical ? "height" : "width", $"{NodeScope.Num(level * 100)}%");
 		thumb.SetStyle(vertical ? "bottom" : "left", NodeScope.Px(ThumbOffset(level, extent, thickness)));
