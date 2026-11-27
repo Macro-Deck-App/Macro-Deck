@@ -1,5 +1,5 @@
 {
-  "interactiveSurface": "Every slider's interactive surface is its whole box - interactiveWidth by interactiveHeight - while the drawn track is trackThickness across. The two differ on purpose: a reader that made only the drawn track draggable would reproduce the picture and ship a control no thumb can hit.",
+  "interactiveSurface": "Every slider's interactive surface is its whole box - interactiveWidth by interactiveHeight - while the drawn track is trackThickness across. The two differ on purpose: a reader that made only the drawn track draggable would reproduce the picture and ship a control no thumb can hit. A slider with neither mainSize nor fill (conformance.plain, conformance.empty) has no content to size from, so its box, and with it its interactive surface, has no height of its own while its track is still drawn trackThickness across; both declare no events, so neither offers an interaction to lose.",
   "fillColor": "A literal is the node's own levelColor. \"reader-accent\" means the node carries no levelColor and the reader paints its own accent colour, which is why that case is in the fixture at all.",
   "thumb": "Every slider draws a thumb at its level: a disc of radius 1.25 x trackThickness ringed by 0.28 x trackThickness, its centre inset from both ends by radius + ringWidth / 2 so the ring never clips. Same shape as ui.range-bar's marker and deliberately larger - that one is read, this one is grabbed. thumbCentre is the resolved centre, measured from the leading edge along the direction axis.",
   "cases": [
@@ -65,10 +65,10 @@
         },
         "conformance.plain": {
           "width": 211.2,
-          "height": 28.8,
+          "height": 0.0,
           "direction": "horizontal",
           "interactiveWidth": 211.2,
-          "interactiveHeight": 28.8,
+          "interactiveHeight": 0.0,
           "trackLength": 211.2,
           "trackThickness": 28.8,
           "cornerRadius": 14.4,
@@ -81,10 +81,10 @@
         },
         "conformance.empty": {
           "width": 211.2,
-          "height": 28.8,
+          "height": 0.0,
           "direction": "horizontal",
           "interactiveWidth": 211.2,
-          "interactiveHeight": 28.8,
+          "interactiveHeight": 0.0,
           "trackLength": 211.2,
           "trackThickness": 28.8,
           "cornerRadius": 14.4,
@@ -159,10 +159,10 @@
         },
         "conformance.plain": {
           "width": 105.6,
-          "height": 14.4,
+          "height": 0.0,
           "direction": "horizontal",
           "interactiveWidth": 105.6,
-          "interactiveHeight": 14.4,
+          "interactiveHeight": 0.0,
           "trackLength": 105.6,
           "trackThickness": 14.4,
           "cornerRadius": 7.2,
@@ -175,10 +175,10 @@
         },
         "conformance.empty": {
           "width": 105.6,
-          "height": 14.4,
+          "height": 0.0,
           "direction": "horizontal",
           "interactiveWidth": 105.6,
-          "interactiveHeight": 14.4,
+          "interactiveHeight": 0.0,
           "trackLength": 105.6,
           "trackThickness": 14.4,
           "cornerRadius": 7.2,
