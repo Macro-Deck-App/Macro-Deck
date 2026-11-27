@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: [main, production]
     paths:
+      - host/src/MacroDeckHost.Integrations/Clipboard/**
       - host/src/MacroDeckHost.Integrations/Keyboard/**
       - host/src/MacroDeckHost.Integrations/Mouse/**
       - host/src/MacroDeckHost.Platform/**

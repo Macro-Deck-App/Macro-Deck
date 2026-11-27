@@ -26370,4 +26370,238 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
     <value>Macro Deck is gestart met --disable-plugins, dus geïnstalleerde plugins zijn niet automatisch gestart. Start ze hier één voor één. Starten of stoppen hier geldt alleen voor deze sessie.</value>
   </data>
+  <data name="Integrations.Clipboard.Name" xml:space="preserve">
+    <value>Klembord</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Title" xml:space="preserve">
+    <value>Klembordinstellingen</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Description" xml:space="preserve">
+    <value>De klembordacties werken zonder deze instellingen. Zet bewaken aan om de klembordgebeurtenissen en -variabelen te gebruiken.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.UnknownStep" xml:space="preserve">
+    <value>Deze instelstap is onbekend. Begin opnieuw.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.NamePlaceholder" xml:space="preserve">
+    <value>Klembord</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.EnterName" xml:space="preserve">
+    <value>Voer een naam in.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchLabel" xml:space="preserve">
+    <value>Klembord bewaken</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchDescription" xml:space="preserve">
+    <value>Merkt op wanneer er iets nieuws wordt gekopieerd, zodat de klembordgebeurtenissen worden geactiveerd en de klembordvariabelen actueel blijven. Macro Deck slaat nooit op of logt nooit wat je kopieert.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextLabel" xml:space="preserve">
+    <value>Klembordtekst als variabele tonen</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextDescription" xml:space="preserve">
+    <value>Zet gekopieerde tekst in de variabele clipboard_text, waar widgets, automatiseringen en verbonden apparaten hem kunnen lezen.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.OutputVariableLabel" xml:space="preserve">
+    <value>Variabele</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Name" xml:space="preserve">
+    <value>Klembordtekst lezen</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Description" xml:space="preserve">
+    <value>Slaat de tekst op het klembord op in een variabele.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.OutputVariableDescription" xml:space="preserve">
+    <value>De variabele die de klembordtekst ontvangt</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Name" xml:space="preserve">
+    <value>Tekst kopiëren</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Description" xml:space="preserve">
+    <value>Zet tekst op het klembord.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextLabel" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextDescription" xml:space="preserve">
+    <value>De tekst die je wilt kopiëren. Ondersteunt variabelen, bijvoorbeeld {example}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Name" xml:space="preserve">
+    <value>Afbeelding kopiëren</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Description" xml:space="preserve">
+    <value>Zet een afbeeldingsbestand op het klembord.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileLabel" xml:space="preserve">
+    <value>Afbeelding</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileDescription" xml:space="preserve">
+    <value>Een PNG-, JPEG-, GIF-, BMP- of TIFF-bestand</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Name" xml:space="preserve">
+    <value>Bestanden kopiëren</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Description" xml:space="preserve">
+    <value>Zet bestanden en mappen op het klembord, zodat je ze in een bestandsbeheerder kunt plakken.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsLabel" xml:space="preserve">
+    <value>Paden</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathLabel" xml:space="preserve">
+    <value>Pad</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsDescription" xml:space="preserve">
+    <value>Absoluut pad van elk bestand of elke map om te kopiëren</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Name" xml:space="preserve">
+    <value>Klembord wissen</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Description" xml:space="preserve">
+    <value>Verwijdert alles van het klembord.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Name" xml:space="preserve">
+    <value>Klembordinhoud controleren</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Description" xml:space="preserve">
+    <value>Slaat true op in een variabele als het klembord het gekozen soort inhoud bevat, anders false.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.KindLabel" xml:space="preserve">
+    <value>Inhoud</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.AnyOption" xml:space="preserve">
+    <value>Elke inhoud</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.OutputVariableDescription" xml:space="preserve">
+    <value>De variabele die true of false ontvangt</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Empty" xml:space="preserve">
+    <value>Leeg</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Text" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Image" xml:space="preserve">
+    <value>Afbeelding</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Files" xml:space="preserve">
+    <value>Bestanden</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Other" xml:space="preserve">
+    <value>Overig</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoVariable" xml:space="preserve">
+    <value>Kies een variabele.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoText" xml:space="preserve">
+    <value>Het klembord bevat geen tekst.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.TextTooLarge" xml:space="preserve">
+    <value>De klembordtekst is groter dan 1 MiB.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.EnterText" xml:space="preserve">
+    <value>Voer de tekst in die je wilt kopiëren.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoImage" xml:space="preserve">
+    <value>Kies een afbeeldingsbestand.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnsupportedImage" xml:space="preserve">
+    <value>Dit afbeeldingsformaat wordt niet ondersteund. Gebruik een PNG-, JPEG-, GIF-, BMP- of TIFF-bestand.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoPaths" xml:space="preserve">
+    <value>Voer minstens één bestands- of mappad in.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotAbsolute" xml:space="preserve">
+    <value>{path} is geen absoluut pad.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotFound" xml:space="preserve">
+    <value>{path} is niet gevonden.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.SourceNotFound" xml:space="preserve">
+    <value>Het bestand om te kopiëren is niet gevonden.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnknownContentKind" xml:space="preserve">
+    <value>Kies op welke inhoud je wilt controleren.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.VariableNotWritten" xml:space="preserve">
+    <value>De variabele {variable} kon niet worden geschreven.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Locked" xml:space="preserve">
+    <value>Een andere app gebruikt het klembord. Probeer het opnieuw.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.ContentTooLarge" xml:space="preserve">
+    <value>De inhoud is te groot voor het klembord.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Refused" xml:space="preserve">
+    <value>Het systeem stond Macro Deck niet toe het klembord te lezen.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Failed" xml:space="preserve">
+    <value>Het klembord kon niet worden gebruikt. Probeer het opnieuw.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.UnsupportedOs" xml:space="preserve">
+    <value>Het klembord wordt niet ondersteund op dit besturingssysteem.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.NoDesktopSession" xml:space="preserve">
+    <value>Er is geen desktopsessie gevonden, dus Macro Deck kan het klembord niet bereiken.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.ToolMissing" xml:space="preserve">
+    <value>Het klembord heeft {tool} nodig. Installeer het en start Macro Deck opnieuw.</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.Unavailable.Title" xml:space="preserve">
+    <value>Het klembord is niet beschikbaar</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Title" xml:space="preserve">
+    <value>Het klembord bewaken wordt niet ondersteund</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Description" xml:space="preserve">
+    <value>Deze desktop laat apps het klembord niet bewaken. De klembordacties werken nog steeds, maar de klembordgebeurtenissen worden niet geactiveerd en de klembordvariabelen worden niet bijgewerkt.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeLabel" xml:space="preserve">
+    <value>Inhoudstype</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextLabel" xml:space="preserve">
+    <value>Tekst</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Name" xml:space="preserve">
+    <value>Klembord gewijzigd</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Description" xml:space="preserve">
+    <value>Wordt geactiveerd wanneer er iets nieuws wordt gekopieerd. Vereist ‘Klembord bewaken’ in de klembordinstellingen.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Name" xml:space="preserve">
+    <value>Gekopieerde tekst komt overeen</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Description" xml:space="preserve">
+    <value>Wordt geactiveerd wanneer gekopieerde tekst overeenkomt met een reguliere expressie. Begin het patroon met (?i) om hoofdletters te negeren. Vereist ‘Klembord bewaken’ in de klembordinstellingen.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternLabel" xml:space="preserve">
+    <value>Patroon</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternDescription" xml:space="preserve">
+    <value>Een reguliere expressie waarmee de gekopieerde tekst wordt vergeleken</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.MatchLabel" xml:space="preserve">
+    <value>Overeenkomst</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Name" xml:space="preserve">
+    <value>Inhoudstype van klembord gewijzigd</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Description" xml:space="preserve">
+    <value>Wordt geactiveerd wanneer het klembord overschakelt naar een ander soort inhoud, bijvoorbeeld van tekst naar een afbeelding. Vereist ‘Klembord bewaken’ in de klembordinstellingen.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.PreviousContentTypeLabel" xml:space="preserve">
+    <value>Vorig inhoudstype</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.ContentType" xml:space="preserve">
+    <value>Inhoudstype van klembord</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasText" xml:space="preserve">
+    <value>Klembord bevat tekst</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasImage" xml:space="preserve">
+    <value>Klembord bevat een afbeelding</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasFiles" xml:space="preserve">
+    <value>Klembord bevat bestanden</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.Text" xml:space="preserve">
+    <value>Klembordtekst</value>
+  </data>
 </root>

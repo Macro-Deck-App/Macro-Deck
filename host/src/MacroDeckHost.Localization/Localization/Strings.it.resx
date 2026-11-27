@@ -26348,4 +26348,238 @@ Questa copia portatile non si aggiorna da sola. Scarica lo ZIP portatile dal sit
   <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
     <value>Macro Deck è stato avviato con --disable-plugins, quindi i plugin installati non sono stati avviati automaticamente. Avviali qui uno alla volta. Avviarli o fermarli qui vale solo per questa sessione.</value>
   </data>
+  <data name="Integrations.Clipboard.Name" xml:space="preserve">
+    <value>Appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Title" xml:space="preserve">
+    <value>Impostazioni degli appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Description" xml:space="preserve">
+    <value>Le azioni degli appunti funzionano anche senza queste impostazioni. Attiva il monitoraggio per usare gli eventi e le variabili degli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.UnknownStep" xml:space="preserve">
+    <value>Questo passaggio di configurazione non è noto. Ricomincia.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.NamePlaceholder" xml:space="preserve">
+    <value>Appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.EnterName" xml:space="preserve">
+    <value>Inserisci un nome.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchLabel" xml:space="preserve">
+    <value>Monitora gli appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchDescription" xml:space="preserve">
+    <value>Rileva quando viene copiato qualcosa di nuovo, così gli eventi degli appunti si attivano e le variabili degli appunti restano aggiornate. Macro Deck non salva né registra mai ciò che copi.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextLabel" xml:space="preserve">
+    <value>Mostra il testo degli appunti come variabile</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextDescription" xml:space="preserve">
+    <value>Inserisce il testo copiato nella variabile clipboard_text, dove widget, automazioni e dispositivi connessi possono leggerlo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.OutputVariableLabel" xml:space="preserve">
+    <value>Variabile</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Name" xml:space="preserve">
+    <value>Leggi il testo degli appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Description" xml:space="preserve">
+    <value>Salva in una variabile il testo presente negli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.OutputVariableDescription" xml:space="preserve">
+    <value>La variabile che riceve il testo degli appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Name" xml:space="preserve">
+    <value>Copia testo</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Description" xml:space="preserve">
+    <value>Inserisce del testo negli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextLabel" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextDescription" xml:space="preserve">
+    <value>Il testo da copiare. Supporta le variabili, ad esempio {example}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Name" xml:space="preserve">
+    <value>Copia immagine</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Description" xml:space="preserve">
+    <value>Inserisce un file immagine negli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileLabel" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileDescription" xml:space="preserve">
+    <value>Un file PNG, JPEG, GIF, BMP o TIFF</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Name" xml:space="preserve">
+    <value>Copia file</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Description" xml:space="preserve">
+    <value>Inserisce file e cartelle negli appunti, così puoi incollarli in un file manager.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsLabel" xml:space="preserve">
+    <value>Percorsi</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathLabel" xml:space="preserve">
+    <value>Percorso</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsDescription" xml:space="preserve">
+    <value>Percorso assoluto di ogni file o cartella da copiare</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Name" xml:space="preserve">
+    <value>Svuota appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Description" xml:space="preserve">
+    <value>Rimuove tutto dagli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Name" xml:space="preserve">
+    <value>Controlla il contenuto degli appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Description" xml:space="preserve">
+    <value>Salva true in una variabile quando gli appunti contengono il tipo di contenuto scelto, altrimenti false.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.KindLabel" xml:space="preserve">
+    <value>Contenuto</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.AnyOption" xml:space="preserve">
+    <value>Qualsiasi contenuto</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.OutputVariableDescription" xml:space="preserve">
+    <value>La variabile che riceve true o false</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Empty" xml:space="preserve">
+    <value>Vuoto</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Text" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Image" xml:space="preserve">
+    <value>Immagine</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Files" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Other" xml:space="preserve">
+    <value>Altro</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoVariable" xml:space="preserve">
+    <value>Scegli una variabile.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoText" xml:space="preserve">
+    <value>Gli appunti non contengono testo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.TextTooLarge" xml:space="preserve">
+    <value>Il testo negli appunti supera 1 MiB.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.EnterText" xml:space="preserve">
+    <value>Inserisci il testo da copiare.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoImage" xml:space="preserve">
+    <value>Scegli un file immagine.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnsupportedImage" xml:space="preserve">
+    <value>Questo formato immagine non è supportato. Usa un file PNG, JPEG, GIF, BMP o TIFF.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoPaths" xml:space="preserve">
+    <value>Inserisci almeno un percorso di file o cartella.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotAbsolute" xml:space="preserve">
+    <value>{path} non è un percorso assoluto.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotFound" xml:space="preserve">
+    <value>{path} non è stato trovato.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.SourceNotFound" xml:space="preserve">
+    <value>Il file da copiare non è stato trovato.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnknownContentKind" xml:space="preserve">
+    <value>Scegli quale contenuto controllare.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.VariableNotWritten" xml:space="preserve">
+    <value>Impossibile scrivere la variabile {variable}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Locked" xml:space="preserve">
+    <value>Un'altra app sta usando gli appunti. Riprova.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.ContentTooLarge" xml:space="preserve">
+    <value>Il contenuto è troppo grande per gli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Refused" xml:space="preserve">
+    <value>Il sistema non ha permesso a Macro Deck di leggere gli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Failed" xml:space="preserve">
+    <value>Impossibile usare gli appunti. Riprova.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.UnsupportedOs" xml:space="preserve">
+    <value>Gli appunti non sono supportati su questo sistema operativo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.NoDesktopSession" xml:space="preserve">
+    <value>Non è stata trovata nessuna sessione desktop, quindi Macro Deck non può accedere agli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.ToolMissing" xml:space="preserve">
+    <value>Gli appunti richiedono {tool}. Installalo e riavvia Macro Deck.</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.Unavailable.Title" xml:space="preserve">
+    <value>Gli appunti non sono disponibili</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Title" xml:space="preserve">
+    <value>Il monitoraggio degli appunti non è supportato</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Description" xml:space="preserve">
+    <value>Questo desktop non consente alle app di monitorare gli appunti. Le azioni degli appunti funzionano ancora, ma gli eventi degli appunti non si attivano e le variabili degli appunti non si aggiornano.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeLabel" xml:space="preserve">
+    <value>Tipo di contenuto</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextLabel" xml:space="preserve">
+    <value>Testo</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Name" xml:space="preserve">
+    <value>Appunti modificati</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Description" xml:space="preserve">
+    <value>Si attiva quando viene copiato qualcosa di nuovo. Richiede «Monitora gli appunti» nelle impostazioni degli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Name" xml:space="preserve">
+    <value>Il testo copiato corrisponde</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Description" xml:space="preserve">
+    <value>Si attiva quando il testo copiato corrisponde a un'espressione regolare. Inizia il modello con (?i) per ignorare maiuscole e minuscole. Richiede «Monitora gli appunti» nelle impostazioni degli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternLabel" xml:space="preserve">
+    <value>Modello</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternDescription" xml:space="preserve">
+    <value>Un'espressione regolare con cui viene confrontato il testo copiato</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.MatchLabel" xml:space="preserve">
+    <value>Corrispondenza</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Name" xml:space="preserve">
+    <value>Tipo di contenuto degli appunti modificato</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Description" xml:space="preserve">
+    <value>Si attiva quando gli appunti passano a un altro tipo di contenuto, ad esempio da testo a immagine. Richiede «Monitora gli appunti» nelle impostazioni degli appunti.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.PreviousContentTypeLabel" xml:space="preserve">
+    <value>Tipo di contenuto precedente</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.ContentType" xml:space="preserve">
+    <value>Tipo di contenuto degli appunti</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasText" xml:space="preserve">
+    <value>Gli appunti contengono testo</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasImage" xml:space="preserve">
+    <value>Gli appunti contengono un'immagine</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasFiles" xml:space="preserve">
+    <value>Gli appunti contengono file</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.Text" xml:space="preserve">
+    <value>Testo degli appunti</value>
+  </data>
 </root>

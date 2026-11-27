@@ -26370,4 +26370,238 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
     <value>O Macro Deck foi iniciado com --disable-plugins, por isso os plugins instalados não foram iniciados automaticamente. Inicie-os aqui um por vez. Iniciar ou parar aqui vale apenas para esta sessão.</value>
   </data>
+  <data name="Integrations.Clipboard.Name" xml:space="preserve">
+    <value>Área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Title" xml:space="preserve">
+    <value>Configurações da área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Description" xml:space="preserve">
+    <value>As ações da área de transferência funcionam sem estas configurações. Ative o monitoramento para usar os eventos e as variáveis da área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.UnknownStep" xml:space="preserve">
+    <value>Esta etapa de configuração é desconhecida. Comece de novo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.NamePlaceholder" xml:space="preserve">
+    <value>Área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.EnterName" xml:space="preserve">
+    <value>Digite um nome.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchLabel" xml:space="preserve">
+    <value>Monitorar a área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchDescription" xml:space="preserve">
+    <value>Percebe quando algo novo é copiado, para que os eventos da área de transferência sejam disparados e as variáveis dela continuem atualizadas. O Macro Deck nunca armazena nem registra o que é copiado.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextLabel" xml:space="preserve">
+    <value>Mostrar o texto da área de transferência como variável</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextDescription" xml:space="preserve">
+    <value>Coloca o texto copiado na variável clipboard_text, onde widgets, automações e dispositivos conectados podem lê-lo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.OutputVariableLabel" xml:space="preserve">
+    <value>Variável</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Name" xml:space="preserve">
+    <value>Ler texto da área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Description" xml:space="preserve">
+    <value>Armazena em uma variável o texto da área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.OutputVariableDescription" xml:space="preserve">
+    <value>A variável que recebe o texto da área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Name" xml:space="preserve">
+    <value>Copiar texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Description" xml:space="preserve">
+    <value>Coloca texto na área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextLabel" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextDescription" xml:space="preserve">
+    <value>O texto a copiar. Aceita variáveis, por exemplo {example}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Name" xml:space="preserve">
+    <value>Copiar imagem</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Description" xml:space="preserve">
+    <value>Coloca um arquivo de imagem na área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileLabel" xml:space="preserve">
+    <value>Imagem</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileDescription" xml:space="preserve">
+    <value>Um arquivo PNG, JPEG, GIF, BMP ou TIFF</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Name" xml:space="preserve">
+    <value>Copiar arquivos</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Description" xml:space="preserve">
+    <value>Coloca arquivos e pastas na área de transferência para que possam ser colados em um gerenciador de arquivos.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsLabel" xml:space="preserve">
+    <value>Caminhos</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathLabel" xml:space="preserve">
+    <value>Caminho</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsDescription" xml:space="preserve">
+    <value>Caminho absoluto de cada arquivo ou pasta a copiar</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Name" xml:space="preserve">
+    <value>Limpar área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Description" xml:space="preserve">
+    <value>Remove tudo da área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Name" xml:space="preserve">
+    <value>Verificar conteúdo da área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Description" xml:space="preserve">
+    <value>Armazena true em uma variável quando a área de transferência contém o tipo de conteúdo escolhido; caso contrário, false.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.KindLabel" xml:space="preserve">
+    <value>Conteúdo</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.AnyOption" xml:space="preserve">
+    <value>Qualquer conteúdo</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.OutputVariableDescription" xml:space="preserve">
+    <value>A variável que recebe true ou false</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Empty" xml:space="preserve">
+    <value>Vazia</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Image" xml:space="preserve">
+    <value>Imagem</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Files" xml:space="preserve">
+    <value>Arquivos</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Other" xml:space="preserve">
+    <value>Outro</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoVariable" xml:space="preserve">
+    <value>Escolha uma variável.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoText" xml:space="preserve">
+    <value>A área de transferência não contém texto.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.TextTooLarge" xml:space="preserve">
+    <value>O texto da área de transferência é maior que 1 MiB.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.EnterText" xml:space="preserve">
+    <value>Digite o texto a copiar.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoImage" xml:space="preserve">
+    <value>Escolha um arquivo de imagem.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnsupportedImage" xml:space="preserve">
+    <value>Este formato de imagem não é compatível. Use um arquivo PNG, JPEG, GIF, BMP ou TIFF.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoPaths" xml:space="preserve">
+    <value>Digite pelo menos um caminho de arquivo ou pasta.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotAbsolute" xml:space="preserve">
+    <value>{path} não é um caminho absoluto.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotFound" xml:space="preserve">
+    <value>{path} não foi encontrado.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.SourceNotFound" xml:space="preserve">
+    <value>O arquivo a copiar não foi encontrado.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnknownContentKind" xml:space="preserve">
+    <value>Escolha qual conteúdo verificar.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.VariableNotWritten" xml:space="preserve">
+    <value>Não foi possível gravar a variável {variable}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Locked" xml:space="preserve">
+    <value>Outro aplicativo está usando a área de transferência. Tente novamente.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.ContentTooLarge" xml:space="preserve">
+    <value>O conteúdo é grande demais para a área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Refused" xml:space="preserve">
+    <value>O sistema não permitiu que o Macro Deck lesse a área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Failed" xml:space="preserve">
+    <value>Não foi possível usar a área de transferência. Tente novamente.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.UnsupportedOs" xml:space="preserve">
+    <value>A área de transferência não é compatível com este sistema operacional.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.NoDesktopSession" xml:space="preserve">
+    <value>Nenhuma sessão de desktop foi encontrada, então o Macro Deck não consegue acessar a área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.ToolMissing" xml:space="preserve">
+    <value>A área de transferência precisa do {tool}. Instale-o e reinicie o Macro Deck.</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.Unavailable.Title" xml:space="preserve">
+    <value>A área de transferência não está disponível</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Title" xml:space="preserve">
+    <value>O monitoramento da área de transferência não é compatível</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Description" xml:space="preserve">
+    <value>Este desktop não permite que aplicativos monitorem a área de transferência. As ações da área de transferência continuam funcionando, mas os eventos dela não são disparados e as variáveis dela não são atualizadas.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeLabel" xml:space="preserve">
+    <value>Tipo de conteúdo</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextLabel" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Name" xml:space="preserve">
+    <value>Área de transferência alterada</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Description" xml:space="preserve">
+    <value>Disparado quando algo novo é copiado. Requer “Monitorar a área de transferência” nas configurações da área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Name" xml:space="preserve">
+    <value>Texto copiado corresponde</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Description" xml:space="preserve">
+    <value>Disparado quando o texto copiado corresponde a uma expressão regular. Comece o padrão com (?i) para ignorar maiúsculas e minúsculas. Requer “Monitorar a área de transferência” nas configurações da área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternLabel" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternDescription" xml:space="preserve">
+    <value>Uma expressão regular com a qual o texto copiado é comparado</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.MatchLabel" xml:space="preserve">
+    <value>Correspondência</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Name" xml:space="preserve">
+    <value>Tipo de conteúdo da área de transferência alterado</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Description" xml:space="preserve">
+    <value>Disparado quando a área de transferência passa para outro tipo de conteúdo, por exemplo de texto para imagem. Requer “Monitorar a área de transferência” nas configurações da área de transferência.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.PreviousContentTypeLabel" xml:space="preserve">
+    <value>Tipo de conteúdo anterior</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.ContentType" xml:space="preserve">
+    <value>Tipo de conteúdo da área de transferência</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasText" xml:space="preserve">
+    <value>Área de transferência tem texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasImage" xml:space="preserve">
+    <value>Área de transferência tem imagem</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasFiles" xml:space="preserve">
+    <value>Área de transferência tem arquivos</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.Text" xml:space="preserve">
+    <value>Texto da área de transferência</value>
+  </data>
 </root>

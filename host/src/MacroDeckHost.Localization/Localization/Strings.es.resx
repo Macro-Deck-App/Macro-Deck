@@ -26348,4 +26348,238 @@ Esta copia portátil no se actualiza sola. Descarga el ZIP portátil desde el si
   <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
     <value>Macro Deck se inició con --disable-plugins, por lo que los plugins instalados no se iniciaron automáticamente. Inícialos aquí uno a uno. Iniciarlos o detenerlos aquí solo se aplica a esta sesión.</value>
   </data>
+  <data name="Integrations.Clipboard.Name" xml:space="preserve">
+    <value>Portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Title" xml:space="preserve">
+    <value>Ajustes del portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Description" xml:space="preserve">
+    <value>Las acciones del portapapeles funcionan sin estos ajustes. Activa la vigilancia para usar los eventos y las variables del portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.UnknownStep" xml:space="preserve">
+    <value>Este paso de configuración no se conoce. Empieza de nuevo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.NamePlaceholder" xml:space="preserve">
+    <value>Portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.EnterName" xml:space="preserve">
+    <value>Escribe un nombre.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchLabel" xml:space="preserve">
+    <value>Vigilar el portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchDescription" xml:space="preserve">
+    <value>Detecta cuándo se copia algo nuevo, para que se disparen los eventos del portapapeles y sus variables se mantengan al día. Macro Deck nunca guarda ni registra lo que copias.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextLabel" xml:space="preserve">
+    <value>Mostrar el texto del portapapeles como variable</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextDescription" xml:space="preserve">
+    <value>Pone el texto copiado en la variable clipboard_text, donde los widgets, las automatizaciones y los dispositivos conectados pueden leerlo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.OutputVariableLabel" xml:space="preserve">
+    <value>Variable</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Name" xml:space="preserve">
+    <value>Leer texto del portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Description" xml:space="preserve">
+    <value>Guarda en una variable el texto del portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.OutputVariableDescription" xml:space="preserve">
+    <value>La variable que recibe el texto del portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Name" xml:space="preserve">
+    <value>Copiar texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Description" xml:space="preserve">
+    <value>Pone texto en el portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextLabel" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextDescription" xml:space="preserve">
+    <value>El texto que se copia. Admite variables, por ejemplo {example}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Name" xml:space="preserve">
+    <value>Copiar imagen</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Description" xml:space="preserve">
+    <value>Pone un archivo de imagen en el portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileLabel" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileDescription" xml:space="preserve">
+    <value>Un archivo PNG, JPEG, GIF, BMP o TIFF</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Name" xml:space="preserve">
+    <value>Copiar archivos</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Description" xml:space="preserve">
+    <value>Pone archivos y carpetas en el portapapeles para poder pegarlos en un gestor de archivos.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsLabel" xml:space="preserve">
+    <value>Rutas</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathLabel" xml:space="preserve">
+    <value>Ruta</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsDescription" xml:space="preserve">
+    <value>Ruta absoluta de cada archivo o carpeta que se va a copiar</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Name" xml:space="preserve">
+    <value>Vaciar portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Description" xml:space="preserve">
+    <value>Quita todo del portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Name" xml:space="preserve">
+    <value>Comprobar contenido del portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Description" xml:space="preserve">
+    <value>Guarda true en una variable cuando el portapapeles contiene el tipo de contenido elegido y false en caso contrario.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.KindLabel" xml:space="preserve">
+    <value>Contenido</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.AnyOption" xml:space="preserve">
+    <value>Cualquier contenido</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.OutputVariableDescription" xml:space="preserve">
+    <value>La variable que recibe true o false</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Empty" xml:space="preserve">
+    <value>Vacío</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Text" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Image" xml:space="preserve">
+    <value>Imagen</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Files" xml:space="preserve">
+    <value>Archivos</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Other" xml:space="preserve">
+    <value>Otro</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoVariable" xml:space="preserve">
+    <value>Elige una variable.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoText" xml:space="preserve">
+    <value>El portapapeles no contiene texto.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.TextTooLarge" xml:space="preserve">
+    <value>El texto del portapapeles supera 1 MiB.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.EnterText" xml:space="preserve">
+    <value>Escribe el texto que quieres copiar.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoImage" xml:space="preserve">
+    <value>Elige un archivo de imagen.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnsupportedImage" xml:space="preserve">
+    <value>Este formato de imagen no es compatible. Usa un archivo PNG, JPEG, GIF, BMP o TIFF.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoPaths" xml:space="preserve">
+    <value>Escribe al menos una ruta de archivo o carpeta.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotAbsolute" xml:space="preserve">
+    <value>{path} no es una ruta absoluta.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotFound" xml:space="preserve">
+    <value>No se encontró {path}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.SourceNotFound" xml:space="preserve">
+    <value>No se encontró el archivo que se iba a copiar.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnknownContentKind" xml:space="preserve">
+    <value>Elige qué contenido quieres comprobar.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.VariableNotWritten" xml:space="preserve">
+    <value>No se ha podido escribir la variable {variable}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Locked" xml:space="preserve">
+    <value>Otra aplicación está usando el portapapeles. Inténtalo de nuevo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.ContentTooLarge" xml:space="preserve">
+    <value>El contenido es demasiado grande para el portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Refused" xml:space="preserve">
+    <value>El sistema no permitió que Macro Deck leyera el portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Failed" xml:space="preserve">
+    <value>No se pudo usar el portapapeles. Inténtalo de nuevo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.UnsupportedOs" xml:space="preserve">
+    <value>El portapapeles no es compatible con este sistema operativo.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.NoDesktopSession" xml:space="preserve">
+    <value>No se encontró ninguna sesión de escritorio, así que Macro Deck no puede acceder al portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.ToolMissing" xml:space="preserve">
+    <value>El portapapeles necesita {tool}. Instálalo y reinicia Macro Deck.</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.Unavailable.Title" xml:space="preserve">
+    <value>El portapapeles no está disponible</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Title" xml:space="preserve">
+    <value>No se puede vigilar el portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Description" xml:space="preserve">
+    <value>Este escritorio no permite que las aplicaciones vigilen el portapapeles. Las acciones del portapapeles siguen funcionando, pero sus eventos no se disparan y sus variables no se actualizan.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeLabel" xml:space="preserve">
+    <value>Tipo de contenido</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextLabel" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Name" xml:space="preserve">
+    <value>Portapapeles cambiado</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Description" xml:space="preserve">
+    <value>Se dispara cuando se copia algo nuevo. Requiere “Vigilar el portapapeles” en los ajustes del portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Name" xml:space="preserve">
+    <value>El texto copiado coincide</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Description" xml:space="preserve">
+    <value>Se dispara cuando el texto copiado coincide con una expresión regular. Empieza el patrón con (?i) para no distinguir mayúsculas de minúsculas. Requiere “Vigilar el portapapeles” en los ajustes del portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternLabel" xml:space="preserve">
+    <value>Patrón</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternDescription" xml:space="preserve">
+    <value>Una expresión regular con la que se compara el texto copiado</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.MatchLabel" xml:space="preserve">
+    <value>Coincidencia</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Name" xml:space="preserve">
+    <value>Tipo de contenido del portapapeles cambiado</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Description" xml:space="preserve">
+    <value>Se dispara cuando el portapapeles pasa a otro tipo de contenido, por ejemplo de texto a una imagen. Requiere “Vigilar el portapapeles” en los ajustes del portapapeles.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.PreviousContentTypeLabel" xml:space="preserve">
+    <value>Tipo de contenido anterior</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.ContentType" xml:space="preserve">
+    <value>Tipo de contenido del portapapeles</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasText" xml:space="preserve">
+    <value>El portapapeles tiene texto</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasImage" xml:space="preserve">
+    <value>El portapapeles tiene una imagen</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasFiles" xml:space="preserve">
+    <value>El portapapeles tiene archivos</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.Text" xml:space="preserve">
+    <value>Texto del portapapeles</value>
+  </data>
 </root>

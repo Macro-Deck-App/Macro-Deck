@@ -26370,4 +26370,238 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Developer.ManagedPlugins.PluginsDisabledNotice" xml:space="preserve">
     <value>Macro Deck запущен с --disable-plugins, поэтому установленные плагины не были запущены автоматически. Запускайте их здесь по одному. Запуск или остановка здесь действует только для этого сеанса.</value>
   </data>
+  <data name="Integrations.Clipboard.Name" xml:space="preserve">
+    <value>Буфер обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Title" xml:space="preserve">
+    <value>Настройки буфера обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.Description" xml:space="preserve">
+    <value>Действия с буфером обмена работают и без этих настроек. Включите отслеживание, чтобы использовать события и переменные буфера обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.UnknownStep" xml:space="preserve">
+    <value>Этот шаг настройки неизвестен. Начните заново.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.NamePlaceholder" xml:space="preserve">
+    <value>Буфер обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.EnterName" xml:space="preserve">
+    <value>Введите имя.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchLabel" xml:space="preserve">
+    <value>Отслеживать буфер обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.WatchDescription" xml:space="preserve">
+    <value>Замечает, когда копируется что-то новое, чтобы срабатывали события буфера обмена и его переменные оставались актуальными. Macro Deck никогда не сохраняет и не записывает в журнал скопированное.</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextLabel" xml:space="preserve">
+    <value>Показывать текст буфера обмена как переменную</value>
+  </data>
+  <data name="Integrations.Clipboard.Config.ExposeTextDescription" xml:space="preserve">
+    <value>Помещает скопированный текст в переменную clipboard_text, откуда его могут читать виджеты, автоматизации и подключённые устройства.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.OutputVariableLabel" xml:space="preserve">
+    <value>Переменная</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Name" xml:space="preserve">
+    <value>Прочитать текст из буфера обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.Description" xml:space="preserve">
+    <value>Сохраняет текст из буфера обмена в переменную.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.ReadText.OutputVariableDescription" xml:space="preserve">
+    <value>Переменная, в которую записывается текст из буфера обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Name" xml:space="preserve">
+    <value>Копировать текст</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.Description" xml:space="preserve">
+    <value>Помещает текст в буфер обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextLabel" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.SetText.TextDescription" xml:space="preserve">
+    <value>Текст для копирования. Поддерживает переменные, например {example}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Name" xml:space="preserve">
+    <value>Копировать изображение</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.Description" xml:space="preserve">
+    <value>Помещает файл изображения в буфер обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileLabel" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyImage.FileDescription" xml:space="preserve">
+    <value>Файл PNG, JPEG, GIF, BMP или TIFF</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Name" xml:space="preserve">
+    <value>Копировать файлы</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.Description" xml:space="preserve">
+    <value>Помещает файлы и папки в буфер обмена, чтобы их можно было вставить в файловом менеджере.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsLabel" xml:space="preserve">
+    <value>Пути</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathLabel" xml:space="preserve">
+    <value>Путь</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CopyFiles.PathsDescription" xml:space="preserve">
+    <value>Абсолютный путь к каждому копируемому файлу или папке</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Name" xml:space="preserve">
+    <value>Очистить буфер обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.Clear.Description" xml:space="preserve">
+    <value>Удаляет всё из буфера обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Name" xml:space="preserve">
+    <value>Проверить содержимое буфера обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.Description" xml:space="preserve">
+    <value>Сохраняет true в переменную, если в буфере обмена есть выбранный вид содержимого, иначе false.</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.KindLabel" xml:space="preserve">
+    <value>Содержимое</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.AnyOption" xml:space="preserve">
+    <value>Любое содержимое</value>
+  </data>
+  <data name="Integrations.Clipboard.Actions.CheckContent.OutputVariableDescription" xml:space="preserve">
+    <value>Переменная, в которую записывается true или false</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Empty" xml:space="preserve">
+    <value>Пусто</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Text" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Image" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Files" xml:space="preserve">
+    <value>Файлы</value>
+  </data>
+  <data name="Integrations.Clipboard.ContentTypes.Other" xml:space="preserve">
+    <value>Другое</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoVariable" xml:space="preserve">
+    <value>Выберите переменную.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoText" xml:space="preserve">
+    <value>В буфере обмена нет текста.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.TextTooLarge" xml:space="preserve">
+    <value>Текст в буфере обмена больше 1 MiB.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.EnterText" xml:space="preserve">
+    <value>Введите текст для копирования.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoImage" xml:space="preserve">
+    <value>Выберите файл изображения.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnsupportedImage" xml:space="preserve">
+    <value>Этот формат изображения не поддерживается. Используйте файл PNG, JPEG, GIF, BMP или TIFF.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.NoPaths" xml:space="preserve">
+    <value>Введите хотя бы один путь к файлу или папке.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotAbsolute" xml:space="preserve">
+    <value>{path} не является абсолютным путём.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.PathNotFound" xml:space="preserve">
+    <value>{path} не найден.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.SourceNotFound" xml:space="preserve">
+    <value>Файл для копирования не найден.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.UnknownContentKind" xml:space="preserve">
+    <value>Выберите, какое содержимое проверять.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.VariableNotWritten" xml:space="preserve">
+    <value>Не удалось записать переменную {variable}.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Locked" xml:space="preserve">
+    <value>Буфер обмена занят другим приложением. Повторите попытку.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.ContentTooLarge" xml:space="preserve">
+    <value>Содержимое слишком велико для буфера обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Refused" xml:space="preserve">
+    <value>Система не разрешила Macro Deck прочитать буфер обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Errors.Failed" xml:space="preserve">
+    <value>Не удалось использовать буфер обмена. Повторите попытку.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.UnsupportedOs" xml:space="preserve">
+    <value>Буфер обмена не поддерживается в этой операционной системе.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.NoDesktopSession" xml:space="preserve">
+    <value>Сеанс рабочего стола не найден, поэтому Macro Deck не может получить доступ к буферу обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Unavailable.ToolMissing" xml:space="preserve">
+    <value>Для буфера обмена нужен {tool}. Установите его и перезапустите Macro Deck.</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.Unavailable.Title" xml:space="preserve">
+    <value>Буфер обмена недоступен</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Title" xml:space="preserve">
+    <value>Отслеживание буфера обмена не поддерживается</value>
+  </data>
+  <data name="Integrations.Clipboard.Issues.WatchUnsupported.Description" xml:space="preserve">
+    <value>Эта среда рабочего стола не позволяет приложениям отслеживать буфер обмена. Действия с буфером обмена по-прежнему работают, но его события не срабатывают, а переменные не обновляются.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeLabel" xml:space="preserve">
+    <value>Тип содержимого</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextLabel" xml:space="preserve">
+    <value>Текст</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Name" xml:space="preserve">
+    <value>Буфер обмена изменён</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentChanged.Description" xml:space="preserve">
+    <value>Срабатывает, когда копируется что-то новое. Требуется параметр «Отслеживать буфер обмена» в настройках буфера обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Name" xml:space="preserve">
+    <value>Скопированный текст совпадает</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.Description" xml:space="preserve">
+    <value>Срабатывает, когда скопированный текст совпадает с регулярным выражением. Чтобы не учитывать регистр, начните шаблон с (?i). Требуется параметр «Отслеживать буфер обмена» в настройках буфера обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternLabel" xml:space="preserve">
+    <value>Шаблон</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.PatternDescription" xml:space="preserve">
+    <value>Регулярное выражение, с которым сравнивается скопированный текст</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.TextMatched.MatchLabel" xml:space="preserve">
+    <value>Совпадение</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Name" xml:space="preserve">
+    <value>Тип содержимого буфера обмена изменён</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.Description" xml:space="preserve">
+    <value>Срабатывает, когда в буфере обмена появляется содержимое другого вида, например изображение вместо текста. Требуется параметр «Отслеживать буфер обмена» в настройках буфера обмена.</value>
+  </data>
+  <data name="Integrations.Clipboard.Events.ContentTypeChanged.PreviousContentTypeLabel" xml:space="preserve">
+    <value>Предыдущий тип содержимого</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.ContentType" xml:space="preserve">
+    <value>Тип содержимого буфера обмена</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasText" xml:space="preserve">
+    <value>В буфере обмена есть текст</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasImage" xml:space="preserve">
+    <value>В буфере обмена есть изображение</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.HasFiles" xml:space="preserve">
+    <value>В буфере обмена есть файлы</value>
+  </data>
+  <data name="Integrations.Clipboard.Variables.Text" xml:space="preserve">
+    <value>Текст буфера обмена</value>
+  </data>
 </root>
