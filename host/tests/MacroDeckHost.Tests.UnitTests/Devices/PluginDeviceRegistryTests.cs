@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Auth;
 using MacroDeckHost.Application.Devices;
+using MacroDeckHost.Application.Events;
 using MacroDeckHost.Application.Integrations;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Persistence.Repositories;
@@ -34,6 +35,7 @@ public class PluginDeviceRegistryTests
 	private PluginDeviceRegistry _registry = null!;
 	private DeviceSessionGuard _sessionGuard = null!;
 	private DeviceService _service = null!;
+	private RecordingMediator _mediator = null!;
 
 	[SetUp]
 	public void SetUp()
@@ -50,7 +52,8 @@ public class PluginDeviceRegistryTests
 
 		var services = new ServiceCollection();
 		services.AddSingleton<IDeviceRepository>(_devices);
-		services.AddSingleton<IMediator>(new RecordingMediator());
+		_mediator = new RecordingMediator();
+		services.AddSingleton<IMediator>(_mediator);
 		_scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
 		_registry = new PluginDeviceRegistry(_scopeFactory,
@@ -127,6 +130,25 @@ public class PluginDeviceRegistryTests
 			Assert.That(device.LayoutReference, Is.EqualTo("com.example.deck::xl"));
 			Assert.That(device.Online, Is.True);
 		});
+	}
+
+	[Test]
+	public async Task A_provider_can_report_presence_from_a_notification_its_registration_raised()
+	{
+		bool? reentrantCallCompleted = null;
+		_mediator.BeforePublish = notification =>
+		{
+			if (notification is DeviceChangedNotification && reentrantCallCompleted is null)
+			{
+				reentrantCallCompleted = false;
+				reentrantCallCompleted = _registry.SetPresenceAsync(ProviderId, "SERIAL-1", DevicePresence.Online)
+					.Wait(TimeSpan.FromSeconds(5));
+			}
+		};
+
+		await _registry.RegisterAsync(ProviderId, Descriptor());
+
+		Assert.That(reentrantCallCompleted, Is.True);
 	}
 
 	[Test]

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using MacroDeck.Sdk.Devices;
 using MacroDeckHost.Application.Events;
@@ -19,6 +20,7 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 	private static readonly JsonSerializerOptions _capabilitiesJson =
 		new(JsonSerializerDefaults.Web) { WriteIndented = false };
 
+	private readonly ConcurrentDictionary<string, SemaphoreSlim> _gates = new(StringComparer.Ordinal);
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly ProviderDevicePresenceTracker _presence;
 	private readonly DeviceConnectionTracker _connectionTracker;
@@ -60,45 +62,52 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
-		var now = _timeProvider.GetUtcNow().UtcDateTime;
-		var existing = await repository.GetByProviderIdentity(providerId, localId);
-
-		if (existing is null)
-		{
-			existing = new DeviceEntity
+		var (registered, online, presenceChanged) = await Serialized(providerId,
+			async () =>
 			{
-				Id = Guid.NewGuid(),
-				// A provider device presents no credential of its own; see DeviceEntity.SecretHash.
-				SecretHash = string.Empty,
-				Name = name,
-				NameIsCustom = false,
-				ProposedName = name,
-				ClientType = DeviceClientType.Provider,
-				FormFactor = DeviceFormFactor.Unknown,
-				LastSeenAt = now,
-				CreatedAt = now,
-				ProviderId = providerId,
-				ProviderDeviceId = localId
-			};
+				var now = _timeProvider.GetUtcNow().UtcDateTime;
+				var existing = await repository.GetByProviderIdentity(providerId, localId);
 
-			Apply(existing, device, name, now);
-			await repository.Create(existing);
-			_sessionGuard.Track(existing.Id, existing.SessionsRevokedAt);
-		}
-		else
-		{
-			Apply(existing, device, name, now);
-			await repository.Update(existing);
-		}
+				if (existing is null)
+				{
+					existing = new DeviceEntity
+					{
+						Id = Guid.NewGuid(),
+						// A provider device presents no credential of its own; see DeviceEntity.SecretHash.
+						SecretHash = string.Empty,
+						Name = name,
+						NameIsCustom = false,
+						ProposedName = name,
+						ClientType = DeviceClientType.Provider,
+						FormFactor = DeviceFormFactor.Unknown,
+						LastSeenAt = now,
+						CreatedAt = now,
+						ProviderId = providerId,
+						ProviderDeviceId = localId
+					};
 
-		var online = device.Presence == DevicePresence.Online && !IsDisabled(providerId);
-		var presenceChanged = _presence.Set(existing.Id, online);
-		_connectionTracker.SetDeviceName(existing.Id, existing.Name);
+					Apply(existing, device, name, now);
+					await repository.Create(existing);
+					_sessionGuard.Track(existing.Id, existing.SessionsRevokedAt);
+				}
+				else
+				{
+					Apply(existing, device, name, now);
+					await repository.Update(existing);
+				}
 
-		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope, existing.Id, online, presenceChanged, cancellationToken);
+				var online = device.Presence == DevicePresence.Online && !IsDisabled(providerId);
+				var presenceChanged = _presence.Set(existing.Id, online);
+				_connectionTracker.SetDeviceName(existing.Id, existing.Name);
 
-		return new DeviceRegistration(existing.Id.ToString(), localId);
+				return (existing, online, presenceChanged);
+			},
+			cancellationToken);
+
+		await Publish(scope, registered.Id, cancellationToken);
+		await PublishPresence(scope, registered.Id, online, presenceChanged, cancellationToken);
+
+		return new DeviceRegistration(registered.Id.ToString(), localId);
 	}
 
 	public async Task UpdateAsync(
@@ -116,21 +125,33 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
-		var existing = await repository.GetByProviderIdentity(providerId, localId);
-		if (existing is null)
+		var (updated, online, presenceChanged) = await Serialized(providerId,
+			async () =>
+			{
+				var existing = await repository.GetByProviderIdentity(providerId, localId);
+				if (existing is null)
+				{
+					return (null, false, false);
+				}
+
+				Apply(existing, device, name, _timeProvider.GetUtcNow().UtcDateTime);
+				await repository.Update(existing);
+
+				var online = device.Presence == DevicePresence.Online && !IsDisabled(providerId);
+				var presenceChanged = _presence.Set(existing.Id, online);
+				_connectionTracker.SetDeviceName(existing.Id, existing.Name);
+
+				return ((DeviceEntity?)existing, online, presenceChanged);
+			},
+			cancellationToken);
+
+		if (updated is null)
 		{
 			return;
 		}
 
-		Apply(existing, device, name, _timeProvider.GetUtcNow().UtcDateTime);
-		await repository.Update(existing);
-
-		var online = device.Presence == DevicePresence.Online && !IsDisabled(providerId);
-		var presenceChanged = _presence.Set(existing.Id, online);
-		_connectionTracker.SetDeviceName(existing.Id, existing.Name);
-
-		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope, existing.Id, online, presenceChanged, cancellationToken);
+		await Publish(scope, updated.Id, cancellationToken);
+		await PublishPresence(scope, updated.Id, online, presenceChanged, cancellationToken);
 	}
 
 	public async Task SetPresenceAsync(
@@ -146,23 +167,33 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
-		var existing = await repository.GetByProviderIdentity(providerId, localId);
-		if (existing is null)
+		var (updated, online, presenceChanged) = await Serialized(providerId,
+			async () =>
+			{
+				var existing = await repository.GetByProviderIdentity(providerId, localId);
+				if (existing is null)
+				{
+					return (null, false, false);
+				}
+
+				var online = presence == DevicePresence.Online && !IsDisabled(providerId);
+				if (online)
+				{
+					existing.LastSeenAt = _timeProvider.GetUtcNow().UtcDateTime;
+					await repository.Update(existing);
+				}
+
+				return ((DeviceEntity?)existing, online, _presence.Set(existing.Id, online));
+			},
+			cancellationToken);
+
+		if (updated is null)
 		{
 			return;
 		}
 
-		var online = presence == DevicePresence.Online && !IsDisabled(providerId);
-		if (online)
-		{
-			existing.LastSeenAt = _timeProvider.GetUtcNow().UtcDateTime;
-			await repository.Update(existing);
-		}
-
-		var presenceChanged = _presence.Set(existing.Id, online);
-
-		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope, existing.Id, online, presenceChanged, cancellationToken);
+		await Publish(scope, updated.Id, cancellationToken);
+		await PublishPresence(scope, updated.Id, online, presenceChanged, cancellationToken);
 	}
 
 	public async Task UnregisterAsync(
@@ -177,17 +208,22 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
-		var existing = await repository.GetByProviderIdentity(providerId, localId);
-		if (existing is null)
+		var (unregistered, wasOnline) = await Serialized(providerId,
+			async () =>
+			{
+				var existing = await repository.GetByProviderIdentity(providerId, localId);
+				return existing is null ? (null, false) : ((DeviceEntity?)existing, _presence.Forget(existing.Id));
+			},
+			cancellationToken);
+
+		if (unregistered is null)
 		{
 			return;
 		}
 
-		var wasOnline = _presence.Forget(existing.Id);
-
-		await Publish(scope, existing.Id, cancellationToken);
-		await PublishPresence(scope, existing.Id, false, wasOnline, cancellationToken);
-		await PublishUnregistered(scope, existing.Id, cancellationToken);
+		await Publish(scope, unregistered.Id, cancellationToken);
+		await PublishPresence(scope, unregistered.Id, false, wasOnline, cancellationToken);
+		await PublishUnregistered(scope, unregistered.Id, cancellationToken);
 	}
 
 	public async Task UnregisterAllAsync(string providerId, CancellationToken cancellationToken = default)
@@ -197,12 +233,17 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		await using var scope = _scopeFactory.CreateAsyncScope();
 		var repository = scope.ServiceProvider.GetRequiredService<IDeviceRepository>();
 
-		foreach (var device in await repository.GetByProviderId(providerId))
+		var forgotten = await Serialized(providerId,
+			async () => (await repository.GetByProviderId(providerId))
+				.Select(device => (device.Id, WasOnline: _presence.Forget(device.Id)))
+				.ToList(),
+			cancellationToken);
+
+		foreach (var (deviceId, wasOnline) in forgotten)
 		{
-			var wasOnline = _presence.Forget(device.Id);
-			await Publish(scope, device.Id, cancellationToken);
-			await PublishPresence(scope, device.Id, false, wasOnline, cancellationToken);
-			await PublishUnregistered(scope, device.Id, cancellationToken);
+			await Publish(scope, deviceId, cancellationToken);
+			await PublishPresence(scope, deviceId, false, wasOnline, cancellationToken);
+			await PublishUnregistered(scope, deviceId, cancellationToken);
 		}
 	}
 
@@ -238,6 +279,22 @@ public sealed class PluginDeviceRegistry : IPluginDeviceRegistry
 		entity.Capabilities = Serialize(device);
 		entity.ClientType = DeviceClientType.Provider;
 		entity.LastSeenAt = now;
+	}
+
+	// Notifications are published after the gate is released: their handlers open device sessions, and a
+	// provider that registers or updates from that callback would otherwise wait on its own gate.
+	private async Task<T> Serialized<T>(string providerId, Func<Task<T>> operation, CancellationToken cancellationToken)
+	{
+		var gate = _gates.GetOrAdd(providerId, static _ => new SemaphoreSlim(1, 1));
+		await gate.WaitAsync(cancellationToken);
+		try
+		{
+			return await operation();
+		}
+		finally
+		{
+			gate.Release();
+		}
 	}
 
 	private bool IsDisabled(string providerId)
