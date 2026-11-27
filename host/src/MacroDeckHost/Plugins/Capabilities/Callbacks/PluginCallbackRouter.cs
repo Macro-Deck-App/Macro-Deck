@@ -113,6 +113,7 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 	private readonly IWidgetDataReader? _widgetData;
 	private readonly PluginVariableHistoryWindows? _variableHistory;
 	private readonly VariableHistoryReadThrottle _variableHistoryReadThrottle;
+	private readonly KeyImageFetchThrottle _keyImageFetchThrottle;
 	private readonly IBatteryRegistry? _batteries;
 	private readonly IWeatherBroadcastTrigger? _weatherTrigger;
 	private readonly ILocaleApi? _locale;
@@ -179,9 +180,11 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 		ILocaleApi? locale = null,
 		IMusicPlayerAlbumColor? albumColor = null,
 		PluginDesktopNotificationCallbacks? desktopNotifications = null,
-		IMcpVariableWriteGuard? mcpWriteGuard = null)
+		IMcpVariableWriteGuard? mcpWriteGuard = null,
+		KeyImageFetchThrottle? keyImageFetchThrottle = null)
 	{
 		_mcpWriteGuard = mcpWriteGuard;
+		_keyImageFetchThrottle = keyImageFetchThrottle ?? new KeyImageFetchThrottle(TimeProvider.System);
 		_desktopNotifications = desktopNotifications;
 		_weatherTrigger = weatherTrigger;
 		_albumColor = albumColor;
@@ -425,6 +428,16 @@ public sealed class PluginCallbackRouter : IPluginCallbackRouter
 			&& payload.Operation == HostOperations.Variables.HistoryRead)
 		{
 			return _variableHistoryReadThrottle.TryConsume(pluginId, _variableHistory?.OpenCount(pluginId) ?? 0)
+				? null
+				: CallingTooQuickly();
+		}
+
+		// A provider paints every key of a session it was just handed, so key image fetches get a bucket
+		// sized by the plugin's open key image cells instead of draining the budget of its other callbacks.
+		if (string.Equals(payload.Api, HostApis.Devices, StringComparison.Ordinal)
+			&& payload.Operation == HostOperations.Devices.KeyImage)
+		{
+			return _keyImageFetchThrottle.TryConsume(pluginId, _deviceSurfaces?.KeyImageCellCount(pluginId) ?? 0)
 				? null
 				: CallingTooQuickly();
 		}

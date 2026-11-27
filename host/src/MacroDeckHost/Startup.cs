@@ -644,6 +644,7 @@ public class Startup
 		services.AddSingleton<UiResourceCallbackThrottle>();
 		services.AddSingleton<MusicPlayerArtworkCallbackThrottle>();
 		services.AddSingleton<VariableHistoryReadThrottle>();
+		services.AddSingleton<KeyImageFetchThrottle>();
 		services.AddSingleton<IPluginCallbackRouter, PluginCallbackRouter>();
 		services.AddSingleton<IPluginAdbAccessPolicy, PluginAdbAccessPolicy>();
 		services.AddSingleton<IPluginAdbConsentNotifier, PluginAdbConsentNotifier>();

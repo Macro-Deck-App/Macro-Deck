@@ -427,6 +427,11 @@ public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken
 - **First paint:** `GetKeyImageAsync` answers for every cell from the moment the session exists, inside
   `OnSessionOpenedAsync` included, so a device can paint all keys on connect instead of waiting for changes. It returns null for a session without key
   images, for a cell outside the grid, and on a host that does not serve key images - never an exception.
+- **Fetch budget:** fetching every cell at once, sequentially or with `Task.WhenAll`, never counts
+  against your plugin's general callback budget. Key image fetches have a budget of their own, sized by
+  the cells of every key image session your plugin holds: about two full repaints at once, refilling one
+  full repaint per second, and a session that opens adds its cells right away. Beyond it a fetch is refused
+  with `RATE_LIMITED`; after the first paint, rely on `KeyImageChanged` instead of fetching again.
 - **Changes:** `KeyImageChanged` carries one cell's new picture, never for a picture that did not change.
   A change Macro Deck rebuilds the surface for (an edit, a widget's state or label, a navigation) has its
   pictures raised after that rebuild: after its `SurfaceChanged`, or right after the host found the surface

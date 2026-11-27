@@ -41,7 +41,7 @@ internal sealed class DeviceKeyImageContractTests : CapabilityContractFixture
 	public void KeyImageSetUp()
 	{
 		_deviceId = Guid.NewGuid();
-		_surfaces = new RecordingDeviceSurfaceService();
+		_surfaces = new RecordingDeviceSurfaceService { KeyImageCells = 15 };
 		_sessionOwners = new RemoteDeviceSessionRegistry();
 		_provider = new PaintingDeviceProvider();
 

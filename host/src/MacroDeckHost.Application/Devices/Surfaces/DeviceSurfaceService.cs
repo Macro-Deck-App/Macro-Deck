@@ -336,6 +336,21 @@ public sealed class DeviceSurfaceService : IDeviceSurfaceService, IDeviceSurface
 			: null;
 	}
 
+	public int KeyImageCellCount(string providerId)
+	{
+		var cells = 0;
+		foreach (var session in _sessions.Values)
+		{
+			if (string.Equals(session.ProviderId, providerId, StringComparison.Ordinal)
+				&& session.KeyImages is { } keyImages)
+			{
+				cells += keyImages.Layout.Rows * keyImages.Layout.Columns;
+			}
+		}
+
+		return cells;
+	}
+
 	public Task RefreshKeyImagesAsync(CancellationToken cancellationToken = default)
 	{
 		foreach (var session in _sessions.Values)

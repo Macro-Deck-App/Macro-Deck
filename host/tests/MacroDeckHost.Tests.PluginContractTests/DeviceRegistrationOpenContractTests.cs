@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using MacroDeck.Plugin.Hosting.Capabilities.DeviceProvider;
 using MacroDeck.Plugin.Hosting.Integrations.HostApis;
+using MacroDeck.Plugin.Protocol.Callbacks;
 using MacroDeck.Plugin.Protocol.Capabilities;
 using MacroDeck.Plugin.Protocol.Handshake;
 using MacroDeck.Plugin.Protocol.Versioning;
@@ -35,14 +36,15 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 {
 	private const string ProviderDeviceId = "SERIAL-1";
 
-	private const int Rows = 2;
+	private const int Rows = 4;
 
-	private const int Columns = 3;
+	private const int Columns = 9;
 
 	private static readonly TimeSpan _deadline = TimeSpan.FromSeconds(10);
 
 	private DeviceSurfaceWorld? _world;
 	private RemoteDeviceProviderRegistry? _providers;
+	private PluginCallbackRouter? _router;
 
 	[TearDown]
 	public void RegistrationTearDown()
@@ -51,6 +53,7 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 		_world = null;
 		_providers?.Dispose();
 		_providers = null;
+		_router = null;
 	}
 
 	[Test]
@@ -64,6 +67,24 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 		await WaitForAsync(() => provider.Surfaces.Count > 0, "The first surface never arrived.", _deadline);
 
 		AssertEveryKeyArrived(world, provider, deviceId, provider.Registration!);
+	}
+
+	[Test]
+	public async Task
+		A_plugin_that_fetches_every_key_at_once_while_it_opens_gets_them_all_and_keeps_its_callback_budget()
+	{
+		var provider = new RegisteringProvider { Concurrently = true };
+		var (world, deviceId) = await ConnectPluginAsync(provider);
+
+		await provider.InitializeAsync(new RemoteDeviceProviderContext(CreatePluginHostInvoker())).WaitAsync(_deadline);
+		await WaitForAsync(() => provider.Opened.Task.IsCompleted, "The session never opened.", _deadline);
+		await WaitForAsync(() => provider.Surfaces.Count > 0, "The first surface never arrived.", _deadline);
+
+		AssertEveryKeyArrived(world, provider, deviceId, provider.Registration!);
+		Assert.That(_router!.Admit(PluginId,
+				new HostInvokePayload { Api = HostApis.Variables, Operation = HostOperations.Variables.List }),
+			Is.Null,
+			"the key fetches left the budget of the plugin's other callbacks alone");
 	}
 
 	[Test]
@@ -126,6 +147,7 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 		var (world, registry) = World(_providers.Resolve(PluginId)!, PluginId);
 		var deviceId = await AssignedDeviceAsync(world, PluginId);
 		router = CreateRouter(world, registry, sessionOwners);
+		_router = router;
 		return (world, deviceId);
 	}
 
@@ -271,7 +293,7 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 			new ScreenSaverRegistry(new RecordingMediator()),
 			new ModalInteractionCoordinator(TimeProvider.System),
 			new NullUiTransport(),
-			new HostCallbackThrottle(TimeProvider.System, 1000, 1000),
+			new HostCallbackThrottle(TimeProvider.System),
 			new CallbackFakeHostLockState(),
 			Serilog.Core.Logger.None,
 			world.Service,
@@ -285,6 +307,8 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 		private readonly ConcurrentQueue<DeviceKeyImage> _painted = new();
 
 		public DevicePresence Presence { get; init; } = DevicePresence.Online;
+
+		public bool Concurrently { get; init; }
 
 		public IReadOnlyList<DeviceKeyImage> Painted => [.. _painted];
 
@@ -325,9 +349,17 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 			session.KeyImageChanged += (_, args) => _painted.Enqueue(args.Image);
 			try
 			{
-				foreach (var (row, column) in Cells())
+				if (Concurrently)
 				{
-					Fetched.Add(await session.GetKeyImageAsync(row, column, cancellationToken));
+					Fetched.AddRange(await Task.WhenAll(Cells()
+						.Select(cell => session.GetKeyImageAsync(cell.Row, cell.Column, cancellationToken))));
+				}
+				else
+				{
+					foreach (var (row, column) in Cells())
+					{
+						Fetched.Add(await session.GetKeyImageAsync(row, column, cancellationToken));
+					}
 				}
 
 				Opened.TrySetResult(null);

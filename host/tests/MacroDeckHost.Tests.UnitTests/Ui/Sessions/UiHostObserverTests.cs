@@ -52,6 +52,8 @@ internal sealed class UiHostObserverTests : UiSessionFixture
 		var observer = new RecordingObserver();
 		using var observation = Broker.ObserveHost(ticket.SessionId, observer);
 		await ticket.Ready;
+		await WaitForAsync(() => observer.Snapshots.Count > 0, "The observer was never handed a tree.");
+		await SettleAsync();
 		Attach(ticket.SessionId, "c1");
 		await WaitForMessagesAsync("c1", 1, "The client never received its tree.");
 

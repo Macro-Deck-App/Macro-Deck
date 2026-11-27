@@ -92,6 +92,13 @@ internal sealed class RecordingDeviceSurfaceService : IDeviceSurfaceService
 
 	public Func<Guid, int, int, DeviceKeyImage?>? KeyImageAnswer { get; set; }
 
+	public int KeyImageCells { get; set; }
+
+	public int KeyImageCellCount(string providerId)
+	{
+		return KeyImageCells;
+	}
+
 	public bool IsOpen(Guid deviceId)
 	{
 		return true;

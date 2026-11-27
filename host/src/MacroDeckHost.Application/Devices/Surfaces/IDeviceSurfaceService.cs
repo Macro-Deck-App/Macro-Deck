@@ -67,4 +67,9 @@ public interface IDeviceSurfaceService
 	{
 		return Task.CompletedTask;
 	}
+
+	int KeyImageCellCount(string providerId)
+	{
+		return 0;
+	}
 }

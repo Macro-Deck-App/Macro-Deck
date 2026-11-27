@@ -577,6 +577,34 @@ internal sealed class DeviceKeyImageSessionTests
 	}
 
 	[Test]
+	public async Task The_key_image_cells_of_a_provider_count_every_session_from_its_open_until_it_closes()
+	{
+		var countedWhileOpening = new List<int>();
+		_fixture.Provider.OnOpen = _ =>
+		{
+			countedWhileOpening.Add(_fixture.Service.KeyImageCellCount(_fixture.Provider.ProviderId));
+			return Task.CompletedTask;
+		};
+		var cells = HardwareRows * HardwareColumns;
+
+		var first = await OpenAsync().WaitAsync(_poll);
+		var second = _fixture.AddDevice("DeckB", layoutSnapshot: Snapshot());
+		await _fixture.Service.OpenAsync(second, _fixture.Provider.ProviderId, "DeckB").WaitAsync(_poll);
+		var withoutKeyImages = _fixture.AddDevice("DeckC");
+		await _fixture.Service.OpenAsync(withoutKeyImages, _fixture.Provider.ProviderId, "DeckC").WaitAsync(_poll);
+		var whileOpen = _fixture.Service.KeyImageCellCount(_fixture.Provider.ProviderId);
+		await _fixture.Service.CloseAsync(first, null).WaitAsync(_poll);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(countedWhileOpening, Is.EqualTo(new[] { cells, cells * 2, cells * 2 }));
+			Assert.That(whileOpen, Is.EqualTo(cells * 2));
+			Assert.That(_fixture.Service.KeyImageCellCount(_fixture.Provider.ProviderId), Is.EqualTo(cells));
+			Assert.That(_fixture.Service.KeyImageCellCount("another-provider"), Is.Zero);
+		});
+	}
+
+	[Test]
 	public async Task A_provider_that_asks_for_every_key_while_it_opens_the_session_gets_every_picture()
 	{
 		_fixture.Home.Widgets.Add(DeviceSurfaceFixture.Button("w1", 0, 0));
