@@ -111,6 +111,23 @@ describe('FilePathInputComponent', () => {
     expect(component.showBrowser()).toBeTrue();
   });
 
+  it('keeps the Browse button in place while the in-app browser is open', async () => {
+    useShell(null);
+    create();
+    const host = fixture.nativeElement as HTMLElement;
+    const button = host.querySelector(':scope > shared-button') as HTMLElement;
+    const input = host.querySelector(':scope > shared-input') as HTMLElement;
+    const closedButton = button.getBoundingClientRect().toJSON();
+    const closedInput = input.getBoundingClientRect().toJSON();
+
+    await component.browse();
+    await fixture.whenStable();
+
+    expect(host.querySelector('shared-file-browser-dialog .modal-overlay')).not.toBeNull();
+    expect(button.getBoundingClientRect().toJSON()).toEqual(closedButton);
+    expect(input.getBoundingClientRect().toJSON()).toEqual(closedInput);
+  });
+
   it('registers itself as a drop target and takes the dropped path', () => {
     create();
     const drop = TestBed.inject(ShellFileDropService);

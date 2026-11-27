@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy } from '@angular/core';
+import { Component, provideZonelessChangeDetection, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConfirmationModalComponent } from './confirmation-modal.component';
 import { provideLocalizationTesting } from '../../../../testing/localization-test-support';
@@ -120,5 +120,47 @@ describe('ConfirmationModalComponent heading input (regression: no native title 
     const host = fixture.nativeElement.querySelector('shared-confirmation-modal') as HTMLElement;
     expect(host.hasAttribute('title')).toBe(false);
     expect(host.querySelector('.modal-title')?.textContent?.trim()).toBe('Delete Folder');
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [ConfirmationModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <div style="display: flex; gap: 8px; width: 300px">
+      <span class="first" style="flex: 1 1 0">first</span>
+      <span class="last" style="flex: 0 0 auto">last</span>
+      @if (open()) {
+        <shared-confirmation-modal heading="Delete Folder" message="Sure?" />
+      }
+    </div>
+  `,
+})
+class ConfirmationInFlexRowHostComponent {
+  readonly open = signal(false);
+}
+
+describe('ConfirmationModalComponent opened inside a flex row', () => {
+  it('leaves the position of the row items unchanged', () => {
+    TestBed.configureTestingModule({
+      imports: [ConfirmationInFlexRowHostComponent],
+      providers: [provideZonelessChangeDetection(), ...provideLocalizationTesting()],
+    });
+    const fixture = TestBed.createComponent(ConfirmationInFlexRowHostComponent);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const first = root.querySelector('.first') as HTMLElement;
+    const last = root.querySelector('.last') as HTMLElement;
+    const closedFirst = first.getBoundingClientRect().toJSON();
+    const closedLast = last.getBoundingClientRect().toJSON();
+
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+
+    expect(root.querySelector('.modal-overlay')).not.toBeNull();
+    expect(first.getBoundingClientRect().toJSON()).toEqual(closedFirst);
+    expect(last.getBoundingClientRect().toJSON()).toEqual(closedLast);
+    fixture.destroy();
   });
 });
