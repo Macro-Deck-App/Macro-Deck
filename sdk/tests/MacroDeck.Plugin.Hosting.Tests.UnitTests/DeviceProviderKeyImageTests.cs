@@ -75,13 +75,13 @@ public class DeviceProviderKeyImageTests
 	{
 		var session = await OpenAsync(new LayoutKeyImageFormatDto
 		{
-			Encoding = KeyImageEncodings.Jpeg, Rotation = 180, MirrorHorizontal = true
+			Encoding = KeyImageEncodings.Jpeg, Rotation = 180, MirrorHorizontal = true, CornerRadius = 8
 		});
 
 		Assert.That(session.KeyImageFormat,
 			Is.EqualTo(new LayoutKeyImageFormat
 			{
-				Encoding = KeyImageEncodings.Jpeg, Rotation = 180, MirrorHorizontal = true
+				Encoding = KeyImageEncodings.Jpeg, Rotation = 180, MirrorHorizontal = true, CornerRadius = 8
 			}));
 	}
 
@@ -270,7 +270,7 @@ public class DeviceProviderKeyImageTests
 						KeySize = new LayoutKeySize(72, 72),
 						KeyImages = new LayoutKeyImageFormat
 						{
-							Encoding = KeyImageEncodings.Bmp, Rotation = 90, MirrorHorizontal = true
+							Encoding = KeyImageEncodings.Bmp, Rotation = 90, MirrorHorizontal = true, CornerRadius = 12
 						}
 					}
 				}

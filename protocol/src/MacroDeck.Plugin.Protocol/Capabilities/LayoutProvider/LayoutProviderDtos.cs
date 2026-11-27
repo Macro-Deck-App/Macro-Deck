@@ -18,6 +18,10 @@ public sealed record LayoutKeyImageFormatDto
 	public int Rotation { get; init; }
 
 	public bool MirrorHorizontal { get; init; }
+
+	/// <summary>Optional and additive: a fixed corner radius in pixels of one key picture. A peer that
+	/// predates it skips the member and rounds keys by the profile's radius.</summary>
+	public int? CornerRadius { get; init; }
 }
 
 /// <summary>Mirrors the SDK's <c>LayoutVisualCapabilities</c>.</summary>

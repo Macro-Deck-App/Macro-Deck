@@ -19,7 +19,10 @@ public class A43DeviceKeyImageTests
 
 	private static readonly long[] _expectedRevisions = [1, 2];
 
-	private static readonly LayoutKeyImageFormat _jpeg = new() { Encoding = KeyImageEncodings.Jpeg, Rotation = 90 };
+	private static readonly LayoutKeyImageFormat _jpeg = new()
+	{
+		Encoding = KeyImageEncodings.Jpeg, Rotation = 90, CornerRadius = 6
+	};
 
 	[Test]
 	public async Task A_fake_session_opened_with_a_format_raises_pushed_pictures_and_answers_with_the_latest()
@@ -77,7 +80,10 @@ public class A43DeviceKeyImageTests
 			SessionId = "session-1",
 			DeviceId = "device-1",
 			ProviderDeviceId = DeviceId,
-			KeyImages = new LayoutKeyImageFormatDto { Encoding = KeyImageEncodings.Jpeg, Rotation = 90 }
+			KeyImages = new LayoutKeyImageFormatDto
+			{
+				Encoding = KeyImageEncodings.Jpeg, Rotation = 90, CornerRadius = 6
+			}
 		});
 		var pushed = await session.DeviceProvider.PushKeyImagesAsync("session-1",
 			[Wire(0, 0, 2, _blue), Wire(0, 0, 1, _red), Wire(0, 1, 1, _red)]);

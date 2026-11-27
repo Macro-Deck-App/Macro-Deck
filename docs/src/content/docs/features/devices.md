@@ -408,8 +408,9 @@ public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken
 
 - **Opt-in, per layout.** `LayoutGrid.KeyImages` is null by default, and the device then gets surfaces
   only, as before. It needs `KeySize`, which is the size of every delivered picture. A format Macro Deck
-  cannot honour - no `KeySize`, a rotation other than 0, 90, 180 or 270, an unknown encoding - means no key
-  images for that layout and a warning in the host log, never a failed registration.
+  cannot honour - no `KeySize`, a rotation other than 0, 90, 180 or 270, an unknown encoding, a negative
+  `CornerRadius` - means no key images for that layout and a warning in the host log, never a failed
+  registration.
 - **`IDeviceSession.KeyImageFormat` is the signal.** It is the format the host renders this session in,
   fixed for the life of the session (a layout change takes effect when the session reopens). It is null
   when the layout asks for no pictures, the format cannot be honoured, or the host predates key images,
@@ -453,6 +454,17 @@ public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken
   with `Borders` false no border ring is drawn; corners are rounded only when `CornerRadius` is true and
   keys of a widget spanning several cells are separated by the profile's spacing only when `WidgetSpacing`
   is true.
+- **A fixed corner radius:** set `LayoutKeyImageFormat.CornerRadius` to round every key by that many pixels
+  of one delivered picture (`KeySize`, the same before and after `Rotation`), to match the shape of the
+  physical keys whatever the profile says. It replaces the profile's widget corner radius and the visual
+  capability `CornerRadius` for every shape that is rounded today: widget tiles, empty keys and the border
+  ring. A widget spanning several keys is one shape, so it is rounded at its outer corners. A key drawn as
+  plain background (no profile assigned, or outside the folder's grid) has no shape and stays a full
+  square picture. `0` draws square keys, a value above half the smaller side of the key is clamped to it,
+  and the editor shows the profile's corner radius setting as having no effect on the device. Null, the
+  default, keeps the profile's radius. A host that predates the property ignores it and rounds by the
+  profile's radius when the visual capability `CornerRadius` is true, so declare that false as well if the
+  keys must stay square there.
 - **What a key is drawn in:** the host's theme (light draws light, dark and system draw dark, since a
   device has no colour scheme of its own), accent colour, app font and language. Changing any of them, or
   importing or removing a font, draws every key again; only the keys that look different are sent. An

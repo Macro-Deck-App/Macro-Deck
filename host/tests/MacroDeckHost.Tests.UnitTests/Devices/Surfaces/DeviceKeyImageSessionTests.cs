@@ -62,6 +62,28 @@ internal sealed class DeviceKeyImageSessionTests
 			new LayoutCapabilities { Visuals = visuals ?? LayoutVisualCapabilities.Full }));
 	}
 
+	private async Task<IReadOnlyList<double>> RadiiDrawnAsync(
+		int? fixedRadius,
+		LayoutVisualCapabilities visuals,
+		int profileRadius)
+	{
+		_fixture.Dispose();
+		_fixture = new DeviceSurfaceFixture();
+		_fixture.Home.WidgetBorderRadius = profileRadius;
+		_fixture.Home.Widgets.Add(DeviceSurfaceFixture.Button("w1", 0, 0));
+		var format = new LayoutKeyImageFormat { Encoding = KeyImageEncodings.Jpeg, CornerRadius = fixedRadius };
+		var deviceId = await OpenAsync(Snapshot(format, visuals));
+		await SettleUntilAsync(() => Batches(deviceId).Count > 0, "No key image was ever pushed.");
+
+		return
+		[
+			.. _fixture.KeyImageRenderer.Requests
+				.Where(request => request.Kind is DeviceKeyCellKind.Widget or DeviceKeyCellKind.Empty)
+				.Select(request => request.CornerRadius)
+				.Distinct()
+		];
+	}
+
 	private async Task<Guid> OpenAsync(string? snapshot = null)
 	{
 		var deviceId = _fixture.AddDevice("DeckA", layoutSnapshot: snapshot ?? Snapshot());
@@ -558,6 +580,51 @@ internal sealed class DeviceKeyImageSessionTests
 			Assert.That((widget.CornerRadius, widget.Spacing), Is.EqualTo((0d, 0d)));
 			Assert.That((widget.Borders, widget.AnimatedIcons), Is.EqualTo((false, false)));
 			Assert.That(Text(Cell(Batches(deviceId)[0], 0, 1)), Does.EndWith("|0,1"), "the tile's second key");
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_fixed_radius_rounds_every_key_alike_whatever_the_profile_and_the_visuals_say()
+	{
+		var fullVisuals = await RadiiDrawnAsync(12, LayoutVisualCapabilities.Full, 22);
+		var noVisuals = await RadiiDrawnAsync(12, new LayoutVisualCapabilities(), 40);
+		var profileOnly = await RadiiDrawnAsync(null, LayoutVisualCapabilities.Full, 22);
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(fullVisuals, Has.Count.EqualTo(1), "tiles and empty keys share the radius");
+			Assert.That(noVisuals, Is.EqualTo(fullVisuals));
+			Assert.That(fullVisuals.Single(), Is.Not.Zero);
+			Assert.That(fullVisuals, Is.Not.EqualTo(profileOnly));
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
+	public async Task A_fixed_radius_above_half_the_key_is_drawn_as_half_of_it()
+	{
+		var tooLarge = await RadiiDrawnAsync(1000, LayoutVisualCapabilities.Full, 22);
+		var half = await RadiiDrawnAsync(36, LayoutVisualCapabilities.Full, 22);
+
+		Assert.That(tooLarge, Is.EqualTo(half));
+	}
+
+	[Test]
+	public async Task A_negative_fixed_radius_means_surfaces_only()
+	{
+		_fixture.Home.Widgets.Add(DeviceSurfaceFixture.Button("w1", 0, 0));
+		var snapshot = Snapshot(new LayoutKeyImageFormat { Encoding = KeyImageEncodings.Jpeg, CornerRadius = -1 });
+
+		var deviceId = await OpenAsync(snapshot);
+		await _fixture.SettleAsync();
+		await QuietAsync();
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(_fixture.Provider.Opens.Single().KeyImages, Is.Null);
+			Assert.That(_fixture.Provider.PushCount(deviceId), Is.EqualTo(1), "the surface still arrives");
+			Assert.That(Batches(deviceId), Is.Empty);
 			await Task.CompletedTask;
 		});
 	}

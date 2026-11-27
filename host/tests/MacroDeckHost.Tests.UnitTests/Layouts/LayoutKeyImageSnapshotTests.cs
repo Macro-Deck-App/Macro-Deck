@@ -11,7 +11,7 @@ public class LayoutKeyImageSnapshotTests
 {
 	private static readonly LayoutKeyImageFormat _bmp = new()
 	{
-		Encoding = KeyImageEncodings.Bmp, Rotation = 90, MirrorHorizontal = true
+		Encoding = KeyImageEncodings.Bmp, Rotation = 90, MirrorHorizontal = true, CornerRadius = 9
 	};
 
 	[Test]
@@ -34,7 +34,7 @@ public class LayoutKeyImageSnapshotTests
 						KeySize = new LayoutKeySizeDto { Width = 72, Height = 72 },
 						KeyImages = new LayoutKeyImageFormatDto
 						{
-							Encoding = KeyImageEncodings.Bmp, Rotation = 90, MirrorHorizontal = true
+							Encoding = KeyImageEncodings.Bmp, Rotation = 90, MirrorHorizontal = true, CornerRadius = 9
 						}
 					}
 				}

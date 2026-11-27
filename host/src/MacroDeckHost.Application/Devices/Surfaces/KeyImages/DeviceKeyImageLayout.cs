@@ -6,6 +6,10 @@ public sealed record DeviceKeyImageLayout
 {
 	public const int DefaultMaxUpdatesPerSecond = 30;
 
+	// The renderer takes a radius in profile units of a 120 pixel cell and scales it to the key, see
+	// KeyCellComposer; a fixed radius is in key pixels.
+	private const double ProfileReferenceCell = 120;
+
 	public required int Rows { get; init; }
 
 	public required int Columns { get; init; }
@@ -21,6 +25,8 @@ public sealed record DeviceKeyImageLayout
 	public bool CornerRadius { get; init; }
 
 	public bool WidgetSpacing { get; init; }
+
+	public int? FixedCornerRadius { get; init; }
 
 	public int MaxUpdatesPerSecond { get; init; } = DefaultMaxUpdatesPerSecond;
 
@@ -50,6 +56,12 @@ public sealed record DeviceKeyImageLayout
 			return null;
 		}
 
+		if (format.CornerRadius < 0)
+		{
+			problem = $"corner radius {format.CornerRadius} is negative";
+			return null;
+		}
+
 		if (grid.Rows <= 0 || grid.Columns <= 0)
 		{
 			problem = "the grid has no cells";
@@ -68,9 +80,22 @@ public sealed record DeviceKeyImageLayout
 			AnimatedIcons = visuals.AnimatedIcons,
 			CornerRadius = visuals.CornerRadius,
 			WidgetSpacing = visuals.WidgetSpacing,
+			FixedCornerRadius = format.CornerRadius is { } fixedRadius
+				? Math.Min(fixedRadius, Math.Min(keySize.Width, keySize.Height) / 2)
+				: null,
 			MaxUpdatesPerSecond = visuals.MaxUpdatesPerSecond is { } rate && rate > 0
 				? rate
 				: DefaultMaxUpdatesPerSecond
 		};
+	}
+
+	public double CornerRadiusFor(double profileRadius, bool hasSurface)
+	{
+		if (FixedCornerRadius is { } fixedRadius)
+		{
+			return fixedRadius * ProfileReferenceCell / Math.Min(KeySize.Width, KeySize.Height);
+		}
+
+		return CornerRadius && hasSurface ? profileRadius : 0;
 	}
 }

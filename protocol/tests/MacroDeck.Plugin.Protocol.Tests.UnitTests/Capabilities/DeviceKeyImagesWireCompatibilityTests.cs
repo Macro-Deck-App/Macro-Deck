@@ -27,6 +27,34 @@ public class DeviceKeyImagesWireCompatibilityTests
 	}
 
 	[Test]
+	public void A_key_image_format_from_a_provider_that_predates_the_corner_radius_keeps_the_profile_s()
+	{
+		const string json = """{"encoding":"jpeg","rotation":90}""";
+
+		var format = JsonSerializer.Deserialize<LayoutKeyImageFormatDto>(json, PluginProtocolJson.Options)!;
+
+		Assert.That(format, Is.EqualTo(new LayoutKeyImageFormatDto { Encoding = "jpeg", Rotation = 90 }));
+	}
+
+	[Test]
+	public void A_peer_that_predates_the_corner_radius_still_reads_a_format_that_carries_it()
+	{
+		var format = new LayoutKeyImageFormatDto
+		{
+			Encoding = "png", Rotation = 180, MirrorHorizontal = true, CornerRadius = 12
+		};
+		var json = JsonSerializer.Serialize(format, PluginProtocolJson.Options);
+
+		var asOldPeer = JsonSerializer.Deserialize<FormatBeforeCornerRadius>(json, PluginProtocolJson.Options)!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(json, Does.Contain("\"cornerRadius\":12"));
+			Assert.That(asOldPeer, Is.EqualTo(new FormatBeforeCornerRadius("png", 180, true)));
+		});
+	}
+
+	[Test]
 	public void A_session_open_from_a_host_that_predates_key_images_carries_none()
 	{
 		const string json = """{"sessionId":"s1","deviceId":"d1","providerDeviceId":"p1"}""";
@@ -61,7 +89,10 @@ public class DeviceKeyImagesWireCompatibilityTests
 	[Test]
 	public void A_key_image_format_round_trips_on_the_grid_and_the_session_open()
 	{
-		var format = new LayoutKeyImageFormatDto { Encoding = "bmp", Rotation = 270, MirrorHorizontal = true };
+		var format = new LayoutKeyImageFormatDto
+		{
+			Encoding = "bmp", Rotation = 270, MirrorHorizontal = true, CornerRadius = 10
+		};
 
 		var grid = RoundTrip(new LayoutGridDto { Rows = 2, Columns = 4, KeyImages = format });
 		var open = RoundTrip(new DeviceSessionOpenArguments
@@ -139,4 +170,6 @@ public class DeviceKeyImagesWireCompatibilityTests
 	}
 
 	private sealed record OpenBeforeKeyImages(string SessionId, string DeviceId, string ProviderDeviceId);
+
+	private sealed record FormatBeforeCornerRadius(string Encoding, int Rotation, bool MirrorHorizontal);
 }

@@ -688,7 +688,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 	{
 		var layout = projection.Surface.Layout;
 		var hasSurface = projection.ProfileId is not null;
-		var radius = _layout.CornerRadius && hasSurface ? layout.WidgetBorderRadius : 0;
+		var radius = _layout.CornerRadiusFor(layout.WidgetBorderRadius, hasSurface);
 		var spacing = _layout.WidgetSpacing && hasSurface ? layout.WidgetSpacing : 0;
 		var background = hasSurface ? layout.BackgroundColor : null;
 		var shared = string.Join('|',

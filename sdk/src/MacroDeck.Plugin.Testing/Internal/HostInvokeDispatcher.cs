@@ -809,7 +809,8 @@ internal static class HostInvokeDispatcher
 				{
 					Encoding = keyImages.Encoding,
 					Rotation = keyImages.Rotation,
-					MirrorHorizontal = keyImages.MirrorHorizontal
+					MirrorHorizontal = keyImages.MirrorHorizontal,
+					CornerRadius = keyImages.CornerRadius
 				}
 				: null
 		};

@@ -28,7 +28,7 @@ internal sealed class DeviceKeyImageContractTests : CapabilityContractFixture
 
 	private static readonly LayoutKeyImageFormat _jpeg = new()
 	{
-		Encoding = KeyImageEncodings.Jpeg, Rotation = 180, MirrorHorizontal = true
+		Encoding = KeyImageEncodings.Jpeg, Rotation = 180, MirrorHorizontal = true, CornerRadius = 10
 	};
 
 	private RecordingDeviceSurfaceService _surfaces = null!;

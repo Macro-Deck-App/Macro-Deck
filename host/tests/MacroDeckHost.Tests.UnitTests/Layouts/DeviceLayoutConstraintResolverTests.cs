@@ -156,6 +156,43 @@ public class DeviceLayoutConstraintResolverTests
 		});
 	}
 
+	[TestCase(true, 8, false)]
+	[TestCase(false, 8, false)]
+	[TestCase(true, null, true)]
+	public void AKeyImageGridThatFixesItsRadius_ReportsTheProfileRadiusUnhonoured(
+		bool declaresVisuals,
+		int? fixedRadius,
+		bool honoured)
+	{
+		var grid = FixedGrid(3, 5).Regions[0];
+		var layout = FixedGrid(3, 5) with
+		{
+			Regions =
+			[
+				grid with
+				{
+					Grid = grid.Grid! with
+					{
+						KeySize = new LayoutKeySize(72, 72),
+						KeyImages = new LayoutKeyImageFormat
+						{
+							Encoding = KeyImageEncodings.Jpeg, CornerRadius = fixedRadius
+						}
+					},
+					Visuals = declaresVisuals ? LayoutVisualCapabilities.Full : null
+				}
+			]
+		};
+
+		var constraint = DeviceLayoutConstraintResolver.Resolve([Device("Deck A", layout)])!;
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(constraint.CornerRadiusHonoured, Is.EqualTo(honoured));
+			Assert.That(constraint.WidgetSpacingHonoured, Is.True);
+		});
+	}
+
 	[Test]
 	public void ALayoutThatDeclaresNoVisuals_LeavesSpacingAndRadiusHonoured()
 	{

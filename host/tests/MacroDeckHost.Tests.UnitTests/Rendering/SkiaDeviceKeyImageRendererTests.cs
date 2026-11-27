@@ -87,6 +87,56 @@ internal sealed class SkiaDeviceKeyImageRendererTests
 		Assert.That(renders.SelectMany(pictures => pictures), Has.All.EqualTo(expected));
 	}
 
+	[TestCase(240, 60, 25, true)]
+	[TestCase(60, 30, 6, false)]
+	[TestCase(60, 30, 15, true)]
+	public async Task A_fixed_radius_rounds_the_key_by_that_many_of_its_pixels(
+		int keySize,
+		int cornerRadius,
+		int diagonal,
+		bool insideTheKey)
+	{
+		var format = new LayoutKeyImageFormat { Encoding = KeyImageEncodings.Png, CornerRadius = cornerRadius };
+		var layout = DeviceKeyImageLayout.Of(new LayoutDescriptor("plugin::deck",
+				"Deck",
+				[
+					new LayoutRegion
+					{
+						Id = "keys",
+						Kind = LayoutRegionKinds.Grid,
+						Grid = new LayoutGrid
+						{
+							Rows = 1, Columns = 1, KeySize = new LayoutKeySize(keySize, keySize), KeyImages = format
+						}
+					}
+				]),
+			out _)!;
+		using var renderer = new SkiaDeviceKeyImageRenderer(new AntaCatalog(), TestLocalization.Resolver);
+
+		var key = renderer.Render(new DeviceKeyImageRenderRequest
+			{
+				KeySize = layout.KeySize,
+				Format = layout.Format,
+				Kind = DeviceKeyCellKind.Empty,
+				CornerRadius = layout.CornerRadiusFor(22, true),
+				Appearance = new DeviceKeyImageAppearance("dark", null, AntaCatalog.Family),
+				Culture = "en",
+				TimeZone = TimeZoneInfo.Utc,
+				Now = DateTimeOffset.UnixEpoch
+			})
+			.Keys
+			.Single();
+		using var decoded = SKBitmap.Decode(key.Content.ToArray());
+
+		var expected = insideTheKey ? decoded.GetPixel(keySize / 2, keySize / 2) : decoded.GetPixel(0, 0);
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(decoded.GetPixel(0, 0), Is.Not.EqualTo(decoded.GetPixel(keySize / 2, keySize / 2)));
+			Assert.That(decoded.GetPixel(diagonal, diagonal), Is.EqualTo(expected));
+			await Task.CompletedTask;
+		});
+	}
+
 	private sealed class AntaCatalog : IFontCatalog
 	{
 		public const string Family = "Anta";

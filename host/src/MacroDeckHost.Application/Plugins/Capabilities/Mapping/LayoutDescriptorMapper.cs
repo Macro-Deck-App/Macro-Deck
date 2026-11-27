@@ -58,7 +58,10 @@ public static class LayoutDescriptorMapper
 			? null
 			: new LayoutKeyImageFormat
 			{
-				Encoding = dto.Encoding, Rotation = dto.Rotation, MirrorHorizontal = dto.MirrorHorizontal
+				Encoding = dto.Encoding,
+				Rotation = dto.Rotation,
+				MirrorHorizontal = dto.MirrorHorizontal,
+				CornerRadius = dto.CornerRadius
 			};
 	}
 
@@ -68,7 +71,10 @@ public static class LayoutDescriptorMapper
 			? null
 			: new LayoutKeyImageFormatDto
 			{
-				Encoding = format.Encoding, Rotation = format.Rotation, MirrorHorizontal = format.MirrorHorizontal
+				Encoding = format.Encoding,
+				Rotation = format.Rotation,
+				MirrorHorizontal = format.MirrorHorizontal,
+				CornerRadius = format.CornerRadius
 			};
 	}
 
