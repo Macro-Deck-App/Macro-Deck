@@ -1,0 +1,179 @@
+{
+  "tree": "conformance-action-button-labels-preset-boxed-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "actionButton.labelRow": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labelRow.labelBox": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labelRow.labelBox.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 15.59,
+            "y": 12.23,
+            "width": 88.81,
+            "height": 95.53
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 88.81,
+              "truncated": {
+                "x": false,
+                "y": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "actionButton.labelRow": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 36.25,
+            "width": 228,
+            "height": 47.5
+          }
+        },
+        "actionButton.labelRow.labelBox": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 36.25,
+            "width": 228,
+            "height": 47.5
+          }
+        },
+        "actionButton.labelRow.labelBox.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 15.59,
+            "y": 36.48,
+            "width": 220.81,
+            "height": 47.03
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 220.81,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "actionButton.labelRow": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 72.02,
+            "width": 96,
+            "height": 107.97
+          }
+        },
+        "actionButton.labelRow.labelBox": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 72.02,
+            "width": 96,
+            "height": 107.97
+          }
+        },
+        "actionButton.labelRow.labelBox.label": {
+          "type": "ui.text",
+          "box": {
+            "x": 15.59,
+            "y": 72.25,
+            "width": 88.81,
+            "height": 107.5
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 88.81,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

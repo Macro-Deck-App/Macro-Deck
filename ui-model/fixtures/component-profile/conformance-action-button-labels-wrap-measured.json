@@ -1,0 +1,482 @@
+{
+  "tree": "conformance-action-button-labels-wrap-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 60,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 60,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 60,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 19.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 19.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 16.33,
+            "width": 96,
+            "height": 87.34
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 108,
+            "y": 60,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 60,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 60,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 19.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 19.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 16.33,
+            "width": 96,
+            "height": 87.34
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 60,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 60,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 60,
+            "width": 228,
+            "height": 40.31
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 39.84,
+            "width": 228,
+            "height": 40.31
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 39.84,
+            "width": 228,
+            "height": 40.31
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 36.48,
+            "width": 228,
+            "height": 47.03
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 228,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 240,
+            "y": 60,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 240,
+            "y": 60,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 240,
+            "y": 60,
+            "width": 228,
+            "height": 40.31
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 39.84,
+            "width": 228,
+            "height": 40.31
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 39.84,
+            "width": 228,
+            "height": 40.31
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 36.48,
+            "width": 228,
+            "height": 47.03
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 228,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 126,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 126,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 126,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 85.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 85.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 82.33,
+            "width": 96,
+            "height": 87.34
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 108,
+            "y": 126,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 126,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 126,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 85.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 85.69,
+            "width": 96,
+            "height": 80.63
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 82.33,
+            "width": 96,
+            "height": 87.34
+          },
+          "texts": [
+            {
+              "text": "A much longer label that has to wrap",
+              "naturalWidth": 288.83,
+              "givenWidth": 96,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

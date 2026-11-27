@@ -1,0 +1,677 @@
+{
+  "tree": "conformance-action-button-labels-state-two-tree.json",
+  "font": {
+    "file": "docs/public/fonts/Anta-Regular.ttf",
+    "sha256": "41f90e2186aa835a104001e994471164fac015738bdf3f45b608b3154e0e8016"
+  },
+  "timeZone": "UTC",
+  "chrome": "Chrome/151.0.7922.138",
+  "cases": [
+    {
+      "tile": {
+        "width": 120,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 120
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 60,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 60,
+            "y": 12,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 60,
+            "y": 12,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 44.33,
+            "y": 12,
+            "width": 31.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 44.33,
+            "y": 12,
+            "width": 31.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 44.33,
+            "y": 8.64,
+            "width": 31.34,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": "Two",
+              "naturalWidth": 31.34,
+              "givenWidth": 31.34,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 108,
+            "y": 108,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 108,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 108,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 90.98,
+            "y": 87.84,
+            "width": 17.02,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 90.98,
+            "y": 87.84,
+            "width": 17.02,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 90.98,
+            "y": 84.48,
+            "width": 17.02,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": "B1",
+              "naturalWidth": 17.02,
+              "givenWidth": 17.02,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 108,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 108,
+            "width": 96,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 108,
+            "width": 96,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 79.2,
+            "width": 32.22,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 79.2,
+            "width": 32.22,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1.label1": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 74.41,
+            "width": 32.22,
+            "height": 38.39
+          },
+          "texts": [
+            {
+              "text": "B2",
+              "naturalWidth": 32.22,
+              "givenWidth": 32.22,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 252,
+        "height": 120
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 252,
+            "height": 120
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 126,
+            "y": 12,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 126,
+            "y": 12,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 126,
+            "y": 12,
+            "width": 228,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 110.33,
+            "y": 12,
+            "width": 31.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 110.33,
+            "y": 12,
+            "width": 31.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 110.33,
+            "y": 8.64,
+            "width": 31.34,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": "Two",
+              "naturalWidth": 31.34,
+              "givenWidth": 31.34,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 240,
+            "y": 108,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 240,
+            "y": 108,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 240,
+            "y": 108,
+            "width": 228,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 222.98,
+            "y": 87.84,
+            "width": 17.02,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 222.98,
+            "y": 87.84,
+            "width": 17.02,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 222.98,
+            "y": 84.48,
+            "width": 17.02,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": "B1",
+              "naturalWidth": 17.02,
+              "givenWidth": 17.02,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 108,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 108,
+            "width": 228,
+            "height": 96
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 108,
+            "width": 228,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 79.2,
+            "width": 32.22,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 79.2,
+            "width": 32.22,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1.label1": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 74.41,
+            "width": 32.22,
+            "height": 38.39
+          },
+          "texts": [
+            {
+              "text": "B2",
+              "naturalWidth": 32.22,
+              "givenWidth": 32.22,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "tile": {
+        "width": 120,
+        "height": 252
+      },
+      "basis": 120,
+      "nodes": {
+        "actionButton": {
+          "type": "ui.button",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 120,
+            "height": 252
+          }
+        },
+        "actionButton.labels": {
+          "type": "ui.layer",
+          "box": {
+            "x": 12,
+            "y": 12,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 60,
+            "y": 12,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 60,
+            "y": 12,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary": {
+          "type": "ui.stack",
+          "box": {
+            "x": 60,
+            "y": 12,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary": {
+          "type": "ui.transform",
+          "box": {
+            "x": 44.33,
+            "y": 12,
+            "width": 31.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 44.33,
+            "y": 12,
+            "width": 31.34,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlotPrimary.labelAnchorPrimary.labelRowPrimary.labelPinPrimary.labelBoxPrimary.labelPrimary": {
+          "type": "ui.text",
+          "box": {
+            "x": 44.33,
+            "y": 8.64,
+            "width": 31.34,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": "Two",
+              "naturalWidth": 31.34,
+              "givenWidth": 31.34,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 108,
+            "y": 240,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 240,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0": {
+          "type": "ui.stack",
+          "box": {
+            "x": 108,
+            "y": 240,
+            "width": 96,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0": {
+          "type": "ui.transform",
+          "box": {
+            "x": 90.98,
+            "y": 219.84,
+            "width": 17.02,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 90.98,
+            "y": 219.84,
+            "width": 17.02,
+            "height": 20.16
+          }
+        },
+        "actionButton.labels.labelSlot0.labelAnchor0.labelRow0.labelPin0.labelBox0.label0": {
+          "type": "ui.text",
+          "box": {
+            "x": 90.98,
+            "y": 216.48,
+            "width": 17.02,
+            "height": 26.88
+          },
+          "texts": [
+            {
+              "text": "B1",
+              "naturalWidth": 17.02,
+              "givenWidth": 17.02,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        },
+        "actionButton.labels.labelSlot1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 240,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 240,
+            "width": 96,
+            "height": 228
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1": {
+          "type": "ui.stack",
+          "box": {
+            "x": 12,
+            "y": 240,
+            "width": 96,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1": {
+          "type": "ui.transform",
+          "box": {
+            "x": 12,
+            "y": 211.2,
+            "width": 32.22,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1": {
+          "type": "ui.modifier",
+          "box": {
+            "x": 12,
+            "y": 211.2,
+            "width": 32.22,
+            "height": 28.8
+          }
+        },
+        "actionButton.labels.labelSlot1.labelAnchor1.labelRow1.labelPin1.labelBox1.label1": {
+          "type": "ui.text",
+          "box": {
+            "x": 12,
+            "y": 206.41,
+            "width": 32.22,
+            "height": 38.39
+          },
+          "texts": [
+            {
+              "text": "B2",
+              "naturalWidth": 32.22,
+              "givenWidth": 32.22,
+              "truncated": {
+                "x": false,
+                "y": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
