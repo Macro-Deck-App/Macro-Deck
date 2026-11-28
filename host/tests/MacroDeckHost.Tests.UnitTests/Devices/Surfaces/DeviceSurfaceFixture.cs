@@ -6,6 +6,7 @@ using MacroDeckHost.Application.Devices;
 using MacroDeckHost.Application.Devices.Surfaces;
 using MacroDeckHost.Application.Icons;
 using MacroDeckHost.Application.Persistence.Repositories;
+using MacroDeckHost.Application.Plugins.IconPacks;
 using MacroDeckHost.Application.Profiles;
 using MacroDeckHost.Application.Rendering;
 using MacroDeckHost.Application.Services;
@@ -57,7 +58,8 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 	public DeviceSurfaceFixture(
 		IIconService? icons = null,
 		ILabelTextService? labelText = null,
-		Func<DeviceSurfaceFixture, IDeviceSurfaceProvider>? provider = null)
+		Func<DeviceSurfaceFixture, IDeviceSurfaceProvider>? provider = null,
+		IPluginIconUiResources? pluginIcons = null)
 	{
 		Time = new ManualTimeProvider();
 		Profiles = new FakeProfileRegistry();
@@ -93,6 +95,11 @@ internal sealed class DeviceSurfaceFixture : IDisposable
 		if (icons is not null)
 		{
 			services.AddSingleton(icons);
+		}
+
+		if (pluginIcons is not null)
+		{
+			services.AddSingleton(pluginIcons);
 		}
 
 		services
