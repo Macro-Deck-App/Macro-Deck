@@ -57,6 +57,11 @@ public sealed class DeviceInteractionRouter
 		DeviceInteraction interaction,
 		CancellationToken cancellationToken)
 	{
+		if (interaction is { Kind: DeviceInteractionKind.Release, Target.WidgetId: { Length: > 0 } released })
+		{
+			session.KeyImages?.Release(released);
+		}
+
 		if (_lockState.IsLocked)
 		{
 			return DeviceInteractionOutcome.Reject(DeviceSurfaceErrorCodes.HostLocked);
@@ -74,17 +79,20 @@ public sealed class DeviceInteractionRouter
 		switch (interaction.Kind)
 		{
 			case DeviceInteractionKind.Press:
+				session.KeyImages?.Press(widgetId);
 				await Presses(session).PressAsync(widgetId);
 				return DeviceInteractionOutcome.Accepted;
 			case DeviceInteractionKind.Release:
 				await Presses(session).ReleaseAsync(widgetId);
 				return DeviceInteractionOutcome.Accepted;
 			case DeviceInteractionKind.ShortPress:
+				session.KeyImages?.Flash(widgetId);
 				return await ExecuteWholePressAsync(session,
 					widgetId,
 					WidgetTriggerTypes.ShortPress,
 					_shortPressPhases);
 			case DeviceInteractionKind.LongPress:
+				session.KeyImages?.Flash(widgetId);
 				return await ExecuteWholePressAsync(session, widgetId, WidgetTriggerTypes.LongPress, _longPressPhases);
 			default:
 				return DeviceInteractionOutcome.NotSupported;

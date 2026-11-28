@@ -37,6 +37,8 @@ public sealed partial class SkiaDeviceKeyImageRenderer : IDeviceKeyImageRenderer
 
 	public event EventHandler? FontsChanged;
 
+	public TimeSpan PressMinVisible => KeyCellComposer.PressMinVisible;
+
 	public DeviceKeyImageRenderResult Render(DeviceKeyImageRenderRequest request)
 	{
 		ArgumentNullException.ThrowIfNull(request);
@@ -88,6 +90,7 @@ public sealed partial class SkiaDeviceKeyImageRenderer : IDeviceKeyImageRenderer
 				EmptyCellVisible = request.EmptyCellVisible,
 				Borders = request.Borders,
 				AnimatedImages = request.AnimatedIcons,
+				Pressed = request.Pressed,
 				WidgetType = request.WidgetType,
 				WidgetData = request.WidgetData,
 				Tree = request.Tree,

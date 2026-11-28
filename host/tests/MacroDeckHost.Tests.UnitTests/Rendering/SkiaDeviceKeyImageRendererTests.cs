@@ -49,6 +49,39 @@ internal sealed class SkiaDeviceKeyImageRendererTests
 	}
 
 	[Test]
+	public async Task A_pressed_key_arrives_lighter_and_inset_from_its_edge()
+	{
+		using var document = JsonDocument.Parse("""{"revision":1,"root":{"id":"r","type":"ui.stack"}}""");
+		using var renderer = new SkiaDeviceKeyImageRenderer(new AntaCatalog(), TestLocalization.Resolver);
+		var request = new DeviceKeyImageRenderRequest
+		{
+			KeySize = new LayoutKeySize(72, 72),
+			Format = new LayoutKeyImageFormat { Encoding = KeyImageEncodings.Png },
+			Kind = DeviceKeyCellKind.Widget,
+			WidgetType = "Clock",
+			Tree = document.RootElement.Clone(),
+			Appearance = new DeviceKeyImageAppearance("dark", null, AntaCatalog.Family),
+			Culture = "en",
+			TimeZone = TimeZoneInfo.Utc,
+			Now = new DateTimeOffset(2026, 9, 12, 14, 5, 30, TimeSpan.Zero)
+		};
+
+		using var resting = SKBitmap.Decode(renderer.Render(request).Keys.Single().Content.ToArray());
+		using var pressed = SKBitmap.Decode(renderer.Render(request with { Pressed = true })
+			.Keys.Single()
+			.Content
+			.ToArray());
+
+		await Assert.MultipleAsync(async () =>
+		{
+			Assert.That(pressed.GetPixel(36, 36).Red, Is.GreaterThan(resting.GetPixel(36, 36).Red + 30));
+			Assert.That(pressed.GetPixel(0, 36).Red, Is.LessThan(resting.GetPixel(0, 36).Red));
+			Assert.That(renderer.PressMinVisible, Is.EqualTo(TimeSpan.FromMilliseconds(60)));
+			await Task.CompletedTask;
+		});
+	}
+
+	[Test]
 	public async Task The_same_key_drawn_on_several_threads_at_once_comes_out_identical()
 	{
 		using var document = JsonDocument.Parse("""

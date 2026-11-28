@@ -7,6 +7,8 @@ public interface IDeviceKeyImageRenderer
 {
 	event EventHandler? FontsChanged;
 
+	TimeSpan PressMinVisible { get; }
+
 	DeviceKeyImageRenderResult Render(DeviceKeyImageRenderRequest request);
 }
 
@@ -53,6 +55,8 @@ public sealed record DeviceKeyImageRenderRequest
 	public bool Borders { get; init; }
 
 	public bool AnimatedIcons { get; init; }
+
+	public bool Pressed { get; init; }
 
 	public required DeviceKeyImageAppearance Appearance { get; init; }
 
