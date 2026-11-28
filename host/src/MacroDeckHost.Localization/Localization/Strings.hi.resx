@@ -15934,6 +15934,10 @@ Macro Deck वेबसाइट से डाउनलोड करें औ�
     <value>डिफ़ॉल्ट प्रोफ़ाइल</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="Profiles.StarterExampleButtonLabel" xml:space="preserve">
+    <value>मुझे संपादित करें</value>
+    <comment>The label of the example button on the profile Macro Deck creates for a newly connected hardware deck. Stored as widget data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
+  </data>
   <data name="ScreenSavers.Clock.Description" xml:space="preserve">
     <value>समय और तारीख, स्क्रीन पर धीरे-धीरे इधर-उधर सरकते हुए।</value>
   </data>

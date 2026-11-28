@@ -15,7 +15,7 @@ namespace MacroDeckHost.DatabaseMigrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.13");
 
             modelBuilder.Entity("MacroDeckHost.Domain.Entities.AppPreferenceEntity", b =>
                 {
@@ -153,6 +153,11 @@ namespace MacroDeckHost.DatabaseMigrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(false)
                         .HasColumnName("d_settings_button_hidden");
+
+                    b.Property<bool>("StarterProfilePending")
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("d_starter_profile_pending");
 
                     b.Property<string>("StartupProfileId")
                         .HasColumnType("TEXT")
