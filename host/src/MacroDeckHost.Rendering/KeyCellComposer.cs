@@ -1,4 +1,5 @@
 using System.Text.Json;
+using MacroDeckHost.Rendering.Animation;
 using MacroDeckHost.Rendering.Nodes;
 using MacroDeckHost.Rendering.Paint;
 using MacroDeckHost.Rendering.Tree;
@@ -38,6 +39,8 @@ public sealed record KeyCellInput
 	public bool Borders { get; init; } = true;
 
 	public bool AnimatedImages { get; init; } = true;
+
+	public bool Pressed { get; init; }
 
 	public string? WidgetType { get; init; }
 
@@ -90,6 +93,10 @@ public static class KeyCellComposer
 		"static", "heartbeat", "breathing", "blink", "comet", "ants", "hue-shift", "rgb"
 	};
 
+	private static readonly SKSamplingOptions _sampling = new(SKFilterMode.Linear, SKMipmapMode.None);
+
+	public static TimeSpan PressMinVisible => TimeSpan.FromMilliseconds(Motion.PressMinVisibleMs);
+
 	public static KeyCellOutput Compose(KeyCellInput input, TileRenderer? renderer = null)
 	{
 		ArgumentNullException.ThrowIfNull(input);
@@ -126,7 +133,14 @@ public static class KeyCellComposer
 				PaintEmptyCell(canvas, bounds, radius, Token(tokens, "--color-bg-secondary"));
 				break;
 			case KeyCellKind.Tile:
+				canvas.Save();
+				if (input.Pressed)
+				{
+					canvas.Scale((float)Motion.PressScale, (float)Motion.PressScale, width / 2f, height / 2f);
+				}
+
 				(next, missing) = PaintTile(canvas, input, bounds, radius, scale, renderer, tokens);
+				canvas.Restore();
 				break;
 		}
 
@@ -226,6 +240,16 @@ public static class KeyCellComposer
 			missing = output.MissingResources;
 		}
 
+		if (input.Pressed)
+		{
+			using var tint = new SKPaint
+			{
+				IsAntialias = true,
+				Color = SKColors.White.WithAlpha((byte)Math.Round(255 * Motion.PressTintAlpha))
+			};
+			canvas.DrawRoundRect(shape, tint);
+		}
+
 		canvas.Restore();
 
 		if (input.Borders && Border(input, root) is { } ring)
@@ -247,7 +271,7 @@ public static class KeyCellComposer
 		var info = new SKImageInfo(output.PixelWidth, output.PixelHeight, SKColorType.Rgba8888, SKAlphaType.Unpremul);
 		using var data = SKData.CreateCopy(output.Pixels);
 		using var image = SKImage.FromPixels(info, data, output.PixelWidth * 4);
-		canvas.DrawImage(image, 0, 0);
+		canvas.DrawImage(image, 0, 0, _sampling);
 	}
 
 	private static (string Style, SKColor Color)? Border(KeyCellInput input, UiNode? root)

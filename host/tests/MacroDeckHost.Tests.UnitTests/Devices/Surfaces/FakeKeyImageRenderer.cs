@@ -14,7 +14,13 @@ internal sealed partial class FakeKeyImageRenderer : IDeviceKeyImageRenderer
 
 	public event EventHandler? FontsChanged;
 
+	public TimeSpan PressMinVisible => TimeSpan.FromMilliseconds(60);
+
+	public ManualResetEventSlim PressedRenders { get; } = new(true);
+
 	public HashSet<string> TickingTypes { get; } = new(StringComparer.Ordinal);
+
+	public HashSet<string> FramedTypes { get; } = new(StringComparer.Ordinal);
 
 	public IReadOnlyList<DeviceKeyImageRenderRequest> Requests
 	{
@@ -58,11 +64,21 @@ internal sealed partial class FakeKeyImageRenderer : IDeviceKeyImageRenderer
 			.Append(rowOffset)
 			.Append(',')
 			.Append(columnOffset);
+		if (request.Pressed)
+		{
+			builder.Append("|pressed");
+		}
+
 		return builder.ToString();
 	}
 
 	public DeviceKeyImageRenderResult Render(DeviceKeyImageRenderRequest request)
 	{
+		if (request.Pressed)
+		{
+			PressedRenders.Wait();
+		}
+
 		lock (_gate)
 		{
 			_requests.Add(request);
@@ -98,9 +114,13 @@ internal sealed partial class FakeKeyImageRenderer : IDeviceKeyImageRenderer
 			}
 		}
 
-		return new DeviceKeyImageRenderResult(keys,
-			ticking ? DateTimeOffset.FromUnixTimeSeconds(second + 1) : null,
-			missing);
+		DateTimeOffset? next = ticking ? DateTimeOffset.FromUnixTimeSeconds(second + 1) : null;
+		if (request.WidgetType is { } framed && FramedTypes.Contains(framed))
+		{
+			next = request.Now.AddMilliseconds(50);
+		}
+
+		return new DeviceKeyImageRenderResult(keys, next, missing);
 	}
 
 	private static IEnumerable<string> ResourceIdsOf(DeviceKeyImageRenderRequest request)

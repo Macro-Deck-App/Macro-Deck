@@ -465,6 +465,13 @@ public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken
   event, counting the pictures `GetKeyImageAsync` handed you.
 - **Rate:** Macro Deck caps updates at the layout's `Visuals.MaxUpdatesPerSecond`, or 30 per second when
   that is unset.
+- **Press feedback:** a `Press` the host accepts redraws every key of that widget in the pressed look (the
+  tile slightly smaller and lightened, as in the web client) and raises those pictures through
+  `KeyImageChanged`; the `Release` raises the resting pictures again. The pressed look stays on the keys
+  for at least 60 ms after it was raised, so a short tap is visible, and a `ShortPress` or `LongPress`
+  shows it for that long. The pictures are drawn beside the press, never in its way: the interaction result
+  does not wait for them, and the rate cap above applies to them too. Nothing is required from you; apply
+  them like any other picture.
 - **What the visual capabilities change:** with `AnimatedIcons` false a key shows the icon's first frame;
   with `Borders` false no border ring is drawn; corners are rounded only when `CornerRadius` is true and
   keys of a widget spanning several cells are separated by the profile's spacing only when `WidgetSpacing`

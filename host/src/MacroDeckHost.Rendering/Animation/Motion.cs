@@ -4,6 +4,10 @@ internal static class Motion
 {
 	public const int PressMinVisibleMs = 60;
 
+	public const double PressTintAlpha = 0.2;
+
+	public const double PressScale = 0.95;
+
 	public const int CrossfadeMs = 220;
 
 	public const string CrossfadeEasing = "ease-out";
