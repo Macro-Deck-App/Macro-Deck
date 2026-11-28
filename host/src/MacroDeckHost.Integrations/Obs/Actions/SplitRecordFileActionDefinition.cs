@@ -49,7 +49,7 @@ internal sealed class SplitRecordFileActionDefinition : IDynamicOptionsActionDef
 				return error;
 			}
 
-			return ObsCommandResults.ToActionResult(await connection.SplitRecordFileAsync());
+			return ObsCommandResults.ToRecordingActionResult(await connection.SplitRecordFileAsync());
 		}
 	}
 }

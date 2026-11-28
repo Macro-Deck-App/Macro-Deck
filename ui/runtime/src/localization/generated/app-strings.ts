@@ -4627,6 +4627,8 @@ export const AppStrings = {
 				SettingExpectsJson: 'macrodeck.app:Integrations.Obs.Errors.SettingExpectsJson',
 				SettingExpectsNumber: 'macrodeck.app:Integrations.Obs.Errors.SettingExpectsNumber',
 				SourceNotFound: 'macrodeck.app:Integrations.Obs.Errors.SourceNotFound',
+				StudioModeOff: 'macrodeck.app:Integrations.Obs.Errors.StudioModeOff',
+				TimedOut: 'macrodeck.app:Integrations.Obs.Errors.TimedOut',
 				VariableWriteFailed: 'macrodeck.app:Integrations.Obs.Errors.VariableWriteFailed',
 			},
 			Events: {
@@ -14293,6 +14295,8 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Integrations.Obs.Errors.SettingExpectsJson': 'The setting {setting} expects JSON in the same form as its current value.',
 	'macrodeck.app:Integrations.Obs.Errors.SettingExpectsNumber': 'The setting {setting} expects a number.',
 	'macrodeck.app:Integrations.Obs.Errors.SourceNotFound': 'The source \'{source}\' does not exist in the scene \'{scene}\'.',
+	'macrodeck.app:Integrations.Obs.Errors.StudioModeOff': 'Studio Mode is off in OBS. Turn it on to set a preview scene.',
+	'macrodeck.app:Integrations.Obs.Errors.TimedOut': 'OBS did not answer in time.',
 	'macrodeck.app:Integrations.Obs.Errors.VariableWriteFailed': 'The variable \'{variable}\' could not be written.',
 	'macrodeck.app:Integrations.Obs.Events.AudioCategory': 'Audio',
 	'macrodeck.app:Integrations.Obs.Events.ConnectionCategory': 'Connection',

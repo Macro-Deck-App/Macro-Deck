@@ -24648,6 +24648,12 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS a refusé la requête : {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Le mode studio est désactivé dans OBS. Active-le pour définir une scène d'aperçu.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS n'a pas répondu à temps.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Saisis un dossier d'enregistrement.</value>
   </data>

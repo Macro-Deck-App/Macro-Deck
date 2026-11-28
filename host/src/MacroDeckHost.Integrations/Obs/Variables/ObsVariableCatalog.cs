@@ -393,10 +393,18 @@ internal sealed class ObsVariableCatalog
 		// 1.0, the reading reports a ceiling that follows a boosted input up, and clamping here would
 		// quietly cut the boost the first time a control wrote the value it had just been shown.
 		var percent = ToPercent(Math.Max(MinimumVolumeDb, decibels));
-		var applied = await runtime.Connection.SetInputVolumePercentAsync(parsed.SourceName!, percent)
+		var result = await runtime.Connection.SetInputVolumePercentAsync(parsed.SourceName!, percent)
 			.ConfigureAwait(false);
 
-		return applied ? VariableWriteResult.Applied() : VariableWriteResult.Unavailable();
+		return result.Outcome switch
+		{
+			ObsCommandOutcome.Success => VariableWriteResult.Applied(),
+			ObsCommandOutcome.Rejected when result.Code == ObsRequestException.TimedOut
+				=> VariableWriteResult.Unavailable(AppStrings.Integrations.Obs.Errors.TimedOut()),
+			ObsCommandOutcome.Rejected => VariableWriteResult.Failed(
+				AppStrings.Integrations.Obs.Errors.RequestRejected(result.Message ?? string.Empty)),
+			_ => VariableWriteResult.Unavailable()
+		};
 	}
 
 	/// <summary>OBS's linear multiplier as a percentage, expressed on OBS's own decibel scale.</summary>

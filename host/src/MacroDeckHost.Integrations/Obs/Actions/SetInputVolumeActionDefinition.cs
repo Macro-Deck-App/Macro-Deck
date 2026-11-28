@@ -159,7 +159,7 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 			var decibelStep = ReadNumber(context.Parameters.GetValueOrDefault(DecibelStepParameter))
 				?? DefaultDecibelStep;
 			var mode = context.Parameters.GetValueOrDefault(ModeParameter) as string ?? ModeSet;
-			var succeeded = mode switch
+			var result = mode switch
 			{
 				ModeIncrease => await connection.AdjustInputVolumePercentAsync(input, volume),
 				ModeDecrease => await connection.AdjustInputVolumePercentAsync(input, -volume),
@@ -169,10 +169,7 @@ internal sealed class SetInputVolumeActionDefinition : IDynamicOptionsActionDefi
 				_ => await connection.SetInputVolumePercentAsync(input, volume)
 			};
 
-			return succeeded
-				? ActionResult.Success()
-				: ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Obs.Errors.NotConnected());
+			return ObsCommandResults.ToActionResult(result);
 		}
 
 		private static double ReadVolume(object? raw)

@@ -2,6 +2,7 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Integrations.Obs.Connections;
+using MacroDeckHost.Integrations.Obs.Protocol;
 using MacroDeckHost.Localization;
 using Serilog;
 
@@ -124,20 +125,15 @@ internal sealed class SceneActionDefinition : IDynamicOptionsActionDefinition, I
 					AppStrings.Integrations.Obs.Errors.NoSceneSelected());
 			}
 
-			if (_preview)
+			if (!_preview)
 			{
-				return await connection.SetPreviewSceneAsync(scene)
-					? ActionResult.Success()
-					: ActionResult.Failed(ActionErrorCodes.NotConnected,
-						AppStrings.Integrations.Obs.Errors.NotConnected());
+				return ObsCommandResults.ToActionResult(await connection.SetSceneAsync(scene));
 			}
-			else
-			{
-				return await connection.SetSceneAsync(scene)
-					? ActionResult.Success()
-					: ActionResult.Failed(ActionErrorCodes.NotConnected,
-						AppStrings.Integrations.Obs.Errors.NotConnected());
-			}
+
+			var result = await connection.SetPreviewSceneAsync(scene);
+			return result is { Outcome: ObsCommandOutcome.Rejected, Code: ObsRequestException.StudioModeNotActive }
+				? ActionResult.Failed(ActionErrorCodes.Unavailable, AppStrings.Integrations.Obs.Errors.StudioModeOff())
+				: ObsCommandResults.ToActionResult(result);
 		}
 	}
 }

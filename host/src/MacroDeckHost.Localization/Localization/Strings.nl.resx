@@ -24670,6 +24670,12 @@ Deze draagbare kopie werkt zichzelf niet bij. Download de draagbare ZIP van de M
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS heeft het verzoek geweigerd: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Studiomodus staat uit in OBS. Zet hem aan om een voorbeeldscène in te stellen.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS heeft niet op tijd geantwoord.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Voer een opnamemap in.</value>
   </data>

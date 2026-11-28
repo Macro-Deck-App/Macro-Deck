@@ -24670,6 +24670,12 @@ Salinan portabel ini tidak memperbarui dirinya sendiri. Unduh ZIP portabel dari 
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS menolak permintaan: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Mode Studio di OBS nonaktif. Aktifkan untuk mengatur adegan pratinjau.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS tidak merespons tepat waktu.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Masukkan folder rekaman.</value>
   </data>

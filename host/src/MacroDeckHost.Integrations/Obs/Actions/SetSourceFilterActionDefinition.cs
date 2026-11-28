@@ -140,17 +140,14 @@ internal sealed class SetSourceFilterActionDefinition : IDynamicOptionsActionDef
 			}
 
 			var mode = context.Parameters.GetValueOrDefault(ModeParameter) as string ?? ModeToggle;
-			var succeeded = mode switch
+			var result = mode switch
 			{
 				ModeEnable => await connection.SetSourceFilterEnabledAsync(source, filter, true),
 				ModeDisable => await connection.SetSourceFilterEnabledAsync(source, filter, false),
 				_ => await connection.ToggleSourceFilterAsync(source, filter)
 			};
 
-			return succeeded
-				? ActionResult.Success()
-				: ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Obs.Errors.NotConnected());
+			return ObsCommandResults.ToActionResult(result);
 		}
 	}
 }

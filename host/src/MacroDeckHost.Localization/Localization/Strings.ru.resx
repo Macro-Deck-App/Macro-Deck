@@ -24670,6 +24670,12 @@ Macro Deck установлен из репозитория APT, поэтому 
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS отклонил запрос: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Режим студии в OBS выключен. Включите его, чтобы задать сцену предпросмотра.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS не ответил вовремя.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Введите папку для записи.</value>
   </data>

@@ -119,17 +119,14 @@ internal sealed class MuteInputActionDefinition : IDynamicOptionsActionDefinitio
 			}
 
 			var mode = context.Parameters.GetValueOrDefault(ModeParameter) as string ?? ModeToggle;
-			var succeeded = mode switch
+			var result = mode switch
 			{
 				ModeMute => await connection.SetInputMuteAsync(input, true),
 				ModeUnmute => await connection.SetInputMuteAsync(input, false),
 				_ => await connection.ToggleInputMuteAsync(input)
 			};
 
-			return succeeded
-				? ActionResult.Success()
-				: ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Obs.Errors.NotConnected());
+			return ObsCommandResults.ToActionResult(result);
 		}
 	}
 }

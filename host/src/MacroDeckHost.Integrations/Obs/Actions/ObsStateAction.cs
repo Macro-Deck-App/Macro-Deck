@@ -20,7 +20,7 @@ internal sealed class ObsStateAction : ObsAction, IStateProviderActionDefinition
 		LocalizedText name,
 		LocalizedText description,
 		ObsTargetResolver resolver,
-		Func<ObsConnection, Task<bool>> command,
+		Func<ObsConnection, Task<ObsCommandResult>> command,
 		IReadOnlyList<ActionStateDefinition> states,
 		Func<ObsState, string> readActiveStateId)
 		: base(id, name, description, resolver, command)

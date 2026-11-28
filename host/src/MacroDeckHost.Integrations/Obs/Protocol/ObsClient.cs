@@ -306,17 +306,17 @@ internal sealed class ObsClient : IObsClient
 
 	public void SetCurrentScene(string sceneName)
 	{
-		_obs.SetCurrentProgramScene(sceneName);
+		Request(() => _obs.SetCurrentProgramScene(sceneName));
 	}
 
 	public void SetPreviewScene(string sceneName)
 	{
-		_obs.SetCurrentPreviewScene(sceneName);
+		Request(() => _obs.SetCurrentPreviewScene(sceneName));
 	}
 
 	public void SetCurrentProfile(string profileName)
 	{
-		_obs.SetCurrentProfile(profileName);
+		Request(() => _obs.SetCurrentProfile(profileName));
 	}
 
 	public void SetCurrentSceneCollection(string sceneCollectionName)
@@ -326,72 +326,72 @@ internal sealed class ObsClient : IObsClient
 
 	public void StartRecord()
 	{
-		_obs.StartRecord();
+		Request(() => _obs.StartRecord());
 	}
 
 	public void StopRecord()
 	{
-		_obs.StopRecord();
+		Request(() => _obs.StopRecord());
 	}
 
 	public void ToggleRecord()
 	{
-		_obs.ToggleRecord();
+		Request(() => _obs.ToggleRecord());
 	}
 
 	public void ToggleRecordPause()
 	{
-		_obs.ToggleRecordPause();
+		Request(() => _obs.ToggleRecordPause());
 	}
 
 	public void StartStream()
 	{
-		_obs.StartStream();
+		Request(() => _obs.StartStream());
 	}
 
 	public void StopStream()
 	{
-		_obs.StopStream();
+		Request(() => _obs.StopStream());
 	}
 
 	public void ToggleStream()
 	{
-		_obs.ToggleStream();
+		Request(() => _obs.ToggleStream());
 	}
 
 	public void StartVirtualCam()
 	{
-		_obs.StartVirtualCam();
+		Request(() => _obs.StartVirtualCam());
 	}
 
 	public void StopVirtualCam()
 	{
-		_obs.StopVirtualCam();
+		Request(() => _obs.StopVirtualCam());
 	}
 
 	public void ToggleVirtualCam()
 	{
-		_obs.ToggleVirtualCam();
+		Request(() => _obs.ToggleVirtualCam());
 	}
 
 	public void StartReplayBuffer()
 	{
-		_obs.StartReplayBuffer();
+		Request(() => _obs.StartReplayBuffer());
 	}
 
 	public void StopReplayBuffer()
 	{
-		_obs.StopReplayBuffer();
+		Request(() => _obs.StopReplayBuffer());
 	}
 
 	public void ToggleReplayBuffer()
 	{
-		_obs.ToggleReplayBuffer();
+		Request(() => _obs.ToggleReplayBuffer());
 	}
 
 	public void SaveReplayBuffer()
 	{
-		_obs.SaveReplayBuffer();
+		Request(() => _obs.SaveReplayBuffer());
 	}
 
 	public void SplitRecordFile()
@@ -437,15 +437,21 @@ internal sealed class ObsClient : IObsClient
 
 	public void SetSourceVisible(string sceneName, string sourceName, bool visible)
 	{
-		var itemId = _obs.GetSceneItemId(sceneName, sourceName, 0);
-		_obs.SetSceneItemEnabled(sceneName, itemId, visible);
+		Request(() =>
+		{
+			var itemId = _obs.GetSceneItemId(sceneName, sourceName, 0);
+			_obs.SetSceneItemEnabled(sceneName, itemId, visible);
+		});
 	}
 
 	public void ToggleSourceVisible(string sceneName, string sourceName)
 	{
-		var itemId = _obs.GetSceneItemId(sceneName, sourceName, 0);
-		var enabled = _obs.GetSceneItemEnabled(sceneName, itemId);
-		_obs.SetSceneItemEnabled(sceneName, itemId, !enabled);
+		Request(() =>
+		{
+			var itemId = _obs.GetSceneItemId(sceneName, sourceName, 0);
+			var enabled = _obs.GetSceneItemEnabled(sceneName, itemId);
+			_obs.SetSceneItemEnabled(sceneName, itemId, !enabled);
+		});
 	}
 
 	public bool GetInputMuted(string inputName)
@@ -455,22 +461,24 @@ internal sealed class ObsClient : IObsClient
 
 	public void SetInputMute(string inputName, bool muted)
 	{
-		_obs.SetInputMute(inputName, muted);
+		Request(() => _obs.SetInputMute(inputName, muted));
 	}
 
 	public void ToggleInputMute(string inputName)
 	{
-		_obs.ToggleInputMute(inputName);
+		Request(() => _obs.ToggleInputMute(inputName));
 	}
 
 	public float GetInputVolume(string inputName)
 	{
-		return _obs.GetInputVolume(inputName).VolumeMul;
+		var volume = 0f;
+		Request(() => volume = _obs.GetInputVolume(inputName).VolumeMul);
+		return volume;
 	}
 
 	public void SetInputVolume(string inputName, float volumeMultiplier)
 	{
-		_obs.SetInputVolume(inputName, volumeMultiplier, false);
+		Request(() => _obs.SetInputVolume(inputName, volumeMultiplier, false));
 	}
 
 	public bool GetSourceFilterEnabled(string sourceName, string filterName)
@@ -480,18 +488,21 @@ internal sealed class ObsClient : IObsClient
 
 	public void SetSourceFilterEnabled(string sourceName, string filterName, bool enabled)
 	{
-		_obs.SetSourceFilterEnabled(sourceName, filterName, enabled);
+		Request(() => _obs.SetSourceFilterEnabled(sourceName, filterName, enabled));
 	}
 
 	public void ToggleSourceFilterEnabled(string sourceName, string filterName)
 	{
-		var enabled = _obs.GetSourceFilter(sourceName, filterName).IsEnabled;
-		_obs.SetSourceFilterEnabled(sourceName, filterName, !enabled);
+		Request(() =>
+		{
+			var enabled = _obs.GetSourceFilter(sourceName, filterName).IsEnabled;
+			_obs.SetSourceFilterEnabled(sourceName, filterName, !enabled);
+		});
 	}
 
 	public void SetStudioMode(bool enabled)
 	{
-		_obs.SetStudioModeEnabled(enabled);
+		Request(() => _obs.SetStudioModeEnabled(enabled));
 	}
 
 	public string GetInputAudioMonitorType(string inputName)
