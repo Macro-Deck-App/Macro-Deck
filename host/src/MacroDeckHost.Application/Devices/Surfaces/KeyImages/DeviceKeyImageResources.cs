@@ -9,17 +9,30 @@ namespace MacroDeckHost.Application.Devices.Surfaces.KeyImages;
 
 public sealed class DeviceKeyImageResources : IDeviceKeyImageResourceLookup
 {
+	internal const int MaxUnusedEntries = 64;
+
+	internal static readonly TimeSpan RetainFor = TimeSpan.FromSeconds(30);
+
 	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly IconAppearanceContext _context;
+	private readonly TimeProvider _timeProvider;
 	private readonly ILogger _logger;
-	private readonly ConcurrentDictionary<(string ResourceId, int? Size), DeviceKeyImageResource?> _cache = new();
+	private readonly IUiResourceStore? _store;
+	private readonly ConcurrentDictionary<(string ResourceId, int? Size), Entry> _cache = new();
 	private readonly ConcurrentDictionary<(string ResourceId, int? Size), byte> _inFlight = new();
 
-	public DeviceKeyImageResources(IServiceScopeFactory scopeFactory, IconAppearanceContext context, ILogger logger)
+	public DeviceKeyImageResources(
+		IServiceScopeFactory scopeFactory,
+		IconAppearanceContext context,
+		TimeProvider timeProvider,
+		ILogger logger)
 	{
 		_scopeFactory = scopeFactory;
 		_context = context;
+		_timeProvider = timeProvider;
 		_logger = logger;
+		using var scope = scopeFactory.CreateScope();
+		_store = scope.ServiceProvider.GetService<IUiResourceStore>();
 	}
 
 	// The buckets of ui/runtime's icon-prefetch.util.ts, so a key asks for the renditions a client asks for.
@@ -36,48 +49,95 @@ public sealed class DeviceKeyImageResources : IDeviceKeyImageResourceLookup
 
 	public DeviceKeyImageResource? TryGet(string resourceId, int? displayPx)
 	{
-		return _cache.TryGetValue((resourceId, SizeBucket(displayPx)), out var resource) ? resource : null;
+		return Lookup(resourceId, displayPx, out _);
 	}
 
-	// A resource found absent stays absent until a tree changes, so a render never fetches in a loop.
+	public DeviceKeyImageResource? Lookup(string resourceId, int? displayPx, out bool pending)
+	{
+		var key = (resourceId, SizeBucket(displayPx));
+		if (!_cache.TryGetValue(key, out var entry))
+		{
+			pending = true;
+			return null;
+		}
+
+		var current = _store is not null && _store.TryGet(resourceId, out var stored) ? stored.ContentHash : null;
+		if (entry.Resource is null
+			? current is not null
+			: entry.SourceHash is not null && !string.Equals(current, entry.SourceHash, StringComparison.Ordinal))
+		{
+			_cache.TryRemove(new KeyValuePair<(string, int?), Entry>(key, entry));
+			pending = true;
+			return null;
+		}
+
+		pending = false;
+		return entry.Resource;
+	}
+
 	public void ForgetAbsent()
 	{
-		foreach (var (key, value) in _cache)
+		foreach (var (key, entry) in _cache)
 		{
-			if (value is null)
+			if (entry is { Resource: null, Stale: false })
 			{
-				_cache.TryRemove(key, out _);
+				_cache.TryUpdate(key, entry with { Stale = true }, entry);
 			}
 		}
 	}
 
 	public void Retain(IEnumerable<(string ResourceId, int? DisplayPx)> used)
 	{
+		var now = _timeProvider.GetUtcNow();
 		var kept = used.Select(request => (request.ResourceId, SizeBucket(request.DisplayPx))).ToHashSet();
-		foreach (var key in _cache.Keys)
+		foreach (var key in kept)
 		{
-			if (!kept.Contains(key))
+			if (_cache.TryGetValue(key, out var entry))
+			{
+				_cache.TryUpdate(key, entry with { LastUsed = now }, entry);
+			}
+		}
+
+		var unused = new List<((string ResourceId, int? Size) Key, DateTimeOffset LastUsed)>();
+		foreach (var (key, entry) in _cache)
+		{
+			if (kept.Contains(key))
+			{
+				continue;
+			}
+
+			if (now - entry.LastUsed > RetainFor)
 			{
 				_cache.TryRemove(key, out _);
 			}
+			else
+			{
+				unused.Add((key, entry.LastUsed));
+			}
+		}
+
+		foreach (var (key, _) in unused.OrderBy(entry => entry.LastUsed).Take(unused.Count - MaxUnusedEntries))
+		{
+			_cache.TryRemove(key, out _);
 		}
 	}
 
-	public async Task<bool> FetchAsync(
+	public async Task<DeviceKeyImageFetch> FetchAsync(
 		IEnumerable<DeviceKeyImageResourceRequest> requests,
 		CancellationToken cancellationToken)
 	{
 		var wanted = requests
 			.Select(request => (request.ResourceId, Size: SizeBucket(request.DisplayPx)))
 			.Distinct()
-			.Where(key => !_cache.ContainsKey(key) && _inFlight.TryAdd(key, 0))
+			.Where(key => (!_cache.TryGetValue(key, out var entry) || entry.Stale) && _inFlight.TryAdd(key, 0))
 			.ToList();
 		if (wanted.Count == 0)
 		{
-			return false;
+			return new DeviceKeyImageFetch(false, false);
 		}
 
 		var found = false;
+		var unblocked = false;
 		try
 		{
 			await using var scope = _scopeFactory.CreateAsyncScope();
@@ -86,14 +146,25 @@ public sealed class DeviceKeyImageResources : IDeviceKeyImageResourceLookup
 			var renditions = scope.ServiceProvider.GetService<IIconUiResourceRenditions>();
 			foreach (var key in wanted)
 			{
-				var resource = await FindAsync(key.ResourceId,
-					key.Size,
-					store,
-					pluginIcons,
-					renditions,
-					cancellationToken);
-				_cache[key] = resource;
-				found |= resource is not null;
+				Entry entry;
+				try
+				{
+					entry = await FindAsync(key.ResourceId,
+						key.Size,
+						store,
+						pluginIcons,
+						renditions,
+						cancellationToken);
+				}
+				catch (Exception exception) when (exception is not OperationCanceledException)
+				{
+					_logger.Warning(exception, "Failed to fetch a resource a device key shows");
+					entry = new Entry(null, null, _timeProvider.GetUtcNow(), false);
+				}
+
+				unblocked |= !_cache.ContainsKey(key);
+				_cache[key] = entry;
+				found |= entry.Resource is not null;
 			}
 		}
 		catch (Exception exception) when (exception is not OperationCanceledException)
@@ -108,10 +179,10 @@ public sealed class DeviceKeyImageResources : IDeviceKeyImageResourceLookup
 			}
 		}
 
-		return found;
+		return new DeviceKeyImageFetch(found, unblocked);
 	}
 
-	private async Task<DeviceKeyImageResource?> FindAsync(
+	private async Task<Entry> FindAsync(
 		string resourceId,
 		int? size,
 		IUiResourceStore store,
@@ -119,16 +190,19 @@ public sealed class DeviceKeyImageResources : IDeviceKeyImageResourceLookup
 		IIconUiResourceRenditions? renditions,
 		CancellationToken cancellationToken)
 	{
-		var content = store.TryGet(resourceId, out var stored)
+		var now = _timeProvider.GetUtcNow();
+		var fromStore = store.TryGet(resourceId, out var stored);
+		var content = fromStore
 			? stored
 			: pluginIcons is null
 				? null
 				: await pluginIcons.TryGetAsync(resourceId, cancellationToken);
 		if (content is null)
 		{
-			return null;
+			return new Entry(null, null, now, false);
 		}
 
+		var sourceHash = fromStore ? stored.ContentHash : null;
 		if (size is { } requested
 			&& renditions is not null
 			&& await renditions.TryGetAsync(resourceId, requested, cancellationToken, _context) is { } sized)
@@ -136,6 +210,17 @@ public sealed class DeviceKeyImageResources : IDeviceKeyImageResourceLookup
 			content = sized.Content;
 		}
 
-		return new DeviceKeyImageResource(content.Content, content.MediaType, content.ContentHash);
+		return new Entry(new DeviceKeyImageResource(content.Content, content.MediaType, content.ContentHash),
+			sourceHash,
+			now,
+			false);
 	}
+
+	private sealed record Entry(
+		DeviceKeyImageResource? Resource,
+		string? SourceHash,
+		DateTimeOffset LastUsed,
+		bool Stale);
 }
+
+public readonly record struct DeviceKeyImageFetch(bool Found, bool Unblocked);

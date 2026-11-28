@@ -15933,6 +15933,10 @@ Cette copie portable ne se met pas à jour toute seule. Télécharge le ZIP port
     <value>Profil par défaut</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="Profiles.StarterExampleButtonLabel" xml:space="preserve">
+    <value>Modifie-moi</value>
+    <comment>The label of the example button on the profile Macro Deck creates for a newly connected hardware deck. Stored as widget data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
+  </data>
   <data name="ScreenSavers.Clock.Description" xml:space="preserve">
     <value>Heure et date, dérivant lentement sur l'écran.</value>
   </data>

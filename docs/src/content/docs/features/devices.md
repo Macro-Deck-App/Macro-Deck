@@ -45,8 +45,8 @@ public sealed class MacroPadIntegration(IPadWatcher watcher) : IPluginIntegratio
 }
 ```
 
-Every connected pad now shows up in Macro Deck's device settings, where the user can name it and give it
-a startup profile. Unplugging it takes it offline; plugging it back in is the same device.
+Every connected pad now shows up in Macro Deck's device settings, where the user can name it and change
+its startup profile. Unplugging it takes it offline; plugging it back in is the same device.
 
 Things to know:
 
@@ -93,6 +93,22 @@ Host restarts     -> registers SERIAL-1 again  -> still the same device
 
 Macro Deck resolves `(your plugin id, Id)` to exactly one device. Re-registering keeps its global id, the
 user's name and its startup profile; the descriptor refreshes the rest.
+
+**A new device starts with a profile.** The first time a device is registered, the host gives it a
+startup profile, so the first surface a rendering provider receives is a deck rather than an empty one:
+
+- When its layout has exactly one grid region, the host creates a profile named after the device with
+  that grid's rows and columns, adds a few 1x1 built-in example widgets (a clock, a stopwatch and a
+  labelled button) and assigns it. The device's layout then locks that profile's grid.
+- When the device has no `LayoutReference`, or its layout has no single grid region, the host assigns the
+  user's first profile instead.
+- When `LayoutReference` names a layout that is not registered yet, the host waits and decides once that
+  layout is registered.
+
+This happens once per device. Re-registering, a restart or a reconnect never creates another profile, and
+a device whose profile the user later changes, unassigns or deletes keeps that choice. A device the user
+deletes in device settings is new when it registers again. Devices registered before this behaviour
+existed are left as they are. Nothing is needed from the provider for any of this.
 
 **Nothing you do deletes a device.** Unregistering takes it offline and stops offering it; the device stays
 so a reconnect is a reuse, not a new row. The same happens when your integration stops or your plugin's
@@ -460,6 +476,11 @@ public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken
   with `Borders` false no border ring is drawn; corners are rounded only when `CornerRadius` is true and
   keys of a widget spanning several cells are separated by the profile's spacing only when `WidgetSpacing`
   is true.
+- **Animated images:** with `AnimatedIcons` true an animated picture plays on the key. That includes SVG
+  images animated with SMIL (`<animate>`, `<animateTransform>` and the like), such as the Music Player's
+  playing mark; a key showing one changes up to 10 times per second, within the rate above. An SVG
+  animated only with CSS `@keyframes`, or whose animations begin on another one's begin or end (`a.end`)
+  or at a `wallclock()` time, is drawn still.
 - **What a key is drawn in:** the host's theme (light draws light, dark and system draw dark, since a
   device has no colour scheme of its own), accent colour, app font and language. Changing any of them, or
   importing or removing a font, draws every key again; only the keys that look different are sent. An

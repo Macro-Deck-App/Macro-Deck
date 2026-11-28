@@ -22,6 +22,7 @@ using MacroDeckHost.Application.FolderViews;
 using MacroDeckHost.Application.Layouts;
 using MacroDeckHost.Application.Plugins.Capabilities.Adapters.Devices;
 using MacroDeckHost.Application.ScreenSavers;
+using MacroDeckHost.Application.Services;
 using MacroDeckHost.Application.Ui.Modals;
 using MacroDeckHost.Application.Widgets;
 using MacroDeckHost.Plugins.Capabilities.Callbacks;
@@ -233,13 +234,21 @@ internal sealed class DeviceRegistrationOpenContractTests : CapabilityContractFi
 			new CellRenderer());
 		_world = world;
 		scopes = world.Scopes;
+		var layouts = new LayoutRegistry(new RecordingMediator());
+		var gates = new ProviderDeviceGates();
 		var registry = new PluginDeviceRegistry(world.Scopes,
 			world.Presence,
 			new DeviceConnectionTracker(new DeviceSurfaceWorld.NoEventBus(),
 				world.Time,
 				new DeckClientTracker(Serilog.Core.Logger.None)),
 			new DeviceSessionGuard(),
-			new LayoutRegistry(new RecordingMediator()),
+			layouts,
+			gates,
+			new ProviderDeviceStarterProfiles(world.Scopes,
+				gates,
+				layouts,
+				new StartupReadiness(),
+				Serilog.Core.Logger.None),
 			world.Time);
 		return (world, registry);
 	}

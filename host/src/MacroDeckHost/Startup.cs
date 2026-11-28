@@ -387,6 +387,7 @@ public class Startup
 		services.AddHostedService<CachingInitializeBackgroundService>();
 		services.AddHostedService<PublicTlsCertificateRenewalBackgroundService>();
 		services.AddHostedService<DeviceLayoutConstraintWarmupBackgroundService>();
+		services.AddHostedService<StarterProfileBackgroundService>();
 		services.AddHostedService<AdbBackgroundService>();
 		services.AddHostedService<NativeUsbBackgroundService>();
 		services.AddHostedService<IntegrationStartupBackgroundService>();
@@ -524,6 +525,8 @@ public class Startup
 		services.AddHostedService<VideoStreamShutdownService>();
 		services.AddSingleton<WidgetTypeProviderHost>();
 		services.AddSingleton<DeviceLayoutConstraintTracker>();
+		services.AddSingleton<ProviderDeviceGates>();
+		services.AddSingleton<ProviderDeviceStarterProfiles>();
 		services.AddSingleton<IPluginDeviceRegistry, PluginDeviceRegistry>();
 		services.AddSingleton<DeviceProviderHost>();
 		services.AddSingleton<IBatteryRegistry, BatteryRegistry>();
@@ -1206,9 +1209,11 @@ public class Startup
 		}
 
 		using var scope = services.CreateScope();
-		var devices = scope.ServiceProvider.GetRequiredService<IDeviceRepository>().GetAll().GetAwaiter().GetResult();
-		services.GetRequiredService<DeviceSessionGuard>()
-			.Seed(devices.Select(device => (device.Id, device.SessionsRevokedAt)));
+		var devices = scope.ServiceProvider.GetRequiredService<IDeviceRepository>()
+			.GetSessionRevocations()
+			.GetAwaiter()
+			.GetResult();
+		services.GetRequiredService<DeviceSessionGuard>().Seed(devices);
 	}
 
 	public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

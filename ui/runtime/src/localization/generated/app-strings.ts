@@ -7509,6 +7509,7 @@ export const AppStrings = {
 	},
 	Profiles: {
 		DefaultName: 'macrodeck.app:Profiles.DefaultName',
+		StarterExampleButtonLabel: 'macrodeck.app:Profiles.StarterExampleButtonLabel',
 	},
 	ScreenSavers: {
 		Clock: {
@@ -16684,6 +16685,7 @@ export const AppStringsDefaults: Readonly<Record<string, string>> = {
 	'macrodeck.app:Portable.Password.TooShort': 'Use at least {minimum} characters',
 	'macrodeck.app:Portable.Password.Weak': 'Weak - longer is better than complicated',
 	'macrodeck.app:Profiles.DefaultName': 'Default Profile',
+	'macrodeck.app:Profiles.StarterExampleButtonLabel': 'Edit me',
 	'macrodeck.app:ScreenSavers.Clock.Description': 'Time and date, drifting slowly across the screen.',
 	'macrodeck.app:ScreenSavers.Clock.Name': 'Clock',
 	'macrodeck.app:ScreenSavers.NowPlaying.Description': 'Cover, title and artist of the current track, the clock when nothing is playing.',

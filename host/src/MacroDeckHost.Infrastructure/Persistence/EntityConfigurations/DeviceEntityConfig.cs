@@ -1,6 +1,7 @@
 using MacroDeckHost.Domain.Entities;
 using MacroDeckHost.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MacroDeckHost.Infrastructure.Persistence.EntityConfigurations;
@@ -58,6 +59,11 @@ public class DeviceEntityConfig : BaseEntityConfig<DeviceEntity>
 		builder.Property(x => x.LayoutReference).HasColumnName(ColumnPrefix + "layout_reference");
 		builder.Property(x => x.Capabilities).HasColumnName(ColumnPrefix + "capabilities");
 		builder.Property(x => x.LayoutSnapshot).HasColumnName(ColumnPrefix + "layout_snapshot");
+		builder.Property(x => x.StarterProfilePending)
+			.HasColumnName(ColumnPrefix + "starter_profile_pending")
+			.HasDefaultValue(false)
+			.ValueGeneratedNever()
+			.Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
 		builder.Ignore(x => x.IsProviderDevice);
 
 		builder.HasIndex(x => x.LastSeenAt).HasDatabaseName("ix_device_last_seen");

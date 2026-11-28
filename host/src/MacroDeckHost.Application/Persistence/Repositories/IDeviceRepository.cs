@@ -8,6 +8,8 @@ public interface IDeviceRepository
 
 	Task<IReadOnlyList<DeviceEntity>> GetAll();
 
+	Task<IReadOnlyList<(Guid Id, DateTime? SessionsRevokedAt)>> GetSessionRevocations();
+
 	Task<IReadOnlyList<DeviceEntity>> GetByStartupProfileId(string profileId);
 
 	Task<DeviceEntity?> GetByProviderIdentity(string providerId, string providerDeviceId);
@@ -21,6 +23,10 @@ public interface IDeviceRepository
 	Task Delete(Guid id);
 
 	Task<bool> SetSettingsButtonHidden(Guid id, bool hidden);
+
+	Task<bool> ClaimStarterProfile(Guid id);
+
+	Task<bool> AssignStarterProfile(Guid id, string profileId, string? layoutSnapshot);
 
 	Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt);
 

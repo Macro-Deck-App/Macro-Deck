@@ -284,10 +284,13 @@ jobs:
             echo "Reachable through the feed: releases/${name}"
           done < <(find release-assets -maxdepth 1 -type f \( -name 'latest-*.json' -o -name 'beta-*.json' \) -print0)
 
+      # The key is optional: without it, or when the summary fails, the announcement goes out
+      # without highlights rather than not at all.
       - name: Notify Discord
         continue-on-error: true
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL_RELEASES }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           VERSION: ${{ steps.release.outputs.version }}
           TAG: ${{ steps.release.outputs.tag }}
         run: |
@@ -298,11 +301,8 @@ jobs:
 
           release_url=$(gh release view "$TAG" --json url --jq '.url')
 
-          jq -n \
-            --arg title "Macro Deck $VERSION released" \
-            --arg url "$release_url" \
-            --arg description "A new Macro Deck release is available. See the GitHub release for the full changelog and downloads." \
-            '{embeds: [{title: $title, url: $url, description: $description}]}' > discord-payload.json
+          node ci/scripts/discord-release-announcement.mjs \
+            "$VERSION" "$release_url" release-notes/release-notes.md > discord-payload.json
 
           curl --fail-with-body \
             --retry 3 \
