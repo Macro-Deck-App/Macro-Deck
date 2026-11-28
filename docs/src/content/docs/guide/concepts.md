@@ -1360,6 +1360,14 @@ Every phone, tablet or browser that connects shows up in **Settings > Devices**.
 profile each device opens with. If you delete the profile a device is showing, the device switches to
 the profile it opens with, or to your first profile if that one is gone too.
 
+A hardware deck that a plugin adds, such as a Stream Deck, works as soon as it is connected for the first
+time: Macro Deck creates a profile named after the deck with exactly its keys, puts a clock, a stopwatch
+and a button labelled **Edit me** on it, and sets it as the profile the deck opens with. Edit or replace it
+like any other profile. A deck whose plugin describes no key grid opens your first profile instead. This
+happens once per deck: if you later choose another profile, remove the assignment or delete the profile,
+reconnecting or restarting does not bring it back. Only a deck you delete under **Settings > Devices** and
+connect again counts as new and gets a new profile.
+
 For a deck in a browser, choose **Hide settings button** in its menu there to take the settings button
 off its screen, and **Show settings button** to bring it back. The deck's own settings have the same
 **Hide settings button** switch under **Display**, and both change the same setting. The device then

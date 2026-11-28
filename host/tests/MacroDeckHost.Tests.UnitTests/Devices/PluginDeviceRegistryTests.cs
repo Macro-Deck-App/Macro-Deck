@@ -56,11 +56,19 @@ public class PluginDeviceRegistryTests
 		services.AddSingleton<IMediator>(_mediator);
 		_scopeFactory = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
 
+		var layouts = new LayoutRegistry(new RecordingMediator());
+		var gates = new ProviderDeviceGates();
 		_registry = new PluginDeviceRegistry(_scopeFactory,
 			_presence,
 			_tracker,
 			_sessionGuard,
-			new LayoutRegistry(new RecordingMediator()),
+			layouts,
+			gates,
+			new ProviderDeviceStarterProfiles(_scopeFactory,
+				gates,
+				layouts,
+				new StartupReadiness(),
+				Serilog.Core.Logger.None),
 			_time);
 		_service = CreateDeviceService();
 	}
@@ -198,13 +206,21 @@ public class PluginDeviceRegistryTests
 		var first = await _registry.RegisterAsync(ProviderId, Descriptor());
 
 		// Everything the host holds in memory is gone; only the persisted devices survive.
+		var layouts = new LayoutRegistry(new RecordingMediator());
+		var gates = new ProviderDeviceGates();
 		var afterRestart = new PluginDeviceRegistry(_scopeFactory,
 			new ProviderDevicePresenceTracker(),
 			new DeviceConnectionTracker(new RecordingEventBus(),
 				_time,
 				new MacroDeckHost.Application.Deck.DeckClientTracker(Serilog.Core.Logger.None)),
 			new DeviceSessionGuard(),
-			new LayoutRegistry(new RecordingMediator()),
+			layouts,
+			gates,
+			new ProviderDeviceStarterProfiles(_scopeFactory,
+				gates,
+				layouts,
+				new StartupReadiness(),
+				Serilog.Core.Logger.None),
 			_time);
 
 		var second = await afterRestart.RegisterAsync(ProviderId, Descriptor());
@@ -247,11 +263,19 @@ public class PluginDeviceRegistryTests
 		var integrations = new IntegrationRegistry(_scopeFactory,
 			new IntegrationLifecycleTests.FakeIntegrationStateStore(),
 			Serilog.Core.Logger.None);
+		var layouts = new LayoutRegistry(new RecordingMediator());
+		var gates = new ProviderDeviceGates();
 		var registry = new PluginDeviceRegistry(_scopeFactory,
 			_presence,
 			_tracker,
 			_sessionGuard,
-			new LayoutRegistry(new RecordingMediator()),
+			layouts,
+			gates,
+			new ProviderDeviceStarterProfiles(_scopeFactory,
+				gates,
+				layouts,
+				new StartupReadiness(),
+				Serilog.Core.Logger.None),
 			_time,
 			integrations);
 		integrations.SetEnabled(ProviderId, false);

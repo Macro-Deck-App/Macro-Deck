@@ -15934,6 +15934,10 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
     <value>默认配置文件</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="Profiles.StarterExampleButtonLabel" xml:space="preserve">
+    <value>编辑我</value>
+    <comment>The label of the example button on the profile Macro Deck creates for a newly connected hardware deck. Stored as widget data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
+  </data>
   <data name="ScreenSavers.Clock.Description" xml:space="preserve">
     <value>时间和日期，在屏幕上缓缓漂移。</value>
   </data>

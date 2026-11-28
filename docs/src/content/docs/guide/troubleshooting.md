@@ -647,6 +647,10 @@ size, not how long it runs. That is why one long GIF plays while a shorter, more
   keep a limit of 2 MB, so the same GIF can animate on one button and show a still image on another.
 - The Companion app on Android 6 to 8 shows a GIF still when it is wider or taller than 2048 pixels, or
   larger than about one megapixel, as a large image a widget or action draws can be.
+- On a hardware device such as a Stream Deck, an animated SVG image plays when its animation is written
+  with SVG's own animation elements, as the Music Player's marks are. An SVG that animates with CSS, such
+  as the animated weather icons, or whose animations start one after another, shows a still image there.
+  A device whose layout does not declare animated icons shows every animation still.
 
 To make a large animation play, shorten it, crop it to the part that matters, lower its frame rate, or
 reduce its colors before importing it again.

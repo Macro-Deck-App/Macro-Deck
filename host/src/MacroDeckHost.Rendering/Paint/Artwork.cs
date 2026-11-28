@@ -23,6 +23,11 @@ internal static class Artwork
 		return ArtworkCache.Get(resource).Raster is { Frames.Count: > 1 } image ? image : null;
 	}
 
+	public static bool LoopingSvg(RenderResource resource)
+	{
+		return ArtworkCache.Get(resource).Motion is { Loops: true };
+	}
+
 	public static void Paint(
 		SKCanvas canvas,
 		Element element,
@@ -38,11 +43,20 @@ internal static class Artwork
 		var decoded = ArtworkCache.Get(resource);
 		if (decoded.Picture is { } picture)
 		{
+			var motion = pipeline.Input.AnimatedImages ? decoded.Motion : null;
+			var now = pipeline.Input.Now.ToUnixTimeMilliseconds();
 			DrawFitted(canvas,
 				picture.CullRect.Size,
 				rect,
 				fit,
-				target => canvas.DrawPicture(picture, Matrix(picture.CullRect, target)));
+				target =>
+				{
+					var matrix = Matrix(picture.CullRect, target);
+					if (motion?.TryDraw(canvas, now, matrix) != true)
+					{
+						canvas.DrawPicture(picture, matrix);
+					}
+				});
 		}
 		else if (decoded.Raster is { } image)
 		{

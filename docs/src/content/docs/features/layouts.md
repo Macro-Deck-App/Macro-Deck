@@ -61,7 +61,9 @@ public sealed class MacroPadIntegration : IPluginIntegration, ILayoutProvider, I
 ```
 
 A profile that is the startup profile of this pad is now locked to 2x3 in the editor, and its spacing and
-corner-radius controls are disabled because the layout does not claim them.
+corner-radius controls are disabled because the layout does not claim them. A pad registered for the first
+time gets such a profile from the host, already 2x3 (see
+[A new device starts with a profile](/features/devices/#presence-and-reconnects)).
 
 Things to know:
 

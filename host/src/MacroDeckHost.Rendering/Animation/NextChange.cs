@@ -7,6 +7,8 @@ internal static class NextChange
 {
 	private const long RingFrameMs = 50;
 
+	private const long SvgFrameMs = 100;
+
 	public static DateTimeOffset? Of(TilePipeline pipeline)
 	{
 		var now = pipeline.Input.Now.ToUnixTimeMilliseconds();
@@ -39,12 +41,18 @@ internal static class NextChange
 		{
 			foreach (var element in pipeline.Document.Descendants())
 			{
-				if (element.Paint is RenderResource resource
-					&& element.Box.Displayed
-					&& Artwork.Animated(resource) is { } image
-					&& image.NextChangeMs(now) is { } wait)
+				if (element.Paint is not RenderResource resource || !element.Box.Displayed)
+				{
+					continue;
+				}
+
+				if (Artwork.Animated(resource) is { } image && image.NextChangeMs(now) is { } wait)
 				{
 					Offer(now + (long)Math.Ceiling(wait));
+				}
+				else if (Artwork.LoopingSvg(resource))
+				{
+					Offer(now - now % SvgFrameMs + SvgFrameMs);
 				}
 			}
 		}

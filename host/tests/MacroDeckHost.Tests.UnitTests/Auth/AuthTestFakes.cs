@@ -221,6 +221,38 @@ internal sealed class InMemoryDeviceRepository : IDeviceRepository
 		return Task.FromResult(true);
 	}
 
+	public Task<IReadOnlyList<(Guid Id, DateTime? SessionsRevokedAt)>> GetSessionRevocations()
+	{
+		return Task.FromResult<IReadOnlyList<(Guid Id, DateTime? SessionsRevokedAt)>>([
+			.. Devices.Select(device => (device.Id, device.SessionsRevokedAt))
+		]);
+	}
+
+	public Task<bool> ClaimStarterProfile(Guid id)
+	{
+		var device = Devices.FirstOrDefault(d => d.Id == id);
+		if (device is not { StarterProfilePending: true })
+		{
+			return Task.FromResult(false);
+		}
+
+		device.StarterProfilePending = false;
+		return Task.FromResult(true);
+	}
+
+	public Task<bool> AssignStarterProfile(Guid id, string profileId, string? layoutSnapshot)
+	{
+		var device = Devices.FirstOrDefault(d => d.Id == id);
+		if (device is null || device.StartupProfileId is not null)
+		{
+			return Task.FromResult(false);
+		}
+
+		device.StartupProfileId = profileId;
+		device.LayoutSnapshot ??= layoutSnapshot;
+		return Task.FromResult(true);
+	}
+
 	public Task TouchLastSeen(IReadOnlyCollection<Guid> ids, DateTime seenAt)
 	{
 		foreach (var device in Devices.Where(d => ids.Contains(d.Id)))

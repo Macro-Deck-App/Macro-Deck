@@ -15934,6 +15934,10 @@ Macro Deck 웹사이트에서 다운로드한 후 설치한 AppImage, DEB 또는
     <value>기본 프로필</value>
     <comment>The name the one profile a fresh install starts with is created under. Stored as data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
   </data>
+  <data name="Profiles.StarterExampleButtonLabel" xml:space="preserve">
+    <value>편집하세요</value>
+    <comment>The label of the example button on the profile Macro Deck creates for a newly connected hardware deck. Stored as widget data from there on, so it is written in the language active at that moment and is not re-translated when the language changes.</comment>
+  </data>
   <data name="ScreenSavers.Clock.Description" xml:space="preserve">
     <value>시간과 날짜가 화면을 천천히 가로질러 움직입니다.</value>
   </data>

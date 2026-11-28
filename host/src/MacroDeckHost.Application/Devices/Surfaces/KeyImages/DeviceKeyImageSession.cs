@@ -45,6 +45,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 	private readonly long[,] _pushedRevisions;
 
 	private Dictionary<string, RenderedUnit> _rendered = new(StringComparer.Ordinal);
+	private Dictionary<string, DateTimeOffset> _holds = new(StringComparer.Ordinal);
 	private DeviceSurfaceProjection? _projection;
 	private RenderEnvironment? _environment;
 	private int _environmentVersion;
@@ -86,6 +87,7 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		_resources = new DeviceKeyImageResources(scopeFactory,
 			new IconAppearanceContext(null,
 				layout.AnimatedIcons ? IconAppearanceTraits.Animated : IconAppearanceTraits.Static),
+			timeProvider,
 			logger);
 	}
 
@@ -559,6 +561,8 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		}
 
 		var rendered = new Dictionary<string, RenderedUnit>(StringComparer.Ordinal);
+		var holds = new Dictionary<string, DateTimeOffset>(StringComparer.Ordinal);
+		var heldResources = new List<(string ResourceId, int? DisplayPx)>();
 		var missing = new List<DeviceKeyImageResourceRequest>();
 		var pictures = new (ReadOnlyMemory<byte> Content, string ContentType)?[_layout.Rows, _layout.Columns];
 		foreach (var unit in units)
@@ -566,6 +570,20 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 			if (Render(unit, environment, now, forceRender, missing) is not { } result)
 			{
 				continue;
+			}
+
+			if (!result.Complete
+				&& _rendered.GetValueOrDefault(unit.Id) is { Complete: true } previous
+				&& !ReferenceEquals(previous, result)
+				&& SameShape(previous, result))
+			{
+				var since = _holds.GetValueOrDefault(unit.Id, now);
+				if (now - since < _treeDeadline)
+				{
+					holds[unit.Id] = since;
+					heldResources.AddRange(result.Resources);
+					result = previous;
+				}
 			}
 
 			rendered[unit.Id] = result;
@@ -581,7 +599,8 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		}
 
 		_rendered = rendered;
-		_resources.Retain(rendered.Values.SelectMany(unit => unit.Resources));
+		_holds = holds;
+		_resources.Retain(rendered.Values.SelectMany(unit => unit.Resources).Concat(heldResources));
 		var changed = new List<DeviceKeyImage>();
 		bool pushing;
 		lock (_gate)
@@ -646,8 +665,19 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 			_ = FetchAsync(missing);
 		}
 
-		Schedule(pushing ? rendered.Values.Select(unit => unit.NextChangeAt).Where(at => at is not null).Min() : null,
-			now);
+		var next = pushing
+			? rendered.Where(unit => !holds.ContainsKey(unit.Key))
+				.Select(unit => unit.Value.NextChangeAt)
+				.Where(at => at is not null)
+				.Min()
+			: null;
+		foreach (var since in holds.Values)
+		{
+			var expiry = since + _treeDeadline;
+			next = next is { } at && at < expiry ? at : expiry;
+		}
+
+		Schedule(next, now);
 	}
 
 	private RenderedUnit? Render(
@@ -675,13 +705,21 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 				Resources = resources
 			});
 			missing.AddRange(result.MissingResources);
-			return new RenderedUnit(unit.Key, result.NextChangeAt, result.Keys, resources.Used);
+			return new RenderedUnit(unit.Key, result.NextChangeAt, result.Keys, resources.Used, !resources.Pending);
 		}
 		catch (Exception exception) when (exception is not OutOfMemoryException)
 		{
 			_logger.Error(exception, "Failed to draw key {Unit} of device {DeviceId}", unit.Id, _deviceId);
 			return cached;
 		}
+	}
+
+	private static bool SameShape(RenderedUnit previous, RenderedUnit result)
+	{
+		return previous.Keys
+			.Select(key => (key.RowOffset, key.ColumnOffset))
+			.ToHashSet()
+			.SetEquals(result.Keys.Select(key => (key.RowOffset, key.ColumnOffset)));
 	}
 
 	private List<RenderUnit> UnitsOf(DeviceSurfaceProjection projection, int environmentVersion)
@@ -830,17 +868,19 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 	{
 		try
 		{
-			if (!await _resources.FetchAsync(missing, _stopping.Token))
+			var fetched = await _resources.FetchAsync(missing, _stopping.Token);
+			if (fetched.Found)
 			{
-				return;
+				lock (_gate)
+				{
+					_resourceVersion++;
+				}
 			}
 
-			lock (_gate)
+			if (fetched.Found || fetched.Unblocked)
 			{
-				_resourceVersion++;
+				Request();
 			}
-
-			Request();
 		}
 		catch (OperationCanceledException)
 		{
@@ -879,7 +919,8 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 		string Key,
 		DateTimeOffset? NextChangeAt,
 		IReadOnlyList<DeviceKeyImagePicture> Keys,
-		IReadOnlyList<(string ResourceId, int? DisplayPx)> Resources);
+		IReadOnlyList<(string ResourceId, int? DisplayPx)> Resources,
+		bool Complete);
 
 	private sealed class UsedResources : IDeviceKeyImageResourceLookup
 	{
@@ -892,10 +933,14 @@ public sealed class DeviceKeyImageSession : IAsyncDisposable
 
 		public List<(string ResourceId, int? DisplayPx)> Used { get; } = [];
 
+		public bool Pending { get; private set; }
+
 		public DeviceKeyImageResource? TryGet(string resourceId, int? displayPx)
 		{
 			Used.Add((resourceId, displayPx));
-			return _resources.TryGet(resourceId, displayPx);
+			var resource = _resources.Lookup(resourceId, displayPx, out var pending);
+			Pending |= pending;
+			return resource;
 		}
 	}
 
