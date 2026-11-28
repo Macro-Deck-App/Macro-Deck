@@ -367,10 +367,12 @@ internal static class GaugesWidgetConfigView
 
 	private static LocalizedText LabelOf(JsonObject gauge, int index)
 	{
-		return gauge["name"] is JsonValue name && name.TryGetValue<string>(out var text) && text.Length > 0
-			? LocalizedText.FromLiteral(text)
-			: AppStrings.Widgets.Gauges.GaugeNumber(
-				LocalizedText.FromLiteral((index + 1).ToString(CultureInfo.InvariantCulture)));
+		return gauge["name"] is JsonValue name
+			&& name.TryGetValue<string>(out var text)
+			&& !string.IsNullOrWhiteSpace(text)
+				? LocalizedText.FromLiteral(text)
+				: AppStrings.Widgets.Gauges.GaugeNumber(
+					LocalizedText.FromLiteral((index + 1).ToString(CultureInfo.InvariantCulture)));
 	}
 
 	private static UiConfigButton PresetButton(string key, LocalizedString label, Action apply)

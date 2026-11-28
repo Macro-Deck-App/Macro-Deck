@@ -196,6 +196,16 @@ public class GaugesWidgetConfigTests
 		});
 	}
 
+	[TestCase("\n")]
+	[TestCase("   ")]
+	public void A_gauge_named_only_blank_characters_is_numbered_in_the_dropdown(string name)
+	{
+		var host = Render(new { gauges = new object[] { new { id = "a", name } } });
+		var options = host.ById("selectedGauge").Property(UiConfigProperties.Options)!.Value.EnumerateArray().ToList();
+
+		Assert.That(options.Single().GetProperty("label").GetRawText(), Does.Contain("Widgets.Gauges.GaugeNumber"));
+	}
+
 	[Test]
 	public void Add_selects_the_new_gauge_and_delete_removes_the_selected_one()
 	{
