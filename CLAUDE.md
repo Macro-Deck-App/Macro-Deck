@@ -23,6 +23,14 @@ label, the one that names its changelog category:
 - A change nobody outside the repository sees (CI, tests, refactoring, tooling, merges between
   branches): `internal`. Documentation only: `documentation`. A flaky test fix: `flaky-test`.
 
+Who sees the change picks the label, not what kind of change it is. A new SDK or protocol capability,
+an improvement to one and a fix for one are all changes only plugin authors see as long as a user of
+the app notices nothing until a plugin makes use of them, device-provider and layout capabilities
+included. Such a pull request carries its `area:*` label and **never** `feature`, `improvement`,
+`bug`, `regression` or `performance`: those categories come first in `.github/release.yml`, so one of
+them lists the change among the user-facing ones instead of under Plugin SDK and Protocol. A change
+users see that also extends a contract takes the user-facing label plus the `compat:*` one.
+
 Add a second label only when it says something the first cannot: `breaking-change`,
 `compat:plugin-api`, `compat:protocol` or `compat:deprecation` when a public plugin-facing contract is
 touched, `regression` on a `bug` that used to work, and one `platform:*` when the change concerns a
