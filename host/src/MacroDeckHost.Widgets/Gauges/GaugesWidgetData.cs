@@ -142,7 +142,9 @@ public sealed record GaugeConfig
 		{
 			Id = id,
 			Variable = GaugesWidgetData.ReadString(item, "variable") ?? string.Empty,
-			Name = GaugesWidgetData.ReadString(item, "name") is { Length: > 0 } name ? name : null,
+			Name = GaugesWidgetData.ReadString(item, "name") is { } name && !string.IsNullOrWhiteSpace(name)
+				? name
+				: null,
 			Icon = item.TryGetProperty("icon", out var icon) && icon.ValueKind == JsonValueKind.Object
 				? WidgetIconReference.Read(JsonNode.Parse(icon.GetRawText()), null)
 				: null,

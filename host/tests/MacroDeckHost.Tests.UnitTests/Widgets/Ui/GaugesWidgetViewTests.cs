@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MacroDeck.Ui.Components;
 using MacroDeck.Ui.Model.Resources;
 using MacroDeck.Ui.Runtime;
@@ -184,6 +185,17 @@ public class GaugesWidgetViewTests
 			Assert.That(ids.Where(id => id.EndsWith(".g0.name", StringComparison.Ordinal)), Is.Not.Empty);
 			Assert.That(ids.Where(id => id.EndsWith(".g1.name", StringComparison.Ordinal)), Is.Empty);
 		});
+	}
+
+	[TestCase("\n")]
+	[TestCase("   ")]
+	public void A_stored_name_of_only_blank_characters_draws_no_name(string stored)
+	{
+		var data = JsonSerializer.SerializeToElement(new { gauges = new object[] { new { id = "a", name = stored } } });
+
+		var ids = Ids(Render(GaugesWidgetData.Parse(data)).Root);
+
+		Assert.That(ids.Where(id => id.EndsWith(".g0.name", StringComparison.Ordinal)), Is.Empty);
 	}
 
 	[Test]

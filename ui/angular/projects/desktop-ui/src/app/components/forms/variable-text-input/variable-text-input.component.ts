@@ -189,7 +189,7 @@ export class VariableTextInputComponent implements AfterViewInit {
     const editor = this.editorRef?.nativeElement;
     if (!editor) return;
 
-    const next = this.serialize(editor);
+    const next = this.editorValue(editor);
     const selection = this.selectionOffsets();
     this.valueState.set(next);
     this.renderedValue = next;
@@ -307,7 +307,7 @@ export class VariableTextInputComponent implements AfterViewInit {
   private reconcile(): void {
     const editor = this.editorRef?.nativeElement;
     if (!editor) return;
-    if (this.serialize(editor) !== this.valueState() || this.hasLooseToken(editor)) {
+    if (this.editorValue(editor) !== this.valueState() || this.hasLooseToken(editor)) {
       this.render();
     }
   }
@@ -480,6 +480,12 @@ export class VariableTextInputComponent implements AfterViewInit {
     return chip;
   }
 
+  private editorValue(editor: HTMLElement): string {
+    // Chromium leaves a placeholder br in an emptied contenteditable; it is not a line the user typed.
+    const empty = stripCaretAnchors(editor.textContent ?? '') === '' && !editor.querySelector('[data-token]');
+    return empty ? '' : this.serialize(editor);
+  }
+
   private serialize(root: Node, chipMask?: string): string {
     let out = '';
 
@@ -500,11 +506,11 @@ export class VariableTextInputComponent implements AfterViewInit {
           continue;
         }
         if (element.tagName === 'BR') {
-          out += '\n';
+          if (this.multiline) out += '\n';
           continue;
         }
         if (VariableTextInputComponent.BLOCK_TAGS.has(element.tagName)) {
-          if (out.length > 0 && !out.endsWith('\n')) out += '\n';
+          if (this.multiline && out.length > 0 && !out.endsWith('\n')) out += '\n';
           if (element.childNodes.length === 1 && element.firstChild?.nodeName === 'BR') continue;
         }
         visit(element);

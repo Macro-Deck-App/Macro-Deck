@@ -355,7 +355,9 @@ describe('VariableTextInputComponent', () => {
       expect(emitted).toEqual(['{{  vars.title  }}!']);
     });
 
-    it('reads a browser-inserted break as a newline', () => {
+    it('reads a browser-inserted break as a newline in a multi-line field', () => {
+      fixture.componentRef.setInput('multiline', true);
+      fixture.detectChanges();
       setValue('a');
       const emitted: string[] = [];
       component.valueChange.subscribe(v => emitted.push(v));
@@ -365,6 +367,47 @@ describe('VariableTextInputComponent', () => {
       editor().dispatchEvent(new Event('input'));
 
       expect(emitted).toEqual(['a\nb']);
+    });
+
+    it('never puts a line break into a single-line value', () => {
+      setValue('a');
+      const emitted: string[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+
+      editor().appendChild(document.createElement('br'));
+      editor().appendChild(document.createTextNode('b'));
+      editor().dispatchEvent(new Event('input'));
+
+      expect(emitted).toEqual(['ab']);
+    });
+
+    for (const multiline of [false, true]) {
+      it(`emits an empty value once the ${multiline ? 'multi' : 'single'}-line field is emptied`, () => {
+        fixture.componentRef.setInput('multiline', multiline);
+        fixture.detectChanges();
+        setValue('CPU');
+        const emitted: string[] = [];
+        component.valueChange.subscribe(v => emitted.push(v));
+
+        editor().replaceChildren(document.createElement('br'));
+        editor().dispatchEvent(new Event('input'));
+
+        expect(emitted).toEqual(['']);
+      });
+    }
+
+    it('keeps a line the user typed into an otherwise empty multi-line field', () => {
+      fixture.componentRef.setInput('multiline', true);
+      fixture.detectChanges();
+      setValue('');
+      const emitted: string[] = [];
+      component.valueChange.subscribe(v => emitted.push(v));
+
+      component.onKeyDown(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+      fixture.detectChanges();
+      editor().dispatchEvent(new Event('input'));
+
+      expect(emitted).toEqual(['\n', '\n']);
     });
 
     it('ignores an in-flight IME composition', () => {
