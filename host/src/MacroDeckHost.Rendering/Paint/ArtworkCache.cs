@@ -5,7 +5,11 @@ using Svg.Skia;
 
 namespace MacroDeckHost.Rendering.Paint;
 
-internal sealed record DecodedArtwork(SKPicture? Picture, AnimatedImage? Raster, SKSvg? Document = null);
+internal sealed record DecodedArtwork(
+	SKPicture? Picture,
+	AnimatedImage? Raster,
+	SKSvg? Document = null,
+	SvgMotion? Motion = null);
 
 internal static class ArtworkCache
 {
@@ -83,7 +87,8 @@ internal static class ArtworkCache
 				using var stream = MemoryMarshal.TryGetArray(data, out var segment)
 					? new MemoryStream(segment.Array!, segment.Offset, segment.Count, false)
 					: new MemoryStream(data.ToArray(), false);
-				return new DecodedArtwork(svg.Load(stream), null, svg);
+				var picture = svg.Load(stream);
+				return new DecodedArtwork(picture, null, svg, svg.HasAnimations ? Motion(data) : null);
 			}
 
 			return new DecodedArtwork(null, AnimatedImageDecoder.Decode(data.Span));
@@ -94,10 +99,23 @@ internal static class ArtworkCache
 		}
 	}
 
+	private static SvgMotion? Motion(ReadOnlyMemory<byte> data)
+	{
+		try
+		{
+			return SvgMotion.Create(data);
+		}
+		catch (Exception exception) when (exception is not OutOfMemoryException)
+		{
+			return null;
+		}
+	}
+
 	private static long SizeOf(DecodedArtwork decoded, int sourceLength)
 	{
 		var frames = decoded.Raster?.Frames.Sum(frame => (long)frame.Length) ?? 0;
-		return Math.Max(1, frames + sourceLength);
+		var documents = decoded.Motion is null ? 1 : 2;
+		return Math.Max(1, frames + sourceLength * documents);
 	}
 
 	private static void Trim(Entry keep)

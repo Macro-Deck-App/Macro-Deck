@@ -469,6 +469,11 @@ public async Task OnSessionOpenedAsync(IDeviceSession session, CancellationToken
   with `Borders` false no border ring is drawn; corners are rounded only when `CornerRadius` is true and
   keys of a widget spanning several cells are separated by the profile's spacing only when `WidgetSpacing`
   is true.
+- **Animated images:** with `AnimatedIcons` true an animated picture plays on the key. That includes SVG
+  images animated with SMIL (`<animate>`, `<animateTransform>` and the like), such as the Music Player's
+  playing mark; a key showing one changes up to 10 times per second, within the rate above. An SVG
+  animated only with CSS `@keyframes`, or whose animations begin on another one's begin or end (`a.end`)
+  or at a `wallclock()` time, is drawn still.
 - **What a key is drawn in:** the host's theme (light draws light, dark and system draw dark, since a
   device has no colour scheme of its own), accent colour, app font and language. Changing any of them, or
   importing or removing a font, draws every key again; only the keys that look different are sent. An
