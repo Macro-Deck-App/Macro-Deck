@@ -24648,6 +24648,12 @@ Ta przenośna kopia nie aktualizuje się samodzielnie. Pobierz przenośny plik Z
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS odrzucił żądanie: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Tryb studyjny w OBS jest wyłączony. Włącz go, aby ustawić scenę podglądu.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS nie odpowiedział na czas.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Podaj folder nagrań.</value>
   </data>

@@ -446,7 +446,7 @@ internal sealed class ObsMultipleConfigurationsTests
 		{
 			Assert.That(aConnection.State.IsConnected, Is.False);
 			Assert.That(publisher.Events, Is.Empty);
-			Assert.That(bCommand, Is.True);
+			Assert.That(bCommand, Is.EqualTo(ObsCommandResult.Success));
 			Assert.That(bClient.Calls, Does.Contain("ToggleRecord"));
 		});
 	}

@@ -24648,6 +24648,12 @@ Tato přenosná kopie se neaktualizuje sama. Stáhněte přenosný ZIP z webu Ma
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS požadavek odmítl: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Režim studia je v OBS vypnutý. Pro nastavení náhledové scény ho zapněte.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS neodpověděl včas.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Zadejte složku nahrávek.</value>
   </data>

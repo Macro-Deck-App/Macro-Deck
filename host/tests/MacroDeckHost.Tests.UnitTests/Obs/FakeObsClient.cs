@@ -69,6 +69,8 @@ internal sealed class FakeObsClient : IObsClient
 
 	public bool DisconnectOnDefaultSettingsRead { get; set; }
 
+	public bool DisconnectOnPreviewScene { get; set; }
+
 	/// <summary>
 	/// Names that used to exist but no longer do. A real OBS instance fails every request naming a gone
 	/// input or source; this is what lets tests simulate that instead of the dictionaries below silently
@@ -242,11 +244,19 @@ internal sealed class FakeObsClient : IObsClient
 	public void SetCurrentScene(string sceneName)
 	{
 		Calls.Add($"SetCurrentScene:{sceneName}");
+		ThrowRequestFailure();
 	}
 
 	public void SetPreviewScene(string sceneName)
 	{
 		Calls.Add($"SetPreviewScene:{sceneName}");
+		if (DisconnectOnPreviewScene)
+		{
+			IsConnected = false;
+			throw new InvalidOperationException("connection closed");
+		}
+
+		ThrowRequestFailure();
 	}
 
 	public IReadOnlyList<string> GetProfileNames()
@@ -303,6 +313,7 @@ internal sealed class FakeObsClient : IObsClient
 	public void ToggleStream()
 	{
 		Calls.Add("ToggleStream");
+		ThrowRequestFailure();
 	}
 
 	public void StartVirtualCam()
@@ -413,6 +424,7 @@ internal sealed class FakeObsClient : IObsClient
 	public void SetInputVolume(string inputName, float volumeMultiplier)
 	{
 		InputVolumes[inputName] = volumeMultiplier;
+		ThrowRequestFailure();
 		Calls.Add($"SetInputVolume:{inputName}:{volumeMultiplier.ToString(CultureInfo.InvariantCulture)}");
 	}
 

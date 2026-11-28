@@ -24670,6 +24670,12 @@ Esta cópia portátil não se atualiza sozinha. Baixe o ZIP portátil no site do
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>O OBS rejeitou a solicitação: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>O modo estúdio está desativado no OBS. Ative-o para definir uma cena de pré-visualização.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>O OBS não respondeu a tempo.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Digite uma pasta de gravação.</value>
   </data>

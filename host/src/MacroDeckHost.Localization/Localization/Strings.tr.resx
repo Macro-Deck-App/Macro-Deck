@@ -24670,6 +24670,12 @@ Bu taşınabilir kopya kendini güncellemez. Taşınabilir ZIP dosyasını Macro
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS isteği reddetti: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>OBS'te stüdyo modu kapalı. Önizleme sahnesi ayarlamak için açın.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS zamanında yanıt vermedi.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Bir kayıt klasörü girin.</value>
   </data>

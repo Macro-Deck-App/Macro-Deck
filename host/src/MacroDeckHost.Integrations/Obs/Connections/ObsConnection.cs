@@ -21,7 +21,6 @@ internal enum ObsCommandOutcome
 {
 	Success,
 	NotConnected,
-	NotRecording,
 	Rejected
 }
 
@@ -30,8 +29,6 @@ internal readonly record struct ObsCommandResult(ObsCommandOutcome Outcome, stri
 	public static ObsCommandResult Success { get; } = new(ObsCommandOutcome.Success);
 
 	public static ObsCommandResult NotConnected { get; } = new(ObsCommandOutcome.NotConnected);
-
-	public static ObsCommandResult NotRecording { get; } = new(ObsCommandOutcome.NotRecording);
 
 	public static ObsCommandResult Rejected(string message, int? code = null)
 	{
@@ -230,19 +227,19 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		return CachedTargetReadAsync<bool>($"output-active:{outputName}", () => _client.GetOutputActive(outputName));
 	}
 
-	public Task<bool> SetSceneAsync(string sceneName)
+	public Task<ObsCommandResult> SetSceneAsync(string sceneName)
 	{
-		return RunAsync(() => _client.SetCurrentScene(sceneName));
+		return RunForResultAsync(() => _client.SetCurrentScene(sceneName));
 	}
 
-	public Task<bool> SetPreviewSceneAsync(string sceneName)
+	public Task<ObsCommandResult> SetPreviewSceneAsync(string sceneName)
 	{
-		return RunAsync(() => _client.SetPreviewScene(sceneName));
+		return RunForResultAsync(() => _client.SetPreviewScene(sceneName));
 	}
 
-	public Task<bool> SetProfileAsync(string profileName)
+	public Task<ObsCommandResult> SetProfileAsync(string profileName)
 	{
-		return RunAsync(() => _client.SetCurrentProfile(profileName));
+		return RunForResultAsync(() => _client.SetCurrentProfile(profileName));
 	}
 
 	public Task<ObsCommandResult> SetSceneCollectionAsync(string sceneCollectionName)
@@ -250,74 +247,74 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		return RunForResultAsync(() => _client.SetCurrentSceneCollection(sceneCollectionName));
 	}
 
-	public Task<bool> StartRecordingAsync()
+	public Task<ObsCommandResult> StartRecordingAsync()
 	{
-		return RunAsync(_client.StartRecord);
+		return RunForResultAsync(_client.StartRecord);
 	}
 
-	public Task<bool> StopRecordingAsync()
+	public Task<ObsCommandResult> StopRecordingAsync()
 	{
-		return RunAsync(_client.StopRecord);
+		return RunForResultAsync(_client.StopRecord);
 	}
 
-	public Task<bool> ToggleRecordingAsync()
+	public Task<ObsCommandResult> ToggleRecordingAsync()
 	{
-		return RunAsync(_client.ToggleRecord);
+		return RunForResultAsync(_client.ToggleRecord);
 	}
 
-	public Task<bool> TogglePauseRecordingAsync()
+	public Task<ObsCommandResult> TogglePauseRecordingAsync()
 	{
-		return RunAsync(_client.ToggleRecordPause);
+		return RunForResultAsync(_client.ToggleRecordPause);
 	}
 
-	public Task<bool> StartStreamingAsync()
+	public Task<ObsCommandResult> StartStreamingAsync()
 	{
-		return RunAsync(_client.StartStream);
+		return RunForResultAsync(_client.StartStream);
 	}
 
-	public Task<bool> StopStreamingAsync()
+	public Task<ObsCommandResult> StopStreamingAsync()
 	{
-		return RunAsync(_client.StopStream);
+		return RunForResultAsync(_client.StopStream);
 	}
 
-	public Task<bool> ToggleStreamingAsync()
+	public Task<ObsCommandResult> ToggleStreamingAsync()
 	{
-		return RunAsync(_client.ToggleStream);
+		return RunForResultAsync(_client.ToggleStream);
 	}
 
-	public Task<bool> StartVirtualCamAsync()
+	public Task<ObsCommandResult> StartVirtualCamAsync()
 	{
-		return RunAsync(_client.StartVirtualCam);
+		return RunForResultAsync(_client.StartVirtualCam);
 	}
 
-	public Task<bool> StopVirtualCamAsync()
+	public Task<ObsCommandResult> StopVirtualCamAsync()
 	{
-		return RunAsync(_client.StopVirtualCam);
+		return RunForResultAsync(_client.StopVirtualCam);
 	}
 
-	public Task<bool> ToggleVirtualCamAsync()
+	public Task<ObsCommandResult> ToggleVirtualCamAsync()
 	{
-		return RunAsync(_client.ToggleVirtualCam);
+		return RunForResultAsync(_client.ToggleVirtualCam);
 	}
 
-	public Task<bool> StartReplayBufferAsync()
+	public Task<ObsCommandResult> StartReplayBufferAsync()
 	{
-		return RunAsync(_client.StartReplayBuffer);
+		return RunForResultAsync(_client.StartReplayBuffer);
 	}
 
-	public Task<bool> StopReplayBufferAsync()
+	public Task<ObsCommandResult> StopReplayBufferAsync()
 	{
-		return RunAsync(_client.StopReplayBuffer);
+		return RunForResultAsync(_client.StopReplayBuffer);
 	}
 
-	public Task<bool> ToggleReplayBufferAsync()
+	public Task<ObsCommandResult> ToggleReplayBufferAsync()
 	{
-		return RunAsync(_client.ToggleReplayBuffer);
+		return RunForResultAsync(_client.ToggleReplayBuffer);
 	}
 
-	public Task<bool> SaveReplayBufferAsync()
+	public Task<ObsCommandResult> SaveReplayBufferAsync()
 	{
-		return RunAsync(_client.SaveReplayBuffer);
+		return RunForResultAsync(_client.SaveReplayBuffer);
 	}
 
 	public Task<ObsCommandResult> SplitRecordFileAsync()
@@ -340,15 +337,15 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		return RunForResultAsync(() => _client.SetInputSettings(inputName, settingsJson));
 	}
 
-	public Task<bool> SetSourceVisibleAsync(string sceneName, string sourceName, bool visible)
+	public Task<ObsCommandResult> SetSourceVisibleAsync(string sceneName, string sourceName, bool visible)
 	{
-		return RunAndForgetTargetReadAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible),
+		return RunForResultAndForgetTargetReadAsync(() => _client.SetSourceVisible(sceneName, sourceName, visible),
 			$"visible:{sceneName}\u0000{sourceName}");
 	}
 
-	public Task<bool> ToggleSourceVisibleAsync(string sceneName, string sourceName)
+	public Task<ObsCommandResult> ToggleSourceVisibleAsync(string sceneName, string sourceName)
 	{
-		return RunAndForgetTargetReadAsync(() => _client.ToggleSourceVisible(sceneName, sourceName),
+		return RunForResultAndForgetTargetReadAsync(() => _client.ToggleSourceVisible(sceneName, sourceName),
 			$"visible:{sceneName}\u0000{sourceName}");
 	}
 
@@ -498,13 +495,6 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 
 	// Forgotten after the write completes, so a read already in flight from before the write is
 	// dropped too and the next asker queries OBS again.
-	private async Task<bool> RunAndForgetTargetReadAsync(Action action, string key)
-	{
-		var succeeded = await RunAsync(action).ConfigureAwait(false);
-		ForgetTargetRead(key);
-		return succeeded;
-	}
-
 	private async Task<ObsCommandResult> RunForResultAndForgetTargetReadAsync(Action action, string key)
 	{
 		var result = await RunForResultAsync(action).ConfigureAwait(false);
@@ -531,14 +521,14 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		}
 	}
 
-	public Task<bool> SetInputMuteAsync(string inputName, bool muted)
+	public Task<ObsCommandResult> SetInputMuteAsync(string inputName, bool muted)
 	{
-		return RunAndForgetTargetReadAsync(() => _client.SetInputMute(inputName, muted), $"mute:{inputName}");
+		return RunForResultAndForgetTargetReadAsync(() => _client.SetInputMute(inputName, muted), $"mute:{inputName}");
 	}
 
-	public Task<bool> ToggleInputMuteAsync(string inputName)
+	public Task<ObsCommandResult> ToggleInputMuteAsync(string inputName)
 	{
-		return RunAndForgetTargetReadAsync(() => _client.ToggleInputMute(inputName), $"mute:{inputName}");
+		return RunForResultAndForgetTargetReadAsync(() => _client.ToggleInputMute(inputName), $"mute:{inputName}");
 	}
 
 	public Task<ObsCommandResult> SetInputAudioMonitorTypeAsync(string inputName, string monitorType)
@@ -563,28 +553,28 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		return QueryValueAsync<double?>(() => _client.GetInputVolume(inputName) * 100d, null);
 	}
 
-	public Task<bool> SetInputVolumePercentAsync(string inputName, double percent)
+	public Task<ObsCommandResult> SetInputVolumePercentAsync(string inputName, double percent)
 	{
-		return RunAsync(() => _client.SetInputVolume(inputName, ToMultiplier(percent)));
+		return RunForResultAsync(() => _client.SetInputVolume(inputName, ToMultiplier(percent)));
 	}
 
-	public Task<bool> AdjustInputVolumePercentAsync(string inputName, double deltaPercent)
+	public Task<ObsCommandResult> AdjustInputVolumePercentAsync(string inputName, double deltaPercent)
 	{
-		return RunAsync(() =>
+		return RunForResultAsync(() =>
 		{
 			var target = _client.GetInputVolume(inputName) * 100d + deltaPercent;
 			_client.SetInputVolume(inputName, ToMultiplier(target));
 		});
 	}
 
-	public Task<bool> SetInputVolumeDecibelsAsync(string inputName, double decibels)
+	public Task<ObsCommandResult> SetInputVolumeDecibelsAsync(string inputName, double decibels)
 	{
-		return RunAsync(() => _client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(decibels)));
+		return RunForResultAsync(() => _client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(decibels)));
 	}
 
-	public Task<bool> AdjustInputVolumeDecibelsAsync(string inputName, double deltaDecibels)
+	public Task<ObsCommandResult> AdjustInputVolumeDecibelsAsync(string inputName, double deltaDecibels)
 	{
-		return RunAsync(() =>
+		return RunForResultAsync(() =>
 		{
 			var target = ObsVolumeScale.ToDecibels(_client.GetInputVolume(inputName)) + deltaDecibels;
 			_client.SetInputVolume(inputName, ObsVolumeScale.ToMultiplier(target));
@@ -607,21 +597,22 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 			() => _client.GetSourceFilterEnabled(sourceName, filterName));
 	}
 
-	public Task<bool> SetSourceFilterEnabledAsync(string sourceName, string filterName, bool enabled)
+	public Task<ObsCommandResult> SetSourceFilterEnabledAsync(string sourceName, string filterName, bool enabled)
 	{
-		return RunAndForgetTargetReadAsync(() => _client.SetSourceFilterEnabled(sourceName, filterName, enabled),
+		return RunForResultAndForgetTargetReadAsync(()
+				=> _client.SetSourceFilterEnabled(sourceName, filterName, enabled),
 			$"filter:{sourceName}\u0000{filterName}");
 	}
 
-	public Task<bool> ToggleSourceFilterAsync(string sourceName, string filterName)
+	public Task<ObsCommandResult> ToggleSourceFilterAsync(string sourceName, string filterName)
 	{
-		return RunAndForgetTargetReadAsync(() => _client.ToggleSourceFilterEnabled(sourceName, filterName),
+		return RunForResultAndForgetTargetReadAsync(() => _client.ToggleSourceFilterEnabled(sourceName, filterName),
 			$"filter:{sourceName}\u0000{filterName}");
 	}
 
-	public Task<bool> SetStudioModeAsync(bool enabled)
+	public Task<ObsCommandResult> SetStudioModeAsync(bool enabled)
 	{
-		return RunAsync(() => _client.SetStudioMode(enabled));
+		return RunForResultAsync(() => _client.SetStudioMode(enabled));
 	}
 
 	public void Dispose()
@@ -1138,28 +1129,6 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 		_pollTimer = null;
 	}
 
-	private Task<bool> RunAsync(Action action)
-	{
-		return Task.Run(() =>
-		{
-			if (!IsConnected)
-			{
-				return false;
-			}
-
-			try
-			{
-				action();
-				return true;
-			}
-			catch (Exception ex)
-			{
-				_logger.Error(ex, "OBS command failed");
-				return false;
-			}
-		});
-	}
-
 	private Task<ObsCommandResult> RunForResultAsync(Action action)
 	{
 		return Task.Run(() =>
@@ -1174,14 +1143,10 @@ internal sealed class ObsConnection : IDisposable, IAsyncDisposable
 				action();
 				return ObsCommandResult.Success;
 			}
-			catch (ObsRequestException ex) when (ex.Code == ObsRequestException.OutputNotRunning)
-			{
-				return ObsCommandResult.NotRecording;
-			}
 			catch (ObsRequestException ex)
 			{
 				_logger.Warning(ex, "OBS rejected a request with code {Code}", ex.Code);
-				return ObsCommandResult.Rejected(ex.Message, ex.Code);
+				return IsConnected ? ObsCommandResult.Rejected(ex.Message, ex.Code) : ObsCommandResult.NotConnected;
 			}
 			catch (Exception ex)
 			{

@@ -99,10 +99,7 @@ internal sealed class ProfileActionDefinition : IDynamicOptionsActionDefinition,
 					AppStrings.Integrations.Obs.Errors.NoProfileSelected());
 			}
 
-			return await connection.SetProfileAsync(profile)
-				? ActionResult.Success()
-				: ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Obs.Errors.NotConnected());
+			return ObsCommandResults.ToActionResult(await connection.SetProfileAsync(profile));
 		}
 	}
 }

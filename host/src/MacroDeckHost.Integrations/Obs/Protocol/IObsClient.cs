@@ -156,6 +156,8 @@ internal sealed class ObsRequestException : Exception
 {
 	internal const int OutputNotRunning = 501;
 
+	internal const int StudioModeNotActive = 506;
+
 	internal const int NotReady = 207;
 
 	internal const int ResourceNotFound = 600;

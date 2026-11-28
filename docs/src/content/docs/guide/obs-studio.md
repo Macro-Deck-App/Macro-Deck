@@ -88,6 +88,17 @@ The action fails with a message when:
 - OBS takes longer than about 10 seconds to load the scene collection. OBS usually still finishes the
   switch, and the button lights up once it has.
 
+## When an action fails
+
+**Set Preview Scene** needs Studio Mode, because OBS only has a separate preview scene while Studio Mode
+is on. With Studio Mode off, the action fails and says so. Turn Studio Mode on in OBS or with the
+**Toggle Studio Mode** action.
+
+When OBS refuses a request, for example because a scene, source or filter no longer exists under that
+name, the action fails with the reason OBS gave. If OBS does not answer in time, the action says so.
+**OBS is not connected** means only that the connection to OBS is down: check that OBS is running and
+that its WebSocket server is enabled.
+
 ## Triggers
 
 Add one of these as an event trigger on a button or flow. Leave **Input** empty to react to any input.

@@ -435,6 +435,81 @@ internal sealed class ObsVariableCatalogTests
 	}
 
 	[Test]
+	public async Task A_volume_write_obs_refuses_fails_with_obs_reason_instead_of_reading_as_unavailable()
+	{
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = 1.0f
+			}
+		};
+		var runtime = CreateRuntime(client);
+		var provider = new ObsVariableCatalog(() => [runtime]);
+		var volumeId = await InputLeafIdAsync(provider, runtime.Id, "Desktop Audio", "volume");
+		client.RequestFailure = new ObsRequestException(ObsRequestException.ResourceNotFound,
+			"ErrorCode: 600, Comment: No source was found");
+
+		var result = await provider.SetValueAsync(volumeId, -10d);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Failed));
+			Assert.That(result.Message.Localized?.Key.ToString(),
+				Does.EndWith("Integrations.Obs.Errors.RequestRejected"));
+			Assert.That(result.Message.Localized?.Arguments["message"]?.ToString(),
+				Does.Contain("No source was found"));
+		});
+	}
+
+	[Test]
+	public async Task A_volume_write_obs_does_not_answer_in_time_is_unavailable()
+	{
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = 1.0f
+			}
+		};
+		var runtime = CreateRuntime(client);
+		var provider = new ObsVariableCatalog(() => [runtime]);
+		var volumeId = await InputLeafIdAsync(provider, runtime.Id, "Desktop Audio", "volume");
+		client.RequestFailure = new ObsRequestException(ObsRequestException.TimedOut, "Request timed out");
+
+		var result = await provider.SetValueAsync(volumeId, -10d);
+
+		Assert.Multiple(() =>
+		{
+			Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Unavailable));
+			Assert.That(result.Message.Localized?.Key.ToString(), Does.EndWith("Integrations.Obs.Errors.TimedOut"));
+		});
+	}
+
+	[Test]
+	public async Task A_volume_write_while_obs_is_offline_is_unavailable()
+	{
+		var client = new FakeObsClient
+		{
+			IsConnected = true, InputNames = ["Desktop Audio"],
+			InputVolumes =
+			{
+				["Desktop Audio"] = 1.0f
+			}
+		};
+		var runtime = CreateRuntime(client);
+		var provider = new ObsVariableCatalog(() => [runtime]);
+		var volumeId = await InputLeafIdAsync(provider, runtime.Id, "Desktop Audio", "volume");
+		client.IsConnected = false;
+
+		var result = await provider.SetValueAsync(volumeId, -10d);
+
+		Assert.That(result.Status, Is.EqualTo(VariableWriteStatus.Unavailable));
+	}
+
+	[Test]
 	public async Task Writing_below_minus_60_decibels_is_applied_and_minus_100_is_silence()
 	{
 		var client = new FakeObsClient

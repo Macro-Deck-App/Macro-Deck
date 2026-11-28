@@ -24670,6 +24670,12 @@ Macro Deck の Web サイトからダウンロードし、インストールし�
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS がリクエストを拒否しました: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>OBS のスタジオモードがオフです。プレビューシーンを設定するには、スタジオモードをオンにしてください。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS が時間内に応答しませんでした。</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>録画フォルダーを入力してください。</value>
   </data>

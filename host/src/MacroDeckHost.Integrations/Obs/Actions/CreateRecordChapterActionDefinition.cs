@@ -60,7 +60,7 @@ internal sealed class CreateRecordChapterActionDefinition : IDynamicOptionsActio
 			var name = context.Parameters.GetValueOrDefault(ChapterNameParameter) as string;
 			var chapter = string.IsNullOrWhiteSpace(name) ? null : name.Trim();
 
-			return ObsCommandResults.ToActionResult(await connection.CreateRecordChapterAsync(chapter));
+			return ObsCommandResults.ToRecordingActionResult(await connection.CreateRecordChapterAsync(chapter));
 		}
 	}
 }

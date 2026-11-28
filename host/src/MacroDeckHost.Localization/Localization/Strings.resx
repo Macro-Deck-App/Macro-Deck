@@ -24677,6 +24677,12 @@ This portable copy does not update itself. Download the portable ZIP from the Ma
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS rejected the request: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Studio Mode is off in OBS. Turn it on to set a preview scene.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS did not answer in time.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Enter a recording folder.</value>
   </data>

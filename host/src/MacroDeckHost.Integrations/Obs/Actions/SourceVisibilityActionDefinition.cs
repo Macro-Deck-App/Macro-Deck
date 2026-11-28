@@ -140,17 +140,14 @@ internal sealed class SourceVisibilityActionDefinition : IDynamicOptionsActionDe
 			}
 
 			var mode = context.Parameters.GetValueOrDefault(ModeParameter) as string ?? ModeToggle;
-			var succeeded = mode switch
+			var result = mode switch
 			{
 				ModeShow => await connection.SetSourceVisibleAsync(scene, source, true),
 				ModeHide => await connection.SetSourceVisibleAsync(scene, source, false),
 				_ => await connection.ToggleSourceVisibleAsync(scene, source)
 			};
 
-			return succeeded
-				? ActionResult.Success()
-				: ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Obs.Errors.NotConnected());
+			return ObsCommandResults.ToActionResult(result);
 		}
 	}
 }

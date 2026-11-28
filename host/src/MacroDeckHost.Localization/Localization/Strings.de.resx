@@ -24646,6 +24646,12 @@ Diese portable Kopie aktualisiert sich nicht selbst. Lade die portable ZIP-Datei
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS hat die Anfrage abgelehnt: {message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>Der Studio-Modus ist in OBS aus. Schalte ihn ein, um eine Vorschauszene festzulegen.</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS hat nicht rechtzeitig geantwortet.</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>Gib einen Aufnahmeordner ein.</value>
   </data>

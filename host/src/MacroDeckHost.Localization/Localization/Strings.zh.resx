@@ -24652,6 +24652,12 @@ Macro Deck 是通过 APT 软件源安装的，因此新版本在那里发布后�
   <data name="Integrations.Obs.Errors.RequestRejected" xml:space="preserve">
     <value>OBS 拒绝了该请求：{message}</value>
   </data>
+  <data name="Integrations.Obs.Errors.StudioModeOff" xml:space="preserve">
+    <value>OBS 的工作室模式已关闭。请开启工作室模式以设置预览场景。</value>
+  </data>
+  <data name="Integrations.Obs.Errors.TimedOut" xml:space="preserve">
+    <value>OBS 未及时响应。</value>
+  </data>
   <data name="Integrations.Obs.Errors.NoDirectorySelected" xml:space="preserve">
     <value>请输入录制文件夹。</value>
   </data>

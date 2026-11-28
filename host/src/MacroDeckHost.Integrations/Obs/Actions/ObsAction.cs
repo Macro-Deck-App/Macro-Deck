@@ -2,7 +2,6 @@ using MacroDeck.Localization;
 using MacroDeck.Sdk.Actions;
 using MacroDeck.Sdk.Logging;
 using MacroDeckHost.Integrations.Obs.Connections;
-using MacroDeckHost.Localization;
 using Serilog;
 
 namespace MacroDeckHost.Integrations.Obs.Actions;
@@ -10,14 +9,14 @@ namespace MacroDeckHost.Integrations.Obs.Actions;
 internal class ObsAction : IDynamicOptionsActionDefinition
 {
 	private readonly ObsTargetResolver _resolver;
-	private readonly Func<ObsConnection, Task<bool>> _command;
+	private readonly Func<ObsConnection, Task<ObsCommandResult>> _command;
 
 	public ObsAction(
 		string id,
 		LocalizedText name,
 		LocalizedText description,
 		ObsTargetResolver resolver,
-		Func<ObsConnection, Task<bool>> command)
+		Func<ObsConnection, Task<ObsCommandResult>> command)
 	{
 		Id = id;
 		Name = name;
@@ -57,9 +56,9 @@ internal class ObsAction : IDynamicOptionsActionDefinition
 		private static readonly ILogger _logger = IntegrationLog.For<ObsAction>(ObsIntegration.IntegrationId);
 
 		private readonly ObsTargetResolver _resolver;
-		private readonly Func<ObsConnection, Task<bool>> _command;
+		private readonly Func<ObsConnection, Task<ObsCommandResult>> _command;
 
-		public Executor(ObsTargetResolver resolver, Func<ObsConnection, Task<bool>> command)
+		public Executor(ObsTargetResolver resolver, Func<ObsConnection, Task<ObsCommandResult>> command)
 		{
 			_resolver = resolver;
 			_command = command;
@@ -72,10 +71,7 @@ internal class ObsAction : IDynamicOptionsActionDefinition
 				return error;
 			}
 
-			return await _command(connection)
-				? ActionResult.Success()
-				: ActionResult.Failed(ActionErrorCodes.NotConnected,
-					AppStrings.Integrations.Obs.Errors.NotConnected());
+			return ObsCommandResults.ToActionResult(await _command(connection));
 		}
 	}
 }
