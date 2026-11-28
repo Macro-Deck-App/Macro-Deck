@@ -1,4 +1,5 @@
 using MacroDeck.Sdk.Layouts;
+using MacroDeckHost.Application.Devices.Surfaces.KeyImages;
 using MacroDeckHost.Domain.Common;
 using MacroDeckHost.Domain.Entities;
 
@@ -208,10 +209,11 @@ public static class DeviceLayoutConstraintResolver
 	private static (bool Spacing, bool CornerRadius, bool CustomFolderViews) Honoured(LayoutDescriptor layout)
 	{
 		var visuals = layout.PrimaryGrid?.Visuals ?? layout.Capabilities?.Visuals;
+		var fixedRadius = DeviceKeyImageLayout.Of(layout, out _)?.FixedCornerRadius is not null;
 
 		return visuals is null
-			? (true, true, true)
-			: (visuals.WidgetSpacing, visuals.CornerRadius, visuals.CustomFolderViews);
+			? (true, !fixedRadius, true)
+			: (visuals.WidgetSpacing, visuals.CornerRadius && !fixedRadius, visuals.CustomFolderViews);
 	}
 
 	public static bool AllowsEdit(

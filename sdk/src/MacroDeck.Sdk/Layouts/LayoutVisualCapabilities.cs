@@ -49,7 +49,8 @@ public sealed record LayoutVisualCapabilities
 	public bool WidgetSpacing { get; init; }
 
 	/// <summary>Whether the profile's widget corner radius changes anything here. See
-	/// <see cref="WidgetSpacing" /> for why this is a capability and not a fixed value.</summary>
+	/// <see cref="WidgetSpacing" /> for why this is a capability and not a fixed value. A key image grid
+	/// that fixes its radius with <see cref="LayoutKeyImageFormat.CornerRadius" /> overrides it.</summary>
 	public bool CornerRadius { get; init; }
 
 	/// <summary>

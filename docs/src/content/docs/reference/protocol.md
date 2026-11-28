@@ -227,6 +227,12 @@ are listed in the descriptor's `capabilityKinds`:
   `session.key-images` operation and the `devices` host API's `key-image`. The host sends the new operation
   and member only to a plugin that negotiated version `3`, and a host that predates them never sends them
   and answers `key-image` with `CAPABILITY_UNSUPPORTED`. See [Key images](/features/devices/#key-images).
+- The key-image format (`LayoutKeyImageFormatDto`, on the `layout-provider` grid and on `session.open`)
+  gained the optional `cornerRadius` (`LayoutKeyImageFormat.CornerRadius`), additively in major `3` and
+  within `device-provider` capability version `3`: a fixed corner radius in pixels of one key picture. An
+  absent value keeps the profile's radius, which is what a plugin built before it sends; a host that
+  predates it ignores it and rounds by the profile's radius when the visual capability `cornerRadius` is
+  true. A negative value is a format the host cannot honour. See [Key images](/features/devices/#key-images).
 
 - The `layout-provider` grid (`LayoutGridDto`) gained the optional `maxWidgetColumns` and `maxWidgetRows`
   (`LayoutGrid.MaxWidgetColumns`, `MaxWidgetRows`), additively in major `3` and within capability version
